@@ -30,15 +30,19 @@ displacement/eignevectors (real/complex) and stress/strain (real) results from t
 Additionally, AVUS, Cart3d, Usm3d, Tetgen, STL, and Panair are somewhat supported and
 included for use.
 
+.. Adding max depth to try to clean up the toc on home page
 
 .. toctree::
-
-   features
+   :maxdepth: 1
+   
    installation/index
    quick_start/index
    how_to/index
    reference/pyNastran
-..   manual/index
+   manual/index
+
+.. WARNING: toctree contains reference to nonexisting document 'features'
+.. features
 
 
 Indices and tables

@@ -19,9 +19,12 @@ cards Package
    pyNastran.bdf.cards.nodes
    pyNastran.bdf.cards.optimization
    pyNastran.bdf.cards.params
-   pyNastran.bdf.cards.superelements
    pyNastran.bdf.cards.utils
-#   pyNastran.bdf.cards.deqatn
+   pyNastran.bdf.cards.deqatn
+
+..  WARNING: toctree contains reference to nonexisting document 'reference/bdf/cards/pyNastran.bdf.cards.superelements'
+..  pyNastran.bdf.cards.superelements
+
 
 aero Package
 ------------

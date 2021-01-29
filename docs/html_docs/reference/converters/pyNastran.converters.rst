@@ -30,6 +30,8 @@ Subpackages
    pyNastran.converters.su2
    pyNastran.converters.tecplot
    pyNastran.converters.tetgen
-   pyNastran.converters.ugrid
    pyNastran.converters.usm3d
+
+.. WARNING: toctree contains reference to nonexisting document 'reference/converters/pyNastran.converters.ugrid'
+.. pyNastran.converters.ugrid
 

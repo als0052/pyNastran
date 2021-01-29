@@ -451,7 +451,7 @@ BDF Reader/Writer
 - System Control Deck
 - Case Control Deck
 - cross-referencing to simplify accessing data
-   - *_ref attributes are cross-referenced
+   - \*_ref attributes are cross-referenced
    - element.nodes is not cross-referenced
    - element.nodes_ref is cross-referenced
 - safe cross-referencing for imperfect models
@@ -602,6 +602,7 @@ The main op2 results can be accessed directly from the op2 object
   - displacements_scaled
   - temperatures
   - eigenvectors
+  
  - OQG - spc/mpc forces
 
   - spc_forces
@@ -611,9 +612,11 @@ The main op2 results can be accessed directly from the op2 object
   - mpc_forces_RAQCONS
   - mpc_forces_RAQEATC
   - thermal_gradient_and_flux
+  
  - OGF - grid point forces
 
   - grid_point_forces
+  
  - OPG - summation of loads for each element
 
   - load_vectors
@@ -621,6 +624,7 @@ The main op2 results can be accessed directly from the op2 object
   - thermal_load_vectors
   - applied_loads
   - force_vectors
+  
  - OES/OSTR
 
   - 0d - CELASx stress/strain
@@ -633,6 +637,7 @@ The main op2 results can be accessed directly from the op2 object
    - celas2_strain
    - celas3_strain
    - celas4_strain
+   
   - isotropic CROD/CONROD/CTUBE stress/strain
 
    - crod_stress
@@ -641,21 +646,25 @@ The main op2 results can be accessed directly from the op2 object
    - crod_strain
    - conrod_strain
    - ctube_strain
+   
   - isotropic CBAR stress/strain
 
    - cbar_stress
    - cbar_strain
    - cbar_stress_10nodes
    - cbar_strain_10nodes
+   
   - isotropic CBEAM stress/strain
 
    - cbeam_stress
    - cbeam_strain
    - nonlinear_cbeam_stress
+   
   - CBEND
 
    - cbend_stress
    - cbend_strain
+   
   - isotropic CTRIA3/CQUAD4 stress
 
    - ctria3_stress
@@ -664,6 +673,7 @@ The main op2 results can be accessed directly from the op2 object
    - cquadr_stress
    - cquad4_stress
    - cquad8_stress
+   
   - isotropic CTRIA3/CQUAD4 strain
 
    - ctria3_strain
@@ -672,6 +682,7 @@ The main op2 results can be accessed directly from the op2 object
    - cquadr_strain
    - cquad4_strain
    - cquad8_strain
+   
   - isotropic CTETRA/CHEXA/CPENTA stress/strain
 
    - ctetra_stress
@@ -680,13 +691,16 @@ The main op2 results can be accessed directly from the op2 object
    - ctetra_strain
    - chexa_strain
    - cpenta_strain
+   
   - CSHEAR stress/strain
 
    - cshear_stress
    - cshear_strain
+   
   - GAPNL 86
 
    - nonlinear_cgap_stress
+   
   - CBUSH 226
 
    - nonlinear_cbush_stress
@@ -708,12 +722,14 @@ The main op2 results can be accessed directly from the op2 object
    - cplsts4_strain
    - cplsts6_strain
    - cplsts8_strain
+   
   - CTRIAX6
 
    - ctriax_stress
    - ctriax_strain
    - cbush_stress
    - cbush_strain
+   
   - nonlinear CROD/CONROD/CTUBE stress
 
    - nonlinear_crod_stress
@@ -722,10 +738,12 @@ The main op2 results can be accessed directly from the op2 object
    - nonlinear_ctube_strain
    - nonlinear_conrod_stress
    - nonlinear_conrod_strain
+   
   - CEALS1 224, CELAS3 225
 
    - nonlinear_celas1_stress
    - nonlinear_celas3_stress
+   
   - composite CTRIA3/CQUAD4 stress
 
    - cquad4_composite_stress
@@ -740,6 +758,7 @@ The main op2 results can be accessed directly from the op2 object
    - ctria3_composite_strain
    - ctria6_composite_strain
    - ctriar_composite_strain
+   
  - OESNLXR - CTRIA3/CQUAD4 stress
 
   - nonlinear_cquad4_stress
@@ -747,23 +766,29 @@ The main op2 results can be accessed directly from the op2 object
   - nonlinear_cquad4_strain
   - nonlinear_ctria3_strain
   - hyperelastic_cquad4_strain
+  
  - OESNLXR - solids
 
    - nonlinear_ctetra_stress_strain
    - nonlinear_cpenta_stress_strain
    - nonlinear_chexa_stress_strain
+   
  - PVT
 
   - params
+  
  - LAMA
 
   - eigenvalues
+  
  - HISADD
 
   - convergence_history
+  
  - R1TABRG
 
   -response1_table
+  
  - OEF - Forces
 
   - 0-d
@@ -779,11 +804,13 @@ The main op2 results can be accessed directly from the op2 object
    - cdamp3_force
    - cdamp4_force
    - cgap_force
+   
   - rod
 
    - crod_force
    - conrod_force
    - ctube_force
+   
  - bar/beam
 
   - cbar_force
@@ -795,6 +822,7 @@ The main op2 results can be accessed directly from the op2 object
   - cbeam_force_vu
   - cbush_force
   - cbend_force
+  
  - shell
 
   - cquad4_force
@@ -804,6 +832,7 @@ The main op2 results can be accessed directly from the op2 object
   - ctria6_force
   - ctriar_force
   - cshear_force
+  
  - solid
 
   - chexa_pressure_force
@@ -811,6 +840,7 @@ The main op2 results can be accessed directly from the op2 object
   - ctetra_pressure_force
   - vu_quad_force
   - vu_tria_force
+  
  - OEF - Fluxes
 
   - conv_thermal_load
@@ -834,6 +864,7 @@ The main op2 results can be accessed directly from the op2 object
    - cbar_thermal_load_flux
    - cbend_thermal_load
    - cbend_thermal_load_flux
+   
   - thermalLoad_2D_3D
 
    - cquad4_thermal_load
@@ -855,18 +886,21 @@ The main op2 results can be accessed directly from the op2 object
    - thermalLoad_VU
    - thermalLoad_VU_3D
    - vu_beam_thermal_load
+   
  - OEFIT - Failure Indices
 
   - cquad4_composite_force_failure_indicies
   - cquad8_composite_force_failure_indicies
   - ctria3_composite_force_failure_indicies
   - ctria6_composite_force_failure_indicies
+  
  - OGS1 - Grid Point Stresses
 
   - grid_point_surface_stresses
   - grid_point_stresses_volume_direct
   - grid_point_stresses_volume_principal
   - grid_point_stress_discontinuities
+  
  - OEE - Strain Energy Density
 
   - cquad4_strain_energy
@@ -901,6 +935,7 @@ The main op2 results can be accessed directly from the op2 object
   - conm2_strain_energy
   - rbe1_strain_energy
   - rbe3_strain_energy
+  
  - unused?
 
   - displacement_scaled_response_spectra_nrl
@@ -979,6 +1014,7 @@ The OP2.Results() are accessed using model.results. as a prefix
    - cshear_force
    - cbush_stress
    - cbush_strain
+   
  - strength_ratio
 
    - cquad4_composite_stress
@@ -993,23 +1029,28 @@ The OP2.Results() are accessed using model.results. as a prefix
    - ctria3_composite_strain
    - ctria6_composite_strain
    - ctriar_composite_strain
+   
  - ROUGV1  # relative disp/vel/acc/eigenvectors
 
    - displacements
    - velocities
    - accelerations
    - eigenvectors
+   
  - RADEFFM
 
    - eigenvectors
+   
  - RADCONS
 
    - eigenvectors
+   
  - RAFCONS
 
    - cbar_force
    - cquad4_force
    - cbush_force
+   
  - RASCONS
 
    - ctetra_stress
@@ -1030,14 +1071,17 @@ The OP2.Results() are accessed using model.results. as a prefix
    - cquad8_strain
    - cquadr_strain
    - ctriar_strain
+   
  - RAECONS
 
    - ctria3_strain
    - cquad4_strain
    - chexa_strain
+   
  - RAGCONS
 
    - grid_point_forces
+   
  - RAPCONS
 
    - cquad4_composite_stress
@@ -1046,6 +1090,7 @@ The OP2.Results() are accessed using model.results. as a prefix
    - ctria3_composite_stress
    - ctria6_composite_stress
    - ctriar_composite_stress
+   
  - RANCONS
 
    - cbar_strain_energy
@@ -1053,26 +1098,32 @@ The OP2.Results() are accessed using model.results. as a prefix
    - chexa_strain_energy
    - ctria3_strain_energy
    - cquad4_strain_energy
+   
  - RADEATC
 
    - eigenvectors
+   
  - RAFEATC
 
    - cbar_force
    - cquad4_force
    - cbush_force
+   
  - RASEATC
 
    - chexa_stress
    - cquad4_stress
+   
  - RAEEATC
 
    - chexa_strain
    - ctria3_strain
    - cquad4_strain
+   
  - RAGEATC
 
    - grid_point_forces
+   
  - RAPEATC
 
    - cquad4_composite_stress
@@ -1081,6 +1132,7 @@ The OP2.Results() are accessed using model.results. as a prefix
    - ctria3_composite_stress
    - ctria6_composite_stress
    - ctriar_composite_stress
+   
  - RANEATC
 
    - cbar_strain_energy
@@ -1091,6 +1143,7 @@ The OP2.Results() are accessed using model.results. as a prefix
 
 All of these results have the same outputs (shown under model.results.crm).
 For example, model.results.ato.displacements, model.results.crm.displacements.
+
  - ato # AutoCorrelationObjects()
  - psd # PowerSpectralDensityObjects()
  - rms # RootMeansSquareObjects()
@@ -1199,6 +1252,7 @@ F06 Plotter
 - flutter (SOL 145) parser
 
   - Supports:
+  
      - multiple subcases
      - PK and PKNL methods
 
@@ -1207,7 +1261,8 @@ F06 Plotter
 
 GUI
 ========
-   [GUI](http://pynastran-git.readthedocs.io/en/latest/quick_start/gui.html)
+[GUI](http://pynastran-git.readthedocs.io/en/latest/quick_start/gui.html)
+
  - buttons for picking, rotation center, distance, min/max
  - GUI Features:
 
@@ -1216,6 +1271,7 @@ GUI
      - PyQt4/PyQt5
      - PySide/PySide2
      - QScintilla & pygments support for scripting code editor
+	 
    - color coded logging
 
    - legend menu
@@ -1229,9 +1285,11 @@ GUI
 
       - mix and match fringe/displacement/vector results (e.g., stress shown on a displaced model)
       - Real/Complex Results
+	  
           - Scale factor
           - Phase
           - Time
+		  
       - Multiple Animation Profiles
       - Where:
 
@@ -1250,6 +1308,7 @@ GUI
      - centroidal fringe
      - deflection
      - nodal vector results (e.g., SPC forces)
+	 
    - preferences menu
 
 Nastran Specific Features

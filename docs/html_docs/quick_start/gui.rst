@@ -92,9 +92,11 @@ Additonal formats include:
    - stl
    - tecplot
    - AFLR
+   
     - bsurf
     - surf
     - ugrid
+   
    - usm3d
 
 
@@ -103,7 +105,7 @@ Setup Note
 Download the entire package from Github or just the `GUI
 <https://sourceforge.net/projects/pynastran/files/?source=navbar/>`_ executable.
 
-If you download the source, make sure you follow the :doc:`installation` and use
+If you download the source, make sure you follow the :doc:`../installation/installation.rst` and use
 **setup.py develop** and not **setup.py install**.
 
 For the GUI, the master **requires**:
@@ -510,7 +512,12 @@ This may be loaded from the command line.  The structure will probably change.
 
 The geometry may be modified from the ``Edit Geometry Properties`` menu.
 
-.. code-block:: console
+
+.. WARNING: Could not lex literal_block as "console". Highlighting skipped.
+.. whatever the hell that means
+.. .. code-block:: console
+
+.. code-block::
 
     # all supported cards
     #  - GRID

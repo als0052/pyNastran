@@ -4,7 +4,7 @@ nastran Package
 :mod:`geometry_helper` Module
 -----------------------------
 
-.. inheritance-diagram:: pyNastran.converters.nastran.gui.geometry_helper
+.. inheritance-diagram:: pyNastran.converters.nastran.gui.geometry_helper.py
 
 .. automodule:: pyNastran.converters.nastran.gui.geometry_helper
     :members:
@@ -55,7 +55,7 @@ nastran Package
 :mod:`results_helper` Module
 ----------------------------
 
-.. inheritance-diagram:: pyNastran.converters.nastran.gui.results_helper
+.. inheritance-diagram:: pyNastran.converters.nastran.gui.results_helper.py
 
 .. automodule:: pyNastran.converters.nastran.gui.results_helper
     :members:

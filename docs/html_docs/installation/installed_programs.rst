@@ -24,24 +24,32 @@ The Graphical User Interface (GUI) looks like:
 
 .. image:: ../../../pyNastran/gui/images/qt.png
 
-.. code-block:: console
+.. .. code-block:: console
 
-See :doc:`gui` for more details.
+See :doc:`../quick_start/gui.rst` for more details.
+
 
 --------
 test_bdf
 --------
 Runs through various checks on a BDF that Nastran doesn't do.  Verifies your model is referenced properly.  Creates a summary table.
 
-See :doc:`test_bdf` for more details.
+See :doc:`../quick_start/test_bdf.rst` for more details.
 
-.. code-block:: conosle
+
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> test_bdf fem.bdf > test.out
 
-The file test.out will be created...
+The file ``test.out`` will be created...
 
-.. code-block:: conosle
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   INFO:    fname=bdf.pyc                lineNo=371    ---starting BDF.read of fem.bdf---
   INFO:    fname=bdf.pyc                lineNo=589    reject_card_name = |TEMPD|
@@ -76,9 +84,13 @@ test_op2
 --------
 Runs through various checks on an OP2 file.  Creates a summary table.
 
-See :doc:`test_op2` for more details.
+See :doc:`../quick_start/test_op2.rst` for more details.
 
-.. code-block:: console
+
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> test_op2 -c ISat_Dploy_Sm.op2
 
@@ -136,7 +148,10 @@ See :doc:`test_op2` for more details.
 
 Or more simply:
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> test_op2 -ct ISat_Dploy_Sm.op2
 
@@ -152,7 +167,10 @@ test_op4
 --------
 Limited checker for testing to see if an OP4 file will load.
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
  >>> test_op4 --help
  Usage:
@@ -177,7 +195,10 @@ bdf
 
 Interface to various BDF-related command line tools
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> bdf --help
 
@@ -205,7 +226,10 @@ f06
 
 Interface to various F06-related command line tools
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> f06 --help
 
@@ -221,7 +245,10 @@ format_converter
 Converts between various common formats, typically using Nastran as a common format.
 This allows methods like nodal equivalencing to be written once.
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
   >>> format_converter --help
 
@@ -257,7 +284,10 @@ This allows methods like nodal equivalencing to be written once.
 
 Example:
 
-.. code-block:: console
+.. .. code-block:: conosle
+.. apparently console is not known? Might be just my install and I don't have dependencies...
+
+.. code-block:: 
 
     >>> format_converter tecplot tecplot.*.plt tecplot.tecplot_joined.plt -x 0.0 -y 0.0 -z 0.0
     >>> format_converter nastran fem.bdf stl fem.stl -b

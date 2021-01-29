@@ -94,7 +94,6 @@ The class-based method
 .. parsed-literal::
 
     c:\nasa\m4\formats\git\pynastran\models\iSat\ISat_Launch_Sm_Rgd.dat
-    
 
 
 .. raw:: html
@@ -103,12 +102,10 @@ The class-based method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   pybdf.py:556                 opening 'c:\\nasa\\m4\\formats\\git\\pynastran\\models\\iSat\\ISat_Launch_Sm_Rgd.dat'
     </text>
-
 
 
 .. raw:: html
@@ -125,19 +122,16 @@ The function-based method
     bdf = read_bdf(bdf_filename, xref=False)
 
 
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   bdf.py:1006                  ---starting BDF.read_bdf of c:\nasa\m4\formats\git\pynastran\models\iSat\ISat_Launch_Sm_Rgd.dat---
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   pybdf.py:556                 opening 'c:\\nasa\\m4\\formats\\git\\pynastran\\models\\iSat\\ISat_Launch_Sm_Rgd.dat'
     </text>
-
 
 
 .. raw:: html
@@ -165,12 +159,10 @@ method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   pybdf.py:556                 opening 'c:\\nasa\\m4\\formats\\git\\pynastran\\models\\iSat\\ISat_Launch_Sm_Rgd.dat'
     </text>
-
 
 
 .. raw:: html
@@ -179,12 +171,10 @@ method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=1 midsurface: z1=0.4 z2=-0.4 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
-
 
 
 .. raw:: html
@@ -193,12 +183,10 @@ method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=3 midsurface: z1=0.4 z2=-0.4 t=0.018 not in range of -1.5t < zi < 1.5t
     </text>
-
 
 
 .. raw:: html
@@ -207,12 +195,10 @@ method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=34 midsurface: z1=0.194 z2=-0.194 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
 
 
 .. raw:: html
@@ -221,19 +207,16 @@ method
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=46 midsurface: z1=0.199 z2=-0.199 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
 
 
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=37 midsurface: z1=0.309 z2=-0.309 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
 
 
 .. raw:: html

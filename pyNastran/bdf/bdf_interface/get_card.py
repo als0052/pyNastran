@@ -1,29 +1,27 @@
 """
 defines various methods to access high level BDF data:
- - GetCard()
-   - get_card_ids_by_card_types(self, card_types=None, reset_type_to_slot_map=False,
-                                stop_on_missing_card=False, combine=False)
-   - get_rslot_map(self, reset_type_to_slot_map=False)
-   - get_cards_by_card_types(self, card_types, reset_type_to_slot_map=False,
-                             stop_on_missing_card=False)
-   - get_SPCx_node_ids(self, spc_id, stop_on_failure=True)
-   - get_SPCx_node_ids_c1( spc_id, stop_on_failure=True)
-   - get_reduced_loads(self, load_id, scale=1., skip_scale_factor0=True, msg='')
-   - get_reduced_dloads(self, dload_id, scale=1., skip_scale_factor0=True, msg='')
-   - get_node_ids_with_elements(self, eids, msg='')
-   - get_elements_nodes_by_property_type(self, dtype='int32',
-                                         save_element_types=False)
-   - get_elements_properties_nodes_by_element_type(self, dtype='int32', solids=None)
-   - get_element_ids_list_with_pids(self, pids=None)
-   - get_pid_to_node_ids_and_elements_array(self, pids=None, etypes=None, idtype='int32')
-   - get_element_ids_dict_with_pids(self, pids=None, stop_if_no_eids=True)
-   - get_node_id_to_element_ids_map(self)
-   - get_node_id_to_elements_map(self)
-   - get_property_id_to_element_ids_map(self)
-   - get_material_id_to_property_ids_map(self)
-   - get_reduced_mpcs(self, mpc_id)
-   - get_reduced_spcs(self, spc_id)
-   - get_spcs(self, spc_id, consider_nodes=False)
+  - GetCard()
+  
+    - get_card_ids_by_card_types(self, card_types=None, reset_type_to_slot_map=False, stop_on_missing_card=False, combine=False)
+    - get_rslot_map(self, reset_type_to_slot_map=False)
+    - get_cards_by_card_types(self, card_types, reset_type_to_slot_map=False, stop_on_missing_card=False)
+    - get_SPCx_node_ids(self, spc_id, stop_on_failure=True)
+    - get_SPCx_node_ids_c1( spc_id, stop_on_failure=True)
+    - get_reduced_loads(self, load_id, scale=1., skip_scale_factor0=True, msg='')
+    - get_reduced_dloads(self, dload_id, scale=1., skip_scale_factor0=True, msg='')
+    - get_node_ids_with_elements(self, eids, msg='')
+    - get_elements_nodes_by_property_type(self, dtype='int32', save_element_types=False)
+    - get_elements_properties_nodes_by_element_type(self, dtype='int32', solids=None)
+    - get_element_ids_list_with_pids(self, pids=None)
+    - get_pid_to_node_ids_and_elements_array(self, pids=None, etypes=None, idtype='int32')
+    - get_element_ids_dict_with_pids(self, pids=None, stop_if_no_eids=True)
+    - get_node_id_to_element_ids_map(self)
+    - get_node_id_to_elements_map(self)
+    - get_property_id_to_element_ids_map(self)
+    - get_material_id_to_property_ids_map(self)
+    - get_reduced_mpcs(self, mpc_id)
+    - get_reduced_spcs(self, spc_id)
+    - get_spcs(self, spc_id, consider_nodes=False)
 
 """
 # pylint: disable=C0103

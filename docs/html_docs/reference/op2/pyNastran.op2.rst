@@ -23,12 +23,15 @@ pyNastran/op2
    pyNastran.op2.op2
    pyNastran.op2.op2_geom
    pyNastran.op2.data_in_material_coord
-   pyNastran.op2.errors
    pyNastran.op2.export_to_vtk
    pyNastran.op2.fortran_format
    pyNastran.op2.op2_helper
    pyNastran.op2.op2_results
    pyNastran.op2.vector_utils
+
+.. WARNING: toctree contains reference to nonexisting document 'reference/op2/pyNastran.op2.errors' 
+.. wow that's ironic
+.. pyNastran.op2.errors
 
 pyNastran/op2/op2_interface
 ---------------------------

@@ -28,8 +28,10 @@ Subpackages
    pyNastran.bdf.field_writer
    pyNastran.bdf.patran_rpt
    pyNastran.bdf.utils
-   pyNastran.bdf.write_path
    cards/pyNastran.bdf.cards
+
+.. WARNING: toctree contains reference to nonexisting document 'reference/bdf/pyNastran.bdf.write_path'
+.. pyNastran.bdf.write_path
 
 bdf_interface
 -------------
@@ -81,3 +83,4 @@ mesh_utils
    mesh_utils/pyNastran.bdf.mesh_utils.split_cbars_by_pin_flag
    mesh_utils/pyNastran.bdf.mesh_utils.split_elements
    mesh_utils/pyNastran.bdf.mesh_utils.utils
+   mesh_utils/pyNastran.bdf.mesh_utils.make_half_model

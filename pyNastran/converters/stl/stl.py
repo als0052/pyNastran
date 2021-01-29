@@ -452,14 +452,21 @@ class STL:
         Writes an STL in ASCII format
 
         solid solid_name
+		
          facet normal -6.601157e-001 6.730213e-001 3.336009e-001
+		 
           outer loop
+		  
             vertex 8.232952e-002 2.722531e-001 1.190414e+001
             vertex 8.279775e-002 2.717848e-001 1.190598e+001
             vertex 8.557653e-002 2.745033e-001 1.190598e+001
+			
           endloop
+		  
          endfacet
+		 
         end solid
+		
         """
         self.log.info("---write_stl_ascii...%r---" % out_filename)
         self._validate()
