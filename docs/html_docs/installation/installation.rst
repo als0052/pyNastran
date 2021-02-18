@@ -119,9 +119,10 @@ Overview
 
 .. todo:: Find doc `installation_release`
 
- * Install Python (see :doc:`installation_release`)
+ * Install Python
 
    * skip the ``pip install pyNastran`` step
+
  * Install Sphinx, GraphViz, alabaster **(for documentation)**
 
  * Install Git

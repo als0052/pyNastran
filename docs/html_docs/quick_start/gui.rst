@@ -105,8 +105,8 @@ Setup Note
 Download the entire package from Github or just the `GUI
 <https://sourceforge.net/projects/pynastran/files/?source=navbar/>`_ executable.
 
-If you download the source, make sure you follow the :doc:`../installation/installation.rst` and use
-**setup.py develop** and not **setup.py install**.
+If you download the source, make sure you follow the :doc:`../installation/installation.rst` and use **setup.py develop** and not **setup.py install**.
+.. If you download the source, make sure you follow the :ref:`Installation <../installation/installation.rst>` and use **setup.py develop** and not **setup.py install**.
 
 For the GUI, the master **requires**:
  - Python 3.7-3.8

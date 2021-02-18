@@ -444,6 +444,17 @@ class STL:
         assert len(self.nodes) > 0, 'No nodes were found in the model'
         assert len(self.elements) > 0, 'No nodes were found in the model'
 
+
+	# TODO: No idea what's wrong here according to Sphinx
+	#       docstring of pyNastran.converters.stl.stl.STL.write_stl_ascii:10: 
+	#       WARNING: Definition list ends without a blank line; unexpected 
+	#       unindent.
+    #       docstring of pyNastran.converters.stl.stl.STL.write_stl_ascii:11: 
+	#       WARNING: Definition list ends without a blank line; unexpected 
+	#       unindent.
+    #       docstring of pyNastran.converters.stl.stl.STL.write_stl_ascii:12: 
+	#       WARNING: Definition list ends without a blank line; unexpected 
+	#       unindent.
     def write_stl_ascii(self, out_filename: str, solid_name: str,
                         float_fmt: str='%.6f',
                         normalize_normal_vectors: bool=False,

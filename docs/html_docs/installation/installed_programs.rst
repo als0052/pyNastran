@@ -27,6 +27,7 @@ The Graphical User Interface (GUI) looks like:
 .. .. code-block:: console
 
 See :doc:`../quick_start/gui.rst` for more details.
+.. See :ref:`Quick Start - GUI<../quick_start/gui.rst>` for more details.
 
 
 --------
@@ -35,6 +36,7 @@ test_bdf
 Runs through various checks on a BDF that Nastran doesn't do.  Verifies your model is referenced properly.  Creates a summary table.
 
 See :doc:`../quick_start/test_bdf.rst` for more details.
+.. See :ref:`Quick Start - test_bdf<../quick_start/test_bdf.rst>` for more details.
 
 
 .. .. code-block:: conosle
@@ -85,6 +87,7 @@ test_op2
 Runs through various checks on an OP2 file.  Creates a summary table.
 
 See :doc:`../quick_start/test_op2.rst` for more details.
+.. See :ref:`Quick Start - test_op2<../quick_start/test_op2.rst>` for more details.
 
 
 .. .. code-block:: conosle

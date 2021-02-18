@@ -6,6 +6,8 @@ Overview
 --------
 
 .. toctree::
+   :maxdepth: 2
+   
    features
 
 BDF

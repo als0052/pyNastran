@@ -6,12 +6,11 @@ Overview
 ========
  - Python 3.7-3.8
  - BSD-3 license
- - unicode support
- - importable from within Matlab
+ - Unicode support
+ - Importable from within MATLAB
+ - Limited package requirements for BDF/OP2/F06
 
- - limited package requirements for BDF/OP2/F06
-
-  - additional features available with more packages
+  - Additional features available with more packages
 
     - BDF/OP2:
 
@@ -20,23 +19,23 @@ Overview
 
     - OP2:
 
-      - pandas for results/matrices for use in the Jupyter Notebook
+      - Pandas for results/matrices for use in the Jupyter Notebook
 
     - F06:
 
-      - matplotlib support for plotting
+      - Matplotlib support for plotting
 
     - GUI: range of choices
 
       - PyQt5/PySide2
       - VTK 7-9
 
-    - logging using **cpylog**
+    - Logging using **cpylog**
 
       - colorama for console logging
       - HTML logging for Jupyter Notebook
-      - no markup when piping output to a file
-      - supports overwriting logger object with user-defined logger
+      - No markup when piping output to a file
+      - Supports overwriting logger object with user-defined logger
 
 BDF Reader/Writer
 =================
@@ -49,11 +48,11 @@ BDF Reader/Writer
      - thermal
      - superelements
 
-   - small, large, double precision file reading/writing
-   - pickling
+   - Small, large, double precision file reading/writing
+   - Pickling
    - HDF5 reading/writing
-   - comments are stored
-   - simplified card adding
+   - Comments are stored
+   - Simplified card adding
      ```python
      >>> model.add_grid(nid, xyz=[4.,5.,6.], comment='nid, cp, x, y, z')
      ```
@@ -63,24 +62,28 @@ BDF Reader/Writer
      GRID,10,,4.0,5.0,6.0
      ```
 
- - methods:
+ - Methods:
 
-   - loads summation
-   - mass properties (including NSM)
-   - nodal equivalencing
-   - mesh quality
+   - Loads summation
+   - Mass properties (including NSM)
+   - Nodal equivalencing
+   - Mesh quality
 
-     - aspect ratio, taper ratio, skew, min/max interior angle, warp angle
-     - quad collapsing
-     - element deletion
-   - deck merging
-   - renumber
-   - unit conversion
-   - cutting plane
-   - visualization of material coordinate systems
-   - mirroring
-   - solid skinning (free faces)
-   - length, area, volume, mass breakdowns
+     - Aspect ratio, taper ratio, skew, min/max interior angle, warp angle
+     - Quad collapsing
+     - Element deletion
+	 
+   - Deck merging
+   - Renumber
+   - Unit conversion
+   - Cutting plane
+   - Visualization of material coordinate systems
+   - Mirroring
+   - Solid skinning (free faces)
+   - Length, area, volume, mass breakdowns
+
+
+.. todo:: Maybe the list of cards supported should be moved to a sub-page; it is a rather long list. Or perhaps add more columns to the list?
 
 - list of cards supported...
 
@@ -452,17 +455,16 @@ BDF Reader/Writer
 - Case Control Deck
 - cross-referencing to simplify accessing data
    - \*_ref attributes are cross-referenced
-   - element.nodes is not cross-referenced
-   - element.nodes_ref is cross-referenced
-- safe cross-referencing for imperfect models
-- optional error storage to get a list of all discovered errors as once
-- model validation
-
+   - ``element.nodes`` is not cross-referenced
+   - ``element.nodes_ref`` is cross-referenced
+- Safe cross-referencing for imperfect models
+- Optional error storage to get a list of all discovered errors as once
+- Model validation
 
 
 OP4 Reader/Writer
 =================
- - For matrices, the OP2 is preffered.  It's simply faster.
+ - For matrices, the OP2 is preffered. It's simply faster.
  - Types:
 
    - ASCII/binary
@@ -470,7 +472,9 @@ OP4 Reader/Writer
    - Real/Complex
    - Sparse/Dense
    - Single/Double Precision
+
  - ASCII writer
+
 
 OP2 Reader / OP2 Writer / F06 Writer
 ====================================
@@ -483,38 +487,42 @@ OP2 Reader / OP2 Writer / F06 Writer
   - IMAT
   - Autodesk Nastran/Nastran-in-CAD
 
-    - geometry not supported
+    - Geometry not supported
 
 - Input/Output:
 
   - Very fast OP2 reader (up to 500 MB/sec with an SSD)
+
     - Memory efficient
-    - support directly loading into HDF5 for very large models
+    - Support directly loading into HDF5 for very large models
+
   - HDF5 export/import support for MATLAB integration
-  - pandas support (results & matrices)
+  - Pandas support (results & matrices)
   - OP2/F06 writing
   - Most fatal errors caught (geometry input errors not caught)
-  - geometry can be read directly from op2 (it's not perfect, but it's much faster)
+  - Geometry can be read directly from op2 (it's not perfect, but it's much faster)
 
 - Operations:
 
-  - transform displacement/eigenvectors/spc/mpc/applied loads to global coordinate system
-  - transform stresses/forces to material coordinate system
-  - grid point forces:
-    - freebody loads
-    - interface loads
+  - Transform displacement/eigenvectors/spc/mpc/applied loads to global coordinate system
+  - Transform stresses/forces to material coordinate system
+  - Grid point forces:
+
+    - Freebody loads
+    - Interface loads
 
 - Supports:
 
-  - superelements
-  - optimization
-  - mesh adaptivity
-  - preload
-  - shape optimization
+  - Superelements
+  - Optimization
+  - Mesh adaptivity
+  - Preload
+  - Shape optimization
 
 OP2 Results
 ------------
 - This is probably an incomplete list.  **Most** results are supported.
+
 - **Basic Tables**
 
   - Types:
@@ -526,6 +534,7 @@ OP2 Results
      - Applied Loads
      - Load Vectors
      - Temperature
+
   - Real/Complex
   - Random; no NO (Number of Crossings) or RMS results
 
@@ -592,7 +601,9 @@ OP2 Results
 Main OP2 Results
 ----------------
 The main op2 results can be accessed directly from the op2 object
-(e.g., model.displacements, model.celas1_stress).
+(e.g., ``model.displacements``, ``model.celas1_stress``).
+
+.. todo:: Are the following bullet points supposed to be method/property names? If so should probably use ``code marker-upper``
 
  - OUG - displacement, temperatures, eigenvectors, velocity, acceleration
 
@@ -638,7 +649,7 @@ The main op2 results can be accessed directly from the op2 object
    - celas3_strain
    - celas4_strain
    
-  - isotropic CROD/CONROD/CTUBE stress/strain
+  - Isotropic CROD/CONROD/CTUBE stress/strain
 
    - crod_stress
    - conrod_stress
@@ -647,14 +658,14 @@ The main op2 results can be accessed directly from the op2 object
    - conrod_strain
    - ctube_strain
    
-  - isotropic CBAR stress/strain
+  - Isotropic CBAR stress/strain
 
    - cbar_stress
    - cbar_strain
    - cbar_stress_10nodes
    - cbar_strain_10nodes
    
-  - isotropic CBEAM stress/strain
+  - Isotropic CBEAM stress/strain
 
    - cbeam_stress
    - cbeam_strain
@@ -665,7 +676,7 @@ The main op2 results can be accessed directly from the op2 object
    - cbend_stress
    - cbend_strain
    
-  - isotropic CTRIA3/CQUAD4 stress
+  - Isotropic CTRIA3/CQUAD4 stress
 
    - ctria3_stress
    - ctriar_stress
@@ -674,7 +685,7 @@ The main op2 results can be accessed directly from the op2 object
    - cquad4_stress
    - cquad8_stress
    
-  - isotropic CTRIA3/CQUAD4 strain
+  - Isotropic CTRIA3/CQUAD4 strain
 
    - ctria3_strain
    - ctriar_strain
@@ -683,7 +694,7 @@ The main op2 results can be accessed directly from the op2 object
    - cquad4_strain
    - cquad8_strain
    
-  - isotropic CTETRA/CHEXA/CPENTA stress/strain
+  - Isotropic CTETRA/CHEXA/CPENTA stress/strain
 
    - ctetra_stress
    - chexa_stress
@@ -730,7 +741,7 @@ The main op2 results can be accessed directly from the op2 object
    - cbush_stress
    - cbush_strain
    
-  - nonlinear CROD/CONROD/CTUBE stress
+  - Nonlinear CROD/CONROD/CTUBE stress
 
    - nonlinear_crod_stress
    - nonlinear_crod_strain
@@ -744,7 +755,7 @@ The main op2 results can be accessed directly from the op2 object
    - nonlinear_celas1_stress
    - nonlinear_celas3_stress
    
-  - composite CTRIA3/CQUAD4 stress
+  - Composite CTRIA3/CQUAD4 stress
 
    - cquad4_composite_stress
    - cquad8_composite_stress
@@ -947,9 +958,8 @@ The main op2 results can be accessed directly from the op2 object
 
 OP2.Results()
 -------------
-
 The OP2.Results() are accessed using model.results. as a prefix
-(e.g., model.results.modal_contribution.celas1_stress).
+(e.g., ``model.results.modal_contribution.celas1_stress``).
 
  - eqexin
  - gpdt
@@ -1141,8 +1151,7 @@ The OP2.Results() are accessed using model.results. as a prefix
    - ctria3_strain_energy
    - cquad4_strain_energy
 
-All of these results have the same outputs (shown under model.results.crm).
-For example, model.results.ato.displacements, model.results.crm.displacements.
+All of these results have the same outputs (shown under model.results.crm). For example, ``model.results.ato.displacements``, ``model.results.crm.displacements``.
 
  - ato # AutoCorrelationObjects()
  - psd # PowerSpectralDensityObjects()
@@ -1253,17 +1262,17 @@ F06 Plotter
 
   - Supports:
   
-     - multiple subcases
+     - Multiple subcases
      - PK and PKNL methods
 
   - `plot_Vg_Vf(...)`, `plot_Vg(...)`, `plot_root_locus(...)`
-  - input/output units
+  - Input/output units
 
 GUI
 ========
 [GUI](http://pynastran-git.readthedocs.io/en/latest/quick_start/gui.html)
 
- - buttons for picking, rotation center, distance, min/max
+ - Buttons for picking, rotation center, distance, min/max
  - GUI Features:
 
    - Packages:
@@ -1272,18 +1281,17 @@ GUI
      - PySide/PySide2
      - QScintilla & pygments support for scripting code editor
 	 
-   - color coded logging
+   - Color coded logging
+   - Legend menu
 
-   - legend menu
+     - Min/max control
+     - Number of labels/colors
+     - Additional color maps
+     - Legend position
 
-     - min/max control
-     - number of labels/colors
-     - additional color maps
-     - legend position
+   - Animation menu
 
-   - animation menu
-
-      - mix and match fringe/displacement/vector results (e.g., stress shown on a displaced model)
+      - Mix and match fringe/displacement/vector results (e.g., stress shown on a displaced model)
       - Real/Complex Results
 	  
           - Scale factor
@@ -1293,47 +1301,47 @@ GUI
       - Multiple Animation Profiles
       - Where:
 
-        - in GUI
-        - exported gif
+        - In GUI
+        - Exported gif
 
-   - node/element highlighting
-   - element groups
-   - high resolution screenshots
-   - nodal/centroidal picking
-   - coordinate systems
-   - results sidebar
-   - custom user results
+   - Node/element highlighting
+   - Element groups
+   - High resolution screenshots
+   - Nodal/centroidal picking
+   - Coordinate systems
+   - Results sidebar
+   - Custom user results
 
-     - nodal fringe
-     - centroidal fringe
-     - deflection
-     - nodal vector results (e.g., SPC forces)
+     - Nodal fringe
+     - Centroidal fringe
+     - Deflection
+     - Nodal vector results (e.g., SPC forces)
 	 
-   - preferences menu
+   - Preferences menu
 
 Nastran Specific Features
 -------------------------
-- multiple OP2s
-- deflection plots
+- Multiple OP2s
+- Deflection plots
 - SOL 200 support
 
-- geometry
+- Geometry
 
-  - all elements supported in BDF
+  - All elements supported in BDF
 
-- bar profile visualzation
+- Bar profile visualzation
 
   - 3D
-  - dimensional vectors
+  - Dimensional vectors
 
-- aero models
+- Aero models
 
   - CAERO panels & subpanels
-  - sideslip coordinate systems support
+  - Sideslip coordinate systems support
 
-- mass elements
-- plotting elements (e.g., PLOTEL)
-- nominal geometry (useful for deflection plots)
+- Mass elements
+- Plotting elements (e.g., PLOTEL)
+- Nominal geometry (useful for deflection plots)
 
 Nastran Geometry Results
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1343,8 +1351,8 @@ Nastran Geometry Results
 
   - PSHELL breakdown
 
-    - thickness, ts/t, 12I/t^3
-    - for each material:
+    - Thickness, ts/t, 12I/t^3
+    - For each material:
 
       - material id
       - stiffnesses
@@ -1352,8 +1360,8 @@ Nastran Geometry Results
 
   - PCOMP breakdown
 
-    - total thickness
-    - for each layer:
+    - Total thickness
+    - For each layer:
 
       - thickness
       - material id
@@ -1366,49 +1374,47 @@ Nastran Geometry Results
     - stiffnesses
     - is_isotropic
 
- - loads
- - optimization
+ - Loads
+ - Optimization
 
-   - design regions
-   - current value
-   - lower/upper bounds
+   - Design regions
+   - Current value
+   - Lower/upper bounds
 
- - mesh quality:
+ - Mesh quality:
 
-   - area, min/max interior angle, skew angle, aspect ratio, taper ratio results
+   - Area, min/max interior angle, skew angle, aspect ratio, taper ratio results
 
 Nastran OP2 Results
 ^^^^^^^^^^^^^^^^^^^
-- solution types:
+- Solution types:
 
-  - analysis types:
+  - Analysis types:
 
-    - static
-    - modal
-    - frequency response
-    - load step
+    - Static
+    - Modal
+    - Frequency response
+    - Load step
 
-  - additional model complexity
+  - Additional model complexity
 
-    - optimization
-    - preload
+    - Optimization
+    - Preload
 
-- result quantities:
+- Result quantities:
 
-  - displacement, velocity, acceleration, eigenvectors
+  - Displacement, velocity, acceleration, eigenvectors
   - SPC/MPC forces
-  - applied loads
-  - temperature
-  - stress/strain
-  - strain energy
-  - limited element forces
-  - thermal gradient/flux
+  - Applied loads
+  - Temperature
+  - Stress/strain
+  - Strain energy
+  - Limited element forces
+  - Thermal gradient/flux
 
 Converters / Additional GUI Options
 -----------------------------------
-pyNastran's code base makes it easy to develop other useful tools
-that make use of common code.  As such, additional formats are supported
-in terms of readers/writers/converters/viewing, but are not a main focus.
+pyNastran's code base makes it easy to develop other useful tools that make use of common code. As such, additional formats are supported in terms of readers/writers/converters/viewing, but are not a main focus.
 
 These include:
 
