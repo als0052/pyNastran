@@ -7,15 +7,14 @@ def run_nastran(bdf_filename: str, nastran_cmd: str='nastran',
                 keywords: Optional[Union[str, List[str], Dict[str, str]]]=None,
                 run: bool=True, run_in_bdf_dir: bool=True,
                 cleanup: bool=False) -> Tuple[Optional[int], List[str]]:
-    """
-    Call a nastran subprocess with the given filename
+    """Call a nastran subprocess with the given filename
 
     Parameters
     ----------
     bdf_filename : string
         Filename of the Nastran .bdf file
     keywords : str/dict/list of strings, optional
-        Default keywords are `'scr=yes'`, `'bat=no'`, `'old=no'`, and `'news=no'`
+        Default keywords are `scr='yes'`, `bat='no'`, `old='no'`, and `news='no'`
     run : bool; default=True
         let's you disable actually running Nastran to test out code/get the call arguments
     run_in_local_dir : bool; default=True
