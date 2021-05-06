@@ -105,8 +105,23 @@ Setup Note
 Download the entire package from Github or just the `GUI
 <https://sourceforge.net/projects/pynastran/files/?source=navbar/>`_ executable.
 
-If you download the source, make sure you follow the :doc:`../installation/installation.rst` and use **setup.py develop** and not **setup.py install**.
-.. If you download the source, make sure you follow the :ref:`Installation <../installation/installation.rst>` and use **setup.py develop** and not **setup.py install**.
+
+.. ******************************************************************************************************************************
+.. This is still causing errors during sphinx compilation
+..
+.. ```
+.. /pyNastran/docs/html_docs/quick_start/gui.rst:108: 
+..     WARNING: unknown document: ../installation/installation.rst
+.. 
+.. /pyNastran/docs/html_docs/quick_start/gui.rst:108: 
+..     WARNING: undefined label: ../installation/installation.rst (if the link has no caption the label must precede a section header)
+.. ```
+..
+.. -als0052, 05-06-2021
+.. ******************************************************************************************************************************
+
+.. If you download the source, make sure you follow the :doc:`../installation/installation.rst` and use **setup.py develop** and not **setup.py install**.
+If you download the source, make sure you follow the :ref:`Installation <../installation/installation.rst>` and use **setup.py develop** and not **setup.py install**.
 
 For the GUI, the master **requires**:
  - Python 3.7-3.8

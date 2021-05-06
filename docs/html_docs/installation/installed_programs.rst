@@ -26,8 +26,21 @@ The Graphical User Interface (GUI) looks like:
 
 .. .. code-block:: console
 
-See :doc:`../quick_start/gui.rst` for more details.
-.. See :ref:`Quick Start - GUI<../quick_start/gui.rst>` for more details.
+.. *************************************************************************************************************************
+.. This is still causing errors during sphinx compilation
+..
+.. ```
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:29: 
+..     WARNING: unknown document: ../quick_start/gui.rst
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:29: 
+..     WARNING: undefined label: ../quick_start/gui.rst (if the link has no caption the label must precede a section header)
+.. ```
+.. 
+.. - als0052, 05-06-2021
+.. *************************************************************************************************************************
+
+.. See :doc:`../quick_start/gui.rst` for more details.
+See :ref:`Quick Start - GUI<../quick_start/gui.rst>` for more details.
 
 
 --------
@@ -35,8 +48,22 @@ test_bdf
 --------
 Runs through various checks on a BDF that Nastran doesn't do.  Verifies your model is referenced properly.  Creates a summary table.
 
-See :doc:`../quick_start/test_bdf.rst` for more details.
-.. See :ref:`Quick Start - test_bdf<../quick_start/test_bdf.rst>` for more details.
+.. ******************************************************************************************************************************
+.. This is still causing errors during sphinx compilation
+..
+.. ```
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:38: 
+..     WARNING: unknown document: ../quick_start/test_bdf.rst
+.. 
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:38: 
+..     WARNING: undefined label: ../quick_start/test_bdf.rst (if the link has no caption the label must precede a section header)
+.. ```
+..
+.. -als0052, 05-06-2021
+.. ******************************************************************************************************************************
+
+.. See :doc:`../quick_start/test_bdf.rst` for more details.
+See :ref:`Quick Start - test_bdf<../quick_start/test_bdf.rst>` for more details.
 
 
 .. .. code-block:: conosle
@@ -86,8 +113,23 @@ test_op2
 --------
 Runs through various checks on an OP2 file.  Creates a summary table.
 
-See :doc:`../quick_start/test_op2.rst` for more details.
-.. See :ref:`Quick Start - test_op2<../quick_start/test_op2.rst>` for more details.
+.. ******************************************************************************************************************************
+.. This is still causing errors during sphinx compilation
+..
+.. ```
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:89: 
+..     WARNING: unknown document: ../quick_start/test_op2.rst
+.. 
+.. /pyNastran/docs/html_docs/installation/installed_programs.rst:89: 
+..     WARNING: undefined label: ../quick_start/test_op2.rst (if the link has no caption the label must precede a section header)
+.. 
+.. ```
+..
+.. -als0052, 05-06-2021
+.. ******************************************************************************************************************************
+
+.. See :doc:`../quick_start/test_op2.rst` for more details.
+See :ref:`Quick Start - test_op2<../quick_start/test_op2.rst>` for more details.
 
 
 .. .. code-block:: conosle

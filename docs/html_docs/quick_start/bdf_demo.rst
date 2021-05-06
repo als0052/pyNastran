@@ -825,8 +825,11 @@ pyNastranGUI
     done
     
 
-We can also script the GUI!
-===========================
+.. We can also script the GUI!
+.. ===========================
+
+Scripting the GUI
+=================
 
 .. code:: ipython3
 
