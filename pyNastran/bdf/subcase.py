@@ -1,5 +1,7 @@
 """Subcase creation/extraction class"""
-from typing import List, Dict, Tuple, Any
+import getpass
+from typing import Tuple, List, Dict, Union, Any
+import numpy as np
 from numpy import ndarray
 
 from pyNastran.utils.numpy_utils import integer_types
@@ -8,6 +10,7 @@ from pyNastran.utils import object_attributes, deprecated
 from pyNastran.bdf.bdf_interface.case_control_cards import CLASS_MAP
 from pyNastran.bdf.bdf_interface.subcase_utils import (
     write_stress_type, write_set, expand_thru_case_control)
+USER_NAME = getpass.getuser()
 
 
 INT_CARDS = (
@@ -302,11 +305,12 @@ class Subcase:
                 self._write_op2_error_msg(log, self.log, msg, data_code)
 
         elif table_name == 'OVG1':
-            if table_code == 11:
+            if table_code in [11, 10]:
                 thermal = data_code['thermal']
                 assert thermal == 0, data_code
                 self.add('VELOCITY', 'ALL', options, 'STRESS-type')
             else:
+                print("table_code = %r" % table_code)
                 self._write_op2_error_msg(log, self.log, msg, data_code)
 
         elif table_name == 'OAG1':
@@ -493,7 +497,7 @@ class Subcase:
 
         elif table_name in ['OESRT']:
             #assert data_code['is_stress_flag'] == True, data_code
-            if table_code in [25, 89]:
+            if table_code in [25, 56, 89]:
                 self.add('STRESS', 'ALL', options, 'STRESS-type')
             else:  # pragma: no cover
                 self._write_op2_error_msg(log, self.log, msg, data_code)
@@ -547,7 +551,8 @@ class Subcase:
             print(data_code)
             raise RuntimeError(data_code)
         log.error(str(data_code))
-        #raise RuntimeError(data_code)
+        if USER_NAME == 'sdoyle': # or 'id' in msg:
+            raise RuntimeError(data_code)
 
     def __contains__(self, param_name: str) -> bool:
         """
@@ -600,7 +605,7 @@ class Subcase:
                   for param_name in param_names]
         return exists
 
-    def __getitem__(self, param_name):
+    def __getitem__(self, param_name: str) -> Tuple[Union[int, str], List[Any]]:
         """
         Gets the [value, options] for a subcase.
 
@@ -629,7 +634,7 @@ class Subcase:
         """
         return self.get_parameter(param_name)
 
-    def suppress_output(self, suppress_to='PLOT'):
+    def suppress_output(self, suppress_to: str='PLOT') -> None:
         """
         Replaces F06 printing with OP2 printing
 
@@ -655,7 +660,7 @@ class Subcase:
             else:
                 raise NotImplementedError(key)
 
-    def get_parameter(self, param_name, msg='', obj=False):
+    def get_parameter(self, param_name: str, msg: str='', obj: bool=False) -> Tuple[Union[int, str], List[Any]]:
         """
         Gets the [value, options] for a subcase.
 
@@ -1164,7 +1169,7 @@ class Subcase:
 def _load_hdf5_param(group, key: str, encoding: str) -> Tuple[str, List[str], str]:
     """('ALL', ['SORT2'], 'STRESS-type')"""
     import h5py
-    from pyNastran.utils.dict_to_h5py import _cast
+    from pyNastran.utils.dict_to_h5py import _cast, _cast_array
     #print('-----------------------------------------')
     #print(type(key), key)
     sub_group = group[key]
@@ -1182,7 +1187,6 @@ def _load_hdf5_param(group, key: str, encoding: str) -> Tuple[str, List[str], st
         elif isinstance(options, bytes):
             options = options.decode(encoding)
         else:
-            options = options.tolist()
             options = [
                 option.decode(encoding) if isinstance(option, bytes) else option
                 for option in options]
@@ -1205,8 +1209,10 @@ def _load_hdf5_param(group, key: str, encoding: str) -> Tuple[str, List[str], st
             value = value.decode(encoding)
         elif isinstance(value, (integer_types, str)):
             pass
-        else:
+        elif isinstance(value, np.ndarray):
             value = value.tolist()
+        #else:
+            #value = value.tolist()
 
     elif 'object' in sub_group:
         value, options = _load_hdf5_object(key, keys, sub_group, encoding)
@@ -1236,7 +1242,7 @@ def _load_hdf5_object(key, keys, sub_group, encoding):
 
     use_data = True
     if 'options' in sub_groupi:
-        options2 = _cast(sub_groupi['options']).tolist()
+        options2 = _cast(sub_groupi['options'])
         value = _cast(sub_groupi['value'])
         #print('sub_keys =', sub_groupi, sub_groupi.keys())
 
@@ -1246,7 +1252,7 @@ def _load_hdf5_object(key, keys, sub_group, encoding):
         use_data = False
 
     data_group = sub_groupi['data']
-    keys2 = _cast(data_group['keys']).tolist()
+    keys2 = _cast(data_group['keys'])
 
     h5_values = data_group['values']
     if isinstance(h5_values, h5py._hl.group.Group):
@@ -1256,7 +1262,7 @@ def _load_hdf5_object(key, keys, sub_group, encoding):
             h5_value = _cast(h5_values[ih5])
             values2[ih5_int] = h5_value
     else:
-        values2 = _cast(h5_values).tolist()
+        values2 = _cast(h5_values)
     #print('data_keys =', data_group, data_group.keys())
 
     unused_keys_str = [

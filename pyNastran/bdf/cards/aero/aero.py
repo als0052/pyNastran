@@ -300,7 +300,7 @@ class AECOMPL(BaseCard):
         labels = []
         j = 1
         for i in range(2, len(card)):
-            label = string(card, i, 'label_%i' % j)
+            label = string(card, i, 'label_%d' % j)
             labels.append(label)
             j += 1
         return AECOMPL(name, labels, comment=comment)
@@ -463,12 +463,12 @@ class AELINK(BaseCard):
         aelink_id = 1
         label = 'ELEV'
         independent_labels = ['ELEV1', 'ELEV2']
-        linking_coefficents = [1., 2.]
-        return AELINK(aelink_id, label, independent_labels, linking_coefficents, comment='')
+        linking_coefficients = [1., 2.]
+        return AELINK(aelink_id, label, independent_labels, linking_coefficients, comment='')
 
     def __init__(self, aelink_id: Union[int, str],
                  label: str, independent_labels: List[str],
-                 linking_coefficents: List[float],
+                 linking_coefficients: List[float],
                  comment: str='') -> None:
         """
         Creates an AELINK card, which defines an equation linking
@@ -482,7 +482,7 @@ class AELINK(BaseCard):
             name of the dependent AESURF card
         independent_labels : List[str, ..., str]
             name for the independent variables (AESTATs)
-        linking_coefficents : List[float]
+        linking_coefficients : List[float]
             linking coefficients
         comment : str; default=''
             a comment for the card
@@ -498,7 +498,7 @@ class AELINK(BaseCard):
         self.independent_labels = independent_labels
 
         #: linking coefficients (real)
-        self.linking_coefficents = linking_coefficents
+        self.linking_coefficients = linking_coefficients
 
         if isinstance(aelink_id, str):
             if aelink_id != 'ALWAYS':
@@ -508,15 +508,15 @@ class AELINK(BaseCard):
         self.aelink_id = aelink_id
 
     def validate(self):
-        if len(self.independent_labels) != len(self.linking_coefficents):
-            msg = 'nlabels=%s nci=%s\nindependent_labels=%s linking_coefficents=%s\n%s' % (
-                len(self.independent_labels), len(self.linking_coefficents),
-                self.independent_labels, self.linking_coefficents, str(self))
+        if len(self.independent_labels) != len(self.linking_coefficients):
+            msg = 'nlabels=%s nci=%s\nindependent_labels=%s linking_coefficients=%s\n%s' % (
+                len(self.independent_labels), len(self.linking_coefficients),
+                self.independent_labels, self.linking_coefficients, str(self))
             raise RuntimeError(msg)
         if len(self.independent_labels) == 0:
-            msg = 'nlabels=%s nci=%s\nindependent_labels=%s linking_coefficents=%s\n%s' % (
-                len(self.independent_labels), len(self.linking_coefficents),
-                self.independent_labels, self.linking_coefficents, str(self))
+            msg = 'nlabels=%s nci=%s\nindependent_labels=%s linking_coefficients=%s\n%s' % (
+                len(self.independent_labels), len(self.linking_coefficients),
+                self.independent_labels, self.linking_coefficients, str(self))
             raise RuntimeError(msg)
 
     @classmethod
@@ -535,7 +535,7 @@ class AELINK(BaseCard):
         aelink_id = integer_or_string(card, 1, 'ID')
         label = string(card, 2, 'label')
         independent_labels = []
-        linking_coefficents = []
+        linking_coefficients = []
 
         list_fields = [interpret_value(field, card) for field in card[3:]]
         assert len(list_fields) % 2 == 0, 'list_fields=%s' % list_fields
@@ -543,9 +543,14 @@ class AELINK(BaseCard):
             independent_label = list_fields[i]
             linking_coefficent = list_fields[i + 1]
             independent_labels.append(independent_label)
-            linking_coefficents.append(linking_coefficent)
-        return AELINK(aelink_id, label, independent_labels, linking_coefficents,
+            linking_coefficients.append(linking_coefficent)
+        return AELINK(aelink_id, label, independent_labels, linking_coefficients,
                       comment=comment)
+
+    def cross_reference(self, model: BDF) -> None:
+        """We're simply going to validate the labels"""
+        sid_ref = model.trims[self.aelink_id]
+        independent_label_ref = model.AESurf(self.label, msg=f'which is required by {str(self)}')
 
     #def uncross_reference(self) -> None:
         #"""Removes cross-reference links"""
@@ -562,7 +567,7 @@ class AELINK(BaseCard):
 
         """
         list_fields = ['AELINK', self.aelink_id, self.label]
-        for (ivar, ival) in zip(self.independent_labels, self.linking_coefficents):
+        for (ivar, ival) in zip(self.independent_labels, self.linking_coefficients):
             list_fields += [ivar, ival]
         return list_fields
 
@@ -1285,7 +1290,14 @@ class AESURFS(BaseCard):
         card = self.raw_fields()
         return self.comment + print_card_8(card)
 
-
+CAERO1_MSG = """
++--------+-----+-----+----+-------+--------+--------+--------+------+
+|   1    |  2  |  3  | 4  |   5   |   6    |    7   |   8    |   9  |
++========+=====+=====+====+=======+========+========+========+======+
+| CAERO1 | EID | PID | CP | NSPAN | NCHORD |  LSPAN | LCHORD | IGID |
++--------+-----+-----+----+-------+--------+--------+--------+------+
+|        |  X1 | Y1  | Z1 |  X12  |   X4   |   Y4   |   Z4   | X43  |
++--------+-----+-----+----+-------+--------+--------+--------+------+""".strip()
 class CAERO1(BaseCard):
     """
     Defines an aerodynamic macro element (panel) in terms of two leading edge
@@ -1315,9 +1327,8 @@ class CAERO1(BaseCard):
     ----------
     eid : int
         element id
-    pid : int, PAERO1
+    pid : int
         int : PAERO1 ID
-        PAERO1 : PAERO1 object (xref)
     igroup : int
         Group number
     p1 : (1, 3) ndarray float
@@ -1328,23 +1339,20 @@ class CAERO1(BaseCard):
         distance along the flow direction from node 1 to node 2; (typically x, root chord)
     x43 : float
         distance along the flow direction from node 4 to node 3; (typically x, tip chord)
-    cp : int, CORDx
+    cp : int
         int : coordinate system
-        CORDx : Coordinate object (xref)
     nspan : int
         int > 0 : N spanwise boxes distributed evenly
         int = 0 : use lchord
     nchord : int
         int > 0 : N chordwise boxes distributed evenly
         int = 0 : use lchord
-    lspan : int, AEFACT
+    lspan : int
         int > 0 : AEFACT reference for non-uniform nspan
         int = 0 : use nspan
-        AEFACT : AEFACT object  (xref)
-    lchord : int, AEFACT
+    lchord : int
         int > 0 : AEFACT reference for non-uniform nchord
         int = 0 : use nchord
-        AEFACT : AEFACT object  (xref)
     comment : str; default=''
          a comment for the card
 
@@ -1429,8 +1437,12 @@ class CAERO1(BaseCard):
         self.p1 = np.asarray(self.p1)
         self.p4 = np.asarray(self.p4)
 
-    def __init__(self, eid, pid, igroup, p1, x12, p4, x43,
-                 cp=0, nspan=0, lspan=0, nchord=0, lchord=0, comment=''):
+    def __init__(self, eid: int, pid: int, igroup: int,
+                   p1: NDArray3float, x12: float,
+                   p4: NDArray3float, x43: float,
+                   cp: int=0,
+                   nspan: int=0, lspan: int=0,
+                   nchord: int=0, lchord: int=0, comment: str=''):
         """
         Defines a CAERO1 card, which defines a simplified lifting surface
         (e.g., wing/tail).
@@ -1550,6 +1562,7 @@ class CAERO1(BaseCard):
             is_failed = True
         if is_failed:
             msg += str(self)
+            msg += CAERO1_MSG
             raise ValueError(msg)
         assert len(self.p1) == 3, 'p1=%s' % self.p1
         assert len(self.p4) == 3, 'p4=%s' % self.p4
@@ -2182,18 +2195,16 @@ class CAERO2(BaseCard):
         ----------
         eid : int
             element id
-        pid : int, PAERO2
+        pid : int
             int : PAERO2 ID
-            PAERO2 : PAERO2 object (xref)
         igroup : int
             Group number
         p1 : (1, 3) ndarray float
             xyz location of point 1 (forward position)
         x12 : float
             length of the CAERO2
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
-            CORDx : Coordinate object (xref)
         nsb : int; default=0
             Number of slender body elements
         lsb : int; default=0
@@ -2909,9 +2920,8 @@ class CAERO4(BaseCard):
         ----------
         eid : int
             element id
-        pid : int, PAERO4
+        pid : int
             int : PAERO4 ID
-            PAERO4 : PAERO4 object (xref)
         p1 : (1, 3) ndarray float
             xyz location of point 1 (leading edge; inboard)
         p4 : (1, 3) ndarray float
@@ -2922,13 +2932,12 @@ class CAERO4(BaseCard):
         x43 : float
             distance along the flow direction from node 4 to node 3
             (typically x, tip chord)
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
-            CORDx : Coordinate object (xref)
         nspan : int; default=0
             int > 0 : N spanwise boxes distributed evenly
             int = 0 : use lchord
-        lspan : int, AEFACT; default=0
+        lspan : int; default=0
             int > 0 : AEFACT reference for non-uniform nspan
             int = 0 : use nspan
         comment : str; default=''
@@ -3266,12 +3275,12 @@ class CAERO5(BaseCard):
             distance along the flow direction from node 1 to node 2; (typically x, root chord)
         x43 : float
             distance along the flow direction from node 4 to node 3; (typically x, tip chord)
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
         nspan : int; default=0
             int > 0 : N spanwise boxes distributed evenly
             int = 0 : use lchord
-        lspan : int, AEFACT; default=0
+        lspan : int; default=0
             int > 0 : AEFACT reference for non-uniform nspan
             int = 0 : use nspan
         ntheory : int; default=0
@@ -4767,8 +4776,8 @@ class PAERO3(BaseCard):
 
         j = 5
         for i in range(5, nfields, 2):
-            xi = double_or_blank(card, i, 'x%i' % j)
-            yi = double_or_blank(card, i + 1, 'y%i' % j)
+            xi = double_or_blank(card, i, 'x%d' % j)
+            yi = double_or_blank(card, i + 1, 'y%d' % j)
             x.append(xi)
             y.append(yi)
             j += 1
@@ -4964,9 +4973,9 @@ class PAERO4(BaseCard):
         caocs = []
         gapocs = []
         for i in range(6, nfields, 3):
-            doc = double(card, i, 'doc_%i' % j)
-            caoc = double(card, i + 1, 'caoc_%i' % j)
-            gapoc = double(card, i + 2, 'gapoc_%i' % j)
+            doc = double(card, i, 'doc_%d' % j)
+            caoc = double(card, i + 1, 'caoc_%d' % j)
+            gapoc = double(card, i + 2, 'gapoc_%d' % j)
             docs.append(doc)
             caocs.append(caoc)
             gapocs.append(gapoc)
@@ -5008,6 +5017,16 @@ class Spline(BaseCard):
     def __init__(self):
         BaseCard.__init__(self)
 
+SPLINE1_MSG = """
++---------+-------+-------+------+------+------+----+------+-------+
+|    1    |   2   |    3  |   4  |   5  |   6  |  7 |   8  |   9   |
++=========+=======+=======+======+======+======+====+======+=======+
+| SPLINE1 | EID   | CAERO | BOX1 | BOX2 | SETG | DZ | METH | USAGE |
++---------+-------+-------+------+------+------+----+------+-------+
+|         | NELEM | MELEM |      |      |      |    |      |       |
++---------+-------+-------+------+------+------+----+------+-------+
+| SPLINE1 |   3   |  111  | 115  | 122  |  14  | 0. |      |       |
++---------+-------+-------+------+------+------+----+------+-------+""".strip()
 
 class SPLINE1(Spline):
     """
@@ -5781,7 +5800,9 @@ class SPLINE4(Spline):
 
     def __init__(self, eid: int, caero: int, aelist: int, setg: int,
                  dz: float, method: str, usage: str,
-                 nelements: int, melements: int, comment: str=''):
+                 nelements: int, melements: int,
+                 ftype: Optional[int]=None, rcore: Optional[float]=None,
+                 comment: str=''):
         """
         Creates a SPLINE4 card, which defines a curved Infinite Plate,
         Thin Plate, or Finite Plate Spline.
@@ -5814,6 +5835,10 @@ class SPLINE4(Spline):
         nelements / melements : int; default=10
             The number of FE elements along the local spline x/y-axis if
             using the FPS option
+        ftype: int; default=None
+            MSC only
+        rcore : float; default=None
+            MSC only
         comment : str; default=''
             a comment for the card
 
@@ -5830,6 +5855,8 @@ class SPLINE4(Spline):
         self.usage = usage
         self.nelements = nelements
         self.melements = melements
+        self.ftype = ftype
+        self.rcore = rcore
         self.caero_ref = None
         self.setg_ref = None
         self.aelist_ref = None
@@ -5861,9 +5888,12 @@ class SPLINE4(Spline):
         usage = string_or_blank(card, 8, 'usage', 'BOTH')
         nelements = integer_or_blank(card, 9, 'nelements', 10)
         melements = integer_or_blank(card, 10, 'melements', 10)
-        assert len(card) <= 11, f'len(SPLINE4 card = {len(card):d}\ncard={card}'
+        ftype = string_or_blank(card, 11, 'ftype', 'WF2')
+        rcore = double_or_blank(card, 12, 'rcore')
+        assert len(card) <= 13, f'len(SPLINE4 card = {len(card):d}\ncard={card}'
         return SPLINE4(eid, caero, aelist, setg, dz, method, usage,
-                       nelements, melements, comment=comment)
+                       nelements, melements, ftype=ftype, rcore=rcore,
+                       comment=comment)
 
     @classmethod
     def add_op2_data(cls, data, comment=''):
@@ -5974,7 +6004,7 @@ class SPLINE4(Spline):
         """
         list_fields = ['SPLINE4', self.eid, self.CAero(), self.AEList(), None,
                        self.Set(), self.dz, self.method, self.usage, self.nelements,
-                       self.melements]
+                       self.melements, self.ftype, self.rcore]
         return list_fields
 
     def repr_fields(self):
@@ -5985,7 +6015,8 @@ class SPLINE4(Spline):
         melements = set_blank_if_default(self.melements, 10)
 
         list_fields = ['SPLINE4', self.eid, self.CAero(), self.AEList(), None,
-                       self.Set(), dz, method, usage, nelements, melements]
+                       self.Set(), dz, method, usage, nelements, melements,
+                       self.ftype, self.rcore]
         list_fields = wipe_empty_fields(list_fields)
         return list_fields
 
@@ -6298,7 +6329,7 @@ def get_caero_subpanel_grid(model: BDF) -> Tuple[np.ndarray, np.ndarray]:
 
     if len(elements) == 1:
         points_array = np.vstack(points)
-        elements_array = elements[0].rehape(1, 4)
+        elements_array = elements[0] # .reshape(1, 4)
     else:
         points_array = np.vstack(points)
         elements_array = np.vstack(elements)

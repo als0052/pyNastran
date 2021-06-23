@@ -261,9 +261,14 @@ class OP2_F06_Common:
     def rbe3_strain_energy(self):
         return self.op2_results.strain_energy.rbe3_strain_energy
     @property
-    def weldc_strain_energy(self):
-        return self.op2_results.strain_energy.weldc_strain_energy
-
+    def cweld_strain_energy(self):
+        return self.op2_results.strain_energy.cweld_strain_energy
+    @property
+    def cfast_strain_energy(self):
+        return self.op2_results.strain_energy.cfast_strain_energy
+    @property
+    def cseam_strain_energy(self):
+        return self.op2_results.strain_energy.cseam_strain_energy
     # ------------------------------------------------------------------
     # Strain Energy - Setter
 
@@ -352,7 +357,12 @@ class OP2_F06_Common:
     @cpyram_strain_energy.setter
     def cpyram_strain_energy(self, cpyram_strain_energy):
         self.op2_results.strain_energy.cpyram_strain_energy = cpyram_strain_energy
-
+    @cfast_strain_energy.setter
+    def cfast_strain_energy(self, cfast_strain_energy):
+        self.op2_results.strain_energy.cfast_strain_energy = cfast_strain_energy
+    @cseam_strain_energy.setter
+    def cseam_strain_energy(self, cseam_strain_energy):
+        self.op2_results.strain_energy.cseam_strain_energy = cseam_strain_energy
     # ------------------------------------------------------------------
     # Force - Getter
     @property
@@ -638,6 +648,19 @@ class OP2_F06_Common:
     @property
     def cpyram_stress(self):
         return self.op2_results.stress.cpyram_stress
+
+    @property
+    def chexa_composite_stress(self):
+        return self.op2_results.stress.chexa_composite_stress
+    @property
+    def cpenta_composite_stress(self):
+        return self.op2_results.stress.cpenta_composite_stress
+    @property
+    def chexa_composite_strain(self):
+        return self.op2_results.strain.chexa_composite_strain
+    @property
+    def cpenta_composite_strain(self):
+        return self.op2_results.strain.cpenta_composite_strain
     # ------------------------------------------------------------------
     # Stress - Setter
     @celas1_stress.setter
@@ -665,6 +688,20 @@ class OP2_F06_Common:
     @cpyram_stress.setter
     def cpyram_stress(self, cpyram_stress):
         self.op2_results.stress.cpyram_stress = cpyram_stress
+
+    @chexa_stress.setter
+    def chexa_composite_stress(self):
+        self.op2_results.stress.chexa_composite_stress = chexa_composite_stress
+    @cpenta_composite_stress.setter
+    def cpenta_composite_stress(self, cpenta_composite_stress):
+        self.op2_results.stress.cpenta_composite_stress = cpenta_composite_stress
+    @chexa_composite_strain.setter
+    def chexa_composite_strain(self, chexa_composite_strain):
+        self.op2_results.strain.chexa_composite_strain = chexa_composite_strain
+    @cpenta_composite_strain.setter
+    def cpenta_composite_strain(self, cpenta_composite_strain):
+        self.op2_results.strain.cpenta_composite_strain = cpenta_composite_strain
+
     # ------------------------------------------------------------------
     # Strain - Getter
     @property

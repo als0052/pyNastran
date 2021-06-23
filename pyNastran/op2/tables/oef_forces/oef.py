@@ -22,11 +22,11 @@ import numpy as np
 from numpy import frombuffer, vstack, sin, cos, radians, array, hstack, zeros
 
 from pyNastran.op2.op2_interface.function_codes import func1, func7
-from pyNastran.op2.op2_interface.op2_reader import mapfmt, reshape_bytes_block_strip
+from pyNastran.op2.op2_interface.op2_reader import mapfmt
 from pyNastran.op2.tables.utils import get_eid_dt_from_eid_device
 from pyNastran.op2.op2_helper import polar_to_real_imag
 from pyNastran.op2.op2_interface.op2_common import OP2Common
-from pyNastran.op2.op2_interface.utils import apply_mag_phase
+from pyNastran.op2.op2_interface.utils import apply_mag_phase, reshape_bytes_block_strip
 from pyNastran.op2.op2_interface.msc_tables import MSC_OEF_REAL_MAPPER, MSC_OEF_IMAG_MAPPER
 from pyNastran.op2.op2_interface.nx_tables import NX_OEF_REAL_MAPPER, NX_OEF_IMAG_MAPPER
 from pyNastran.op2.op2_interface.op2_codes import SORT1_TABLES_BYTES, TABLES_BYTES
@@ -3151,7 +3151,7 @@ def oef_shells_composite_real_9(self, data: bytes,
         # 'HFAIL' for the Hashin failure criterion
         # 'HTAPE' for the Hashin tape criterion
         # 'HFABR' for the Hashin fabric criterion
-        assert failure_theory in ['TSAI-WU', 'STRAIN', 'HILL', 'HOFFMAN', 'HFAIL', 'HFABRIC', ''], f'failure_theory={failure_theory!r}'
+        assert failure_theory in ['TSAI-WU', 'STRAIN', 'HILL', 'HOFFMAN', 'HFAIL', 'HFABRIC', 'HTAPE', ''], f'failure_theory={failure_theory!r}'
         assert failure_flag in ['', '***'], 'failure_flag=%r' % failure_flag
         obj.add_sort1(dt, eid, failure_theory, ply_id, failure_stress_for_ply, flag,
                       interlaminar_stress, max_value, failure_flag)

@@ -3,6 +3,8 @@ defines:
  - ShearMomentTorqueObject
 
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING
 #from pyNastran.bdf.cards.coordinate_systems import CORD2R
 from pyNastran.bdf.mesh_utils.cut_model_by_plane import (
     get_element_centroids)
@@ -11,6 +13,8 @@ from pyNastran.gui.menus.cutting_plane.shear_moment_torque import ShearMomentTor
 from pyNastran.gui.qt_files.colors import PURPLE_FLOAT
 from pyNastran.op2.tables.ogf_gridPointForces.smt import (
     get_nid_cd_xyz_cid0, plot_smt, setup_coord_from_plane)
+if TYPE_CHECKING:
+    from pyNastran.op2.tables.ogf_gridPointForces.ogf_objects import RealGridPointForcesArray
 
 class ShearMomentTorqueObject:
     """wrapper around ShearMomentTorqueWindow"""
@@ -55,7 +59,7 @@ class ShearMomentTorqueObject:
             gui.log.error('Select a Grid Point Forces result.')
             return
 
-        gpforce = obj.gpforce_array
+        gpforce = obj.gpforce_array  # type: RealGridPointForcesArray
         data = {
             'font_size' : settings.font_size,
             'cids' : cids,
@@ -101,13 +105,13 @@ class ShearMomentTorqueObject:
         #self.out_data['clicked_ok'] = True
 
         model_name = data['model_name']
-        gpforce = data['gpforce']
+        gpforce = data['gpforce']  # type: RealGridPointForcesArray
         nplanes = data['nplanes']
         #model = self.models[model_name]
 
-        cid_p1, p1 = data['p1']
-        cid_p2, p2 = data['p2']
-        cid_p3, p3 = data['p3']
+        cid_p1, p1 = data['p1'] # start
+        cid_p2, p2 = data['p2'] # xzplane
+        cid_p3, p3 = data['p3'] # end
         cid_zaxis, zaxis = data['zaxis']
         plane_color = data['plane_color']
         plane_opacity = data['plane_opacity']
@@ -124,7 +128,7 @@ class ShearMomentTorqueObject:
             csv_filename=csv_filename,
             show=show)
 
-    def plot_shear_moment_torque(self, model_name, gpforce,
+    def plot_shear_moment_torque(self, model_name, gpforce: RealGridPointForcesArray,
                                  p1, p2, p3, zaxis,
                                  method: str='Z-Axis Projection',
                                  cid_p1: int=0, cid_p2: int=0, cid_p3: int=0, cid_zaxis: int=0,
@@ -160,7 +164,7 @@ class ShearMomentTorqueObject:
         nids, nid_cd, icd_transform, xyz_cid0 = get_nid_cd_xyz_cid0(model)
         #xyz1, xyz2, xyz3, i, k, origin, xzplane, dim_max, stations
         try:
-            xyz1, xyz2, xyz3, i, k, coord_out, dim_max, stations = setup_coord_from_plane(
+            xyz1, xyz2, xyz3, i, k, coord_out, iaxis_march, dim_max, stations = setup_coord_from_plane(
                 model, xyz_cid0,
                 p1, p2, p3, zaxis,
                 method=method,
@@ -182,6 +186,11 @@ class ShearMomentTorqueObject:
             #if stop_on_failure:
                 #raise
             #return None, None
+
+        # the plane actor defines the plane of the output results,
+        # not the plane of the march direction
+        # xyz1: origin
+        # xyz2: xzplane
         unused_plane_actor, unused_prop = self.create_plane_actor(
             xyz1, xyz2,
             coord, i, k, dim_max,
@@ -198,12 +207,12 @@ class ShearMomentTorqueObject:
         self.gui.Render()
 
         eids, element_centroids_cid0 = get_element_centroids(model)
-        force_sum, moment_sum = gpforce.shear_moment_diagram(
-            xyz_cid0, eids, nids, icd_transform,
-            element_centroids_cid0,
-            model.coords, nid_cd, stations, coord,
-            idir=0, itime=0, debug=False, log=log)
-        plot_smt(stations, force_sum, moment_sum, show=show)
+        force_sum, moment_sum, new_coords, nelems, nnodes = gpforce.shear_moment_diagram(
+            nids, xyz_cid0, nid_cd, icd_transform,
+            eids, element_centroids_cid0, stations,
+            model.coords, coord, iaxis_march=iaxis_march,
+            itime=0, debug=False, log=log)
+        plot_smt(stations, force_sum, moment_sum, nelems, nnodes, show=show)
         return force_sum, moment_sum
 
     def create_plane_actor(self, xyz1, xyz2, coord, i, k, dim_max: float,

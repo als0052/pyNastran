@@ -5,6 +5,15 @@ from struct import Struct
 from typing import Tuple, List, Any
 
 import numpy as np
+from pyNastran.bdf.cards.aero.aero import (
+    #AECOMP, AECOMPL, AEFACT, AELINK, AELIST, AEPARM, AESURF, AESURFS,
+    #CAERO1, CAERO2, CAERO3, CAERO4, CAERO5,
+    #PAERO1, PAERO2, PAERO3, PAERO4, PAERO5,
+    MONPNT1, # , MONPNT2, MONPNT3, MONDSP1,
+    #SPLINE1, SPLINE2, SPLINE3,
+    SPLINE4, SPLINE5)
+
+from pyNastran.op2.errors import DoubleCardError
 from pyNastran.op2.tables.geom.geom_common import GeomCommon
 from pyNastran.op2.op2_interface.op2_reader import mapfmt, reshape_bytes_block, reshape_bytes_block_size
 from pyNastran.bdf.cards.elements.acoustic import ACMODL
@@ -46,7 +55,7 @@ class EDT(GeomCommon):
             (2202, 22, 340) : ['AEROS', self._read_aeros],
             (2102, 21, 339) : ['AESTAT', self._read_aestat],
             (2002, 20, 338) : ['AESURF', self._read_aesurf],
-            (7701, 77, 581) : ['AESURFS', self._read_fake],
+            (7701, 77, 581) : ['AESURFS', self._read_aesurfs],
             (3002, 30, 263) : ['CAERO1', self._read_caero1],
             (4301, 43, 167) : ['CAERO2', self._read_caero2],
             (4401, 44, 168) : ['CAERO3', self._read_caero3],
@@ -55,7 +64,7 @@ class EDT(GeomCommon):
             (6201, 62, 143) : ['CLOAD', self._read_fake],
             (6401, 64, 307) : ['CSSCHD', self._read_fake],
             (104, 1, 81) : ['DEFORM', self._read_deform],
-            (2702, 27, 387) : ['DIVERG', self._read_fake],
+            (2702, 27, 387) : ['DIVERG', self._read_diverg],
             (4102, 41, 274) : ['FLFACT', self._read_flfact],
             (3902, 39, 272) : ['FLUTTER', self._read_flutter],
             (17400, 174, 616) : ['GROUP', self._read_group],
@@ -99,7 +108,7 @@ class EDT(GeomCommon):
             # MSC
             (1247, 12, 667): ['MONPNT2', self._read_fake],
             (11204, 112, 821): ['ERPPNL', self._read_fake],
-            (8001, 80, 511): ['SET3', self._read_fake],
+            (8001, 80, 511): ['SET3', self._read_set3],
             (9400, 94, 641): ['MDLPRM', self._read_fake],
             (11004, 110, 1820_720): ['HADACRI', self._read_fake],
             (8804, 88, 628): ['MONDSP1', self._read_fake],
@@ -115,12 +124,99 @@ class EDT(GeomCommon):
 
         }
     def _read_aeforce(self, data: bytes, n: int) -> int:
-        aeforcex
+        """Word Name Type Description
+        1 MACH     RS
+        2 SYMXZ(2) CHAR4
+        4 SYMXY(2) CHAR4
+        6 UXID     I
+        7 MESH(2)  CHAR4
+        9 FORCE    I
+        10 DMIK(2) CHAR4
+        12 PERQ(2) CHAR4
+        """
+        ntotal = 52 * self.factor # 4*13
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        assert self.factor == 1, self.factor
+        structi = Struct(self._endian + b'f 8s 8s i 8s i 8s 8s')
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+
+            mach, sym_xz_bytes, sym_xy_bytes, ux_id, mesh_bytes, force, dmik_bytes, perq_bytes = out
+            sym_xz = reshape_bytes_block_size(sym_xz_bytes, size=self.size)
+            sym_xy = reshape_bytes_block_size(sym_xy_bytes, size=self.size)
+            mesh = reshape_bytes_block_size(mesh_bytes, size=self.size)
+            dmik = reshape_bytes_block_size(dmik_bytes, size=self.size)
+            perq = reshape_bytes_block_size(perq_bytes, size=self.size)
+
+            aeforce = self.add_aeforce(mach, sym_xz, sym_xy, ux_id, mesh, force, dmik, perq)
+            str(aeforce)
+            n += ntotal
+        return n
+
     def _read_aepress(self, data: bytes, n: int) -> int:
-        aepressx
+        """
+        Parametric pressure loading for aerodynamics.
+        Word Name Type Description
+        1 MACH     RS    Mach number
+        2 SYMXZ(2) CHAR4 Character string for identifying symmetry of the
+                         force vector. Allowable values are SYMM, ASYMM, and ANTI
+        4 SYMXY(2) CHAR4 Character string for identifying symmetry of the
+                         force vector. Allowable values are SYMM, ASYMM, and ANTI
+        6 UXID     I     The identification number of a UXVEC entry
+        7 DMIJ(2)  CHAR4 The name of a DMI or DMIJ entry that defines the pressure
+                         per unit dynamic pressure
+        9 DMIJI(2) CHAR4 The name of a DMIJI entry that defines the CAERO2
+                         interference element downwashes
+        """
+        ntotal = 40 * self.factor # 4*10
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        assert self.factor == 1, self.factor
+        structi = Struct(self._endian + b'f 8s 8s i 8s 8s')
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+
+            mach, sym_xz_bytes, sym_xy_bytes, ux_id, dmij_bytes, dmiji_bytes= out
+            sym_xz = reshape_bytes_block_size(sym_xz_bytes, size=self.size)
+            sym_xy = reshape_bytes_block_size(sym_xy_bytes, size=self.size)
+            dmij = reshape_bytes_block_size(dmij_bytes, size=self.size)
+            dmiji = reshape_bytes_block_size(dmiji_bytes, size=self.size)
+
+            aepress = self.add_aepress(mach, sym_xz, sym_xy, ux_id, dmij, dmiji)
+            str(aepress)
+            #print(mach, sym_xz, sym_xy, ux_id, dmij, dmiji)
+            n += ntotal
+        return n
+
     def _read_mkaero2(self, data: bytes, n: int) -> int:
         mkaero2x
+    def _read_diverg(self, data: bytes, n: int) -> int:
+        """
+        Record – DIVERG(2702,27,387)
+        Divergence analysis data.
+        Word Name Type Description
+        1 SID     I    Unique set identification number
+        2 NROOT   I    Number of divergence roots to output
+        3 M       RS   Mach number
+        Word 3 repeats until -1 occurs
+        """
+        ints = np.frombuffer(data[n:], self.idtype).copy()
+        floats = np.frombuffer(data[n:], self.fdtype).copy()
+        istart, iend = get_minus1_start_end(ints)
 
+        for (i0, i1) in zip(istart, iend):
+            sid, nroots = ints[i0:i0+2]
+            machs = floats[i0+2:i1]
+            #print(sid, nroots, machs)
+            assert ints[i1] == -1, ints[i1]
+            diverg = self.add_diverg(sid, nroots, machs)
+            str(diverg)
+        return len(data)
 
     def _read_flfact(self, data: bytes, n: int) -> int:
         """
@@ -572,9 +668,87 @@ class EDT(GeomCommon):
         return n
 
     def _read_caero3(self, data: bytes, n: int) -> int:
-        caero3x
+        """
+        Aerodynamic panel element configuration.
+
+        Word Name Type Description
+        1 EID    I Element identification number
+        2 PID    I Property identification number of a PAERO3 entry
+        3 CP     I Coordinate system for locating points 1 and 4
+        4 LISTW  I Identification number of an AEFACT entry that lists
+                   coordinate pairs for structural interpolation of the wing
+        5 LISTC1 I Identification number of an AEFACT entry that lists
+                   coordinate pairs for control surfaces
+        6 LISTC2 I Identification number of an AEFACT entry that lists
+                   coordinate pairs for control surfaces
+        7 UNDEF(2) None
+        9  X1   RS X-coordinate of point 1 in coordinate system CP
+        10 Y1   RS Y-coordinate of point 1 in coordinate system CP
+        11 Z1   RS Z-coordinate of point 1 in coordinate system CP
+        12 X12  RS Edge chord length in aerodynamic coordinate system
+        13 X4   RS X-coordinate of point 4 in coordinate system CP
+        14 Y4   RS Y-coordinate of point 4 in coordinate system CP
+        15 Z4   RS Z-coordinate of point 4 in coordinate system CP
+        16 X43  RS Edge chord length in aerodynamic coordinate system
+        """
+        ntotal = 64 * self.factor # 4*16
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        structi = Struct(mapfmt(self._endian + b'6i 2i 8f', self.size))
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+            eid, pid, cp, list_w, list_c1, list_c2, zero1, zero2, x1, y1, z1, x12, x4, y4, z4, x43 = out
+            #eid, pid, cp, nspan, lspan, zero1, zero2, zero3, x1, y1, z1, x12, x4, y4, z4, x43 = out
+            assert min(zero1, zero2) == max(zero1, zero2)
+            p1 = [x1, y1, z1]
+            p4 = [x4, y4, z4]
+            caero3 = self.add_caero3(
+                eid, pid, list_w, p1, x12, p4, x43,
+                cp=cp, list_c1=list_c1, list_c2=list_c2, comment='')
+            str(caero3)
+            #print(caero3)
+            n += ntotal
+        return n
+
     def _read_caero4(self, data: bytes, n: int) -> int:
-        caero4x
+        """
+        Word Name Type Description
+        1 EID   I Element identification number
+        2 PID   I Property identification number of a PAERO4 entry
+        3 CP    I Coordinate system for locating points 1 and 4
+        4 NSPAN I Number of strips
+        5 LSPAN I Identification number of an AEFACT entry
+                  containing a list of division points for strips
+        6 UNDEF(3) None
+        9  X1  RS X-coordinate of point 1 in coordinate system CP
+        10 Y1  RS Y-coordinate of point 1 in coordinate system CP
+        11 Z1  RS Z-coordinate of point 1 in coordinate system CP
+        12 X12 RS Edge chord length in aerodynamic coordinate system
+        13 X4  RS X-coordinate of point 4 in coordinate system CP
+        14 Y4  RS Y-coordinate of point 4 in coordinate system CP
+        15 Z4  RS Z-coordinate of point 4 in coordinate system CP
+        16 X43 RS Edge chord length in aerodynamic coordinate system
+        """
+        ntotal = 64 * self.factor # 4*16
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        structi = Struct(mapfmt(self._endian + b'5i 3i 8f', self.size))
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+            eid, pid, cp, nspan, lspan, zero1, zero2, zero3, x1, y1, z1, x12, x4, y4, z4, x43 = out
+            assert min(zero1, zero2, zero3) == max(zero1, zero2, zero3)
+            p1 = [x1, y1, z1]
+            p4 = [x4, y4, z4]
+            caero4 = self.add_caero4(eid, pid, p1, x12, p4, x43,
+                                     cp=cp, nspan=nspan, lspan=lspan, comment='')
+            str(caero4)
+            #print(caero4)
+            n += ntotal
+        return n
 
     def _read_caero5(self, data: bytes, n: int) -> int:
         """
@@ -685,7 +859,7 @@ class EDT(GeomCommon):
         14 THI3      I
         15 THN3      I
 
-        PAERO1  100001
+        PAERO2  100001
 
         data = (100001, 100001, 0, 10, 0, 0, 24, 1,
                 99.3, 21.45, -11.65, 42.86, 101.8387, 122.62, -2.69, 32.71)
@@ -782,14 +956,27 @@ class EDT(GeomCommon):
         return len(data)
 
     def _read_acmodl(self, data: bytes, n: int) -> int:
-        """common method for reading SPCs"""
-        n = self._read_dual_card(data, n, self._read_acmodl_nx, self._read_acmodl_msc,
-                                 'ACMODL', self._add_acmodl_object)
-        #return self._read_acmodl_msc(data, n)
+        """Reads the ACMODL card"""
+        card_name = 'ACMODL'
+        card_obj = ACMODL
+        methods = {
+            72 : self._read_acmodl_nx_72,
+            64 : self._read_acmodl_msc_64,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self._add_acmodl_object,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
         return n
 
+        #n = self._read_dual_card(data, n, self._read_acmodl_nx, self._read_acmodl_msc,
+                                 #'ACMODL', self._add_acmodl_object)
+        ##return self._read_acmodl_msc(data, n)
+        #return n
 
-    def _read_acmodl_nx(self, data: bytes, n: int) -> Tuple[int, List[ACMODL]]:
+
+    def _read_acmodl_nx_72(self, card, data: bytes, n: int) -> Tuple[int, List[ACMODL]]:
         """
         NX 2019.2 - 72 bytes
         Word Name Type Description
@@ -882,7 +1069,7 @@ class EDT(GeomCommon):
             n += ntotal
         return n, acmodls
 
-    def _read_acmodl_msc(self, data: bytes, n: int) ->  Tuple[int, List[ACMODL]]:
+    def _read_acmodl_msc_64(self, card, data: bytes, n: int) ->  Tuple[int, List[ACMODL]]:
         """
         MSC 2018.2 - 64 bytes
         Word Name Type Description
@@ -944,9 +1131,9 @@ class EDT(GeomCommon):
             search_unit = reshape_bytes_block_size(search_unit_bytes, self.size)
             #ctype = reshape_bytes_block_size(ctype_bytes, self.size)
 
-            assert inter in ['IDENT'], inter
+            assert inter in ['IDENT', 'DIFF'], inter
             #assert ctype in ['STRONG', 'WEAK', 'WEAKINT', 'WEAKEXT'], ctype
-            assert method in [''], method
+            assert method in ['CP', ''], method
             #assert area_op in [0, 1], area_op
             #If CTYPE = STRONG
             #If CTYPE = WEAK
@@ -1060,7 +1247,6 @@ class EDT(GeomCommon):
         return n
 
     def _read_set3(self, data: bytes, n: int) -> int:
-
         """
         MSC 2018.2
         Word Name Type Description
@@ -1093,7 +1279,13 @@ class EDT(GeomCommon):
             elif desc_int == 2:
                 desc = 'GRID'
             elif desc_int == 3:
+                desc = 'POINT'
+            elif desc_int == 4:
                 desc = 'PROP'
+            elif desc_int == 5:
+                desc = 'RBEin'
+            elif desc_int == 6:
+                desc = 'RBEex'
             else:
                 raise NotImplementedError(desc_int)
 
@@ -1299,12 +1491,26 @@ class EDT(GeomCommon):
         spline3
         #n = self._read_spline2_nx(data, n)
         return n
+
     def _read_spline4(self, data: bytes, n: int) -> int:
         """reads the SPLINE4 card"""
-        n = self._read_spline4_nx(data, n)
+        card_name = 'SPLINE4'
+        card_obj = SPLINE4
+        #self.show_data(data[n:])
+        methods = {
+            44 : self._read_spline4_nx_44,
+            52 : self._read_spline4_msc_52,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self._add_spline_object,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
         return n
+        #n = self._read_spline4_nx(data, n)
+        #return n
 
-    def _read_spline4_nx(self, data: bytes, n: int) -> int:
+    def _read_spline4_nx_44(self, spline: SPLINE4, data: bytes, n: int) -> Tuple[int, SPLINE4]:
         """
         MSC 2018.2
 
@@ -1324,12 +1530,13 @@ class EDT(GeomCommon):
         """
         # 792/4 = 198
         # 198 = 2 * 99 = 2 * 11 * 9
-        ntotal = 4 * 11 # 4 * 13
+        ntotal = 44 # 4 * 11
         ndatai = len(data) - n
         ncards = ndatai // ntotal
         assert ndatai % ntotal == 0
         #structi = Struct(self._endian + b'4i f 8s 8s 3i f') # msc
         structi = Struct(self._endian + b'4i f 8s 8s 2i')
+        splines = []
         for unused_i in range(ncards):
             edata = data[n:n + ntotal]
             out = structi.unpack(edata)
@@ -1337,19 +1544,135 @@ class EDT(GeomCommon):
             eid, caero, aelist, setg, dz, method_bytes, usage_bytes, nelements, melements = out
             method = method_bytes.rstrip().decode('ascii')
             usage = usage_bytes.rstrip().decode('ascii')
-            self.add_spline4(eid, caero, aelist, setg,
+            spline = SPLINE4(eid, caero, aelist, setg,
                              dz, method, usage,
                              nelements, melements)
+            str(spline)
+            splines.append(spline)
             n += ntotal
         self.to_nx(' because SPLINE4-NX was found')
-        return n
+        return n, splines
+
+    def _read_spline4_msc_52(self, spline: SPLINE4, data: bytes, n: int) -> Tuple[int, SPLINE4]:
+        """
+        MSC 2018.2
+
+        Word Name Type Description
+        1 EID           I Spline element Identification
+        2 CAERO         I Component Identifification
+        3 AELIST        I AELIST Id for boxes
+        4 SETG          I SETi Id for grids
+        5 DZ           RS Smoothing Parameter
+        6 METHOD(2) CHAR4 Method: IPS|TPS|FPS
+        8 USAGE(2)  CHAR4 Usage flag: FORCE|DISP|BOTH
+        10 NELEM        I Number of elements for FPS on x-axis
+        11 MELEM        I Number of elements for FPS on y-axis
+        12 FTYPE        I Radial interpolation funtion fir METHOD=RIS  (not in NX)
+        13 RCORE       RS Radius of radial interpolation function      (not in NX)
+
+        """
+        # 792/4 = 198
+        # 198 = 2 * 99 = 2 * 11 * 9
+        ntotal = 52 # 4 * 13
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        #structi = Struct(self._endian + b'4i f 8s 8s 3i f') # msc
+        structi = Struct(self._endian + b'4i f 8s 8s 2i if')
+        splines = []
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+            eid, caero, aelist, setg, dz, method_bytes, usage_bytes, nelements, melements, ftype, rcore = out  # msc
+            #print(eid, caero, aelist, setg, dz, method_bytes, usage_bytes, nelements, melements, ftype, rcore)
+            method = method_bytes.rstrip().decode('ascii')
+            usage = usage_bytes.rstrip().decode('ascii')
+            spline = SPLINE4(eid, caero, aelist, setg,
+                             dz, method, usage,
+                             nelements, melements,
+                             ftype=ftype, rcore=rcore)
+            str(spline)
+            splines.append(spline)
+            n += ntotal
+        self.to_msc(' because SPLINE4-MSC was found')
+        return n, splines
 
     def _read_spline5(self, data: bytes, n: int) -> int:
-        """reads the SPLINE6 card"""
-        n = self._read_spline5_nx(data, n)
+        """reads the SPLINE5 card"""
+        card_name = 'SPLINE5'
+        card_obj = SPLINE5
+        methods = {
+            60 : self._read_spline5_nx_60,
+            68 : self._read_spline5_msc_68,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self._add_spline_object,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
         return n
 
-    def _read_spline5_nx(self, data: bytes, n: int) -> int:
+    def _read_spline5_msc_68(self, spline: SPLINE5, data: bytes, n: int) -> Tuple[int, List[SPLINE5]]:
+        """
+        reads the SPLINE5 card
+
+        Word Name Type Description
+        1 EID            I Spline element Identification
+        2 CAERO          I Component Identifification
+        3 AELIST         I AELIST Id for boxes
+        4 SETG           I SETi Id for grids
+        5 DZ            RS Smoothing Parameter
+        6 DTORXY        RS Flexibility ratio in XY Plane
+        7 CID            I Coordinate Sys. Id. for Beam CS
+        8 DTHX          RS Smoothing/Attachment Flags for X rotations
+        9 DTHY          RS Smoothing/Attachment Flags for Y rotations
+        10 DTHZ         RS Smoothing/Attachment Flags for Z rotations
+        11 USAGE(2)  CHAR4 Usage flag: FORCE|DISP|BOTH
+        13 METHOD(2) CHAR4 Method: IPS|TPS|FPS|RIS
+        15 DTORZY       RS Flexibility ratio in ZY Plane
+        16 FTYPE         I Radial interpolation funtion fir METHOD=RIS (not in NX)
+        17 RCORE        RS Radius of radial interpolation function     (not in NX)
+
+        """
+        ntotal = 68 * self.factor # 4 * 17
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0, ndatai % ntotal
+        if self.size == 4:
+            structi = Struct(self._endian + b'4i 2f i 3f 8s8s fif')
+        else:
+            asdf
+            #structi = Struct(self._endian + b'5q 2d q 2d 16s')
+
+        splines = []
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+            #ftype, rcore
+            eid, caero, aelist, setg, dz, dtorxy, cid, dthx, dthy, dthz, usage_bytes, method_bytes, dtorzy, ftype, rcore = out
+            method = reshape_bytes_block_size(method_bytes, self.size)
+            usage = reshape_bytes_block_size(usage_bytes, self.size)
+            #print(f'eid={eid} caero={caero} aelist={aelist} setg={setg} dz={dz} '
+                  #f'dtorxy={dtorxy} cid={cid} dthx={dthx} dthy={dthy} dthz={dthz} '
+                  #f'usage={usage!r} method={method!r} dtorzy={dtorzy} ftype={ftype} rcore={rcore}')
+            assert method in ['IPS','TPS','FPS','RIS', 'BEAM'], method
+            assert usage in ['FORCE','DISP','BOTH'], usage
+            thx = dthx
+            thy = dthy
+            dtor = dtorzy
+            spline = SPLINE5(
+                eid, caero, aelist, setg, thx, thy,
+                dz=dz, dtor=dtor, cid=cid,
+                usage=usage, method=method,
+                ftype=ftype, rcore=rcore,  # not in NX
+            )
+            str(spline)
+            splines.append(spline)
+            n += ntotal
+        self.to_msc(' because SPLINE5-MSC was found')
+        return n, splines
+
+    def _read_spline5_nx_60(self, spline: SPLINE5, data: bytes, n: int) -> Tuple[int, List[SPLINE5]]:
         """
         reads the SPLINE5 card
 
@@ -1371,7 +1694,6 @@ class EDT(GeomCommon):
         17 RCORE        RS Radius of radial interpolation function     (not in NX?)
 
         """
-
         ntotal = 60 * self.factor # 4 * 12
         ndatai = len(data) - n
         ncards = ndatai // ntotal
@@ -1382,6 +1704,7 @@ class EDT(GeomCommon):
             asdf
             #structi = Struct(self._endian + b'5q 2d q 2d 16s')
 
+        splines = []
         for unused_i in range(ncards):
             edata = data[n:n + ntotal]
             out = structi.unpack(edata)
@@ -1395,23 +1718,34 @@ class EDT(GeomCommon):
             thx = dthx
             thy = dthy
             dtor = dtorzy
-            spline5 = self.add_spline5(
+            spline = SPLINE5(
                 eid, caero, aelist, setg, thx, thy,
                 dz=dz, dtor=dtor, cid=cid,
                 usage=usage, method=method,
                 #ftype=ftype, rcore=rcore,  # not in NX
             )
-            str(spline5)
+            str(spline)
+            splines.append(spline)
             n += ntotal
         self.to_nx(' because SPLINE5-NX was found')
-        return n
+        return n, splines
 
     def _read_monpnt1(self, data: bytes, n: int) -> int:
         """Reads the MONPNT1 card"""
-        n = self._read_monpnt1_nx(data, n)
+        card_name = 'MONPNT1'
+        card_obj = MONPNT1
+        methods = {
+            92 : self._read_monpnt1_nx_92,
+            96 : self._read_monpnt1_96,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self._add_monpnt_object,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
         return n
 
-    def _read_monpnt1_nx(self, data: bytes, n: int) -> int:
+    def _read_monpnt1_nx_92(self, monpnt1: MONPNT1, data: bytes, n: int) -> Tuple[int, List[MONPNT1]]:
         """
         MSC 2018.2
 
@@ -1424,17 +1758,16 @@ class EDT(GeomCommon):
         21 X           RS
         22 Y           RS
         23 Z           RS
-        24 CD           I  (not in NX)
 
         """
         #ntotal = 4 * 24 # 4 * 24
-        ntotal = 4 * 23 # 4 * 23
+        ntotal = 92 # 4 * 23
         ndatai = len(data) - n
         ncards = ndatai // ntotal
         assert ndatai % ntotal == 0
         #structi = Struct(self._endian + b'8s 56s i 8s i 3f i')  # msc
         structi = Struct(self._endian + b'8s 56s i 8s i 3f')  # nx
-        #monpnt1s = []
+        monpnt1s = []
         for unused_i in range(ncards):
             edata = data[n:n + ntotal]
             out = structi.unpack(edata)
@@ -1444,13 +1777,54 @@ class EDT(GeomCommon):
             label = reshape_bytes_block_size(label_bytes, self.size)
             aecomp_name = reshape_bytes_block_size(aecomp_name_bytes, self.size)
             xyz = [x, y, z]
-            monpnt1 = self.add_monpnt1(name, label, axes, aecomp_name,
-                                       xyz, cp=cp)
+            monpnt1 = MONPNT1(name, label, axes, aecomp_name,
+                              xyz, cp=cp)
             str(monpnt1)
             n += ntotal
-            #monpnt1s.append(monpnt1)
+            monpnt1s.append(monpnt1)
         self.to_nx(' because MONPNT1-NX was found')
-        return n
+        return n, monpnt1s
+
+    def _read_monpnt1_96(self, monpnt1: MONPNT1, data: bytes, n: int) -> Tuple[int, List[MONPNT1]]:
+        """
+        MSC 2018.2
+
+        Word Name Type Description
+        1 NAME(2)   CHAR4
+        3 LABEL(14) CHAR4
+        17 AXES         I
+        18 COMP(2)  CHAR4
+        20 CP           I
+        21 X           RS
+        22 Y           RS
+        23 Z           RS
+        24 CD           I
+
+        """
+        #ntotal = 4 * 24 # 4 * 24
+        ntotal = 96 # 4 * 23
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        structi = Struct(self._endian + b'8s 56s i 8s i 3f i')  # msc
+        #structi = Struct(self._endian + b'8s 56s i 8s i 3f')  # nx
+        monpnt1s = []
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out = structi.unpack(edata)
+            name_bytes, label_bytes, axes, aecomp_name_bytes, cp, x, y, z, cd = out
+            #name_bytes, label_bytes, axes, aecomp_name_bytes, cp, x, y, z = out
+            name = reshape_bytes_block_size(name_bytes, self.size)
+            label = reshape_bytes_block_size(label_bytes, self.size)
+            aecomp_name = reshape_bytes_block_size(aecomp_name_bytes, self.size)
+            xyz = [x, y, z]
+            monpnt1 = MONPNT1(name, label, axes, aecomp_name,
+                              xyz, cp=cp, cd=cd)
+            str(monpnt1)
+            n += ntotal
+            monpnt1s.append(monpnt1)
+        #self.to_nx(' because MONPNT1-NX was found')
+        return n, monpnt1s
 
     def _read_aestat(self, data: bytes, n: int) -> int:
         """
@@ -1494,17 +1868,17 @@ class EDT(GeomCommon):
         7 IMETH(2)  CHAR4
         SFLG=0 (std)
           9 NEIGN  I  nvalue
-          10 EPR  RS
-          11 SFLG  I SWEEP FLAG
         SFLG=1 (sweep)
           9 FMAX  RS maximum frequency
-          10 EPR  RS
-          11 SFLG  I SWEEP FLAG
         End SFLG
+        10 EPR  RS
+        11 SFLG  I SWEEP FLAG
         Words 1 through max repeat until End of Record
 
         NX:
-          data = (30, PK, 1, 2, 3, L, 3, 0.001, -1)
+                  sid method,     d, m, k, imethod,  neign, epr, sflag
+          data = (30, PK,         1, 2, 3, L,         3, 0.001, -1)       # ???
+          data = (30, KE, '    ', 1, 2, 3, L, '    ', 3, 0.001, 0.0, -1)  # MSC
         """
         ints = np.frombuffer(data[n:], self.idtype).copy()
         floats = np.frombuffer(data[n:], self.fdtype).copy()
@@ -1519,10 +1893,16 @@ class EDT(GeomCommon):
             mach = ints[i0+4]
             reduced_freq_velocity = ints[i0+5]
             imethod_bytes = data[n+i0*4+24:n+i0*4+32]
-            nvalue = ints[i0+8]
+            nvalue = ints[i0+8]  # nvalue
             epsilon = floats[i0+9]
-            assert ints[i0+10] == -1, ints[i0:i1]
 
+            if ints[i0+10] == -1:
+                assert ints[i0+10] == -1, ints[i0:i1]
+            else:
+                # msc
+                sweep_flag = ints[i0+10]
+                assert ints[i0+11] == -1, ints[i0:i1+1]
+                assert sweep_flag == 0, sweep_flag
             method = method_bytes.rstrip().decode('ascii')
             imethod = imethod_bytes.rstrip().decode('ascii')
             self.add_flutter(sid, method,
@@ -1607,8 +1987,8 @@ class EDT(GeomCommon):
         7 ALID2        I IDentification of an AELIST bulk data entry that identifies all aerodynamic elements that make up the CS comp
         8 EFF         RS Control surface EFFectiveness, default=1.0
         9 LDW          I =0 create a linear down wash, >0 no linear downwash
-        10 CREFC      RS REFerence Chord Length for the CS > 0.0, default = 1.0
-        11 CREFS      RS REFerence area for the CS > 0.0, default = 1.0
+        10 CREFC      RS Reference Chord Length for the CS > 0.0, default = 1.0
+        11 CREFS      RS Reference area for the CS > 0.0, default = 1.0
         12 PLLIM      RS Lower deflection   Limit for the control surface in radians, default=no limit
         13 PULIM      RS Upper deflection   Limit for the control surface in radians, default=no limit
         14 HMLLIM     RS Lower Hinge Moment Limit for the control surface in force-length units, default=no limit
@@ -1621,18 +2001,23 @@ class EDT(GeomCommon):
         ndatai = len(data) - n
         ncards = ndatai // ntotal
         assert ndatai % ntotal == 0
+
+        ntotali = -24 * self.factor
         if self.size == 4:
-            struct1 = Struct(self._endian + b'i 8s 4i fi 8f')
-            #struct2 = Struct(self._endian + b'i 8s 4i fi 4f4i')
+            struct2 = Struct(self._endian + b'6f')
+            struct1 = Struct(self._endian + b'i 8s 4i fi 2f 4s4s 4s4s 4s4s')
+            nan = b'    '
         else:
-            struct1 = Struct(self._endian + b'q 16s 4q dq 8d')
+            struct2 = Struct(self._endian + b'6d')
+            struct1 = Struct(self._endian + b'q 16s 4q dq 2d 8s8s 8s8s 8s8s')
+            nan = b'        '
+
         for unused_i in range(ncards):
             edata = data[n:n + ntotal]
             out1 = struct1.unpack(edata)
-            #out2 = struct2.unpack(edata)
             (aesurf_id, label_bytes, cid1, alid1, cid2, alid2, eff, ldw_int, crefc, crefs,
              pllim, pulim, hmllim, hmulim, tqllim, tqulim) = out1
-
+            #print(out1)
             label = reshape_bytes_block_size(label_bytes, self.size)
 
             if ldw_int == 0:
@@ -1641,27 +2026,65 @@ class EDT(GeomCommon):
                 ldw = 'NOLDW'
             else:
                 raise NotImplementedError(ldw_int)
-
             assert isinstance(ldw, str), ldw
-            # TODO: incorrect...too strict
-            # hmllim, hmulim, tqllim, tqulim
 
-            # this is super janky
-            if hmllim == 1.3563156426940112e-19:
+            if (pllim, pulim, hmllim, hmulim, tqllim, tqulim) == (nan, nan, nan, nan, nan, nan):
+                pllim = None
+                pulim = None
                 hmllim = None
-            if hmulim == 1.3563156426940112e-19:
                 hmulim = None
-            if tqllim == 1.3563156426940112e-19:
                 tqllim = None
-            if tqulim == 1.3563156426940112e-19:
                 tqulim = None
-            #print(pllim, pulim, hmllim, hmulim, tqllim, tqulim)
+            else:
+                pllim2, pulim2, hmllim2, hmulim2, tqllim2, tqulim2 = struct2.unpack(edata[ntotali:])
+                pllim = pllim2 if pllim != nan else None
+                pulim = pulim2 if pulim != nan else None
+
+                hmllim = hmllim2 if hmllim != nan else None
+                hmulim = hmulim if hmulim != nan else None
+
+                tqllim = tqllim2 if tqllim != nan else None
+                tqulim = tqulim2 if tqulim != nan else None
+                #print('pllim, pulim, hmllim, hmulim, tqllim, tqulim', pllim, pulim, hmllim, hmulim, tqllim, tqulim)
+
             self.add_aesurf(aesurf_id, label, cid1, alid1, cid2=None, alid2=None,
                             eff=eff, ldw=ldw, crefc=crefc, crefs=crefs,
                             #pllim=-np.pi/2., pulim=np.pi/2.,
                             pllim=pllim, pulim=pulim,
                             hmllim=hmllim, hmulim=hmulim, # hinge moment lower/upper limits
                             tqllim=tqllim, tqulim=tqulim)
+            n += ntotal
+        return n
+
+    def _read_aesurfs(self, data: bytes, n: int) -> int:
+        """
+        Word Name Type Description
+        1 ID       I     Identification of an aerodynamic trim variable degree
+                         of freedom >0, no default
+        2 LABEL(2) CHAR4 Control Surface (CS) name, no default
+        4 LIST1    I     Identification of a SET1 that contains the grids ids
+                         associated with this control surface
+        5 LIST2    I     Identification of a SET1 that contains the grids ids
+                         associated with this control surface
+        """
+        ntotal = 20 *  self.factor # 4 * 5
+        ndatai = len(data) - n
+        ncards = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        if self.size == 4:
+            struct1 = Struct(self._endian + b'i 8s 2i')
+        else:
+            struct1 = Struct(self._endian + b'i 16s 2i')
+
+        for unused_i in range(ncards):
+            edata = data[n:n + ntotal]
+            out1 = struct1.unpack(edata)
+
+            aesid, label_bytes, list1, list2 = out1
+            label = reshape_bytes_block_size(label_bytes, self.size)
+
+            aesurfs = self.add_aesurfs(aesid, label, list1, list2)
+            str(aesurfs)
             n += ntotal
         return n
 

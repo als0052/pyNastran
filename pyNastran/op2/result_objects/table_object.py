@@ -92,6 +92,9 @@ SORT1_TABLES.extend([
     'BOUGV1',
     'OUG1F',
     'BOUGF1',
+    'OUG1',
+    'OVG1',
+    'OAG1',
 ])
 SORT2_TABLES = list(SORT2_TABLE_NAME_MAP.keys())
 
@@ -1031,7 +1034,7 @@ class RealTableArray(TableArray):
             'OAGATO1', 'OAGCRM1', 'OAGNO1', 'OAGPSD1', 'OAGRMS1', # acceleration
                                   'OPGNO1',            'OPGRMS1', # load vector
             'OQGPSD1',
-            'OCRPG', 'OCRUG', 'OUG1',
+            'OCRPG', 'OCRUG', 'OUG1', 'OAG1',
             'OUGV1PAT',
             'OUGF1',
             'OQGCF1', 'OQGGF1',
@@ -1570,6 +1573,7 @@ class ComplexTableArray(TableArray):
             'OUG1F',
             'OUG1',
             'OUGF1', 'BOUGF1',
+            'OAG1', 'OVG1',
         ]
         assert self.table_name in allowed_tables, self.table_name
 

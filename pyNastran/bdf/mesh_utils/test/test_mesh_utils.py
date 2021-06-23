@@ -1,6 +1,7 @@
 """various mesh_utils tests"""
 import os
 import unittest
+from pathlib import Path
 from io import StringIO
 
 from docopt import DocoptExit
@@ -30,13 +31,14 @@ from pyNastran.bdf.mesh_utils.get_oml import get_oml_eids
 
 from pyNastran.bdf.mesh_utils.mesh import create_structured_cquad4s, create_structured_chexas
 
-PKG_PATH = pyNastran.__path__[0]
-MODEL_PATH = os.path.abspath(os.path.join(PKG_PATH, '..', 'models'))
+PKG_PATH = Path(pyNastran.__path__[0])
+MODEL_PATH = (PKG_PATH / '..' / 'models').resolve()
+BWB_PATH = MODEL_PATH / 'bwb'
 
 np.set_printoptions(edgeitems=3, infstr='inf',
                     linewidth=75, nanstr='nan', precision=3,
                     suppress=True, threshold=1000, formatter=None)
-DIRNAME = os.path.dirname(__file__)
+DIRNAME = Path(os.path.dirname(__file__))
 
 class TestMeshUtils(unittest.TestCase):
     """various mesh_utils tests"""
@@ -140,22 +142,22 @@ class TestMeshUtils(unittest.TestCase):
         #1U CubeSat is 10 cm, 10 cm, 11.35 cm.
         #2U CubeSat is 10 cm, 10 cm, 22.70 cm.
         #6U CubeSat is 20 cm, 10 cm, 34.05 cm.
-        model = BDF()
+        model = BDF(debug=False)
         pid1 = 1
         pid2 = 2
 
         xmax = 10.
         ymax = 10.
         zmax = 10.
-        p1 = [0., 0., 0.]
-        p2 = [xmax, 0., 0.]
-        p3 = [xmax, ymax, 0.]
-        p4 = [0., ymax, 0.]
+        unused_p1 = [0., 0., 0.]
+        unused_p2 = [xmax, 0., 0.]
+        unused_p3 = [xmax, ymax, 0.]
+        unused_p4 = [0., ymax, 0.]
 
-        p5 = [0., 0., zmax]
-        p6 = [xmax, 0., zmax]
-        p7 = [xmax, ymax, zmax]
-        p8 = [0., ymax, zmax]
+        unused_p5 = [0., 0., zmax]
+        unused_p6 = [xmax, 0., zmax]
+        unused_p7 = [xmax, ymax, zmax]
+        unused_p8 = [0., ymax, zmax]
 
         # nnodes
         nx = 20
@@ -169,7 +171,7 @@ class TestMeshUtils(unittest.TestCase):
         E = 69.e9  # Pa
         G = None
         nu = 0.30
-        rho = 2_710  #kg/m^3
+        #rho = 2_710  #kg/m^3
         uallow = 240.e6  # MPa
         model.add_mat1(mid, E, G, nu, rho=0.0, a=0.0, tref=0.0, ge=0.0,
                        St=0.0, Sc=0.0, Ss=0.0, mcsid=0,
@@ -255,13 +257,13 @@ class TestMeshUtils(unittest.TestCase):
     def test_merge_01(self):
         """merges multiple bdfs into a single deck"""
         log = SimpleLogger(level='error')
-        bdf_filename1 = os.path.join(MODEL_PATH, 'bwb', 'bwb_saero.bdf')
+        bdf_filename1 = BWB_PATH / 'bwb_saero.bdf'
         bdf_filename2 = os.path.join(MODEL_PATH, 'sol_101_elements', 'static_solid_shell_bar.bdf')
         bdf_filename3 = os.path.join(MODEL_PATH, 'solid_bending', 'solid_bending.bdf')
         bdf_filename4 = os.path.join(MODEL_PATH, 'iSat', 'ISat_Dploy_Sm.dat')
-        bdf_filename_out1 = os.path.join(MODEL_PATH, 'bwb', 'BWBsaero_staticbar_8.out')
-        bdf_filename_out2 = os.path.join(MODEL_PATH, 'bwb', 'BWBsaero_static_bar_16.out')
-        bdf_filename_out3 = os.path.join(MODEL_PATH, 'bwb', 'BWBsaero_staticbar_isat.out')
+        bdf_filename_out1 = MODEL_PATH / 'bwb' / 'BWBsaero_staticbar_8.out'
+        bdf_filename_out2 = MODEL_PATH / 'bwb' / 'BWBsaero_static_bar_16.out'
+        bdf_filename_out3 = MODEL_PATH / 'bwb' / 'BWBsaero_staticbar_isat.out'
 
         bdf_filenames1 = [bdf_filename1, bdf_filename2]
         bdf_filenames2 = [bdf_filename1, bdf_filename2, bdf_filename3, bdf_filename4]
@@ -286,7 +288,7 @@ class TestMeshUtils(unittest.TestCase):
     def test_exit(self):
         """tests totally failing to run"""
         with self.assertRaises(SystemExit):
-            cmd_line(argv=['bdf'])
+            cmd_line(argv=['bdf'], quiet=True)
 
         with self.assertRaises(SystemExit):
             cmd_line(argv=['bdf', 'export_caero_mesh'])
@@ -295,7 +297,7 @@ class TestMeshUtils(unittest.TestCase):
             cmd_line(argv=['bdf', 'convert'])
 
         with self.assertRaises(SystemExit):
-            cmd_line(argv=['bdf', 'scale'])
+            cmd_line(argv=['bdf', 'scale'], quiet=True)
 
         #with self.assertRaises(SystemExit):
             #cmd_line(argv=['bdf', 'bin'])
@@ -313,7 +315,7 @@ class TestMeshUtils(unittest.TestCase):
             cmd_line(argv=['bdf', 'equivalence'])
 
         with self.assertRaises(SystemExit):
-            cmd_line(argv=['bdf', 'free_faces'])
+            cmd_line(argv=['bdf', 'free_faces'], quiet=True)
 
         with self.assertRaises(SystemExit):
             cmd_line(argv=['bdf', 'merge'])
@@ -395,8 +397,8 @@ class TestMeshUtils(unittest.TestCase):
     def test_export_mcids(self):
         """creates material coordinate systems"""
         log = SimpleLogger(level='error')
-        bdf_filename = os.path.join(MODEL_PATH, 'bwb', 'bwb_saero.bdf')
-        csv_filename = os.path.join(MODEL_PATH, 'bwb', 'mcids.csv')
+        bdf_filename = MODEL_PATH / 'bwb' / 'bwb_saero.bdf'
+        csv_filename = MODEL_PATH / 'bwb' / 'mcids.csv'
         export_mcids(bdf_filename, csv_filename,
                      export_xaxis=True, export_yaxis=True,
                      iply=9, log=log, debug=False)
@@ -405,13 +407,13 @@ class TestMeshUtils(unittest.TestCase):
         model.safe_cross_reference()
         #os.remove('mcids.csv')
 
-        argv = ['bdf', 'export_mcids', bdf_filename, '-o', csv_filename,
+        argv = ['bdf', 'export_mcids', str(bdf_filename), '-o', str(csv_filename),
                 '--iplies', '0,1,2,3,4,5,6,7,8,9,10', '--no_x', '--no_y']
         with self.assertRaises(DocoptExit):
             # can't define both --no_x and --no_y
             cmd_line(argv=argv, quiet=True)
 
-        argv = ['bdf', 'export_mcids', bdf_filename, '-o', csv_filename,
+        argv = ['bdf', 'export_mcids', str(bdf_filename), '-o', str(csv_filename),
                 '--iplies', '0,1,2,3,4,5,6,7,8,9', '--no_x']
         cmd_line(argv=argv, quiet=True)
 
@@ -632,7 +634,7 @@ class TestMeshUtils(unittest.TestCase):
         bdf_file.seek(0)
         assert np.allclose(mass, 0.1), mass # t=0.1; A=1.0; nsm=0.; mass=0.1
 
-        csv_filename = 'mcids.csv'
+        csv_filename = DIRNAME / 'mcids.csv'
         export_mcids(model, csv_filename=csv_filename, eids=[12, 13],
                      export_xaxis=True, export_yaxis=True,
                      iply=0)
@@ -676,6 +678,11 @@ class TestMeshUtils(unittest.TestCase):
         model.add_grid(7, [11., 11., 11.])
         model.add_grid(8, [10., 11., 11.])
 
+        nodes = [1, 4]
+        components = ['123', '123']
+        coefficients = [1.0, 1.0]
+        mpc = model.add_mpc(42, nodes, components, coefficients, comment='')
+        mpc.validate()
 
         model.add_cquad4(1, pid_pshell, [1, 2, 3, 4]) # mass=1
         model.add_ctria3(2, pid_pshell, [1, 2, 3]) # mass=0.5
@@ -705,30 +712,104 @@ class TestMeshUtils(unittest.TestCase):
             [0., 0., 1.],
             [1., 0., 0.],
         ])
-        model, unsed_mirror_model, unused_nid_offset, unused_eid_offset = bdf_mirror_plane(
+        assert len(model.mpcs) == 1, model.mpcs
+        assert len(model.mpcs[42]) == 1, model.mpcs[42]
+        model, unused_mirror_model, unused_nid_offset, unused_eid_offset = bdf_mirror_plane(
             model, plane, mirror_model=None, log=None, debug=True,
             use_nid_offset=False)
         #for nid, node in sorted(mirror_model.nodes.items()):
             #print(nid, node.xyz)
 
+        assert len(model.mpcs) == 1, model.mpcs
+        assert len(model.mpcs[42]) == 2, model.mpcs[42]
 
-        out_filename = os.path.join(DIRNAME, 'sym.bdf')
+        out_filename = DIRNAME / 'sym.bdf'
         write_bdf_symmetric(model, out_filename=out_filename, encoding=None, size=8,
                             is_double=False,
                             enddata=None,
                             close=True, plane='xz') # +y/-y
+        # ----------------------------------------------
+        # validate
         model2 = read_bdf(out_filename, log=log)
         assert len(model2.nodes) == 16, model2.nodes
         mass2, cg2, unused_inertia2 = mass_properties(model2)
         #print('cg1=%s cg2=%s' % (cg1, cg2))
         assert np.allclose(mass1*2, mass2), 'mass1=%s mass2=%s' % (mass1, mass2)
         assert np.allclose(cg2[1], 0.), 'cg2=%s stats=%s' % (cg2, model2.get_bdf_stats())
+
+        assert len(model2.mpcs) == 1, model2.mpcs
+        assert len(model2.mpcs[42]) == 4, model2.mpcs[42]
         os.remove(out_filename)
 
-    def test_mirror2(self):
+    def test_mirror_tetra(self):
+        """tests mirroring a chexa"""
+        model = BDF(debug=False, log=None, mode='msc')
+
+        model.add_grid(11, [0., 0., 0.])
+        model.add_grid(12, [1., 0., 0.])
+        model.add_grid(13, [0., 1, 0.])
+        model.add_grid(14, [0., 0., 6.])
+
+        pid = 20
+        mid = 100
+        E = 3.0e7
+        G = None
+        nu = 0.3
+
+        eid_tetra = 10
+        nids = [11, 12, 13, 14]
+        model.add_ctetra(eid_tetra, pid, nids, comment='')
+        model.add_psolid(pid, mid)
+        model.add_mat1(mid, E, G, nu, rho=1.0)
+        model.validate()
+        model.cross_reference()
+
+        bdf_mirror(model, plane='xz', log=None, debug=True)
+        model.cross_reference()
+        #for eid, elem in model.elements.items():
+            #print(eid, elem.Volume())
+        x = 1
+
+    def test_mirror_hexa(self):
+        """tests mirroring a chexa"""
+        model = BDF(debug=False, log=None, mode='msc')
+
+        xmax = 5.
+        ymax = 10.
+        zmax = 20.
+        model.add_grid(1, [0., 0., 0.])
+        model.add_grid(2, [xmax, 0., 0.])
+        model.add_grid(3, [xmax, ymax, 0.])
+        model.add_grid(4, [0., ymax, 0.])
+        model.add_grid(5, [0., 0., zmax])
+        model.add_grid(6, [xmax, 0., zmax])
+        model.add_grid(7, [xmax, ymax, zmax])
+        model.add_grid(8, [0., ymax, zmax])
+
+        pid = 20
+        mid = 100
+        E = 3.0e7
+        G = None
+        nu = 0.3
+
+        eid_hexa = 11
+        nids = [1, 2, 3, 4, 5, 6, 7, 8]
+        model.add_chexa(eid_hexa, pid, nids, comment='')
+        model.add_psolid(pid, mid)
+        model.add_mat1(mid, E, G, nu, rho=1.0)
+        model.validate()
+        model.cross_reference()
+
+        bdf_mirror(model, plane='xz', log=None, debug=True)
+        model.cross_reference()
+        #for eid, elem in model.elements.items():
+            #print(eid, elem.Volume())
+        x = 1
+
+    def test_mirror_bwb(self):
         """mirrors the BDF (we care about the aero cards)"""
         log = SimpleLogger(level='warning')
-        bdf_filename = os.path.join(MODEL_PATH, 'bwb', 'bwb_saero.bdf')
+        bdf_filename = BWB_PATH / 'bwb_saero.bdf'
         model = bdf_mirror(bdf_filename, plane='xz', log=log)[0]
         model.uncross_reference()
         model.cross_reference()
@@ -800,12 +881,37 @@ class TestMeshUtils(unittest.TestCase):
                       #triangle_intersection(p, v, p0, p1, p2),
                       #quad_intersection(p, v, p0, p1, p3, p2))
 
+    def test_get_oml_eids(self):
+        bdf_filename = BWB_PATH / 'bwb_saero.bdf'
+        eid_start = 10144
+        model, eids_oml = get_oml_eids(
+            bdf_filename, eid_start, theta_tol=30.,
+            is_symmetric=True, consider_flippped_normals=True)
+        assert len(eids_oml) == 169, len(eids_oml)
+        eids_expected = {
+            10250, 10251, 10252, 10253, 10254, 10255, 10256, 10257, 10258, 10259, 10260,
+            10261, 10262, 10263, 10264, 10265, 10266, 10267, 10268, 10269, 10270, 10271,
+            10272, 10273, 10274, 10275, 10276, 10277, 10278, 10279, 10280, 10281, 10282,
+            10283, 10284, 10285, 10286, 10287, 10288, 10289, 10290, 10291, 10292, 10293,
+            10294, 10295, 10296, 10297, 10298, 10299, 10300, 10301, 10302, 10303, 10304,
+            10305, 10306, 10307, 10308, 10309, 10310, 10311, 10312, 10313, 10314, 10315,
+            10316, 10317, 10318, 10319, 10320, 10321, 10322, 10323, 10324, 10325, 10326,
+            10327, 10328, 10329, 10330, 10331, 10332, 10333, 10334, 10335, 10336, 10337,
+            10338, 10339, 10340, 10341, 10342, 10343, 10344, 10345, 10346, 10347, 10348,
+            10349, 10350, 10351, 10352, 10353, 10354, 10355, 10356, 10357, 10358, 10359,
+            10360, 10361, 10362, 10363, 10364, 10365, 10144, 10145, 10146, 10147, 10148,
+            10149, 10150, 10151, 10152, 10153, 10154, 10155, 10156, 10157, 10158, 10159,
+            10160, 10161, 10162, 10163, 10164, 10165, 10166, 10167, 10168, 10169, 10196,
+            10197, 10198, 10199, 10200, 10201, 10202, 10203, 10204, 10205, 10206, 10207,
+            10208, 10209, 10210, 10211, 10212, 10213, 10214, 10215, 10216, 10217, 10218,
+            10219, 10220, 10221, 10222}
+        assert eids_oml == eids_expected
 
 class TestEquiv(unittest.TestCase):
 
     def test_closest(self):
         """Finds the closest nodes to specified points"""
-        log = SimpleLogger(level='error')
+        log = SimpleLogger(level='warning')
         msg = (
             'CEND\n'
             'BEGIN BULK\n'
@@ -821,12 +927,12 @@ class TestEquiv(unittest.TestCase):
             'MAT1,1,3.0,, 0.3\n'
             'ENDDATA'
         )
-        bdf_filename = os.path.join(DIRNAME, 'nonunique.bdf')
+        bdf_filename = DIRNAME / 'nonunique.bdf'
         #bdf_filename_out = os.path.join(DIRNAME, 'unique.bdf')
         with open(bdf_filename, 'w') as bdf_file:
             bdf_file.write(msg)
 
-        model = read_bdf(bdf_filename)
+        model = read_bdf(bdf_filename, log=log)
         out = model.get_displacement_index_xyz_cp_cd()
         icd_transform, icp_transform, xyz_cp, nid_cp_cd = out
 
@@ -875,8 +981,8 @@ class TestEquiv(unittest.TestCase):
             'MAT1,1,3.0,, 0.3\n'
             'ENDDATA'
         )
-        bdf_filename = os.path.join(DIRNAME, 'nonunique.bdf')
-        bdf_filename_out = os.path.join(DIRNAME, 'unique.bdf')
+        bdf_filename = DIRNAME / 'nonunique.bdf'
+        bdf_filename_out = DIRNAME / 'unique.bdf'
 
         with open(bdf_filename, 'w') as bdf_file:
             bdf_file.write(msg)
@@ -927,8 +1033,8 @@ class TestEquiv(unittest.TestCase):
             'MAT1,1000,3.0,, 0.3\n'
             'ENDDATA'
         )
-        bdf_filename = os.path.join(DIRNAME, 'nonunique.bdf')
-        bdf_filename_out = os.path.join(DIRNAME, 'unique.bdf')
+        bdf_filename = DIRNAME / 'nonunique.bdf'
+        bdf_filename_out = DIRNAME / 'unique.bdf'
 
         with open(bdf_filename, 'w') as bdf_file:
             bdf_file.write(msg)
@@ -1029,8 +1135,9 @@ class TestEquiv(unittest.TestCase):
         # Only collpase 2 nodes
         bdf_equivalence_nodes(bdf_filename, bdf_filename_out, tol,
                               renumber_nodes=False, neq_max=4, xref=True,
-                              node_set=node_set, crash_on_collapse=False, debug=False,
-                              method='old')
+                              node_set=node_set, crash_on_collapse=False,
+                              #log=log,
+                              debug=False, method='old')
         model = save_check_nodes(bdf_filename_out, log, nnodes=5)
         node_ids = list(sorted(model.nodes))
         assert node_ids == [1, 3, 5, 6, 40], node_ids
@@ -1089,8 +1196,8 @@ class TestEquiv(unittest.TestCase):
             '$MATERIALS',
             'MAT1           1      3.              .3',
         ]
-        bdf_filename = os.path.join(DIRNAME, 'nonunique2.bdf')
-        bdf_filename_out = os.path.join(DIRNAME, 'unique2.bdf')
+        bdf_filename = DIRNAME / 'nonunique2.bdf'
+        bdf_filename_out = DIRNAME / 'unique2.bdf'
 
         with open(bdf_filename, 'w') as bdf_file:
             bdf_file.write('\n'.join(lines))
@@ -1126,26 +1233,28 @@ class TestEquiv(unittest.TestCase):
 
         """
         log = SimpleLogger(level='error')
-        msg = 'CEND\n'
-        msg += 'BEGIN BULK\n'
-        msg += 'GRID,1, , 0.,   0.,   0.\n'
-        msg += 'GRID,20,, 1.,   0.,   0.\n'
-        msg += 'GRID,3, , 1.01, 0.,   0.\n'
+        msg = (
+            'CEND\n'
+            'BEGIN BULK\n'
+            'GRID,1, , 0.,   0.,   0.\n'
+            'GRID,20,, 1.,   0.,   0.\n'
+            'GRID,3, , 1.01, 0.,   0.\n'
 
-        msg += 'GRID,41,, 1.,   1.,   0.\n'  # eq
-        msg += 'GRID,4,, 1.,   1.,   0.\n'  # eq
-        msg += 'GRID,40,, 1.,   1.,   0.\n'  # eq
-        msg += 'GRID,4,, 1.,   1.,   0.\n'  # eq
+            'GRID,41,, 1.,   1.,   0.\n'  # eq
+            'GRID,4,, 1.,   1.,   0.\n'  # eq
+            'GRID,40,, 1.,   1.,   0.\n'  # eq
+            'GRID,4,, 1.,   1.,   0.\n'  # eq
 
-        msg += 'GRID,5, , 0.,   1.,   0.\n'
-        msg += 'GRID,6, , 0.,   1.01, 0.\n'
-        msg += 'CTRIA3,1, 100,1,20,6\n'
-        msg += 'CTRIA3,10,100,3,40,5\n'
-        msg += 'PSHELL,100,1000,0.1\n'
-        msg += 'MAT1,1000,3.0,, 0.3\n'
-        msg += 'ENDDATA'
-        bdf_filename = os.path.join(DIRNAME, 'nonunique.bdf')
-        bdf_filename_out = os.path.join(DIRNAME, 'unique.bdf')
+            'GRID,5, , 0.,   1.,   0.\n'
+            'GRID,6, , 0.,   1.01, 0.\n'
+            'CTRIA3,1, 100,1,20,6\n'
+            'CTRIA3,10,100,3,40,5\n'
+            'PSHELL,100,1000,0.1\n'
+            'MAT1,1000,3.0,, 0.3\n'
+            'ENDDATA'
+        )
+        bdf_filename = DIRNAME / 'nonunique.bdf'
+        bdf_filename_out = DIRNAME / 'unique.bdf'
 
         with open(bdf_filename, 'w') as bdf_file:
             bdf_file.write(msg)
@@ -1165,7 +1274,7 @@ class TestEquiv(unittest.TestCase):
 
     def test_eq5(self):
         log = SimpleLogger(level='info')
-        bdf_filename_out = 'eq5.bdf'
+        bdf_filename_out = DIRNAME / 'eq5.bdf'
 
         model = BDF(debug=True, log=log, mode='msc')
         for nid in range(1, 11):
@@ -1201,6 +1310,37 @@ class TestEquiv(unittest.TestCase):
         node_ids = list(sorted(model.nodes))
         assert node_ids == [1], node_ids
 
+    def test_multi_eq1(self):
+        model = BDF(debug=False)
+        log = model.log
+        # group 1
+        model.add_grid(1, [0., 0., 0.])
+        model.add_grid(2, [0., 0., 0.])
+
+        # group 2
+        model.add_grid(3, [0., 0., 0.])
+        model.add_grid(4, [1., 0., 0.])
+        model.add_grid(5, [1., 0., 0.])
+        node_set = [
+            [1, 2],
+            [3, 4, 5],
+        ]
+        #nid_pairs = [
+            #[1, 2],
+            #[2, 3],
+            #[1, 3],
+            #[4, 5],
+        #]
+        #[(1, 2), (1, 3), (2, 3), (4, 5)]
+
+        tol = 0.1
+        bdf_filename_out = DIRNAME / 'multi_eq1.bdf'
+        bdf_equivalence_nodes(model, bdf_filename_out, tol,
+                              renumber_nodes=False, neq_max=4, xref=True,
+                              node_set=node_set, crash_on_collapse=False,
+                              log=log, debug=True, method='new')
+        model2 = read_bdf(bdf_filename_out, debug=None)
+        assert len(model2.nodes) == 3, model2.nodes
 
 def save_check_nodes(bdf_filename, log, nnodes, skip_cards=None):
     model = BDF(log=log, debug=False)

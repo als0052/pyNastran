@@ -34,12 +34,101 @@ from pyNastran.bdf.cards.elements.acoustic import CHACAB, CHACBR, CAABSF
 from pyNastran.op2.errors import MixedVersionCard
 from pyNastran.op2.tables.geom.geom_common import GeomCommon
 from pyNastran.op2.op2_interface.op2_reader import mapfmt # , reshape_bytes_block
+from pyNastran.op2.tables.geom.geom4 import RBE3, fill_rbe3_wt_comp_gijs, get_minus_2_index
 
-class DoubleCardError(RuntimeError):
-    pass
-class EmptyCardError(RuntimeError):
-    pass
+from pyNastran.op2.errors import DoubleCardError, EmptyCardError
 
+def _map_offt(num):
+    offt = ['G', 'G', 'G']
+    # 1G->1B: 4^3; 1+64=65
+    if num > 64:
+        num -= 64 # 4^3
+        offt[0] = 'B'
+
+    # 3G->3O: 4^2; 1+16=17
+    # 3G->3B: 2*4^2; 1+32=33
+    if num > 32:
+        num -= 32 # 4^2
+        offt[2] = 'O'
+    elif num > 16:
+        num -= 16 # 4^2
+        offt[2] = 'B'
+
+    # 2G->2O: 4*1; 1+4=5
+    # 2G->2B: 4*2; 1+8=9
+    if num > 8:
+        num -= 8 # 4*2
+        offt[1] = 'O'
+    elif num > 4:
+        num -= 4 # 4
+        offt[1] = 'B'
+
+    offt_str = ''.join(offt)
+    return offt_str
+
+BAR_FE_MAP = {
+    #B/G   2
+    #B/G/O 3
+    #GGG = 1
+    #1: 'GGG',
+    #5: 'GOG', # 2G->2O: 4*1; 1+4=5
+    #9: 'GBG', # 2G->2B: 4*2; 1+8=9
+    #17: 'GGO', # 3G->3O: 4^2; 1+16=17
+    #21: 'GOO', # 2G->2O: 4*1; 17+4=21
+    #33: 'GGB', # 3G->3B: 2*4^2; 1+32=33
+    #41: 'GBB', # 2G->2B: 4*2; 33+8=41
+
+    #65: 'BGG', # 1G->1B: 4^3; 1+64=65
+    #69: 'BOG', # 2G->2O: 4*1; 65+4=69
+    #73: 'BBG', # 2G->2B: 4*2; 65+8=73
+    #81: 'BGO', # 3G->3O: 4^2; 65+16=81
+    #85: 'BOO', # 2G->2O: 4*1; 81+4=85
+    #97: 'BGB', # 3G->3B: 2*4^2; 65+32=97
+    #105: 'BBB', # 2G->2B: 4*2; 97+8=105
+    #
+    # 1G->1B: 4^3; 1+64=65
+    #
+    # 2G->2O: 4*1; 1+4=5
+    # 2G->2B: 4*2; 1+8=9
+    #
+    # 3G->3O: 4^2; 1+16=17
+    # 3G->3B: 2*4^2; 1+32=33
+
+    #fprime = fe-f
+    # f=1    f=2
+    0: 'GGG', # NX?
+    1: 'GGG', 2: 'GGG',
+    5: 'GOG', 6: 'GOG',
+    9: 'GBG', 10: 'GBG',
+    17: 'GGO', 18: 'GGO',
+    21: 'GOO', 22: 'GOO',
+    33: 'GGB', 34: 'GGB',
+    41: 'GBB', 42: 'GBB',
+
+    65: 'BGG',
+    69: 'BOG',
+    73: 'BBG',
+    81: 'BGO',
+    85: 'BOO',
+    97: 'BGB',
+    105: 'BBB',
+
+
+    #https://docs.plm.automation.siemens.com/data_services/resources/scnastran/2020_1/help/tdoc/en_US/pdf/release_guide.pdf
+    #F = 1 XYZ option - global or basic coordinate system
+    #F = 2 Grid option
+    #F = 5 XYZ option - global or basic coordinate system
+    #F = 6 XYZ option - global or basic coordinate system
+    #F = 17 XYZ option - global or basic coordinate system
+    #F = 18 XYZ option - global or basic coordinate system
+    #F = 21 XYZ option - global or basic coordinate system
+    #F = 22 XYZ option - global or basic coordinate system
+    #F = 65 XYZ option - global or basic coordinate system
+    #F = 69 XYZ option - global or basic coordinate system
+    #F = 81 XYZ option - global or basic coordinate system
+    #F = 85 XYZ option - global or basic coordinate system
+
+}
 
 class GEOM2(GeomCommon):
     """defines methods for reading op2 elements"""
@@ -423,7 +512,7 @@ class GEOM2(GeomCommon):
             (15418, 154, 610): ['CBEAM3', self._read_cbeam3],
             (15901, 159, 9956): ['CQUAD8N', self._read_cquad8],
             (14600, 146, 9910): ['CQUAD4F', self._read_cquad4],
-            (7908, 79, 9702): ['???', self._read_fake],
+            (7908, 79, 9702): ['CSEAM?', self._read_cseam_maybe],
 
             (14100, 141, 9905): ['???', self._read_fake],
             (14700, 147, 9911): ['CTRIAF', self._read_ctria3],
@@ -564,7 +653,13 @@ class GEOM2(GeomCommon):
             # per DMAP: F = FE bit-wise AND with 3
             fe, = struct_i.unpack(edata[fe1:fe2])
             f = fe & 3
+            #if f not in [0, 1, 2]: f = 0
 
+            # CBAR    EID     PID     GA      GB      X1       X2     X3        OFFT
+            #          PA      PB     W1A     W2A     W3A      W1B    W2B       W3B
+            # CBAR    401     3       2217    81      .2769987-.931498-.235759  B
+            # 'fe = 65; fe&3=1'
+            # ints    = (401, 3, 2217, 81, 0.277, -0.931498, -0.235759, 65, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             if f == 0:
                 # nodes defined in cid=0
                 # XYZ option -- basic coordinate system
@@ -594,7 +689,14 @@ class GEOM2(GeomCommon):
             else:
                 raise RuntimeError('invalid f value...f=%s' % (f))
             elem = CBAR.add_op2_data(data_in)
-            assert f == fe, 'f=%s type(f)=%s fe=%s\n%s' % (f, type(f), fe, elem)
+            try:
+                offt = BAR_FE_MAP[fe]
+            except:
+                print(elem)
+                raise
+            elem.offt = offt
+            #print(f'eid={eid} f={f} fe={fe} offt={offt}')
+            #assert f == fe, 'f=%s type(f)=%s fe=%s\n%s' % (f, type(f), fe, elem)
 
             self.add_op2_element(elem)
             n += ntotal
@@ -903,6 +1005,13 @@ class GEOM2(GeomCommon):
                     eid, f, fe, str(data_in)))
 
             elem = CBEAM.add_op2_data(data_in, f)
+            try:
+                offt = BAR_FE_MAP[fe]
+            except:
+                print(elem)
+                raise
+            elem.offt = offt
+
             self.add_op2_element(elem)
             n += ntotal
         self.card_count['CBEAM'] = nelements
@@ -1748,6 +1857,7 @@ class GEOM2(GeomCommon):
         The MSC version is 8 fields longer.
         """
         n0 = n
+        assert self.factor == 1, self.factor
         if self.is_nx:
             try:
                 n, elements = self._read_conv_nx(data, n)
@@ -1763,6 +1873,7 @@ class GEOM2(GeomCommon):
         for elem in elements:
             self._add_thermal_bc_object(elem, elem.eid)
         self.card_count['CONV'] = nelements
+        assert n == len(data), f'ndata={len(data)} n={n}'
         return n
 
     def _read_split_card(self, data, n, read1, read2, card_name, card_obj, add_method):
@@ -1783,10 +1894,20 @@ class GEOM2(GeomCommon):
         self.card_count[card_name] = nelements
         return n
 
-    def _read_dual_card(self, data, n, nx_read, msc_read, card_name, add_method):
+    def _read_dual_card(self, data, n, nx_read, msc_read, card_name, add_method) -> int:
         """
         generalization of multi read methods (MSC, NX)
         """
+        n, elements = self._read_dual_card_load(
+            data, n, nx_read, msc_read)
+        nelements = len(elements)
+        for elem in elements:
+            add_method(elem)
+        self.card_count[card_name] = nelements
+        return n
+
+    def _read_dual_card_load(self, data, n,
+                             nx_read, msc_read) -> Tuple[int, List[Any]]:
         n0 = n
         if self.is_nx:
             try:
@@ -1800,13 +1921,8 @@ class GEOM2(GeomCommon):
             except (AssertionError, MixedVersionCard):
                 #raise
                 n, elements = nx_read(data, n0)
-
-        nelements = len(elements)
         assert n is not None
-        for elem in elements:
-            add_method(elem)
-        self.card_count[card_name] = nelements
-        return n
+        return n, elements
 
     def _read_conv_nx(self, data: bytes, n: int) -> int:
         """
@@ -1815,6 +1931,7 @@ class GEOM2(GeomCommon):
         ntotal = 48  # 12*4
         s = Struct(self._endian + b'4i 8i')
         nelements = (len(data) - n) // ntotal
+        assert (len(data) - n) % ntotal == 0
         elements = []
         for unused_i in range(nelements):
             edata = data[n:n+ntotal]
@@ -1844,6 +1961,7 @@ class GEOM2(GeomCommon):
         ntotal = 80  # 20*4
         s = Struct(self._endian + b'12i 8f')
         nelements = (len(data) - n) // ntotal
+        assert (len(data) - n) % ntotal == 0
         elements = []
         for unused_i in range(nelements):
             edata = data[n:n+80]
@@ -1952,6 +2070,7 @@ class GEOM2(GeomCommon):
 
         is_six = (ndata - n) % ntotal6 == 0
         is_seven = (ndata - n) % ntotal7 == 0
+        assert self.factor == 1, self.factor
 
         if is_six and is_seven:
             try:
@@ -1985,7 +2104,7 @@ class GEOM2(GeomCommon):
             (eid, pcon_id, flmnd, cntrlnd, ta1, ta2) = out
             #if eid <= 0:
             if eid <= 0 or pcon_id <= 0 or flmnd < 0 or cntrlnd <= 0 or ta1 <= 0 or ta2 <= 0:
-                self.show_data(data, 'if')
+                #self.show_data(data, 'if')
                 # TODO: I'm not sure that this really has 6 fields...
                 raise RuntimeError(f'eid={eid} pconid={pcon_id} flmnd={flmnd} cntrlnd={cntrlnd} ta1={ta1} ta2={ta2} < 0')
             mdot = 0.
@@ -2018,7 +2137,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplsts3(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTS3(8801,88,984)
+        RECORD - CPLSTS3(8801,88,984)
         Word Name Type Description
         1 EID  I Element identification number
         2 PID  I Property identification number
@@ -2059,7 +2178,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplsts4(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTS4(8401,84,985)
+        RECORD - CPLSTS4(8401,84,985)
 
         Word Name Type Description
         1 EID  I Element identification number
@@ -2098,7 +2217,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplsts6(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTS6(1801,18,986)
+        RECORD - CPLSTS6(1801,18,986)
         Word Name Type Description
         1 EID  I Element identification number
         2 PID  I Property identification number
@@ -2148,7 +2267,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplsts8(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTS8(3601,36,987)
+        RECORD - CPLSTS8(3601,36,987)
 
         Word Name Type Description
         1 EID     I Element identification number
@@ -2196,7 +2315,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplstn3(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTN3(1701,17,980)
+        RECORD - CPLSTN3(1701,17,980)
 
         Word Name Type Description
         1 EID    I Element identification number
@@ -2232,7 +2351,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplstn4(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTN4(5701,57,981)
+        RECORD - CPLSTN4(5701,57,981)
         Word Name Type Description
         1 EID    I Element identification number
         2 PID    I Property identification number
@@ -2267,7 +2386,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplstn6(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTN6(5801,58,982)
+        RECORD - CPLSTN6(5801,58,982)
 
         Word Name Type Description
         1 EID  I Element identification number
@@ -2303,7 +2422,7 @@ class GEOM2(GeomCommon):
 
     def _read_cplstn8(self, data: bytes, n: int) -> int:
         """
-        RECORD – CPLSTN8(7201,72,983)
+        RECORD - CPLSTN8(7201,72,983)
 
         Word Name Type Description
         1 EID     I Element identification number
@@ -2516,15 +2635,15 @@ class GEOM2(GeomCommon):
         card_name = 'CQUAD4'
         card_obj = CQUAD4
         methods = {
-            56 : self._run_cquad4_nx,
-            60 : self._run_cquad4_msc,
+            56 : self._run_cquad4_nx_56,
+            60 : self._run_cquad4_msc_60,
         }
         try:
             n = self._read_double_card(card_name, card_obj, self.add_op2_element,
                                        methods, data, n)
         except DoubleCardError:
-            nx_method = partial(self._run_cquad4_nx, card_obj)
-            msc_method = partial(self._run_cquad4_msc, card_obj)
+            nx_method = partial(self._run_cquad4_nx_56, card_obj)
+            msc_method = partial(self._run_cquad4_msc_60, card_obj)
             n = self._read_dual_card(
                 data, n,
                 nx_method, msc_method,
@@ -2538,6 +2657,18 @@ class GEOM2(GeomCommon):
 
     def _read_double_card(self, card_name: str, card_obj, add_method,
                           methods, data: bytes, n: int) -> int:
+        n, elements = self._read_double_card_load(
+            card_name, card_obj,
+            methods, data, n)
+
+        nentries = len(elements)
+        for elem in elements:
+            add_method(elem)
+        self.card_count[card_name] = nentries
+        return n
+
+    def _read_double_card_load(self, card_name: str, card_obj,
+                               methods, data: bytes, n: int) -> int:
         assert isinstance(data, bytes), type(data)
         ndatai = (len(data) - n) // self.factor
         keys = np.array(list(methods.keys()))
@@ -2565,17 +2696,12 @@ class GEOM2(GeomCommon):
                     #print('error')
                     pass
                 else:
-                    raise DoubleCardError()
+                    raise DoubleCardError(f'No {card_name} cards found')
         #else:
         if elements is None:
             self.show_data(data, types='ifs')
             raise EmptyCardError()
-
-        nentries = len(elements)
-        for elem in elements:
-            add_method(elem)
-        self.card_count[card_name] = nentries
-        return n
+        return n, elements
 
     def _read_vutria3(self, data: bytes, n: int) -> int:
         return self._run_3nodes(CTRIA3, data, n)
@@ -2687,7 +2813,7 @@ class GEOM2(GeomCommon):
         self.card_count[element.type] = nelements
         return n
 
-    def _run_cquad4_msc(self, element: CQUAD4, data: bytes, n: int) -> Tuple[int, Any]:
+    def _run_cquad4_msc_60(self, element: CQUAD4, data: bytes, n: int) -> Tuple[int, Any]:
         r"""
         buggy MSC 2018.2 version
 
@@ -2723,7 +2849,7 @@ class GEOM2(GeomCommon):
         #   3f-i zeros as float/int???
         #   4f correct
         #   i correct
-        s = Struct(mapfmt(self._endian + b'6i 4f 3fi i', self.size))
+        structi = Struct(mapfmt(self._endian + b'6i 3fi 4f i', self.size))
         #if self.is_debug_file:
             #self.binary_debug.write('ndata=%s\n' % (nelements * 44))
 
@@ -2733,13 +2859,16 @@ class GEOM2(GeomCommon):
 
         for unused_i in range(nelements):
             edata = data[n:n + ntotal]
-            out = s.unpack(edata)
+            #self.show_data(edata)
+            out = structi.unpack(edata)
             # theta, zoffs, blank, tflag, t1, t2, t3, t4
             (eid, pid, n1, n2, n3, n4,
              theta, zoffs, blank, tflag,
              t1, t2, t3, t4,
              minus1) = out
-            minus1 = out[-1]
+            assert blank == 0.0
+            assert isinstance(tflag, int), tflag
+            #minus1 = out[-1]
             #eid, pid, n1, n2, n3, n4, theta, a, b, c, t1, t2, t3, t4, minus1 = out
             #print(eid, pid)
 
@@ -2751,7 +2880,7 @@ class GEOM2(GeomCommon):
                        theta, zoffs,
                        blank, tflag,
                        (t1, t2, t3, t4), minus1))
-
+            #print(msg)
             #assert theta == 0, msg
             assert zoffs == 0, msg
             assert blank == 0, msg
@@ -2775,8 +2904,8 @@ class GEOM2(GeomCommon):
         #self.card_count[element.type] = nelements
         return n, elements
 
-    def _run_cquad4_nx(self, element: Union[CQUAD4, CQUADR],
-                       data: bytes, n: int) -> Tuple[int, Any]:
+    def _run_cquad4_nx_56(self, element: Union[CQUAD4, CQUADR],
+                          data: bytes, n: int) -> Tuple[int, Any]:
         """
         common method for CQUAD4, CQUADR
 
@@ -3020,8 +3149,8 @@ class GEOM2(GeomCommon):
 
     def _read_cquadr(self, data: bytes, n: int) -> int:
         """CQUADR(8009,80,367)  - the marker for Record 75"""
-        nx_method = partial(self._run_cquad4_nx, CQUADR)
-        msc_method = partial(self._run_cquad4_msc, CQUADR)
+        nx_method = partial(self._run_cquad4_nx_56, CQUADR)
+        msc_method = partial(self._run_cquad4_msc_60, CQUADR)
         n = self._read_dual_card(
             data, n,
             nx_method, msc_method,
@@ -3043,8 +3172,125 @@ class GEOM2(GeomCommon):
         return len(data)
 
     def _read_crbe3(self, data: bytes, n: int) -> int:
+        """
+        This card is an internal RBE3 that's used for Langrage elements.
+        It's not what the user entered.
+
+        Word Name Type Description
+        1 EID  I  Element identification number
+        2 NWE  I  Number of words for the element
+        3 REFG I  Reference grid point identification number
+        4 REFC I  Component numbers at the reference grid point
+        5 WT1  RS Weighting factor for components of motion at G
+        6 C    I  Component numbers
+        7 G    I  Grid point identification number
+        Word 7 repeats until End of Record (-1)
+        Words 5 through 7 repeat until End of Record (-2)
+
+        8 GM I Grid point identification number for dependent DOFs
+        9 CM I Component numbers of dependent DOFs
+        Words 8 through 9 repeat until End of Record (-4?)
+
+        10 ALPHA RS Thermal expansion coefficient
+        Word 10 repeats until End of Record (-5?)
+
+        11 LMID1 I Lagrange multiplier identification number
+        12 NDOFS I Number of DOF for Lagrange multiplier
+        Words 11 through 12 repeat until End of Record (-3?)
+
+        data = (3, 14, 41, 123456, 1.0, 123456, 3, -1,
+                -2,
+                -4,
+                0.002, -5,
+                101000041, 6, -3,
+                4, 14, 4,  123456, 1.0, 123456, 3, -1, -2, -4, 2.0e-6, -5, 101000004, 6, -3)
+          """
         # C:\NASA\m4\formats\git\examples\move_tpl\ngd720a.op2
-        self.log.info('skipping RBE3 in GEOM2')
+        idata = np.frombuffer(data[n:], self.idtype8).copy()
+        fdata = np.frombuffer(data[n:], self.fdtype8).copy()
+
+        iminus3 = np.where(idata == -3)[0]
+        if idata[-1] == -3:
+            is_alpha = False
+            i = np.hstack([[0], iminus3[:-1]+1])
+        else:
+            is_alpha = True
+            i = np.hstack([[0], iminus3[:-1]+2])
+        j = np.hstack([iminus3[:-1], len(idata)])
+        #print('i = ', i)
+        #print('j = ', j)
+        #print('is_alpha =', is_alpha)
+
+        assert len(i) == len(j)
+        for ii, jj in zip(i, j):
+
+            idatai = idata[ii:jj]
+            #print(idatai)
+            #print(fdata[ii:ii+5])
+            #1 EID  I  Element identification number
+            #2 NWE  I  Number of words for the element
+            #3 REFG I  Reference grid point identification number
+            #4 REFC I  Component numbers at the reference grid point
+            #5 WT1  RS Weighting factor for components of motion at G
+            #6 C    I  Component numbers
+            #7 G    I  Grid point identification number
+            eid, nwords, refg, refc, unused_weight, comp, grid = idatai[:7]
+            #nwords += 1
+            #print(f'nwords={nwords}; len(datai)={len(idatai)}', len(idatai))
+            weight = fdata[ii+4]
+            weights = [weight]
+            comps = [comp]
+            gijs = [grid]
+
+            iji = ii
+            values = []
+            values_dict = {}
+            value = idata[iji]
+            while value != -3:
+                if value < 0:
+                    if len(values):
+                        values_dict[value] = values
+                    values = []
+                else:
+                    values.append(iji)
+                iji += 1
+                value = idata[iji]
+            if len(values):
+                values_dict[value] = values
+
+            #print('values_dict =', values_dict)
+            del values_dict[-1]
+            #{-1: [3, 14, 41, 123456, 1065353216, 123456, 3], -5: [990057071], -3: [101000041, 6]}
+            if -5 in values_dict:
+                ialpha_list = values_dict[-5]
+                assert len(ialpha_list) == 1, ialpha_list
+                alpha = fdata[ialpha_list[0]]
+                #print("alpha =", alpha)
+                del values_dict[-5]
+            if -3 in values_dict:
+                ilagrange_ndof = values_dict[-3]
+                assert len(ilagrange_ndof) >= 2, ilagrange_ndof
+                assert len(ilagrange_ndof) % 2 == 0, ilagrange_ndof
+                lagrange_ndof = idata[ilagrange_ndof]
+                #print("lagrange_ndof =", lagrange_ndof)
+                del values_dict[-3]
+            if values_dict:
+                print('values_dict =', values_dict)
+                assert len(values_dict) == 0, values_dict
+
+            nrows = len(lagrange_ndof) // 2
+            lagrange_ndof = lagrange_ndof.reshape(nrows, 2)
+            gmi = lagrange_ndof[:, 0]
+            cmi = lagrange_ndof[:, 1]
+            in_data = [eid, refg, refc, weights, comps, gijs,
+                       gmi, cmi, alpha]
+            if self.is_debug_file:
+                self.binary_debug.write('  RBE3=%s\n' % str(in_data))
+            #print('rbe3 =', in_data)
+            rbe3 = RBE3.add_op2_data(in_data)
+            str(rbe3)
+            continue
+            #self._add_op2_rigid_element(rbe3)
         return len(data)
 
     def _read_crjoint(self, data: bytes, n: int) -> int:
@@ -3261,7 +3507,6 @@ class GEOM2(GeomCommon):
             eid  pid n1     n2     n3     theta?      ?  ?  ?  ?
             201, 35, 50000, 50001, 50101, 19.2, 0, 0, 0, 0, 0.2, 0.2, 0.2, -1,
 
-
         C:\MSC.Software\msc_nastran_runs\cc179h.op2
         ints = (
             5959, 59, 282,
@@ -3333,8 +3578,9 @@ class GEOM2(GeomCommon):
         card_name = 'CTRIA6'
         card_obj = CTRIA6
         methods = {
-            52 : self._read_ctria6_v2001,
-            56 : self._read_ctria6_current,
+            52 : self._read_ctria6_v2001_52,
+            56 : self._read_ctria6_current_56,
+            60 : self._read_ctria6_60,
         }
         try:
             n = self._read_double_card(card_name, card_obj, self.add_op2_element,
@@ -3561,7 +3807,7 @@ class GEOM2(GeomCommon):
             n += ntotal
         return n, elements
 
-    def _read_ctria6fd_32(self, card_obj, data: bytes, n: int) -> int:
+    def _read_ctria6fd_32(self, card_obj, data: bytes, n: int) -> Tuple[int, List[CTRIA6]]:
         """
         Word Name Type Description
         1 EID  I Element identification number
@@ -3588,7 +3834,48 @@ class GEOM2(GeomCommon):
             n += ntotal
         return n, elements
 
-    def _read_ctria6_current(self, card_obj, data: bytes, n: int) -> int:
+    def _read_ctria6_60(self, card_obj, data: bytes, n: int) -> Tuple[int, List[CTRIA6]]:
+        """
+        CTRIA6(4801,48,327) - the marker for Record 96
+
+        Record 90 -- CTRIA6(4801,48,327) # MSC 2005 - GEOM2
+        Word Name Type Description
+        1 EID     I Element identification number
+        2 PID     I Property identification number
+        3 G(6)    I Grid point identification numbers of connection points
+        9 THETA  RS Material property orientation angle or coordinate system identification number
+        10 ZOFFS RS Offset from the surface of grid points reference plane
+        11 T(3)  RS Membrane thickness of element at grid points
+        14 TFLAG  I Relative thickness flag
+        -1
+        """
+        ntotal = 60 * self.factor # 15*4
+        s = Struct(mapfmt(self._endian + b'8i 5f i i', self.size))
+        nelements = (len(data) - n) // ntotal
+        assert (len(data) - n) % ntotal == 0
+        elements = []
+        for unused_i in range(nelements):
+            edata = data[n:n + ntotal]
+            out = s.unpack(edata)
+            if self.is_debug_file:
+                self.binary_debug.write('  CTRIA6=%s\n' % str(out))
+            #(eid, pid, n1, n2, n3, n4, n5, n6, theta, zoffs, t1, t2, t3, tflag, minus1) = out
+            #print('eid=%s pid=%s nids[%s, %s %s] theta=%s zoffs=%s '
+                  #'tflag=%s t1=%s t2=%s t3=%s' % (
+                      #eid, pid, n1, n2, n3, theta, zoffs,
+                      #tflag, t1, t2, t3))
+            tflag, minus1 = out[-2:]
+            assert minus1 == -1
+            #self.log.info('ctria6 tflag = %s' % tflag)
+            #print(minus1)
+            elem = CTRIA6.add_op2_data(out)
+            self.add_op2_element(elem)
+            assert tflag in [-1, 0, 1], tflag
+            elements.append(elem)
+            n += ntotal
+        return n, elements
+
+    def _read_ctria6_current_56(self, card_obj, data: bytes, n: int) -> Tuple[int, List[CTRIA6]]:
         """
         CTRIA6(4801,48,327) - the marker for Record 96
 
@@ -3626,7 +3913,7 @@ class GEOM2(GeomCommon):
             n += ntotal
         return n, elements
 
-    def _read_ctria6_v2001(self, card_obj, data: bytes, n: int) -> int:
+    def _read_ctria6_v2001_52(self, card_obj, data: bytes, n: int) -> int:
         """
         CTRIA6(4801,48,327) - the marker for Record 96
 
@@ -3665,26 +3952,77 @@ class GEOM2(GeomCommon):
         """
         CTRIAR(9200,92,385) - the marker for Record 99
         """
+        card_name = 'CTRIAR'
+        card_obj = CTRIAR
+        methods = {
+            # nbytes
+            52 : self._read_ctriar_13,
+            56 : self._read_ctriar_14,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self.add_op2_element,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
+            self.log.warning(f'try-except {card_name}')
+            #n = self._read_split_card(data, n,
+                                      #self._read_cquad8_current, self._read_cquad8_v2001,
+                                      #card_name, self.add_op2_element)
+        #nelements = self.card_count['CQUAD8']
+        #self.log.debug(f'nCQUAD8 = {nelements}')
+
+        #n = self._read_dual_card(data, n, self._read_ctriax_8, self._read_ctriax_9,
+                                 #'CTRIAX', self.add_op2_element)
+        return n
+
+    def _read_ctriar_13(self, element: CTRIAR, data: bytes, n: int) -> Tuple[int, List[CTRIAR]]:
         ntotal = 52 * self.factor  # 13*4
         s = Struct(mapfmt(self._endian + b'5iff3i3f', self.size))
-        nelements = (len(data) - n)// ntotal
+        nelements = (len(data) - n) // ntotal
+        assert (len(data) - n) % ntotal == 0
+        elements = []
         for unused_i in range(nelements):
             edata = data[n:n+ntotal]
+            #self.show_data(data[n:n+ntotal+40])
             out = s.unpack(edata)
-            #print('eid=%s pid=%s n1=%s n2=%s n3=%s theta=%s zoffs=%s '
-                  #'blank1=%s blank2=%s tflag=%s t1=%s t2=%s t3=%s' % (
-                      #eid, pid, n1, n2, n3, theta, zoffs,
-                      #blank1, blank2, tflag, t1, t2, t3))
             (eid, pid, n1, n2, n3, theta, zoffs, unused_blank1,
              unused_blank2, tflag, t1, t2, t3) = out
+            #print('eid=%s pid=%s nodes=(%s,%s,%s) theta=%s zoffs=%s '
+                  #'blank1=%s blank2=%s tflag=%s t1-t3=(%s,%s,%s)' % (
+                      #eid, pid, n1, n2, n3, theta, zoffs,
+                      #unused_blank1, unused_blank2, tflag, t1, t2, t3))
             if self.is_debug_file:
                 self.binary_debug.write('  CTRIAR=%s\n' % str(out))
             data_in = [eid, pid, n1, n2, n3, theta, zoffs, tflag, t1, t2, t3]
             elem = CTRIAR.add_op2_data(data_in)
-            self.add_op2_element(elem)
+            elements.append(elem)
             n += ntotal
-        self.card_count['CTRIAR'] = nelements
-        return n
+        return n, elements
+
+    def _read_ctriar_14(self, element: CTRIAR, data: bytes, n: int) -> Tuple[int, List[CTRIAR]]:
+        """same as ``read_ctriar_13`` but with a -1 to change the format"""
+        ntotal = 56 * self.factor  # 14*4
+        s = Struct(mapfmt(self._endian + b'5iff3i3f i', self.size))
+        nelements = (len(data) - n)// ntotal
+        assert (len(data) - n) % ntotal == 0
+        elements = []
+        for unused_i in range(nelements):
+            edata = data[n:n+ntotal]
+            out = s.unpack(edata)
+            (eid, pid, n1, n2, n3, theta, zoffs, unused_blank1,
+             unused_blank2, tflag, t1, t2, t3, minus1) = out
+            #print('eid=%s pid=%s nodes=(%s,%s,%s) theta=%s zoffs=%s '
+                  #'blank1=%s blank2=%s tflag=%s t1-t3=(%s,%s,%s)' % (
+                      #eid, pid, n1, n2, n3, theta, zoffs,
+                      #unused_blank1, unused_blank2, tflag, t1, t2, t3))
+            assert minus1 == -1, minus1
+            if self.is_debug_file:
+                self.binary_debug.write('  CTRIAR=%s\n' % str(out))
+            data_in = [eid, pid, n1, n2, n3, theta, zoffs, tflag, t1, t2, t3]
+            elem = CTRIAR.add_op2_data(data_in)
+            elements.append(elem)
+            n += ntotal
+        return n, elements
 
     #def _read_ctriax_b(self, data: bytes, n: int) -> int:  # pragma: no cover
         #"""
@@ -3863,7 +4201,7 @@ class GEOM2(GeomCommon):
             s1 = s0 + 8
             entity = data[s0:s1].decode('latin1').rstrip()
             eids = ints[i0+5:ispliti]
-            assert entity in ['FEEDGE', 'GRID', 'GMCURV'], f'entity={entity!r}'
+            assert entity in ['FEEDGE', 'GRID', 'GMCURV', 'GMCURVE'], f'entity={entity!r}'
             #print(eids)
             i0 = ispliti + 1
         self.card_count['GMBNDC'] = nelements
@@ -3970,20 +4308,20 @@ class GEOM2(GeomCommon):
         4, 1, # N(c), f, KZij...floats...)
 
         (6.05360936588321e-43,
-        1, 4.203895392974451e-45,
-        2.802596928649634e-45, 4.203895392974451e-45,
-        4.203895392974451e-45, 4.203895392974451e-45,
-        5.605193857299268e-45, 4.203895392974451e-45,
-        7.006492321624085e-45, 4.203895392974451e-45,
-        8.407790785948902e-45, 4.203895392974451e-45,
-        9.80908925027372e-45, 4.203895392974451e-45,
-        1.1210387714598537e-44, 4.203895392974451e-45,
-        1.2611686178923354e-44, 4.203895392974451e-45,
-        1.401298464324817e-44, 4.203895392974451e-45,
+        1, 3,
+        2.802596928649634e-45, 3,
+        3, 3,
+        4, 3,
+        7.006492321624085e-45, 3,
+        8.407790785948902e-45, 3,
+        9.80908925027372e-45, 3,
+        1.1210387714598537e-44, 3,
+        1.2611686178923354e-44, 3,
+        1.401298464324817e-44, 3,
         nan,
-        1.401298464324817e-44, 1.5414283107572988e-44, 4.203895392974451e-45, 1.5414283107572988e-44, 5.605193857299268e-45, 1.5414283107572988e-44, 7.006492321624085e-45, 1.5414283107572988e-44, 8.407790785948902e-45,
+        1.401298464324817e-44, 1.5414283107572988e-44, 3, 1.5414283107572988e-44, 4, 1.5414283107572988e-44, 7.006492321624085e-45, 1.5414283107572988e-44, 8.407790785948902e-45,
         nan,
-        5.605193857299268e-45, 1,
+        4, 1,
         8.71720021677902e-06, 1.3361000128497835e-06, 1.2778000382240862e-05, 6.272000064200256e-06, 1.6251000488409773e-05, 1.0492000001249835e-05, 2.0478000806178898e-05, 1.562999932502862e-05, 2.428500010864809e-05, 2.0403000235091895e-05,
         3.086099968641065e-05, 6.272000064200256e-06, 3.229700087103993e-05, 1.0492000001249835e-05, 3.352899875608273e-05, 1.562999932502862e-05, 3.502099934848957e-05,
         2.025700086960569e-05, 3.578500036383048e-05, 2.7731999580282718e-05, 1.572600012877956e-05, 4.825499854632653e-05, 3.762800042750314e-05, 7.328399806283414e-05,
@@ -3991,7 +4329,7 @@ class GEOM2(GeomCommon):
         0.00010011999984271824, 8.837800123728812e-05, 0.00011811000149464235, 0.00012758000229950994, 0.00011344000085955486, 0.00019350000366102904, 0.0001816000003600493,
         0.0002528300101403147, 0.00024294000468216836, 0.0001699900021776557, 0.0001816000003600493, 0.000229199999012053, 0.00024294000468216836, 0.0002824899856932461,
         0.00036862000706605613, 0.00035051998565904796, 0.0005267499946057796, 0.0005117100081406534, 0.00042292001307941973, 0.0005117100081406534, 0.0005718700122088194,
-        0.0008483999990858138, 0.0008233999833464622, 0.0009233999880962074, 5.605193857299268e-45, 1.0, 90.0, -20.25, 45.0, 1.0, 90.0, 81.0, 45.0, 1.0, 186.0, -17.850000381469727,
+        0.0008483999990858138, 0.0008233999833464622, 0.0009233999880962074, 4, 1.0, 90.0, -20.25, 45.0, 1.0, 90.0, 81.0, 45.0, 1.0, 186.0, -17.850000381469727,
         141.0, 1.0, 186.0, 71.4000015258789, 141.0, 1.0, 268.0, -15.800000190734863, 223.0, 1.0, 268.0, 63.20000076293945, 223.0, 1.0, 368.0, -13.300000190734863, 323.0, 1.0,
         368.0, 53.20000076293945, 323.0, 1.0, 458.0, -11.050000190734863, 413.0, 1.0, 458.0, 44.20000076293945, 413.0)
         """
@@ -4437,6 +4775,54 @@ class GEOM2(GeomCommon):
         self.log.info('skipping adapt card in GEOM2')
         return len(data)
 
+    def _read_cseam_maybe(self, data: bytes, n: int) -> int:
+        """
+        564 / 4 = 141
+        141
+        3, 47
+
+          ints    = (
+          77, 2011808,
+          77, 2007308,
+          8, 100001002, 4007101, 100001003, 4007101, 100001004, 4007101, 100001005, 4007101, 100001006, 4007101, 100001007, 4007101, 100001008, 4007101, 100001009, 4007101,
+          78, 2011808,
+          78, 2007308,
+          4, 100001010, 4007101, 100001011, 4007101, 100001012, 4007101, 100001013, 4007101,
+          79, 2011808,
+          79, 2007308,
+          4, 100001014, 4007101, 100001015, 4007101, 100001016, 4007101, 100001017, 4007101,
+          87, 2011808,
+          87, 2007308,
+          8, 100001018, 4007101, 100001019, 4007101, 100001020, 4007101, 100001021, 4007101, 100001022, 4007101, 100001023, 4007101, 100001024, 4007101, 100001025, 4007101,
+          88, 2011808,
+          88, 2007308,
+          4, 100001026, 4007101, 100001027, 4007101, 100001028, 4007101, 100001029, 4007101,
+          89, 2011808,
+          89, 2007308,
+          4, 100001030, 4007101, 100001031, 4007101, 100001032, 4007101, 100001033, 4007101,
+          97, 2011808,
+          97, 2007308,
+          8, 100001034, 4007101, 100001035, 4007101, 100001036, 4007101, 100001037, 4007101, 100001038, 4007101, 100001039, 4007101, 100001040, 4007101, 100001041, 4007101, # 2*8
+          98, 2011808,
+          98, 2007308,
+          4, 100001042, 4007101, 100001043, 4007101, 100001044, 4007101, 100001045, 4007101,  # 2*4
+          99, 2011808,
+          99, 2007308,
+          4, 100001046, 4007101, 100001047, 4007101, 100001048, 4007101, 100001049, 4007101)  # 2*4
+        """
+        self.log.info('skipping CSEAM? card in GEOM2')
+        #self.show_data(data[n:], types='ifqds')
+        #self.show_data(data[n+4:], types='qd')
+        #ntotal = 44 * self.factor  # 11*4
+        ##s = Struct(mapfmt(self._endian + b'10if', self.size))
+        #nelements = (len(data) - n)// ntotal
+        #for unused_i in range(nelements):
+            #edata = data[n:n+ntotal]
+            ##out = s.unpack(edata)
+            #n += ntotal
+        #aaa
+        return len(data)
+
 def convert_theta_to_mcid(theta):
     """odd function..."""
     # sort of guessed at this number...it seems reasonable-ish
@@ -4451,3 +4837,11 @@ def convert_theta_to_mcid(theta):
         assert np.allclose(cid, cid_float), 'theta=%s cid=%s cid_float=%s' % (theta, cid, cid_float)
         theta = cid
     return theta
+
+def get_minus_4_index(idata):
+    """helper for ``get_minus_4_index``"""
+    #print('idata =', idata)
+    i = np.where((idata == -4) | (idata == -3))[0]
+    if len(i) == 0:
+        return len(idata)
+    return i[0]

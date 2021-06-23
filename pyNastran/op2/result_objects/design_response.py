@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 
 class Responses:
-    """Defines SOL 200 responses"""
+    """Defines SOL 200 responses from the R1TABRG table"""
     def __init__(self):
         self.convergence_data = None
         self.desvars = None
@@ -727,10 +727,16 @@ class Desvars:
 
         encoding = 'ascii'
         for i, (internal_id, desvar_id, label, lower, upper, delxv, dunno) in enumerate(desvars):
-            #print((internal_id, desvar_id, label, lower, upper, delxv, dunno))
+            try:
+                label_str = label.decode(encoding)
+                #print((internal_id, desvar_id, label_str, lower, upper, delxv, dunno))
+            except:
+                label_str = 'fake_%d' % i
+                #warnings.warn(str([internal_id, desvar_id, label, label_str, lower, upper, delxv, dunno]))
+                #raise
             self.internal_id[i] = internal_id
             self.desvar_id[i] = desvar_id
-            self.label[i] = label.decode(encoding).strip()
+            self.label[i] = label_str.strip()
             self.lower[i] = lower
             self.upper[i] = upper
             self.delxv[i] = delxv

@@ -19,7 +19,7 @@ from cpylog import get_logger2
 # pyNastran
 from pyNastran.bdf.bdf_interface.dev.matrices import make_gpwg
 from pyNastran.dev.bdf_vectorized.solver.utils import (
-    triple, reverse_dict, partition_dense_symmetric, partition_dense_vector, remove_dofs)
+    reverse_dict, partition_dense_symmetric, partition_dense_vector, remove_dofs)
 #from pyNastran.f06.f06_writer import sorted_bulk_data_header
 from pyNastran.utils.dev import list_print
 from pyNastran.utils.mathematics import print_matrix, print_annotated_matrix
@@ -267,7 +267,7 @@ class Solver(OP2):
 
         # g-set before elimination of any degrees of freedom
         # n-set after elimination of multipoint constraints
-        # f-set after elimination of automatic constraints and SPC�s
+        # f-set after elimination of automatic constraints and SPC's
         self.Ub = []
         self.iUb = []
         self.Uc = []

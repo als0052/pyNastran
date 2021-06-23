@@ -4,7 +4,7 @@ from pyNastran.op2.op2_interface.op2_reader import reshape_bytes_block # , resha
 
 
 def set_casecc(self, data: bytes, idtype: str, fdtype: str, size: int=4,
-               nastran_format='nx'):
+               nastran_format: str='nx'):
     """
     Word Name Type Description
     subcase, mpc, spc, load, method_structure, deform, temp_load, temp_mat_init, tic, nlload_set, nlload_media, nlload_format, dload, freq, tfl = ints[:15]
@@ -633,7 +633,6 @@ def set_casecc(self, data: bytes, idtype: str, fdtype: str, size: int=4,
     if nastran_format == 'optistruct':
         raise NotImplementedError(nastran_format)
         #self.show_data(data, types='ifs')
-    #print('nastran_format =', nastran_format)
     ints = np.frombuffer(data, dtype=idtype).copy()
     floats = np.frombuffer(data, dtype=fdtype).copy()
     #print(len(ints[15:31]))
@@ -658,7 +657,9 @@ def set_casecc(self, data: bytes, idtype: str, fdtype: str, size: int=4,
     title_bytes = title_subtitle_label[:32*size]
     subtitle_bytes = title_subtitle_label[32*size:64*size]
     label_bytes = title_subtitle_label[64*size:]
-    #print(f'title = {title_subtitle_label!r}')
+    #print(f'title    = {title_bytes.strip()!r}')
+    #print(f'subtitle = {subtitle_bytes.strip()!r}')
+    #print(f'label    = {label_bytes.strip()!r}')
     #--------
     (stpltflag, ax_sym_set, nharmonics, tstrv) = ints[134:138]
     #self.show_data(data[133*size:158*size], types='sdq')
@@ -677,9 +678,11 @@ def set_casecc(self, data: bytes, idtype: str, fdtype: str, size: int=4,
      svelocity_set, svelocity_media, svelocity_format,
      saccel_set, saccel_media, saccel_format,
      nonlinear, partn, cyclic, random, nlparm, fmethod,
-     lsem) = ints[150:166]
-    assert lsem // 4 in [150, 300], f'lsem={lsem} lsem//4={lsem//4}'
-    #assert lsem == 4 * 150, f'lsem={lsem} size={size} lsem//size={lsem//size}'
+     nwords_to_lsem) = ints[150:166]
+    if nwords_to_lsem // 4 not in {150, 300}:
+        self.log.warning(f'nwords_to_lsem={nwords_to_lsem} nwords_to_lsem//4={nwords_to_lsem//4}')
+
+    #assert nwords_to_lsem == 4 * 150, f'nwords_to_lsem={nwords_to_lsem} size={size} nwords_to_lsem//size={nwords_to_lsem//size}'
     # LCC=1200 @ word 166
     # LSM @ 658?
 

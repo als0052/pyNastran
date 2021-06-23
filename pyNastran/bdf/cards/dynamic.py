@@ -67,6 +67,7 @@ NLPARM_CONV_MAP = {
     7 : 'UPW',
     10: '', # NLSTEP
     14: '', # NLSTEP
+    42: 'PVA',
     -1 : 'PW',  # Nastran-CoFE : blank -> assuming default
 }
 #nlparm_conv_map = {
@@ -2257,8 +2258,8 @@ class TSTEPNL(BaseCard):
         assert self.kstep is None or self.kstep >= 2, self.get_stats()
 
         assert self.min_iter is None or self.min_iter >= 0, self.get_stats()
-        assert self.max_iter > 0, self.get_stats()
-        assert self.max_div > 0, self.get_stats()
+        assert self.max_iter != 0, self.get_stats()
+        assert self.max_div != 0, self.get_stats()
         assert self.max_qn > 0, self.get_stats()
         assert self.max_ls >= 0, self.get_stats()
         assert self.max_bisect > 0, self.get_stats()
@@ -2306,7 +2307,7 @@ class TSTEPNL(BaseCard):
             kstep = integer_or_blank(card, 6, 'kStep', 2)
         elif method == 'ITER':
             kstep = integer_or_blank(card, 6, 'kStep', 10)
-        elif method in ['AUTO', 'TSTEP', 'SEMI']:
+        elif method in ['AUTO', 'TSTEP', 'SEMI', 'FNT']:
             kstep = None
             #kstep = blank(card, 6, 'kStep') #: .. todo:: not blank
         else:

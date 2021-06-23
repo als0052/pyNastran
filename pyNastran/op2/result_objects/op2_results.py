@@ -22,6 +22,9 @@ class Results:
         self.monitor3 = None
         self.responses = Responses()
 
+        self.separation_initial = {}
+        self.separation_final = {}
+
         self.psds = PSDObjects()
         self.ato = AutoCorrelationObjects()
         self.psd = PowerSpectralDensityObjects()
@@ -102,7 +105,10 @@ class Results:
 
     def _get_base_objects_map(self) -> Dict[str, Any]:
         """gets only the objects that are do not contain sub-objects"""
-        base_names = ['eqexin', 'gpdt', 'bgpdt', 'psds', 'monitor1', 'monitor3']
+        base_names = [
+            'eqexin', 'gpdt', 'bgpdt', 'psds', 'monitor1', 'monitor3',
+            'separation_initial', 'separation_final',
+        ]
         base_objs_map = {}
         for base_name in base_names:
             obj = getattr(self, base_name)
@@ -112,7 +118,10 @@ class Results:
 
     def get_table_types(self):
         """combines all the table_types from all objects and sub-objects"""
-        base = ['eqexin', 'gpdt', 'bgpdt', 'psds', 'monitor1', 'monitor3']
+        base = [
+            'eqexin', 'gpdt', 'bgpdt', 'psds', 'monitor1', 'monitor3',
+            'separation_initial', 'separation_final',
+        ]
         sum_objs = self._get_sum_objects()
         for objs in sum_objs:
             base.extend(objs.get_table_types())
@@ -500,6 +509,10 @@ class Stress:
         self.chexa_stress = {}
         self.cpyram_stress = {}
 
+        # 269, 270
+        self.chexa_composite_stress = {}
+        self.cpenta_composite_stress = {}
+
     def get_table_types(self):
         tables = [
             # OES - CELAS1/CELAS2/CELAS3/CELAS4 stress
@@ -507,6 +520,8 @@ class Stress:
 
             # OES - isotropic CTETRA/CHEXA/CPENTA stress
             'ctetra_stress', 'cpenta_stress', 'chexa_stress', 'cpyram_stress',
+
+            'chexa_composite_stress', 'cpenta_composite_stress',
         ]
         return ['stress.' + table for table in tables]
 
@@ -523,6 +538,10 @@ class Strain:
         self.celas3_strain = {}
         self.celas4_strain = {}
 
+        # 269, 270
+        self.chexa_composite_strain = {}
+        self.cpenta_composite_strain = {}
+
     def get_table_types(self):
         tables = [
             # OES - CELAS1/CELAS2/CELAS3/CELAS4 strain
@@ -530,6 +549,8 @@ class Strain:
 
             # OES - isotropic CTETRA/CHEXA/CPENTA strain
             'ctetra_strain', 'cpenta_strain', 'chexa_strain', 'cpyram_strain',
+
+            'chexa_composite_strain', 'cpenta_composite_strain',
         ]
         return ['strain.' + table for table in tables]
 
@@ -583,7 +604,9 @@ class StrainEnergy:
         self.conm2_strain_energy = {}
         self.rbe1_strain_energy = {}
         self.rbe3_strain_energy = {}
-        self.weldc_strain_energy = {}
+        self.cweld_strain_energy = {}
+        self.cfast_strain_energy = {}
+        self.cseam_strain_energy = {}
 
     def get_table_types(self):
         tables = [
@@ -618,6 +641,6 @@ class StrainEnergy:
             'genel_strain_energy',
             'conm2_strain_energy',
             'rbe1_strain_energy', 'rbe3_strain_energy',
-            'weldc_strain_energy',
+            'cweld_strain_energy', 'cfast_strain_energy', 'cseam_strain_energy',
         ]
         return ['strain_energy.' + table for table in tables]
