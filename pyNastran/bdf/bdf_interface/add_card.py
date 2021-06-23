@@ -14,7 +14,7 @@ from pyNastran.bdf.bdf_interface.add_methods import AddMethods
 
 from pyNastran.bdf.cards.elements.elements import CFAST, CGAP, CRAC2D, CRAC3D, PLOTEL, GENEL
 from pyNastran.bdf.cards.properties.properties import PFAST, PGAP, PRAC2D, PRAC3D
-from pyNastran.bdf.cards.properties.solid import PLSOLID, PSOLID, PIHEX, PCOMPS
+from pyNastran.bdf.cards.properties.solid import PLSOLID, PSOLID, PIHEX, PCOMPS, PCOMPLS
 from pyNastran.bdf.cards.cyclic import CYAX, CYJOIN
 #from pyNastran.bdf.cards.msgmesh import CGEN, GMCORD, GMLOAD
 
@@ -123,7 +123,7 @@ from pyNastran.bdf.cards.bdf_sets import (
     RADSET,
 )
 from pyNastran.bdf.cards.params import PARAM, PARAM_MYSTRAN, PARAM_NASA95
-from pyNastran.bdf.cards.dmig import DMIG, DMIAX, DMI, DMIJ, DMIK, DMIJI, DMIG_UACCEL, DTI
+from pyNastran.bdf.cards.dmig import DMIG, DMIAX, DMI, DMIJ, DMIK, DMIJI, DMIG_UACCEL, DTI, DTI_UNITS
 from pyNastran.bdf.cards.thermal.loads import (QBDY1, QBDY2, QBDY3, QHBDY, TEMP, TEMPD, TEMPB3,
                                                TEMPRB, QVOL, QVECT)
 from pyNastran.bdf.cards.thermal.thermal import (CHBDYE, CHBDYG, CHBDYP, PCONV, PCONVM,
@@ -323,6 +323,7 @@ CARD_MAP = {
     'PSOLID' : PSOLID,
     'PLSOLID' : PLSOLID,
     'PCOMPS' : PCOMPS,
+    'PCOMPLS': PCOMPLS,
 
     'CTETRA4' : CTETRA4,
     'CPENTA6' : CPENTA6,
@@ -638,7 +639,7 @@ CARD_MAP = {
     'DMIJI' : DMIJI,
     'DMIJ' : DMIJ,
     'DMIAX' : DMIAX,
-    'DTI' : DTI,
+    #'DTI' : DTI,
     'DMIG_UACCEL' : DMIG_UACCEL,
 
     'BCRPARA' : BCRPARA,
@@ -4629,7 +4630,8 @@ class AddCards(AddMethods):
         self._add_constraint_spc_object(spc)
         return spc
 
-    def add_mpc(self, conid, nodes, components, coefficients, comment='') -> MPC:
+    def add_mpc(self, conid: int, nodes: List[int], components: List[str], coefficients: List[float],
+                comment: str='') -> MPC:
         """
         Creates an MPC card
 
@@ -4753,8 +4755,12 @@ class AddCards(AddMethods):
         self._add_aero_object(aero)
         return aero
 
-    def add_caero1(self, eid, pid, igroup, p1, x12, p4, x43,
-                   cp=0, nspan=0, lspan=0, nchord=0, lchord=0, comment='') -> CAERO1:
+    def add_caero1(self, eid: int, pid: int, igroup: int,
+                   p1: NDArray3float, x12: float,
+                   p4: NDArray3float, x43: float,
+                   cp: int=0,
+                   nspan: int=0, lspan: int=0,
+                   nchord: int=0, lchord: int=0, comment: str='') -> CAERO1:
         """
         Defines a CAERO1 card, which defines a simplified lifting surface
         (e.g., wing/tail).
@@ -4763,9 +4769,8 @@ class AddCards(AddMethods):
         ----------
         eid : int
             element id
-        pid : int, PAERO1
+        pid : int
             int : PAERO1 ID
-            PAERO1 : PAERO1 object (xref)
         igroup : int
             Group number
         p1 : (1, 3) ndarray float
@@ -4776,9 +4781,8 @@ class AddCards(AddMethods):
             distance along the flow direction from node 1 to node 2; (typically x, root chord)
         x43 : float
             distance along the flow direction from node 4 to node 3; (typically x, tip chord)
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
-            CORDx : Coordinate object (xref)
         nspan : int; default=0
             int > 0 : N spanwise boxes distributed evenly
             int = 0 : use lchord
@@ -4788,11 +4792,9 @@ class AddCards(AddMethods):
         lspan : int, AEFACT; default=0
             int > 0 : AEFACT reference for non-uniform nspan
             int = 0 : use nspan
-            AEFACT : AEFACT object  (xref)
         lchord : int, AEFACT; default=0
             int > 0 : AEFACT reference for non-uniform nchord
             int = 0 : use nchord
-            AEFACT : AEFACT object  (xref)
         comment : str; default=''
              a comment for the card
 
@@ -4803,7 +4805,8 @@ class AddCards(AddMethods):
         self._add_caero_object(caero)
         return caero
 
-    def add_caero2(self, eid: int, pid: int, igroup: int, p1: List[float], x12: float,
+    def add_caero2(self, eid: int, pid: int, igroup: int,
+                   p1: List[float], x12: float,
                    cp: int=0,
                    nsb: int=0, nint: int=0,
                    lsb: int=0, lint: int=0, comment: str='') -> CAERO2:
@@ -4817,16 +4820,14 @@ class AddCards(AddMethods):
             element id
         pid : int, PAERO2
             int : PAERO2 ID
-            PAERO2 : PAERO2 object (xref)
         igroup : int
             Group number
         p1 : (1, 3) ndarray float
             xyz location of point 1 (forward position)
         x12 : float
             length of the CAERO2
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
-            CORDx : Coordinate object (xref)
         nsb : int; default=0
             Number of slender body elements
         lsb : int; default=0
@@ -4861,9 +4862,8 @@ class AddCards(AddMethods):
         ----------
         eid : int
             element id
-        pid : int, PAERO4
+        pid : int
             int : PAERO4 ID
-            PAERO4 : PAERO4 object (xref)
         p1 : (1, 3) ndarray float
             xyz location of point 1 (leading edge; inboard)
         p4 : (1, 3) ndarray float
@@ -4874,16 +4874,14 @@ class AddCards(AddMethods):
         x43 : float
             distance along the flow direction from node 4 to node 3
             (typically x, tip chord)
-        cp : int, CORDx; default=0
+        cp : int; default=0
             int : coordinate system
-            CORDx : Coordinate object (xref)
         nspan : int; default=0
             int > 0 : N spanwise boxes distributed evenly
             int = 0 : use lchord
-        lspan : int, AEFACT; default=0
+        lspan : int; default=0
             int > 0 : AEFACT reference for non-uniform nspan
             int = 0 : use nspan
-            AEFACT : AEFACT object  (xref)
         comment : str; default=''
              a comment for the card
 
@@ -5928,7 +5926,7 @@ class AddCards(AddMethods):
         return aestat
 
     def add_aelink(self, aelink_id: int, label: str,
-                   independent_labels: List[str], linking_coefficents: List[float],
+                   independent_labels: List[str], linking_coefficients: List[float],
                    comment: str='') -> AELINK:
         """
         Creates an AELINK card, which defines an equation linking
@@ -5942,17 +5940,17 @@ class AddCards(AddMethods):
             name of the dependent AESURF card
         independent_labels : List[str, ..., str]
             name for the independent variables (AESTATs)
-        linking_coefficents : List[float]
+        linking_coefficients : List[float]
             linking coefficients
         comment : str; default=''
             a comment for the card
 
         """
-        aelink = AELINK(aelink_id, label, independent_labels, linking_coefficents, comment=comment)
+        aelink = AELINK(aelink_id, label, independent_labels, linking_coefficients, comment=comment)
         self._add_aelink_object(aelink)
         return aelink
 
-    def add_aelist(self, sid, elements, comment='') -> AELIST:
+    def add_aelist(self, sid: int, elements: List[int], comment: str='') -> AELIST:
         """
         Creates an AELIST card, which defines the aero boxes for
         an AESURF/SPLINEx.
@@ -5991,7 +5989,7 @@ class AddCards(AddMethods):
         self._add_aefact_object(aefact)
         return aefact
 
-    def add_diverg(self, sid, nroots, machs, comment='') -> DIVERG:
+    def add_diverg(self, sid: int, nroots: int, machs: List[float], comment: str='') -> DIVERG:
         """
         Creates an DIVERG card, which is used in divergence
         analysis (SOL 144).
@@ -6501,8 +6499,11 @@ class AddCards(AddMethods):
         self._add_rigid_element_object(elem)
         return elem
 
-    def add_rbe3(self, eid, refgrid, refc, weights, comps, Gijs,
-                 Gmi=None, Cmi=None, alpha=0.0, comment='') -> RBE3:
+    def add_rbe3(self, eid: int, refgrid: int, refc: str,
+                 weights: List[float], comps: List[str], Gijs: List[int],
+                 Gmi=None, Cmi=None,
+                 alpha: float=0.0, tref: float=0.0,
+                 comment: str='') -> RBE3:
         """
         Creates an RBE3 element
 
@@ -7538,6 +7539,26 @@ class AddCards(AddMethods):
         fields = ['DSCONS', dscid, label, nid_eid, comp, limit, opt, layer_id]
         self.reject_card_lines('DSCONS', print_card_(fields).split('\n'), show_log=False)
 
+    def add_aepress(self, mach, sym_xz: str, sym_xy: str, ux_id: int, dmij: str, dmiji: str):
+        #AEPRESS MACH SYMXZ SYMXY UXID DMIJ DMIJI
+        """adds an AEPRESS card"""
+        assert isinstance(sym_xz, str), sym_xz
+        assert isinstance(sym_xy, str), sym_xy
+        assert isinstance(dmij, str), dmij
+        assert isinstance(dmiji, str), dmiji
+        fields = ['AEPRESS', mach, sym_xz, sym_xy, ux_id, dmij, dmiji]
+        self.reject_card_lines('AEPRESS', print_card_(fields).split('\n'), show_log=False)
+
+    def add_aeforce(self, mach: float, sym_xz: str, sym_xy: str, ux_id: int, mesh: str, force: int, dmik: str, perq: str):
+        """adds an AEPRESS card"""
+        assert isinstance(mesh, str), mesh
+        assert isinstance(sym_xz, str), sym_xz
+        assert isinstance(sym_xy, str), sym_xy
+        assert isinstance(dmik, str), dmik
+        assert isinstance(perq, str), perq
+        fields = ['AEFORCE', mach, sym_xz, sym_xy, ux_id, mesh, force, dmik, perq]
+        self.reject_card_lines('AEPRESS', print_card_(fields).split('\n'), show_log=False)
+
     def add_dvset(self, vid: int, dv_type: str, field: int, pref: float, pids: List[float],
                   alpha: float=1.0):
         """
@@ -8079,9 +8100,12 @@ class AddCards(AddMethods):
         self._add_convection_property_object(prop)
         return prop
 
-    def add_dti(self, name, fields, comment='') -> DTI:
+    def add_dti(self, name, fields, comment='') -> Union[DTI, DTI_UNITS]:
         """Creates a DTI card"""
-        dti = DTI(name, fields, comment=comment)
+        if name == 'UNITS':
+            dti = DTI_UNITS(name, fields, comment=comment)
+        else:
+            dti = DTI(name, fields, comment=comment)
         self._add_dti_object(dti)
         return dti
 

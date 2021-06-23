@@ -1,7 +1,7 @@
 """various OP2 tests"""
 import os
 import unittest
-import getpass
+from pathlib import Path
 
 import numpy as np
 from cpylog import get_logger
@@ -34,7 +34,6 @@ from pyNastran.op2.test.test_op2 import run_op2, main as test_op2
 from pyNastran.bdf.test.bdf_unit_tests import Tester
 from pyNastran.bdf.cards.test.utils import save_load_deck
 from pyNastran.bdf.bdf_interface.compare_card_content import compare_elements
-from pyNastran.bdf.mesh_utils.cut_model_by_plane import get_element_centroids, get_stations
 
 #from pyNastran.op2.tables.oef_forces.oef_force_objects import (
     #RealPlateBilinearForceArray, RealPlateForceArray)
@@ -46,9 +45,9 @@ from pyNastran.femutils.test.utils import is_array_close
 from pyNastran.op2.result_objects.grid_point_weight import make_grid_point_weight
 from pyNastran.op2.tables.geom.geom4 import _read_spcadd_mpcadd
 
-PKG_PATH = pyNastran.__path__[0]
-MODEL_PATH = os.path.abspath(os.path.join(PKG_PATH, '..', 'models'))
-OP2_TEST_PATH = os.path.abspath(os.path.join(PKG_PATH, 'op2', 'test', 'examples'))
+PKG_PATH = Path(pyNastran.__path__[0])
+MODEL_PATH = (PKG_PATH / '..'/ 'models').resolve()
+OP2_TEST_PATH = (PKG_PATH / 'op2' / 'test' / 'examples').resolve()
 
 
 class TestOP2Unit(Tester):
@@ -193,7 +192,7 @@ class TestOP2(Tester):
         log = get_logger(level='warning')
         op2_filename = os.path.join(MODEL_PATH, 'elements', 'static_elements.op2')
         model = OP2Geom(log=log)
-        model.read_op2(op2_filename=op2_filename, combine=True, build_dataframe=None,
+        model.read_op2(op2_filename=op2_filename, combine=True, build_dataframe=False,
                        skip_undefined_matrices=False,
                        encoding=None)
 
@@ -207,7 +206,7 @@ class TestOP2(Tester):
         }
         model2.set_additional_generalized_tables_to_read(tables)
         with self.assertRaises(NotImplementedError):
-            model2.read_op2(op2_filename=op2_filename, combine=True, build_dataframe=None,
+            model2.read_op2(op2_filename=op2_filename, combine=True, build_dataframe=False,
                             skip_undefined_matrices=False,
                             encoding=None)
 
@@ -488,7 +487,7 @@ class TestOP2(Tester):
         #read_op2(op2_filename=op2_filename, combine=True, subcases=None,
                  #exclude_results=None, include_results=None,
                  #log=None, debug=True, debug_file=None,
-                 #build_dataframe=None,
+                 #build_dataframe=False,
                  #skip_undefined_matrices=True, mode='msc',
                  #encoding=None)
         run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=False,
@@ -1020,7 +1019,12 @@ class TestOP2(Tester):
         diff_cards2.sort()
         assert len(diff_cards2) == 0, diff_cards2
 
-        model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        model = BDF(debug=True, log=log, mode='msc')
+        model._add_disabled_cards()
+        model.read_bdf(bdf_filename=bdf_filename, validate=True, xref=False,
+                       punch=False, read_includes=True, save_file_structure=False,
+                       encoding=None)
         nid = 1
         sid = 601
         mag = 1.0
@@ -1050,9 +1054,14 @@ class TestOP2(Tester):
         diff_cards2.sort()
         assert len(diff_cards2) == 0, diff_cards2
 
-        model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        model = BDF(debug=True, log=log, mode='msc')
+        model._add_disabled_cards()
+        model.read_bdf(bdf_filename=bdf_filename, validate=True, xref=False,
+                       punch=False, read_includes=True, save_file_structure=False,
+                       encoding=None)
         model.safe_cross_reference()
-        save_load_deck(model)
+        save_load_deck(model, remove_disabled_cards=False, run_save_load_hdf5=False)
 
         run_op2(op2_filename, make_geom=True, write_bdf=True, read_bdf=False,
                 write_f06=True, write_op2=False,
@@ -1122,7 +1131,11 @@ class TestOP2(Tester):
         diff_cards2.sort()
         assert len(diff_cards2) == 0, diff_cards2
 
-        model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        model = BDF(debug=True, log=log, mode='msc')
+        model._add_disabled_cards()
+        model.read_bdf(bdf_filename=bdf_filename, validate=True, xref=False,
+                       punch=False, read_includes=True, save_file_structure=False,
+                       encoding=None)
         model.safe_cross_reference()
 
         # run_op2_reader - super strange PLOAD4 bug
@@ -1301,7 +1314,12 @@ class TestOP2(Tester):
         #diff_cards2.sort()
         #assert len(diff_cards2) == 0, diff_cards2
 
-        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        model = BDF(debug=True, log=log, mode='msc')
+        model._add_disabled_cards()
+        model.read_bdf(bdf_filename=bdf_filename, validate=True, xref=False,
+                       punch=False, read_includes=True, save_file_structure=False,
+                       encoding=None)
         #model.safe_cross_reference()
 
         #save_load_deck(model, run_renumber=False)
@@ -1331,7 +1349,12 @@ class TestOP2(Tester):
         #diff_cards2.sort()
         #assert len(diff_cards2) == 0, diff_cards2
 
-        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        model = BDF(debug=True, log=log, mode='msc')
+        model._add_disabled_cards()
+        model.read_bdf(bdf_filename=bdf_filename, validate=True, xref=False,
+                       punch=False, read_includes=True, save_file_structure=False,
+                       encoding=None)
         #model.safe_cross_reference()
 
         #save_load_deck(model, run_renumber=False)
@@ -1376,7 +1399,7 @@ class TestOP2(Tester):
                 stop_on_failure=True, dev=False,
                 build_pandas=False, log=log)
 
-    def test_bdf_op2_other_29(self):
+    def test_bdf_op2_other_30(self):
         """checks rot063akd2s_107.bdf, which tests CampbellDiagram"""
         log = get_logger(level='info')
         #bdf_filename = os.path.join(MODEL_PATH, 'other', 'rot063akd2s_107.bdf')
@@ -1395,7 +1418,36 @@ class TestOP2(Tester):
         #save_load_deck(model, run_save_load=False)
 
         log = get_logger(level='warning')
-        run_op2(op2_filename, make_geom=False, write_bdf=False, read_bdf=False,
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=False,
+                write_f06=True, write_op2=True,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
+
+    def test_bdf_op2_other_31(self):
+        """checks htrussx.bdf, which tests getting rid of the Panel"""
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'other', 'htrussx.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'other', 'htrussx.op2')
+
+        #  can't parse replication
+        #unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            #'', bdf_filename, log=log)
+        #diff_cards2 = list(set(diff_cards))
+        #diff_cards2.sort()
+        #assert len(diff_cards2) == 0, diff_cards2
+
+        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model.safe_cross_reference()
+
+        #save_load_deck(model, run_save_load=False)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=False,
                 write_f06=True, write_op2=False,
                 is_mag_phase=False,
                 is_sort2=False, is_nx=None, delete_f06=True,
@@ -1403,7 +1455,200 @@ class TestOP2(Tester):
                 compare=False, debug=False, binary_debug=True,
                 quiet=True,
                 stop_on_failure=True, dev=False,
-                build_pandas=False, log=log)
+                build_pandas=True, log=log)
+
+    def test_nx_initial_final_separation(self):
+        """
+        checks nx/contact_model.bdf, which tests
+        initial/final contact separation distance
+        """
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'nx', 'contact_model.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'nx', 'contact_model.op2')
+
+        #  can't parse replication
+        unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            '', bdf_filename, log=log)
+        diff_cards2 = list(set(diff_cards))
+        diff_cards2.sort()
+        assert len(diff_cards2) == 0, diff_cards2
+
+        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model.safe_cross_reference()
+
+        #save_load_deck(model, run_save_load=False)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                write_f06=True, write_op2=True,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
+
+    def test_nx_composite_solids(self):
+        """
+        checks nx/composite_solids/test.bdf, which tests
+        centroidal CHEXA composite stress
+        """
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'nx', 'composite_solids', 'test.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'nx', 'composite_solids', 'test.op2')
+
+        #  can't parse replication
+        unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            '', bdf_filename, log=log)
+        diff_cards2 = list(set(diff_cards))
+        diff_cards2.sort()
+        assert len(diff_cards2) == 0, diff_cards2
+
+        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model.safe_cross_reference()
+
+        #save_load_deck(model, run_save_load=False)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                write_f06=True, write_op2=False,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
+
+    def test_nx_composite_solids_corner(self):
+        """
+        checks nx/composite_solids/test_nx_corner.bdf, which tests
+        corner CHEXA composite stress
+        """
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'nx', 'composite_solids', 'test_nx_corner.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'nx', 'composite_solids', 'test_nx_corner.op2')
+
+        #  can't parse replication
+        unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            '', bdf_filename, log=log)
+        diff_cards2 = list(set(diff_cards))
+        diff_cards2.sort()
+        assert len(diff_cards2) == 0, diff_cards2
+
+        unused_model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model.safe_cross_reference()
+
+        #save_load_deck(model, run_save_load=False)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                write_f06=True, write_op2=False,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
+
+    def test_msc_2017_failure_indices_strength_ratio(self):
+        """
+        checks msc/failure_indices_strength_ratio/TestStressTemp.op2, which tests
+         - op2_results.strength_ratio.cquad4_composite_stress[1]
+         - op2_results.failure_indices.cquad4_composite_force[1]
+
+        """
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'msc', 'failure_indices_strength_ratio', 'TestStressTemp.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'msc', 'failure_indices_strength_ratio', 'TestStressTemp.op2')
+
+        unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            '', bdf_filename, log=log)
+        diff_cards2 = list(set(diff_cards))
+        diff_cards2.sort()
+        assert len(diff_cards2) == 0, diff_cards2
+
+        model = read_bdf(bdf_filename, debug=False, log=log, xref=True)
+        #model.safe_cross_reference()
+
+        save_load_deck(model, run_save_load=True)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                write_f06=True, write_op2=False, write_hdf5=False,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
+
+    def test_msc_2017_units(self):
+        """
+        checks msc/units_mass_spring_damper/units_mass_spring_damper.op2, which tests
+         - UNITS table for MSC 2014
+        """
+        log = get_logger(level='info')
+        #bdf_filename = os.path.join(MODEL_PATH, 'msc', 'units_mass_spring_damper', 'test_nx_corner.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'msc', 'units_mass_spring_damper', 'units_mass_spring_damper.op2')
+
+        #  can't parse replication
+        #unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            #'', bdf_filename, log=log)
+        #diff_cards2 = list(set(diff_cards))
+        #diff_cards2.sort()
+        #assert len(diff_cards2) == 0, diff_cards2
+
+        #model = read_bdf(bdf_filename, debug=False, log=log, xref=False)
+        #model.safe_cross_reference()
+
+        #save_load_deck(model, run_save_load=False)
+
+        log = get_logger(level='warning')
+        with self.assertRaises(NotImplementedError):
+            run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                    write_f06=True, write_op2=False,
+                    is_mag_phase=False,
+                    is_sort2=False, is_nx=None, delete_f06=True,
+                    subcases=None, exclude=None, short_stats=False,
+                    compare=False, debug=False, binary_debug=True,
+                    quiet=True,
+                    stop_on_failure=True, dev=False,
+                    build_pandas=True, log=log)
+
+    def test_msc_2021_cbush_rbe3(self):
+        """
+        checks msc/cbush_2021/cbush_test.op2, which tests
+         - UNITS table for MSC 2021
+        """
+        log = get_logger(level='info')
+        bdf_filename = os.path.join(MODEL_PATH, 'msc', 'cbush_2021', 'cbush_test.bdf')
+        op2_filename = os.path.join(MODEL_PATH, 'msc', 'cbush_2021', 'cbush_test.op2')
+
+        unused_fem1, unused_fem2, diff_cards = self.run_bdf(
+            '', bdf_filename, log=log)
+        diff_cards2 = list(set(diff_cards))
+        diff_cards2.sort()
+        assert len(diff_cards2) == 0, diff_cards2
+
+        model = read_bdf(bdf_filename, debug=False, log=log, xref=True)
+        #model.safe_cross_reference()
+
+        save_load_deck(model, run_save_load=True)
+
+        log = get_logger(level='warning')
+        run_op2(op2_filename, make_geom=True, write_bdf=False, read_bdf=True,
+                write_f06=True, write_op2=False,
+                is_mag_phase=False,
+                is_sort2=False, is_nx=None, delete_f06=True,
+                subcases=None, exclude=None, short_stats=False,
+                compare=False, debug=False, binary_debug=True,
+                quiet=True,
+                stop_on_failure=True, dev=False,
+                build_pandas=True, log=log)
 
     def test_op2_nasa_nastran_01(self):
         """checks sdr11se_s2dc.bdf, which tests ComplexCBushStressArray"""
@@ -1500,73 +1745,6 @@ class TestOP2(Tester):
         op2.write_f06(f06_filename)
         os.remove(f06_filename)
 
-    @unittest.skipIf(getpass.getuser() != 'sdoyle', 'local test')
-    def test_op2_bwb(self):  # pragma: no cover
-        log = get_logger(level='warning')
-        folder = os.path.join(MODEL_PATH, 'bwb')
-        op2_filename = os.path.join(folder, 'bwb_saero.op2')
-        op2 = OP2Geom(debug=False, log=log, debug_file=None, mode=None)
-        op2.load_as_h5 = True
-        op2.read_op2(op2_filename=op2_filename, combine=True,
-                     build_dataframe=None, skip_undefined_matrices=False,
-                     encoding=None)
-
-        model = op2
-        model.cross_reference()
-        gpforce = op2.grid_point_forces[1]
-        out = model.get_xyz_in_coord_array(cid=0)
-        nid_cp_cd, xyz_cid0, xyz_cp, icd_transform, icp_transform = out
-        nids = nid_cp_cd[:, 0]
-        nid_cd = nid_cp_cd[:, [0, 2]]
-        eids, element_centroids_cid0 = get_element_centroids(model)
-        coord_out = model.coords[0]
-
-        #cid_p1 = 0 # start
-        #cid_p3 = 0 # end
-        #cid_p2 = 0 # coord
-        #p1-p2 defines the x-axis
-        #k is defined by the z-axis
-        #p1 = np.array([1354., 0., 0.]) # origin
-        #p2 = np.array([1354., 1245., 0.]) # xaxis
-        #p3 = np.array([1354., 1245., 0.]) # end
-        #zaxis = np.array([0., 0., 1.])
-        #method = 'Z-Axis Projection'
-        #idir = 0
-
-        #p1 = np.array([1354., 0., 0.]) # origin
-        #p2 = np.array([1354., 0., 1.]) # xzplane
-        #p3 = np.array([1354., 1245., 0.]) # end
-        #zaxis = np.array([0., 0., 1.])
-        #method = 'CORD2R'
-        #idir = 1 # x-direction in this rotated system
-
-        # axial
-        p1 = np.array([0., 0., 0.]) # origin
-        p2 = np.array([1600., 0., 0.]) # xaxis
-        p3 = np.array([1600., 0., 0.]) # end
-        zaxis = np.array([0., 0., 1.])
-        method = 'Z-Axis Projection'
-        idir = 0
-
-        xyz1, xyz2, xyz3, i, k, coord_out, stations = get_stations(
-            model, p1, p2, p3, zaxis,
-            method=method, cid_p1=0, cid_p2=0, cid_p3=0,
-            cid_zaxis=0, idir=idir, nplanes=100)
-        print(f'stations = {stations}')
-
-        # i/j/k vector is nan
-        print(f'origin: {coord_out.origin}')
-        print(f'zaxis: {coord_out.e2}')
-        print(f'xzplane: {coord_out.e3}')
-
-        force_sum, moment_sum = gpforce.shear_moment_diagram(
-            xyz_cid0, eids, nids, icd_transform,
-            element_centroids_cid0,
-            model.coords, nid_cd, stations, coord_out,
-            idir=idir, itime=0, debug=True, log=model.log)
-        #dd
-        plot_smt(stations, force_sum, moment_sum, show=False)
-
     @unittest.skipIf(not IS_H5PY, "No h5py")
     def test_op2_solid_bending_02(self):
         log = get_logger(level='warning')
@@ -1575,7 +1753,7 @@ class TestOP2(Tester):
         op2 = OP2(debug=False, log=log, debug_file=None, mode=None)
         op2.load_as_h5 = True
         op2.read_op2(op2_filename=op2_filename, combine=True,
-                     build_dataframe=None, skip_undefined_matrices=False,
+                     build_dataframe=False, skip_undefined_matrices=False,
                      encoding=None)
         #op2 = read_op2(op2_filename, debug=False)
         del op2
@@ -2704,6 +2882,7 @@ class TestOP2(Tester):
         #write_f06 = True
         log = get_logger(level='warning')
         bdf = BDF(log=log)
+        bdf._add_disabled_cards()
         bdf.read_bdf(bdf_filename, xref=False)
 
         debug = False
@@ -2874,7 +3053,7 @@ class TestOP2(Tester):
         model.set_transient_times(times)
         op2_filename = os.path.abspath(os.path.join(MODEL_PATH, 'sol_101_elements',
                                                     'mode_solid_shell_bar.op2'))
-        model.read_op2(op2_filename, combine=True, build_dataframe=None,
+        model.read_op2(op2_filename, combine=True, build_dataframe=False,
                        skip_undefined_matrices=False,
                        encoding=None)
         isubcase = 1
@@ -3239,62 +3418,6 @@ def _verify_ids(bdf, op2, isubcase=1):
         for eid in eids:
             assert eid in out[card_type], 'eid=%s eids=%s card_type=%s'  % (eid, out[card_type], card_type)
 
-def plot_smt(x, force_sum, moment_sum, show=True):
-    """plots the shear, moment, torque plots"""
-    import matplotlib.pyplot as plt
-    plt.close()
-    #f, ax = plt.subplots()
-    # ax = fig.subplots()
-    fig = plt.figure(1)
-    ax = fig.gca()
-    ax.plot(x, force_sum[:, 0], '-*')
-    ax.set_title('X vs. Axial')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Axial')
-    ax.grid(True)
-
-    fig = plt.figure(2)
-    ax = fig.gca()
-    ax.plot(x, force_sum[:, 1], '-*')
-    ax.set_title('X vs. Shear Y')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Shear Y')
-    ax.grid(True)
-
-    fig = plt.figure(3)
-    ax = fig.gca()
-    ax.plot(x, force_sum[:, 2], '-*')
-    ax.set_title('X vs. Shear Z')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Shear Z')
-    ax.grid(True)
-
-    fig = plt.figure(4)
-    ax = fig.gca()
-    ax.plot(x, moment_sum[:, 0], '-*')
-    ax.set_title('X vs. Torque')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Torque')
-    ax.grid(True)
-
-    fig = plt.figure(5)
-    ax = fig.gca()
-    ax.plot(x, moment_sum[:, 1], '-*')
-    ax.set_title('X vs. Moment Y')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Moment Y')
-    ax.grid(True)
-
-    fig = plt.figure(6)
-    ax = fig.gca()
-    ax.plot(x, moment_sum[:, 2], '-*')
-    ax.set_title('X vs. Moment Z')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Moment Z')
-    ax.grid(True)
-
-    if show:
-        plt.show()
 
 if __name__ == '__main__':  # pragma: no cover
     ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'

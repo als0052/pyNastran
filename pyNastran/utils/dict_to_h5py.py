@@ -193,6 +193,7 @@ class HDF5Exporter:
                             nlevels+1)
         else:
             # print(f'string_types = {string_types}')   # undefined variable?
+			#print('string_types =', string_types)
             print('value =', value)
             msg = (f'key={key!r} Type={class_name!r} is not in custom_types='
                    f'{custom_types_list} and does not have:\n - '
@@ -598,12 +599,32 @@ def _cast(h5_result_attr) -> Optional[Any]:
         out = np.array(h5_result_attr).tolist()
         # raise NotImplementedError(h5_result_attr.dtype)
     else:
-        out = np.array(h5_result_attr)
-    #  assert not isinstance(out, bytes), f'out={out!r}'
+    # assert not isinstance(out, bytes), f'out={out!r}'
     # if isinstance(out, bytes):
     #     out = out.decode(encoding)
+        out = np.array(h5_result_attr)
+        if out.dtype.name == 'object':
+            out = out.tolist()
     return out
 
+def _cast_array(h5_result_attr) -> Optional[Any]:
+    """converts the h5py type back into the actual type"""
+    if h5_result_attr is None:
+        return None
+
+    if len(h5_result_attr.shape) == 0:
+        # np.int32/np.float32/np.str_
+        # calling tolist() doesn't make it a list; it makes it an int/float/str
+        out = np.array(h5_result_attr).tolist()
+        raise RuntimeError(out)
+        #raise NotImplementedError(h5_result_attr.dtype)
+    else:
+        out = np.array(h5_result_attr)
+
+    #assert not isinstance(out, bytes), f'out={out!r}'
+    #if isinstance(out, bytes):
+        #out = out.decode(encoding)
+    return out
 
 def cast_strings(group, encoding: str) -> List[str]:
     """
@@ -613,7 +634,7 @@ def cast_strings(group, encoding: str) -> List[str]:
     @param encoding:
     @return:
     """
-    bytes_list = _cast(group).tolist()
+    bytes_list = _cast(group)
     str_list = [bytesi.decode(encoding) for bytesi in bytes_list]
     return str_list
 

@@ -4,6 +4,7 @@ defines readers for BDF objects in the OP2 EPT/EPTS table
 #pylint: disable=C0103,R0914
 from struct import unpack, Struct
 from typing import Tuple, List
+from functools import partial
 
 import numpy as np
 
@@ -94,8 +95,6 @@ class EPT(GeomCommon):
             (3002, 30, 415): ['VIEW3D', self._read_fake],  # record 63
 
             (13501, 135, 510) : ['PFAST', self._read_pfast_msc],  # MSC-specific
-
-            # NX-specific
             (3601, 36, 55) : ['PFAST', self._read_pfast_nx],  # NX-specific
             (3801, 38, 979) : ['PPLANE', self._read_pplane],
             (11801, 118, 560) : ['PWELD', self._read_fake],
@@ -1313,26 +1312,50 @@ class EPT(GeomCommon):
 
         DMAP NX 11
         ----------
-        NX has 23 fields in NX 11 (supported)
-        NX has 18 fields in the pre-2001 format (supported)
+        NX has 23 fields in NX 11
+        NX has 18 fields in the pre-2001 format
 
         DMAP MSC 2005
         -------------
-        MSC has 23 fields in 2005 (supported)
-        MSC has 18 fields in the pre-2001 format (supported)
+        MSC has 23 fields in 2005
+        MSC has 18 fields in the pre-2001 format
 
         DMAP MSC 2016
         -------------
-        TODO: MSC has 24 fields in 2016.1 (not supported)
-        MSC has 18 fields in the pre-2001 format (supported)
+        MSC has 24 fields in 2016.1
+        MSC has 18 fields in the pre-2001 format
+
+        DMAP MSC 2021
+        -------------
+        MSC has 27 fields in 2021
+
         """
+        card_name = 'PBUSH'
+        card_obj = PBUSH
+        methods = {
+            72 : self._read_pbush_nx_72,  # 72=4*18
+            92 : self._read_pbush_msc_92, # 92=4*23
+            96 : self._read_pbush_msc_96, # 96=4*24
+            108 : self._read_pbush_msc_108, # 108=4*27
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self._add_op2_property,
+                                       methods, data, n)
+        except DoubleCardError:
+            nx_method = partial(self._read_pbush_nx_72, card_obj)
+            msc_method = partial(self._read_pbush_msc_92, card_obj)
+            n = self._read_dual_card(
+                data, n,
+                nx_method, msc_method,
+                card_name, self._add_op2_property)
+
         # we're listing nx twice because NX/MSC used to be consistent
         # the new form for MSC is not supported
-        n = self._read_dual_card(data, n, self._read_pbush_nx, self._read_pbush_msc,
-                                 'PBUSH', self._add_op2_property)
+        #n = self._read_dual_card(data, n, self._read_pbush_nx, self._read_pbush_msc,
+                                 #'PBUSH', self._add_op2_property)
         return n
 
-    def _read_pbush_nx(self, data: bytes, n: int) -> int:
+    def _read_pbush_nx_72(self, card_obj: PBUSH, data: bytes, n: int) -> Tuple[int, List[PBUSH]]:
         """PBUSH(1402,14,37) - 18 fields"""
         ntotal = 72 * self.factor
         struct1 = Struct(mapfmt(self._endian + b'i17f', self.size))
@@ -1358,8 +1381,11 @@ class EPT(GeomCommon):
             n += ntotal
         return n, props
 
-    def _read_pbush_msc(self, data: bytes, n: int) -> int:
-        """PBUSH(1402,14,37) - 23 fields"""
+    def _read_pbush_msc_92(self, card_obj: PBUSH, data: bytes, n: int) -> Tuple[int, List[PBUSH]]:
+        """PBUSH(1402,14,37) - 23 fields
+
+        MSC 2005r2 to <MSC 2016
+        """
         ntotal = 92 * self.factor # 23*4
         struct1 = Struct(mapfmt(self._endian + b'i22f', self.size))
 
@@ -1377,6 +1403,66 @@ class EPT(GeomCommon):
             pid = out[0]
             assert pid > 0, pid
             prop = PBUSH.add_op2_data(out)
+            props.append(prop)
+            n += ntotal
+        return n, props
+
+    def _read_pbush_msc_96(self, card_obj: PBUSH, data: bytes, n: int) -> Tuple[int, List[PBUSH]]:
+        """PBUSH(1402,14,37) - 24 fields
+
+        MSC 2016.1? to 2020
+        """
+        ntotal = 96 * self.factor # 24*4
+        struct1 = Struct(mapfmt(self._endian + b'i22f f', self.size))
+
+        ndata = len(data) - n
+        nentries = ndata // ntotal
+        assert nentries > 0, 'table={self.table_name} len={ndata}'
+        assert ndata % ntotal == 0, f'table={self.table_name} leftover = {ndata} % {ntotal} = {ndata % ntotal}'
+
+        props = []
+        for unused_i in range(nentries):
+            edata = data[n:n+ntotal]
+            out = struct1.unpack(edata)
+            #(pid, k1, k2, k3, k4, k5, k6, b1, b2, b3, b4, b5, b6,
+             #g1, g2, g3, g4, g5, g6, sa, st, ea, et, mass) = out
+            pid = out[0]
+            assert pid > 0, pid
+            prop = PBUSH.add_op2_data(out)
+            props.append(prop)
+            n += ntotal
+        return n, props
+
+    def _read_pbush_msc_108(self, card_obj: PBUSH, data: bytes, n: int) -> Tuple[int, List[PBUSH]]:
+        """
+        PBUSH(1402,14,37) - 27 fields
+        MSC 2021 to current
+
+        ints    = (1402, 14, 37, 2, 100000.0, 200000.0, 300000.0, 0.15, 0.25, 0.35, 1000.0, 2000.0, 3000.0, 0.0015, 0.0025, 0.0035, 0,
+                   -1577048263, -1577048263, -1577048263, -1577048263, -1577048263, 1065353216, 1065353216, 1065353216, 1065353216, 0, 0, 0, 0)
+        floats  = (1402, 14, 37,
+                   2, 100000.0, 200000.0, 300000.0, 0.15, 0.25, 0.35, 1000.0, 2000.0, 3000.0, 0.0015, 0.0025, 0.0035, 0.0,
+                   -1.7367999061094683e-18, -1.7367999061094683e-18, -1.7367999061094683e-18, -1.7367999061094683e-18, -1.7367999061094683e-18, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
+        """
+        ntotal = 108 * self.factor # 27*4
+        struct1 = Struct(mapfmt(self._endian + b'i22f 4f', self.size))
+        #self.show_data(data, types='ifs')
+
+        ndata = len(data) - n
+        nentries = ndata // ntotal
+        assert nentries > 0, 'table={self.table_name} len={ndata}'
+        assert ndata % ntotal == 0, f'table={self.table_name} leftover = {ndata} % {ntotal} = {ndata % ntotal}'
+
+        props = []
+        for unused_i in range(nentries):
+            edata = data[n:n+ntotal]
+            out = struct1.unpack(edata)
+            #(pid, k1, k2, k3, k4, k5, k6, b1, b2, b3, b4, b5, b6,
+             #g1, g2, g3, g4, g5, g6, sa, st, ea, et) = out
+            pid = out[0]
+            assert pid > 0, pid
+            prop = PBUSH.add_op2_data(out)
+            str(prop)
             props.append(prop)
             n += ntotal
         return n, props
@@ -2109,11 +2195,47 @@ class EPT(GeomCommon):
 
     def _read_pconv(self, data: bytes, n: int) -> int:
         """common method for reading PCONVs"""
-        n = self._read_dual_card(data, n, self._read_pconv_nx, self._read_pconv_msc,
-                                 'PCONV', self._add_pconv)
+        #n = self._read_dual_card(data, n, self._read_pconv_nx, self._read_pconv_msc,
+                                 #'PCONV', self._add_pconv)
+
+        card_name = 'PCONV'
+        card_obj = PCONV
+        methods = {
+            16 : self._read_pconv_nx_16,  # 16=4*4
+            56 : self._read_pconv_msc_56, # 56=4*14
+        }
+        try:
+            n, elements = self._read_double_card_load(
+                card_name, card_obj,
+                methods, data, n)
+        except DoubleCardError:
+            nx_method = partial(self._read_pconv_nx_16, card_obj)
+            msc_method = partial(self._read_pconv_msc_56, card_obj)
+            n, elements = self._read_dual_card_load(
+                data, n,
+                nx_method, msc_method,
+                card_name, self._add_op2_property)
+
+        nelements = len(elements)
+        for prop in elements:
+            key = prop.pconid
+            if key in self.convection_properties:
+                prop_old = self.convection_properties[key]
+                if prop != prop_old:
+                    self.log.warning(prop.raw_fields())
+                    self.log.warning(prop_old.raw_fields())
+                    self.log.warning(f'PCONV pconid={key}; old, new\n{prop_old}{prop}')
+                    # this will fail due to a duplicate id
+                    self._add_pconv(prop)
+                #else:
+                    # already exists
+            else:
+                self._add_pconv(prop)
+        self.card_count['PCONV'] = nelements
+
         return n
 
-    def _read_pconv_nx(self, data: bytes, n: int) -> int:
+    def _read_pconv_nx_16(self, card_obj: PCONV, data: bytes, n: int) -> int:
         """
         (11001,110,411)- NX version
         """
@@ -2134,7 +2256,7 @@ class EPT(GeomCommon):
             n += ntotal
         return n, props
 
-    def _read_pconv_msc(self, data: bytes, n: int) -> int:
+    def _read_pconv_msc_56(self, card_obj: PCONV, data: bytes, n: int) -> int:
         """
         (11001,110,411)- MSC version - Record 25
         """
@@ -2285,7 +2407,7 @@ class EPT(GeomCommon):
                        kr1, kr2, kr3, mass, ge)
             prop = PFAST.add_op2_data(data_in)
             str(prop)
-            print(prop)
+            #print(prop)
             self._add_op2_property(prop)
             n += ntotal
         self.card_count['PFAST'] = nproperties
@@ -2735,11 +2857,11 @@ class EPT(GeomCommon):
                 # this is a fake PSHELL
                 propi = self.properties[pid]
                 if prop == propi:
-                    self.log.warning('Fake PSHELL (skipping):\n%s' % propi)
+                    self.log.warning(f'Fake PSHELL {pid:d} (skipping):\n{propi}')
                     nproperties -= 1
                     continue
                 #assert propi.type in ['PCOMP', 'PCOMPG'], propi.get_stats()
-                self.log.error(f'PSHELL is also {propi.type} (skipping PSHELL):\n{propi}{prop}')
+                self.log.error(f'PSHELL {pid:d} is also {propi.type} (skipping PSHELL):\n{propi}{prop}')
                 nproperties -= 1
                 continue
             #continue
@@ -2764,6 +2886,7 @@ class EPT(GeomCommon):
             struct_6i4s = Struct(self._endian + b'6q8s')
 
         nproperties = (len(data) - n) // ntotal
+        nproperties_found = 0
         for unused_i in range(nproperties):
             edata = data[n:n+ntotal]
             out = struct_6i4s.unpack(edata)
@@ -2771,10 +2894,16 @@ class EPT(GeomCommon):
             #data_in = [pid, mid, cid, inp, stress, isop, fctn]
             if self.is_debug_file:
                 self.binary_debug.write('  PSOLID=%s\n' % str(out))
+
+            n += ntotal
+            fctn = out[-1]
+            if fctn == b'FAKE':
+                self.log.warning('    PSOLID=%s; is this a PCOMPLS?' % str(out))
+                continue
             prop = PSOLID.add_op2_data(out)
             self._add_op2_property(prop)
-            n += ntotal
-        self.card_count['PSOLID'] = nproperties
+            nproperties_found += 1
+        self.card_count['PSOLID'] = nproperties_found
         return n
 
 # PSOLIDL

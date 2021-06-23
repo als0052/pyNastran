@@ -155,7 +155,7 @@ class MPT(GeomCommon):
                 (mid, g1, g2, g3, g4, g5, g6, rho, aj1, aj2, aj3,
                  tref, ge, St, Sc, Ss, mcsid, *blanks) = out
                 mat = MAT2.add_op2_data(out)
-                self.log.debug(str(mat))
+                self.log.debug(f'\n{mat}')
             #print("MAT2 = ",out)
 
             if 0 < mid <= 1e8:  # just a checker for out of range materials
@@ -311,10 +311,32 @@ class MPT(GeomCommon):
         5 GE   RS Structural damping coefficient
 
         """
+        card_name = 'MAT10'
+        card_obj = MAT10
+        methods = {
+            20 : self._read_mat10_20,
+            24 : self._read_mat10_24,
+            #56 : self._read_ctria6_current_56,
+        }
+        try:
+            n = self._read_double_card(card_name, card_obj, self.add_op2_material,
+                                       methods, data, n)
+        except DoubleCardError:
+            raise
+
+        #n = self._read_split_card(data, n,
+                                  #self._read_ctria6_current, self._read_ctria6_v2001,
+                                  #'CTRIA6', CTRIA6, self.add_op2_element)
+        return n
+
+    def _read_mat10_20(self, material: MAT10, data: bytes, n: int) -> Tuple[int, MAT10]:
         ntotal = 20 * self.factor # 5*4
         s = Struct(mapfmt(self._endian + b'i4f', self.size))
-        nmaterials = (len(data) - n) // ntotal
+        ndatai = (len(data) - n)
+        nmaterials = ndatai // ntotal
+        assert ndatai % ntotal == 0
         assert nmaterials > 0, nmaterials
+        materials = []
         for unused_i in range(nmaterials):
             edata = data[n:n+ntotal]
             out = s.unpack(edata)
@@ -328,9 +350,42 @@ class MPT(GeomCommon):
                 continue
             mat = MAT10.add_op2_data(out)
             assert mat.mid > 0, mat
-            self.add_op2_material(mat)
-        self.card_count['MAT10'] = nmaterials
-        return n
+            materials.append(mat)
+        return n, materials
+
+    def _read_mat10_24(self, material: MAT10, data: bytes, n: int) -> Tuple[int, MAT10]:
+        """
+        1 MID   I  Material identification number
+        2 BULK  RS Bulk modulus
+        3 RHO   RS Mass density
+        4 C     RS Speed of sound
+        5 GE    RS Structural damping coefficient
+        6 ALPHA RS
+        data = (25, 1.0, 0.1, 3.16, 0.02, 0)
+             = (25, 1.0, 0.1, 3.16, 0.02, 0.0)
+        """
+        ntotal = 24 * self.factor # 6*4
+        s = Struct(mapfmt(self._endian + b'i5f', self.size))
+        ndatai = (len(data) - n)
+        nmaterials = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        assert nmaterials > 0, nmaterials
+        materials = []
+        for unused_i in range(nmaterials):
+            edata = data[n:n+ntotal]
+            out = s.unpack(edata)
+            n += ntotal
+
+            (mid, bulk, rho, c, ge, alpha) = out
+            if self.is_debug_file:
+                self.binary_debug.write('  MAT10=%s\n' % str(out))
+            if mid == 0 and bulk == 0. and rho == 0. and c == 0. and ge == 0. and alpha == 0.0:
+                self.log.debug('  skipping empty MAT10...')
+                continue
+            mat = MAT10.add_op2_data(out)
+            assert mat.mid > 0, mat
+            materials.append(mat)
+        return n, materials
 
     def _read_mat11(self, data: bytes, n: int) -> int:
         """
@@ -550,20 +605,54 @@ class MPT(GeomCommon):
         Word Name Type Description
         1 MID     I Material identification number
         2 TID(15) I entry identification numbers
+
+        test_op2 -g C:\MSC.Software\msc_nastran_runs\varmat4c.op2
+        C:\MSC.Software\simcenter_nastran_2019.2\tpl_post2\m402mat3_matt3_ex_ey_nuxy_gxy.op2
         """
         ntotal = 64 * self.factor # 16*4
         s = Struct(mapfmt(self._endian + b'16i', self.size))
-        nmaterials = (len(data) - n) // ntotal
+        ndatai = len(data) - n
+        nmaterials = ndatai // ntotal
+        assert ndatai % ntotal == 0
+        assert nmaterials > 0
         for unused_i in range(nmaterials):
             edata = data[n:n+ntotal]
             out = s.unpack(edata)
+
             (mid, *tables, a, b, c, d) = out
+            #mid, _ex, _eth, _ez, _nuxth, _nuthz, _nuzx, rho, _gxz, ax, _ath, az, _ge, *other = out
+            if self._nastran_format == 'msc':
+                mid, a, b, c, d, e, f, rho, g, h, i, ax, j, az, k, m = out
+                assert sum([a, b, c, d, e, f, g, h, i, j, k, m]) == 0, out
+                #assert rho == 92, rho
+                #assert ax == 93, out
+                #assert az == 93, az
+                #assert rho == 92, rho
+            elif self._nastran_format == 'nx':
+                # $ NX
+                # $ MID	T(EX)	T(EY)	T(EZ)	T(NUXY)	T(NUYZ)	T(NUZX)	T(RHO)
+                # $ T(GXY)	T(GZX)	T(AX)	T(AY)	T(AZ)	T(GE)
+                # MATT3          2       1               2       3                        +
+                # +              4
+                # $            mid      ex              ez    nuxy
+                # MATT3          2       1               2       3                        +
+                # $            gxy
+                # +              4
+                #$            mid      ex      ey      ez    nuxy    nuyz    nuzx      rho
+                #$            gxy     gzx     ax      ay      az       ge
+
+                mid, ex, ey, ez, nuxy, nuyz, nuzx, rho, gxy, gzx, ax, ay, ax, gea, geb, gec = out
+                #assert ex == 1, f'ex={ex} out={out}'
+                #assert ey == 0, f'ey={ey} out={out}'
+                #assert ez == 2, out
+                #assert nuxy == 3, out
+                #assert gxy == 4, out
+                #assert ge == 0, ge
+                assert sum([nuyz, nuzx, rho, gzx, ax, ay, ax, gea, geb, gec]) == 0, [mid, nuyz, nuzx, rho, gzx, ax, ay, ax, gea, geb, gec]
+            else:
+                raise NotImplementedError(self._nastran_format)
             if self.is_debug_file:
                 self.binary_debug.write('  MATT3=%s\n' % str(out))
-            assert a == 0, out
-            assert b == 0, out
-            assert c == 0, out
-            assert d == 0, out
             #mat = MATT3(mid, ex_table=None, eth_table=None, ez_table=None, nuth_table=None,
                      #nuxz_table=None, rho_table=None, gzx_table=None,
                      #ax_table=None, ath_table=None, az_table=None, ge_table=None,)

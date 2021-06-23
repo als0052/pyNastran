@@ -48,7 +48,16 @@ from typing import List, Tuple, Dict, Set, Union, Optional, Any
 
 from numpy import array
 import numpy as np
-from cpylog import get_logger2
+import cpylog
+if cpylog.__version__ >= '1.5.0':  # pragma: no cover
+    #import warnings
+    #warnings.warn('run "pip install cpylog>=1.5.0"')
+    from cpylog import get_logger2, log_exc
+else:  # pramga: no cover
+    from cpylog import get_logger2
+    def log_exc(*args, **kwargs):
+        pass
+
 
 from pyNastran import is_release, __version__
 from pyNastran.f06.errors import FatalError
@@ -340,6 +349,9 @@ FLOAT_PARAMS_1 = {
     b'XUPFAC',
     b'ZUZRR1', b'ZUZRR2', b'ZUZRR3', b'ZUZRR4', b'ZUZRR5', b'ZUZRR6', b'ZUZRR7', b'ZUZRR8', b'ZUZRR9', b'ZUZRR10',
     b'K6ROT',
+
+    # models/msc/units_mass_spring_damper.op2
+    b'RBTR',
 }
 FLOAT_PARAMS_2 = {
     b'BETA', b'CB1', b'CB2', b'CK1', b'CK2', b'CK3', b'CK41', b'CK42',
@@ -1029,10 +1041,10 @@ class OP2_Scalar(LAMA, ONR, OGPF,
             b'OQGCF1' : [self._read_oqg1_3, self._read_oqg_4], # Contact force at grid point.
             b'OQGCF2' : [self._read_oqg2_3, self._read_oqg_4], # Contact force at grid point.
 
-            b'OSPDS1' : [self._nx_table_passer, self._table_passer],  # Final separation distance.
+            b'OSPDS1' : [self._read_opsds1_3, self._read_opsds1_4],  # Final separation distance.
             b'OSPDS2' : [self._nx_table_passer, self._table_passer],
 
-            b'OSPDSI1' : [self._nx_table_passer, self._table_passer], # Initial separation distance.
+            b'OSPDSI1' : [self._read_opsdi1_3, self._read_opsdi1_4], # Initial separation distance.
             b'OSPDSI2' : [self._nx_table_passer, self._table_passer], # Output contact separation distance results.
 
             #b'OBC1' : [self._read_obc1_3, self._read_obc1_4],
@@ -1419,19 +1431,21 @@ class OP2_Scalar(LAMA, ONR, OGPF,
         iloc = self.f.tell()
         try:
             ndata2 = self._read_pvto_4_helper(data, ndata)
-        except NotImplementedError as error:
-            self.log.error(str(error))
+        except (NotImplementedError, AssertionError) as error:
             #raise  # only for testing
             if 'dev' in __version__ and self.IS_TESTING:
                 raise  # only for testing
+            self.log.error(str(error))
+            log_exc(self.log)
             self.f.seek(iloc)
             ndata2 = ndata
+
         if 'NXVER' in self.params and not self.is_nx:
             self.set_as_nx()
             self.log.debug('found PARAM,NXVER -> setting as NX')
         return ndata2
 
-    def _read_pvto_4_helper(self, data, ndata: int) -> int:
+    def _read_pvto_4_helper(self, data: bytes, ndata: int) -> int:
         """reads PARAM cards"""
         xword = (4 * self.factor)
         nvalues = ndata // xword
@@ -1543,12 +1557,11 @@ class OP2_Scalar(LAMA, ONR, OGPF,
                 if isinstance(value, str):
                     assert word in STR_PARAMS_1, f'word={word}'
                 else:
-                    if self.size == 4:
-                        self.show_data(data[istart:istart+20], types='sifqd')
-                    elif self.size == 8:
-                        self.show_data(data[istart:istart+40], types='sifqd')
-
-                    assert word in FLOAT_PARAMS_1, f'word={word}'
+                    #if self.size == 4:
+                        #self.show_data(data[istart:istart+20], types='sifqd')
+                    #elif self.size == 8:
+                        #self.show_data(data[istart:istart+40], types='sifqd')
+                    assert word in FLOAT_PARAMS_1, f'float/str; word={word} value={value}'
                 i += 5
             #elif flag == 3: # string
                 #assert self.size in [4, 8], (key, self.size, flag)
@@ -1975,7 +1988,7 @@ class OP2_Scalar(LAMA, ONR, OGPF,
                 msg = (
                     f'Invalid Table = {table_name!r}\n\n'
                     'If you have matrices that you want to read, see:\n'
-                    '  model.set_additional_matrices_to_read(matrices)'
+                    '  model.set_additional_matrices_to_read(matrices)\n'
                     '  matrices = {\n'
                     "      b'BHH' : True,\n"
                     "      b'KHH' : False,\n"

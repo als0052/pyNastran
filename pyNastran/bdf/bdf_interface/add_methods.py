@@ -11,7 +11,7 @@ if TYPE_CHECKING:  # pragma: no cover
     )
     from pyNastran.bdf.cards.elements.elements import CFAST, CGAP, CRAC2D, CRAC3D, PLOTEL, GENEL
     from pyNastran.bdf.cards.properties.properties import PFAST, PGAP, PRAC2D, PRAC3D
-    from pyNastran.bdf.cards.properties.solid import PLSOLID, PSOLID, PIHEX, PCOMPS
+    from pyNastran.bdf.cards.properties.solid import PLSOLID, PSOLID, PIHEX, PCOMPS, PCOMPLS
     #from pyNastran.bdf.cards.msgmesh import CGEN, GMCORD
 
     from pyNastran.bdf.cards.elements.springs import CELAS1, CELAS2, CELAS3, CELAS4
@@ -499,14 +499,14 @@ class AddMethods(BDFAttributes):
                                                PBEAM, PBEAML, PBCOMP, PBMSECT,
                                                PBEND, PBEAM3, PPLANE, PSHEAR,
                                                PSHELL, PCOMP, PCOMPG, PLPLANE,
-                                               PSOLID, PLSOLID, PIHEX, PCOMPS],
+                                               PSOLID, PLSOLID, PIHEX, PCOMPS, PCOMPLS],
                              allow_overwrites: bool=False) -> None:
         """
         adds one of the following objects:
           PELAS, PBUSH, PBUSH1D, PBUSH2D, PDAMP,
           PROD, PBAR, PBARL, PBEAM, PBEAML, PBCOMP,
           PSHELL, PCOMP, PCOMPG,
-          PSOLID, PLSOLID
+          PSOLID, PLSOLID, PIHEX, PCOMPS, PCOMPLS
         """
         key = prop.pid
         assert key > 0, 'pid=%s prop=%s' % (key, prop)
@@ -923,10 +923,16 @@ class AddMethods(BDFAttributes):
 
     def _add_convection_property_object(self, prop: Union[PCONV, PCONVM]) -> None:
         key = prop.pconid
-        assert key > 0, key
-        assert key not in self.convection_properties, key
-        self.convection_properties[key] = prop
-        self._type_to_id_map[prop.type].append(key)
+        if key in self.convection_properties:
+            if not prop == self.convection_properties[key]:
+                assert key not in self.convection_properties, 'PCONV/PCONVM.pconid=%s\nold=\n%snew=\n%s' % (
+                    key, self.convection_properties[key], prop)
+        else:
+            assert key > 0, 'pid=%s PCONV/PCONVM=\n%s' % (key, prop)
+            #assert key > 0, key
+            #assert key not in self.convection_properties, key
+            self.convection_properties[key] = prop
+            self._type_to_id_map[prop.type].append(key)
 
     def _add_thermal_bc_object(self, bc: Union[CONV, CONVM, RADM, TEMPBC], key) -> None:
         assert key > 0

@@ -71,7 +71,7 @@ def transform_force_moment(force_in_local, moment_in_local,
     coord_out_T = coord_out.beta()
 
     if debug:
-        log.debug(coord_out)
+        log.debug(str(coord_out))
         if consider_rxf:
             for ii in range(xyz_cid0.shape[0]):
                 log.debug('***i=%s xyz=%s nid=%s cd=%s' % (
@@ -143,7 +143,7 @@ def transform_force_moment(force_in_local, moment_in_local,
         if consider_rxf:
             delta = xyz_cid0[i, :] - summation_point_cid0[np.newaxis, :]
             #delta_minus_origin = delta - analysis_coord.origin
-            #delta_in_cid = dot(delta_minus_origin, cd_T.T)
+            #delta_in_cid = delta_minus_origin @ cd_T.T
             if debug:
                 log.debug('delta = %s' % delta)
             rxf = np.cross(delta, force_in_globali.T)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 import sys
 import inspect
+import warnings
+from copy import deepcopy
 from struct import Struct, pack
 from typing import List, Dict, TYPE_CHECKING
 
@@ -15,7 +17,7 @@ from pyNastran.op2.vector_utils import (
 from pyNastran.utils.numpy_utils import integer_types
 from pyNastran.op2.op2_interface.write_utils import set_table3_field
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pyNastran.nptyping import (
         NDArrayN3float, NDArray3float, NDArrayN2int, NDArrayNint, NDArrayNfloat)
     from pyNastran.bdf.bdf import (BDF, CORD,
@@ -243,54 +245,12 @@ class RealGridPointForcesArray(GridPointForces):
         minor_axis / headers = [T1, T2, T3, R1, R2, R3]
         name = mode
         """
-        import pandas as pd
-        headers = self.get_headers()
         #name = self.name
+        headers = self.get_headers()
         if self.is_unique:
-            ntimes = self.data.shape[0]
-            nnodes = self.data.shape[1]
-            #nvalues = ntimes * nnodes
-            node_element = self.node_element.reshape((ntimes * nnodes, 2))
-            if self.nonlinear_factor not in (None, np.nan):
-                column_names, column_values = self._build_dataframe_transient_header()
-                #column_names = column_names[0]
-                #column_values = column_values[0]
-
-                column_values2 = []
-                for value in column_values:
-                    values2 = []
-                    for valuei in value:
-                        values = np.ones(nnodes) * valuei
-                        values2.append(values)
-                    values3 = np.vstack(values2).ravel()
-                    column_values2.append(values3)
-                df1 = pd.DataFrame(column_values2).T
-                df1.columns = column_names
-                #df1.columns.names = column_names
-                #self.data_frame.columns.names = column_names
-
-                df2 = pd.DataFrame(node_element)
-                df2.columns = ['NodeID', 'ElementID']
-                df3 = pd.DataFrame(self.element_names.ravel())
-                df3.columns = ['ElementType']
-
-                dfs = [df2, df3]
-                for i, header in enumerate(headers):
-                    df = pd.DataFrame(self.data[:, :, i].ravel())
-                    df.columns = [header]
-                    dfs.append(df)
-                data_frame = df1.join(dfs)
-                #print(self.data_frame)
-            else:
-                df1 = pd.DataFrame(node_element)
-                df1.columns = ['NodeID', 'ElementID']
-                df2 = pd.DataFrame(self.element_names[0, :])
-                df2.columns = ['ElementType']
-                df3 = pd.DataFrame(self.data[0])
-                df3.columns = headers
-                data_frame = df1.join([df2, df3])
-                #print(data_frame)
+            data_frame = self._build_unique_dataframe(headers)
         else:
+            import pandas as pd
             node_element = [self.node_element[:, 0], self.node_element[:, 1]]
             if self.nonlinear_factor not in (None, np.nan):
                 column_names, column_values = self._build_dataframe_transient_header()
@@ -308,7 +268,54 @@ class RealGridPointForcesArray(GridPointForces):
             #print(self.data_frame)
         self.data_frame = data_frame
 
-    def __eq__(self, table):  # pragma: no cover
+    def _build_unique_dataframe(self, headers: List[str]):
+        import pandas as pd
+        ntimes = self.data.shape[0]
+        nnodes = self.data.shape[1]
+        #nvalues = ntimes * nnodes
+        node_element = self.node_element.reshape((ntimes * nnodes, 2))
+        if self.nonlinear_factor not in (None, np.nan):
+            column_names, column_values = self._build_dataframe_transient_header()
+            #column_names = column_names[0]
+            #column_values = column_values[0]
+
+            column_values2 = []
+            for value in column_values:
+                values2 = []
+                for valuei in value:
+                    values = np.ones(nnodes) * valuei
+                    values2.append(values)
+                values3 = np.vstack(values2).ravel()
+                column_values2.append(values3)
+            df1 = pd.DataFrame(column_values2).T
+            df1.columns = column_names
+            #df1.columns.names = column_names
+            #self.data_frame.columns.names = column_names
+
+            df2 = pd.DataFrame(node_element)
+            df2.columns = ['NodeID', 'ElementID']
+            df3 = pd.DataFrame(self.element_names.ravel())
+            df3.columns = ['ElementType']
+
+            dfs = [df2, df3]
+            for i, header in enumerate(headers):
+                df = pd.DataFrame(self.data[:, :, i].ravel())
+                df.columns = [header]
+                dfs.append(df)
+            data_frame = df1.join(dfs)
+            #print(self.data_frame)
+        else:
+            df1 = pd.DataFrame(node_element)
+            df1.columns = ['NodeID', 'ElementID']
+            df2 = pd.DataFrame(self.element_names[0, :])
+            df2.columns = ['ElementType']
+            df3 = pd.DataFrame(self.data[0])
+            df3.columns = headers
+            data_frame = df1.join([df2, df3])
+            #print(data_frame)
+        return data_frame
+
+    def __eq__(self, table) -> bool:  # pragma: no cover
         is_valid = False
         try:
             self.assert_equal(table)
@@ -423,7 +430,7 @@ class RealGridPointForcesArray(GridPointForces):
                                coords: Dict[int, CORD],
                                nid_cd: NDArrayN2int,
                                icd_transform: Dict[int, NDArrayNint],
-                               itime: int=0, debug: bool=True,
+                               itime: int=0, debug: bool=False,
                                log: Optional[SimpleLogger]=None):
         """
         Extracts Patran-style freebody loads.  Freebody loads are the
@@ -524,9 +531,10 @@ class RealGridPointForcesArray(GridPointForces):
                                 consider_rxf: bool=True,
                                 itime: int=0,
                                 assume_sorted: bool=False,
-                                debug: bool=True,
+                                stop_on_nan: bool=False,
+                                debug: bool=False,
                                 log: Optional[SimpleLogger]=None,
-                                idtype: str='int32') -> Tuple[NDArrayN3float, NDArrayN3float, NDArray3float, NDArray3float]:
+                                idtype: str='int32') -> Tuple[NDArray3float, NDArray3float]:
         """
         Extracts Patran-style interface loads.  Interface loads are the
         internal loads at a cut.
@@ -560,14 +568,12 @@ class RealGridPointForcesArray(GridPointForces):
             debugging flag
         logger : logger; default=None
             a logger object that gets used when debug=True
+        assume_sorted : bool; default=False
+            sorts the nodes/elements if they're not
+            is sorting required?
 
         Returns
         -------
-        force_out : (Nnodes, 3) float ndarray
-            the ith float components in the coord_out coordinate frame
-        moment_out : (Nnodes, 3) float ndarray
-            the ith moment components about the summation point in the
-            coord_out coordinate frame
         force_out_sum : (3, ) float ndarray
             the sum of forces in the coord_out coordinate frame
         moment_out_sum : (3, ) float ndarray
@@ -583,10 +589,48 @@ class RealGridPointForcesArray(GridPointForces):
                   1D output style:
                     - Make loads in the direction of the element
                   This process can't be done for 0D or 3D elements
+
         """
+        # force_out : (Nnodes, 3) float ndarray
+        #     the ith float components in the coord_out coordinate frame
+        # moment_out : (Nnodes, 3) float ndarray
+        #     the ith moment components about the summation point in the
+        #     coord_out coordinate frame
+        _check_array(nids, 'int', 1)
+        _check_array(nid_cd, 'int', 2)
+        _check_array(eids, 'int', 1)
+        _check_array(xyz_cid0, 'float', 2)
+
+        unused_force_out, unused_moment_out, force_out_sum, moment_out_sum = self._extract_interface_loads(
+            nids, eids, coord_out, coords, nid_cd, icd_transform, xyz_cid0,
+            summation_point=summation_point, consider_rxf=consider_rxf,
+            itime=itime, assume_sorted=assume_sorted,
+            stop_on_nan=stop_on_nan,
+            debug=debug, log=log, idtype=idtype)
+        return force_out_sum, moment_out_sum
+
+    def _extract_interface_loads(self,
+                                nids: NDArrayNint,
+                                eids: NDArrayNint,
+                                coord_out: CORD,
+                                coords: Dict[int, CORD],
+                                nid_cd: NDArrayN2int,
+                                icd_transform: Dict[int, CORD],
+                                xyz_cid0: NDArrayN3float,
+                                summation_point: Optional[NDArray3float]=None,
+                                consider_rxf: bool=True,
+                                itime: int=0,
+                                assume_sorted: bool=False,
+                                debug: bool=False,
+                                stop_on_nan: bool=False,
+                                log: Optional[SimpleLogger]=None,
+                                idtype: str='int32') -> Tuple[NDArrayN3float, NDArrayN3float, NDArray3float, NDArray3float]:
+        """see ``extract_interface_loads``"""
         fdtype = self.data.dtype
         nid_cd = _get_nid_cd_from_nid_cp_cd(nid_cd)
-        if summation_point is not None:
+        if summation_point is None:
+            summation_point = np.array([0., 0., 0.])
+        else:
             summation_point = np.asarray(summation_point)
         #assert coord_in.Type == 'R', 'Only rectangular coordinate systems are supported; coord_in=\n%s' % str(coord_in)
         #assert coord_out.Type == 'R', 'Only rectangular coordinate systems are supported; coord_out=\n%s' % str(coord_out)
@@ -603,10 +647,11 @@ class RealGridPointForcesArray(GridPointForces):
             itime=itime, debug=debug)
         gpforce_nids, gpforce_eids, irange, force_out, moment_out = out
         if len(irange) == 0:
-            force_out = None
-            moment_out = None
-            force_out_sum = None
-            moment_out_sum = None
+            force_out_sum = np.full(3, np.nan, dtype=force_out.dtype)
+            moment_out_sum = np.full(3, np.nan, dtype=force_out.dtype)
+            if stop_on_nan:
+                raise RuntimeError(f'no nodes/elements in intersect; summation_point={summation_point}')
+
             return force_out, moment_out, force_out_sum, moment_out_sum
 
         if debug:
@@ -636,13 +681,19 @@ class RealGridPointForcesArray(GridPointForces):
         # update only the nodes that are in the CD coordinate systems (is_in_cd)
         #force_out_sum = np.full(3, np.nan, dtype=fdtype)
         #moment_out_sum = np.full(3, np.nan, dtype=fdtype)
+        nid_cd_used_sorted = nid_cd[is_in_cd, :][isort]
+        xyz_cid0_used_sorted = xyz_cid0[is_in_cd, :][isort]
         force_out, moment_out, force_out_sum, moment_out_sum = transform_force_moment_sum(
             force_global, moment_global,
-            coord_out, coords, nid_cd[is_in_cd, :][isort],
+            coord_out, coords, nid_cd_used_sorted,
             icd_transform,
-            xyz_cid0[is_in_cd, :][isort], summation_point_cid0=summation_point,
+            xyz_cid0_used_sorted, summation_point_cid0=summation_point,
             consider_rxf=consider_rxf,
             debug=debug, log=log)
+
+        if not np.isfinite(force_out_sum[0]) and stop_on_nan:
+            raise RuntimeError(f'no nodes/elements in intersect; summation_point={summation_point}')
+
         return force_out, moment_out, force_out_sum, moment_out_sum
 
     def _extract_interface_loads_helper(self, nids: NDArrayNint, eids: NDArrayNint,
@@ -650,7 +701,7 @@ class RealGridPointForcesArray(GridPointForces):
                                         idtype: str,
                                         fdtype: str,
                                         itime:int=0,
-                                        debug: bool=True) -> Tuple[NDArrayNint, NDArrayN3float, NDArrayN3float]:
+                                        debug: bool=False) -> Tuple[NDArrayNint, NDArrayN3float, NDArrayN3float]:
         force_out = np.full((0, 3), np.nan, dtype=fdtype)
         moment_out = np.full((0, 3), np.nan, dtype=fdtype)
         #force_out_sum = np.full(3, np.nan, dtype=fdtype)
@@ -669,7 +720,10 @@ class RealGridPointForcesArray(GridPointForces):
         is_in = np.in1d(gpforce_nids, nids, assume_unique=False)
         if not np.any(is_in):
             msg = 'no nodes found\n'
-            log.warning(msg)
+            if log:
+                log.warning(msg)
+            else:
+                warnings.warn(msg)
             irange = np.array([], dtype='int32')
             return gpforce_nids, gpforce_eids, irange, force_out, moment_out
 
@@ -735,18 +789,28 @@ class RealGridPointForcesArray(GridPointForces):
         """
         raise NotImplementedError()
 
-    def shear_moment_diagram(self, xyz_cid0: np.ndarray,
-                             eids: np.ndarray,
+
+    def shear_moment_diagram(self, # model,
                              nids: np.ndarray,
-                             icd_transform: Dict[int, NDArrayNint],
-                             element_centroids_cid0: NDArrayN3float,
-                             coords: Dict[int, CORD],
+                             xyz_cid0: np.ndarray,
                              nid_cd: NDArrayN2int,
+                             icd_transform: Dict[int, NDArrayNint],
+
+                             eids: np.ndarray,
+                             element_centroids_cid0: NDArrayN3float,
                              stations: NDArrayNfloat,
+                             coords: Dict[int, CORD],
                              coord_out: CORD,
-                             idir: int=0, itime: int=0,
+                             iaxis_march: Optional[NDArray3float]=None,
+                             itime: int=0,
+                             icoord: int=None,
+                             nodes_tol: Optional[float]=None,
+                             stop_on_nan: bool=False,
                              debug: bool=False,
-                             log: Optional[SimpleLogger]=None):
+                             log: Optional[SimpleLogger]=None) -> Tuple[NDArray3float,
+                                                                        NDArray3float,
+                                                                        Dict[int, CORD],
+                                                                        NDArrayNint, NDArrayNint]:
         """
         Computes a series of forces/moments at various stations along a
         structure.
@@ -773,26 +837,38 @@ class RealGridPointForcesArray(GridPointForces):
             The station to sum forces/moments about, where a station is
             the value of coord_out in the idir (e.g., for station=1, cid=0,
             idir=0, then x=1).
-            Be careful of picking exactly on symmetry planes/boundaries
-            of elements or nodes.
+            It is necessary that the spacing is constant.
             Stations should be sorted (negative to positive), but it not
             necessary (it makes it easier to see a monotonic change in
             the number of nodes/elements).
+            Try to avoid picking exactly on symmetry planes/boundaries
+            of elements or nodes.
         coord_out : CORD2R()
             the output coordinate system
-        idir : int; default=0
-            The axis of the coordinate system to consider
-            as the axial direction. This will be the direction that
-            we're marching.
+        iaxis_march : (3,) float narray; default=None -> coord_out.i
+            the normalized x-axis that defines the direction to march
+        icoord : int; default=None -> coord_out+1
+            the starting index for the coordinate systems that will be created
+            and placed in new_coords; useful for debugging
+        nodes_tol : float; default=None -> dstation
+            the tolerance bending the plane to pull nodes from
+
+        Returns
+        -------
+        force_sum / moment_sum : (nstations, 3) float ndarray
+            the forces/moments at the station
+        new_coords: Dict[int, CORD2R]
+            the station march coords starting from icoord
+        nelems, nnodes: (nstations,) int ndarray
+            the number of elements/nodes included in the summation
 
         Notes
         -----
         1.  Clip elements based on centroid.
             Elements that are less than the ith station are kept.
-        2.  Get the nodes for those elements.
-        3a. Extract the freebody loads and sum them about the
-            summation point (todo).
-        3b. Extract the interface loads and sum them about the
+        2.  Get the nodes on the opposite side of the clip plane
+            and the ones within nodes_tol of the plane.
+        3.  Extract the interface loads and sum them about the
             summation point.
 
         Examples
@@ -806,31 +882,78 @@ class RealGridPointForcesArray(GridPointForces):
         .. todo:: Not Tested...Does 3b work?  Can 3a give the right answer?
 
         """
-        #eids = np.asarray(eids, dtype='int32')
-        eids = np.asarray(eids, dtype=nid_cd.dtype)
-        nids = np.asarray(nids, dtype=nid_cd.dtype)
+        _check_array(nids, 'int', 1)
+        _check_array(nid_cd, 'int', 2)
+        _check_array(eids, 'int', 1)
+        _check_array(xyz_cid0, 'float', 2)
+        _check_array(element_centroids_cid0, 'float', 2)
+        _check_array(stations, 'float', 1)
+        assert len(nids) == nid_cd.shape[0]
+        assert len(nids) == xyz_cid0.shape[0]
+        assert len(eids) == element_centroids_cid0.shape[0]
+        assert isinstance(coords, dict), coords
+        assert isinstance(icd_transform, dict), icd_transform
+        if icoord is None:
+            icoord = max(coords) + 1
+
+        nid_cd = _get_nid_cd_from_nid_cp_cd(nid_cd)
+        idtype = nid_cd.dtype
+        fdtype = xyz_cid0.dtype
+
+        if iaxis_march is None:
+            iaxis_march = deepcopy(coord_out.i)
+
+        eids = np.asarray(eids, dtype=idtype)
+        nids = np.asarray(nids, dtype=idtype)
         assert len(eids.shape) == 1, eids.shape
         assert len(nids.shape) == 1, nids.shape
         assert len(stations.shape) == 1, stations.shape
-        nid_cd = _get_nid_cd_from_nid_cp_cd(nid_cd)
         nstations = len(stations)
         assert coord_out.type in ['CORD2R', 'CORD1R'], coord_out.type
-        beta = coord_out.beta()
-        element_centroids_coord = element_centroids_cid0 @ beta
-        xyz_coord = xyz_cid0 @ beta
-        x_centroid = element_centroids_coord[:, idir]
-        x_coord = xyz_coord[:, idir]
-        #print(f'xmin={x_centroid.min()} xmax={x_centroid.max()} (centroids)')
-        #print(f'xmin={x_coord.min()} xmax={x_coord.max()}')
+        #assert coord_march.type in ['CORD2R', 'CORD1R'], coord_march.type
+        #i_axis_march = deepcopy(coord_march.i)
+        #del iaxis_march
+        assert np.array_equal(nids, np.unique(nids))
+        assert np.array_equal(eids, np.unique(eids))
+        # ----------------------------------------------------------------------
 
-        fdtype = xyz_cid0.dtype
+        element_centroids_coord = coord_out.transform_node_to_local_array(element_centroids_cid0)
+        xyz_coord = coord_out.transform_node_to_local_array(xyz_cid0)
+
+        # we can hardcode this cause we transformed it into the output frame
+        # which is similar to the output coordinate frame
+        # minus sign because we march into the page for axial
+        #
+        idir = 0
+        x_elem_centroid = element_centroids_coord[:, idir]
+        x_coord = xyz_coord[:, idir]
 
         eids = np.unique(eids)
         force_sum = np.full((nstations, 3), np.nan, dtype=fdtype)
         moment_sum = np.full((nstations, 3), np.nan, dtype=fdtype)
 
-        offset = np.zeros(3, dtype='float64')
+        offset = np.zeros(3, dtype=fdtype)
+        new_coords = {}
+        nelems = []
+        nnodes = []
+
+        # calculate the value of dstation_x for the 1st station
+        doffset = (stations[1] - stations[0]) * iaxis_march
+        dsummation_point = coord_out.origin + doffset
+        dsummation_point_coord = coord_out.transform_node_to_local(dsummation_point)
+        dstation = dsummation_point_coord[idir]
+        if nodes_tol is None:
+            nodes_tol = dstation
+        assert nodes_tol >= 0., nodes_tol
+
         for istation, station in enumerate(stations):
+            # summation point creation
+            # in the global coordinate system
+            offset = station * iaxis_march
+
+            summation_point = coord_out.origin + offset  # in basic frame
+            summation_point_coord = coord_out.transform_node_to_local(summation_point)
+            station_x = summation_point_coord[idir]
             # we're picking the elements on one side of the centroid
             # and nodes on the other side
 
@@ -840,27 +963,47 @@ class RealGridPointForcesArray(GridPointForces):
             # one side of the cutting plane, we can take all the
             # nodes within some tolerance of the station direction and
             # find the free nodes
-            i = np.where(x_centroid <= station)[0]
+            #
+            ielem = np.where(x_elem_centroid <= station_x)[0]
+            nelem = len(ielem)
+            nelems.append(nelem)
 
             # We want to do this similarly for the elements.  Ideally,
             # we want a single line of elements (and not include extra)
             # to reduce the size of the array sooner.
             #
-            # can this be >=? it technically shouldn't matter, but we could speed things up
-            j = np.where(x_coord <= station)[0]
+            # We'll include a few extra nodes (with dstation) to include
+            # all the nodes for the boundary elements.  The extra nodes
+            # will have +forces and -forces, so they'll cancel.  The alternative
+            # is that we miss some the boundary nodes and get no force/moment.
+            #
+            jnode = np.where(x_coord >= (station_x-nodes_tol))[0]
+            nnode = len(jnode)
+            nnodes.append(nnode)
+
+            coord_save = deepcopy(coord_out)
+            coord_save.cid = icoord
+            coord_save.translate(offset)
+
+            assert np.allclose(coord_save.e1, summation_point)
+            new_coords[icoord] = deepcopy(coord_save)
+            #station_x_old = station_x
 
             # we'd break if we knew the user was traveling in the
             # "correct" direction, but we don't
-            if len(i) == 0 or len(j) == 0:
+            if nelem == 0:
                 continue
-            # summation point creation
-            offset[idir] = station
-            summation_point = coord_out.origin + offset
+            if nnode == 0:
+                continue
 
+            eidsi = eids[ielem]
+            nidsj = nids[jnode]
+            assert len(eidsi) == len(np.unique(eidsi))
+            assert len(nidsj) == len(np.unique(nidsj))
             if 0: # pragma: no cover
                 # I don't think this will work...
                 forcei, momenti = self.extract_freebody_loads(
-                    eids[i],
+                    eidsi,
                     coord_out, coords, nid_cd, icd_transform,
                     # xyz_cid0, summation_point,
                     itime=itime, debug=debug, log=log)
@@ -870,21 +1013,25 @@ class RealGridPointForcesArray(GridPointForces):
                 #       sum loads about summation point
                 moment_sum[istation, :] = momenti.sum(axis=0)
             else:
-                eidsi = eids[i]
-                nidsj = nids[j]
                 #print(f'eids={eidsi}; nids={nidsj}')
-                forcei, momenti, force_sumi, moment_sumi = self.extract_interface_loads(
-                    eidsi, nidsj,
+                force_sumi, moment_sumi = self.extract_interface_loads(
+                    nidsj, eidsi,
                     coord_out, coords, nid_cd, icd_transform,
                     xyz_cid0, summation_point, assume_sorted=True,
-                    itime=itime, # debug=debug,
-                    log=log)
-                log.info(f'neids={len(i):d} nnodes={len(j):d} force={force_sumi} moment={moment_sumi}')
-                if force_sumi is None:
+                    itime=itime, stop_on_nan=stop_on_nan,
+                    debug=debug, log=log)
+                #log.info(f'neids={len(ielem):d} nnodes={len(jnode):d} station={station:g}; '
+                         #f'force={force_sumi} moment={moment_sumi}')
+                if not np.isfinite(force_sumi[0]):
+                    if stop_on_nan:
+                        raise RuntimeError(f'station={station} is nan; force_sum={force_sumi}')
                     continue
                 force_sum[istation, :] = force_sumi
                 moment_sum[istation, :] = moment_sumi
-        return force_sum, moment_sum
+            icoord += 1
+        nelems = np.array(nelems, dtype=idtype)
+        nnodes = np.array(nnodes, dtype=idtype)
+        return force_sum, moment_sum, new_coords, nelems, nnodes
 
     def add_sort1(self, dt, node_id, eid, ename, t1, t2, t3, r1, r2, r3):
         """unvectorized method for adding SORT1 transient data"""
@@ -1836,4 +1983,30 @@ def _get_nid_cd_from_nid_cp_cd(nid_cd: np.ndarray) -> np.ndarray:
         assert isinstance(nid_cd[0, :].tolist()[0], int), nid_cd
         nid_cp_cd = nid_cd
         nid_cd = nid_cp_cd[:, [0, 2]]
+    assert nid_cd.shape[1] == 2, nid_cd
     return nid_cd
+
+def _check_array(x, dtype, dim: int, msg=''):
+    if isinstance(x, np.ndarray):
+        assert len(x.shape) == dim, x.shape
+        if dtype == 'float':
+            assert x.dtype.name in ['float32', 'float64'], x.dtype.name
+        elif dtype == 'int':
+            assert x.dtype.name in ['int32', 'int64'], x.dtype.name
+        else:
+            raise NotImplementedError(dtype)
+    else:
+        assert isinstance(x, (list, tuple)), x
+        if dim == 1:
+            val = x[0]
+        elif dim == 2:
+            val = x[0][0]
+        else:
+            raise NotImplementedError(dim)
+        if dtype == 'float':
+            assert isinstance(val, (float, np.float32, np.float64)), x
+        elif dtype == 'int':
+            assert isinstance(val, (int, np.int32, np.int64)), x
+        else:
+            raise NotImplementedError(dtype)
+    return

@@ -35,6 +35,8 @@ if qt_version == 'pyqt5':
     import PyQt5
 elif qt_version == 'pyside2':
     import PySide2
+elif qt_version == 'pyqt6':
+    import PyQt6
 else:
     raise NotImplementedError(qt_version)
 
@@ -634,7 +636,7 @@ class NastranIO(NastranGuiResults, NastranGeometryHelper):
             xref_nodes = True
             return model, xref_nodes
 
-        punch = False
+        punch = None
         if ext == '.pch':
             punch = True
 
@@ -655,6 +657,10 @@ class NastranIO(NastranGuiResults, NastranGeometryHelper):
             model.load(obj_filename=bdf_filename)
         else:  # read the bdf/punch
             model = BDF(log=log, debug=True)
+            #model.set_error_storage(nparse_errors=0,
+            #                        stop_on_parsing_error=True,
+            #                        nxref_errors=0,
+            #                        stop_on_xref_error=True)
             model.read_bdf(bdf_filename,
                            punch=punch, xref=False,
                            validate=True)
@@ -5728,7 +5734,8 @@ class NastranIO(NastranGuiResults, NastranGeometryHelper):
         if 'PSHELL' in model.card_count:
             is_pshell = True
 
-        pids_pcomp = model.get_card_ids_by_card_types(['PCOMP', 'PCOMPG'], combine=True)
+        composite_properties = ['PCOMP', 'PCOMPG', 'PCOMPS', 'PCOMPLS']
+        pids_pcomp = model.get_card_ids_by_card_types(composite_properties, combine=True)
         properties = model.properties
         for superelement in model.superelement_models.values():
             properties.update(superelement.properties)
@@ -5787,7 +5794,7 @@ class NastranIO(NastranGuiResults, NastranGeometryHelper):
                 thickness[i, 1] = prop.twelveIt3
                 thickness[i, 2] = prop.tst
 
-            elif prop.type in ['PCOMP', 'PCOMPG']:
+            elif prop.type in ['PCOMP', 'PCOMPG', 'PCOMPS', 'PCOMPLS']:
                 i = np.where(pids == pid)[0]
                 npliesi = prop.nplies
                 nplies_pcomp[i] = npliesi

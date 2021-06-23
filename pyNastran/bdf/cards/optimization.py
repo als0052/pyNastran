@@ -64,7 +64,13 @@ def validate_dvcrel(validate, element_type, cp_name):
     if not validate:
         return
     msg = 'DVCRELx: element_type=%r cp_name=%r is invalid' % (element_type, cp_name)
-    if element_type in ['CQUAD4']:
+    if element_type == 'CMASS4':
+        options = ['M']
+        _check_dvcrel_options(cp_name, element_type, options)
+    elif element_type == 'CELAS4':
+        options = ['K']
+        _check_dvcrel_options(cp_name, element_type, options)
+    elif element_type in ['CQUAD4']:
         options = ['T1', 'T2', 'T3', 'T4'] # 'ZOFFS',
         _check_dvcrel_options(cp_name, element_type, options)
     elif element_type == 'CTRIA3':
@@ -453,7 +459,7 @@ class DVXREL1(BaseCard):
 
             if coeff in ['PVAL']:
                 pass
-            elif not isinstance(coeff, float):
+            elif not isinstance(coeff, float_types):
                 msg += '  coeff[%i]=%s is not a float; type=%s\n' % (i, coeff, type(coeff))
         if msg:
             raise RuntimeError('Invalid %s\n' % self.type + msg + str(self))

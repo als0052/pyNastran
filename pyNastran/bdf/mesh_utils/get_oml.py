@@ -4,17 +4,26 @@ defines:
                            is_symmetric=True, consider_flippped_normals=True)
 
 """
+from io import StringIO
 from copy import deepcopy
+from pathlib import PurePath
+from typing import Set, Tuple, Union
 import numpy as np
 
-from pyNastran.bdf.bdf import read_bdf
+from pyNastran.bdf.bdf import BDF
+from pyNastran.bdf.mesh_utils.internal_utils import get_bdf_model
 #from pyNastran.bdf.bdf_interface.dev_utils import get_free_edges
 
 
-def get_oml_eids(bdf_filename, eid_start, theta_tol=30.,
-                 is_symmetric=True, consider_flippped_normals=True):
+def get_oml_eids(bdf_filename: Union[str, BDF, PurePath, StringIO],
+                 eid_start: int,
+                 theta_tol: float=30.,
+                 is_symmetric: bool=True,
+                 consider_flippped_normals: bool=True) -> Tuple[BDF, Set[int]]:
     """
-    extracts the OML faces (outer mold line)
+    Extracts the OML faces (outer mold line) of a shell model.  In other words,
+    find all the shell elements touching the current element without crossing
+    an MPC or rigid element.
 
     Parameters
     ----------
@@ -43,26 +52,27 @@ def get_oml_eids(bdf_filename, eid_start, theta_tol=30.,
     #---------------------------------
     theta_tol = np.radians(theta_tol)
 
-    model = read_bdf(bdf_filename, xref=True)
+    model = get_bdf_model(bdf_filename, xref=True, log=None, debug=True)
     maps = model._get_maps(
         eids=None, map_names=None,
         consider_0d=False, consider_0d_rigid=False,
         consider_1d=False, consider_2d=True, consider_3d=False)
     edge_to_eid_map = maps['edge_to_eid_map']
     eid_to_edge_map = maps['eid_to_edge_map']
-    nid_to_edge_map = maps['nid_to_edge_map']
+    unused_nid_to_edge_map = maps['nid_to_edge_map']
 
     #free_edges = get_free_edges(model, maps=maps)
     #---------------------------------
     normals = {}
     etypes_skipped = set()
+    shells = {'CTRIA3', 'CQUAD4', 'CTRIA6', 'CQUAD8', 'CQUAD'}
     for eid, elem in model.elements.items():
-        if elem.type in ['CTRIA3', 'CQUAD4']:
+        if elem.type in shells:
             normals[eid] = elem.Normal()
         else:
             if elem.type in etypes_skipped:
                 continue
-            model.log.debug('elem.type=%r is not supported' % elem.type)
+            model.log.debug(f'elem.type={elem.type!r} is not supported')
             etypes_skipped.add(elem.type)
 
     #eid_starts = eids_oml.tolist()
@@ -70,7 +80,7 @@ def get_oml_eids(bdf_filename, eid_start, theta_tol=30.,
     while eids_next:
         eid_starts = deepcopy(eids_next)
         eids_oml_start = deepcopy(eids_oml)
-        model.log.warning(len(eid_starts))
+        model.log.debug(f'nactive_elements = {len(eid_starts)}')
         while eid_starts:
             eid_start = eid_starts.pop()
             normal_start = normals[eid_start]
@@ -106,14 +116,14 @@ def get_oml_eids(bdf_filename, eid_start, theta_tol=30.,
                 normal = normals[eid]
                 # a o b = a * b * cos(theta)
                 # cos(theta) = (a o b)/ (a b); where |a| = 1; |b| = 1
-                cos_theta = normal @ normal_start
+                cos_theta = np.clip(normal @ normal_start, -1.0, 1.0)
                 theta = np.arccos(cos_theta)
                 if theta < theta_tol:
                     eids_next.add(eid)
                     eids_oml.add(eid)
                 elif consider_flippped_normals:
                     # handles flipped normals
-                    cos_theta = normal @ -normal_start
+                    cos_theta = np.clip(normal @ -normal_start, -1.0, 1.0)
                     theta = np.arccos(cos_theta)
                     if theta < theta_tol:
                         eids_next.add(eid)
@@ -123,17 +133,18 @@ def get_oml_eids(bdf_filename, eid_start, theta_tol=30.,
         #eids_next = eids_next.difference(eid_starts)
         #print('eids_next =', eids_next)
         #print('-------------------------------')
-    model.log.warning('done...')
+    model.log.debug('done with get_oml_eids')
 
-    with open('eids_oml.txt', 'w') as eids_file:
-        eids_file.write('eids_oml = %s\n' % list(eids_oml))
-    return eids_oml
+    #with open('eids_oml.txt', 'w') as eids_file:
+        #eids_file.write('eids_oml = %s\n' % list(eids_oml))
+    return model, eids_oml
 
-def main():
+def main():  # pragma: no cover
     """runs the test problem"""
     bdf_filename = 'bwb_saero.bdf'
     eid_start = 2810
-    eids_oml = get_oml_eids(bdf_filename, eid_start)
+    model, eids_oml = get_oml_eids(bdf_filename, eid_start)
+    del eids_oml
 
 if __name__ == '__main__':  # pragma: no cover
     main()
