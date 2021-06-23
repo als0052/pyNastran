@@ -82,10 +82,7 @@ BDF Reader/Writer
    - Solid skinning (free faces)
    - Length, area, volume, mass breakdowns
 
-
-.. todo:: Maybe the list of cards supported should be moved to a sub-page; it is a rather long list. Or perhaps add more columns to the list?
-
-- list of cards supported...
+- list of cards supported:
 
 .. include: ./supported_cards_include.rst.txt
 
@@ -239,8 +236,7 @@ OP2 Results
 
 Main OP2 Results
 ================
-The main op2 results can be accessed directly from the op2 object
-(e.g., ``model.displacements``, ``model.celas1_stress``).
+The main op2 results can be accessed directly from the op2 object (e.g., ``model.displacements``, ``model.celas1_stress``).
 
 .. todo:: Are the following bullet points supposed to be method/property names? If so should probably use ``code marker-upper``
 
@@ -600,8 +596,7 @@ The main op2 results can be accessed directly from the op2 object
 
 OP2.Results()
 -------------
-The OP2.Results() are accessed using model.results. as a prefix
-(e.g., ``model.results.modal_contribution.celas1_stress``).
+The OP2.Results() are accessed using model.results. as a prefix (e.g., ``model.results.modal_contribution.celas1_stress``).
 
  - eqexin
  - gpdt
@@ -887,8 +882,7 @@ All of these results have the same outputs (shown under model.results.crm). For 
 
 Matrices with explicit methods
 ------------------------------
-These are simply accessor methods to various matrices.  For example,
-``model.total_effective_mass_matrix`` is the same as ``self.matrices['EFMFSMS']``.
+These are simply accessor methods to various matrices.  For example, ``model.total_effective_mass_matrix`` is the same as ``self.matrices['EFMFSMS']``.
 
  - total_effective_mass_matrix (EFMFSMS)
  - effective_mass_matrix (EFMASSS)
@@ -918,7 +912,6 @@ GUI
 .. [GUI](http://pynastran-git.readthedocs.io/en/latest/quick_start/gui.html)
 
 :ref:<GUI>`gui.rst`
-
 
  - Buttons for picking, rotation center, distance, min/max
  - GUI Features:
@@ -972,7 +965,6 @@ Nastran Specific Features
 - Multiple OP2s
 - Deflection plots
 - SOL 200 support
-
 - Geometry
 
   - All elements supported in BDF

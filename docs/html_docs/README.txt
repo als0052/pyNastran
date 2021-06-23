@@ -35,7 +35,8 @@ sphinx-apidoc -o output ../pyNastran
 # final command
 make html > make.out 2>&1
 
-# does basically the same thing, but is more obvious...
+# Does basically the same thing, but is more obvious...
+# This one saves warnings to their own file so you can actually find the warnings
 # sphinx-build -v -w warnings.out -d build/doctrees . _build/html > junk.out 2>&1
 
 # what is run by rtd

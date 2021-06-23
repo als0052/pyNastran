@@ -2,13 +2,25 @@
 Quick Start
 ###########
 
+The **head**/**tail**/**file_slice** methods can be found at:
+
+    https://github.com/SteveDoyle2/pyNastran/blob/v0.7/docs_sphinx/manual/py_docs/bdf_doc.py
+
+These examples can be found at:
+
+    https://github.com/SteveDoyle2/pyNastran/blob/v0.7/docs_sphinx/manual/py_docs/op2_doc.py
+
+.. todo:: update where to get the head, tail, file_slice code from
+
+
+
 Overview
 ********
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    
-   features
+   features.rst
 
 BDF
 ***
@@ -16,30 +28,30 @@ BDF
 .. probably only need to show down to the Example level
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    
-   bdf_overview
-   test_bdf
+   bdf_overview.rst
+   test_bdf.rst
 
 OP2
 ***
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    
-   op2_overview
+   op2_overview.rst
+   test_op2.rst
 
-   test_op2
-   pandas
+   .. op2_pandas
 
 
 OP4
 ***
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    
-   op4_demo
+   op4_demo.rst
 
 GUI
 ***
@@ -47,7 +59,7 @@ GUI
 .. toctree::
    :maxdepth: 1
    
-   gui
+   gui.rst
 
 Other
 *****
@@ -55,5 +67,5 @@ Other
 .. toctree::
    :maxdepth: 1
    
-   matlab
-   nastran_differences
+   matlab.rst
+   nastran_differences.rst

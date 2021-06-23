@@ -1,16 +1,16 @@
+########
 OP4 Demo
---------
+########
 
-The Jupyter notebook for this demo can be found in: -
-docs/quick_start/demo/op4_demo.ipynb -
-https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op4_demo.ipynb
+The Jupyter notebook for this demo can be found in: 
 
-The OP4 is a Nastran input/output format that can store matrices.
+- docs/quick_start/demo/op4_demo.ipynb 
+- https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op4_demo.ipynb
 
-The OP2 can as well, but is less validated in regards to matrices.
+The OP4 is a Nastran input/output format that can store matrices. The OP2 can as well, but is less validated in regards to matrices.
 
 Import pyNastran
-^^^^^^^^^^^^^^^^
+****************
 
 .. code:: ipython3
 
@@ -28,12 +28,11 @@ Import pyNastran
     np.set_printoptions(precision=3, threshold=20)
 
 Print the docstring
-^^^^^^^^^^^^^^^^^^^
+*******************
 
 .. code:: ipython3
 
     help(read_op4)
-
 
 .. parsed-literal::
 
@@ -114,11 +113,8 @@ Print the docstring
         .. note:: it's strongly recommended that you convert sparse matrices to
                   another format before doing math on them.  This is standard
                   with sparse matrices.
-    
-    
 
 So as you can see, Nastran has many matrix formats.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -134,7 +130,7 @@ So as you can see, Nastran has many matrix formats.
     matrices = read_op4(op4_filename)
 
 There are more ways to read an OP4
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**********************************
 
 .. code:: ipython3
 
@@ -151,23 +147,19 @@ There are more ways to read an OP4
     print("form = %s" % form)
     print("type = %s" % type(flama))
 
-
 .. parsed-literal::
 
     form = 2
     type = <class 'numpy.ndarray'>
     
-
 .. code:: ipython3
 
     print("keys = %s" % matrices.keys())
-
 
 .. parsed-literal::
 
     keys = dict_keys(['FLAMA', 'UGEXT'])
     
-
 .. code:: ipython3
 
     print(matrices.keys())
@@ -181,7 +173,6 @@ There are more ways to read an OP4
     print("ugext.shape = %s" % str(ugext.shape))
     print("ugext nvals = %s" % ugext.size)
 
-
 .. parsed-literal::
 
     dict_keys(['FLAMA', 'UGEXT'])
@@ -191,12 +182,10 @@ There are more ways to read an OP4
     ugext.shape = (32274, 167)
     ugext nvals = 5389758
     
-
 .. code:: ipython3
 
     print(ugext[:,:])
     #print(flama)
-
 
 .. parsed-literal::
 
@@ -207,4 +196,3 @@ There are more ways to read an OP4
      [-3.006e-07  5.476e-05 -6.343e-04 ...  8.170e-03 -2.790e-02  2.645e-02]
      [-1.723e-06  1.278e-06  1.805e-06 ... -4.877e-03 -4.630e-03 -6.870e-03]
      [ 7.271e-06  3.394e-06  2.716e-06 ... -7.789e-03 -7.146e-03 -8.940e-03]]
-    
