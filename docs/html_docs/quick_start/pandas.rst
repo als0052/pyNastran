@@ -1,23 +1,22 @@
-======
+.. Most of this will probably need to be re-done
+
+######
 Pandas
-======
+######
 
-pyNastran also supports Pandas dataframes for the OP2 objects.  This is most useful from within the iPython / Jupyter notebook.
+pyNastran also supports Pandas dataframes for the OP2 objects. This is most useful from within the iPython / Jupyter notebook.
 
-Pandas Introduction
-===================
-https://github.com/fonnesbeck/statistical-analysis-python-tutorial/blob/master/1.%20Introduction%20to%20Pandas.ipynb
+Pandas Introductions
+********************
 
-Another Pandas Intro
-====================
-
-`Pandas Video<https://www.youtube.com/watch?v=5JnMutdy6Fw>`_
+- https://github.com/fonnesbeck/statistical-analysis-python-tutorial/blob/master/1.%20Introduction%20to%20Pandas.ipynb
+- `Pandas Video<https://www.youtube.com/watch?v=5JnMutdy6Fw>`_
 
 .. _alink: https://www.youtube.com/watch?v=5JnMutdy6Fw
 
 
 Static & Transient DataFrames in PyNastran
-==========================================
+******************************************
 .. https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_pandas_multi_case.ipynb
 
 op2_pandas_multi_case

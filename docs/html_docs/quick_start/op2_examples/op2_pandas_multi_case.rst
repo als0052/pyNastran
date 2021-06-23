@@ -1,9 +1,11 @@
+##########################################
 Static & Transient DataFrames in PyNastran
-==========================================
+##########################################
 
-The Jupyter notebook for this demo can be found in: -
-docs/quick_start/demo/op2_pandas_multi_case.ipynb -
-https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_pandas_multi_case.ipynb
+The Jupyter notebook for this demo can be found in: 
+
+- docs/quick_start/demo/op2_pandas_multi_case.ipynb 
+- https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_pandas_multi_case.ipynb
 
 .. code:: ipython3
 
@@ -16,7 +18,7 @@ https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_p
     model_path = os.path.join(pkg_path, '..', 'models')
 
 Solid Bending
--------------
+*************
 
 Let’s show off ``combine=True/False``. We’ll talk about the keys soon.
 
@@ -26,32 +28,25 @@ Let’s show off ``combine=True/False``. We’ll talk about the keys soon.
     solid_bending = read_op2(solid_bending_op2, combine=False, debug=False)
     print(solid_bending.displacements.keys())
 
-
-
 .. raw:: html
 
     <text style=color:green>INFO:    op2_scalar.py:1588           op2_filename = 'c:\\nasa\\m4\\formats\\git\\pynastran\\pyNastran\\..\\models\\solid_bending\\solid_bending.op2'
     </text>
 
-
 .. parsed-literal::
 
     dict_keys([(1, 1, 1, 0, 0, '', '')])
     
-
 .. code:: ipython3
 
     solid_bending_op2 = os.path.join(model_path, 'solid_bending', 'solid_bending.op2')
     solid_bending2 = read_op2(solid_bending_op2, combine=True, debug=False)
     print(solid_bending2.displacements.keys())
 
-
-
 .. raw:: html
 
     <text style=color:green>INFO:    op2_scalar.py:1588           op2_filename = 'c:\\nasa\\m4\\formats\\git\\pynastran\\pyNastran\\..\\models\\solid_bending\\solid_bending.op2'
     </text>
-
 
 .. parsed-literal::
 
@@ -59,7 +54,7 @@ Let’s show off ``combine=True/False``. We’ll talk about the keys soon.
     
 
 Single Subcase Buckling Example
--------------------------------
+*******************************
 
 The keys cannot be “combined” despite us telling the program that it was
 OK. We’ll get the following values that we need to handle. ####
@@ -88,32 +83,24 @@ solution
      else:
          raise NotImplementedError('transient_word=%r is not supported...' % trans_word)
 
-Let’s look at an odd case:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Let’s look at an odd case
+*************************
 
-You can do buckling as one subcase or two subcases (makes parsing it a
-lot easier!).
+You can do buckling as one subcase or two subcases (makes parsing it a lot easier!).
 
-However, you **have** to do this once you start messing around with
-superelements or multi-step optimization.
+However, you **have** to do this once you start messing around with superelements or multi-step optimization.
 
-For optimization, sometimes Nastran will downselect elements and do an
-optimization on that and print out a subset of the elements. At the end,
-it will rerun an analysis to double check the constraints are satisfied.
-It does not always do multi-step optimization.
+For optimization, sometimes Nastran will downselect elements and do an optimization on that and print out a subset of the elements. At the end, it will rerun an analysis to double check the constraints are satisfied. It does not always do multi-step optimization.
 
 .. code:: ipython3
 
     op2_filename = os.path.join(model_path, 'sol_101_elements', 'buckling_solid_shell_bar.op2')
     model = read_op2(op2_filename, combine=True, debug=False, build_dataframe=True)
 
-
-
 .. raw:: html
 
     <text style=color:green>INFO:    op2_scalar.py:1588           op2_filename = 'c:\\nasa\\m4\\formats\\git\\pynastran\\pyNastran\\..\\models\\sol_101_elements\\buckling_solid_shell_bar.op2'
     </text>
-
 
 .. code:: ipython3
 
@@ -124,7 +111,6 @@ It does not always do multi-step optimization.
     key0 = (1, 1, 1, 0, 0, '', '')
     key1 = (1, 8, 1, 0, 0, '', '')
 
-
 .. parsed-literal::
 
     dict_keys([(1, 1, 1, 0, 0, '', ''), (1, 8, 1, 0, 0, '', '')])
@@ -132,18 +118,15 @@ It does not always do multi-step optimization.
 
 Keys: \* key0 is the “static” key \* key1 is the “buckling” key
 
-Similarly: \* Transient solutions can have preload \* Frequency
-solutions can have loadsets (???)
+Similarly: \* Transient solutions can have preload \* Frequency solutions can have loadsets (???)
 
 Moving onto the data frames
----------------------------
+***************************
 
 -  The static case is the initial deflection state
--  The buckling case is “transient”, where the modes (called load steps
-   or lsdvmn here) represent the “times”
+-  The buckling case is “transient”, where the modes (called load steps or lsdvmn here) represent the “times”
 
-pyNastran reads these tables differently and handles them differently
-internally. They look very similar though.
+pyNastran reads these tables differently and handles them differently internally. They look very similar though.
 
 .. code:: ipython3
 
@@ -160,8 +143,6 @@ internally. They look very similar though.
     print('loadsteps   = %s' % model.cquad4_stress[key1].lsdvmns)
     print('eigenvalues = %s' % model.cquad4_stress[key1].eigrs)
     
-
-
 .. parsed-literal::
 
     stress_static.nonlinear_factor = nan
@@ -170,9 +151,8 @@ internally. They look very similar though.
     loadsteps   = [1, 2, 3, 4]
     eigenvalues = [-49357660160.0, -58001940480.0, -379750744064.0, -428462538752.0]
     
-
 Static Table
-------------
+************
 
 .. code:: ipython3
 
@@ -180,9 +160,6 @@ Static Table
     pd.set_option('precision', 2)
     
     stress_static.head(20)
-
-
-
 
 .. raw:: html
 
@@ -489,9 +466,8 @@ Static Table
     </div>
 
 
-
 Transient Table
----------------
+***************
 
 .. code:: ipython3
 
@@ -501,9 +477,6 @@ Transient Table
     #np.set_printoptions(formatter={'all':lambda x: '%g'})
     
     stress_transient.head(20)
-
-
-
 
 .. raw:: html
 
@@ -734,5 +707,3 @@ Transient Table
       </tbody>
     </table>
     </div>
-
-

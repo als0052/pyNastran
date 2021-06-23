@@ -1,8 +1,8 @@
 .. _xref-test_op2:
 
-========
+########
 test_op2
-========
+########
 
 ``test_op2`` verifies that the OP2 is read properly.  It's mainly a
 developer debugging script as it runs the OP2 twice (with different

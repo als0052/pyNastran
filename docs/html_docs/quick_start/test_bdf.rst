@@ -1,5 +1,8 @@
+.. _test-bdf-demo:
+
+#############
 test_bdf demo
-=============
+#############
 
 In this demo, we’ll show off test_bdf
 
@@ -151,13 +154,10 @@ In this demo, we’ll show off test_bdf
     {42: TRIM          42      .8    100.       Z     2.5
     }
     
-
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   write_mesh.py:145            ---starting BDF.write_bdf of junk.bdf---
     </text>
-
 
 .. parsed-literal::
 
@@ -220,7 +220,6 @@ In this demo, we’ll show off test_bdf
                    1      1.
     ----------------------------------------------------------------------------------------------------
     
-
 .. parsed-literal::
 
     c:\python37\lib\site-packages\IPython\utils\_process_win32.py:131: ResourceWarning: unclosed file <_io.BufferedWriter name=5>
@@ -233,48 +232,36 @@ In this demo, we’ll show off test_bdf
       return process_handler(cmd, _system_body)
     ResourceWarning: Enable tracemalloc to get the object allocation traceback
     
-
 .. code:: ipython3
 
     from pyNastran.bdf.test.test_bdf import run_bdf as test_bdf
     model.write_bdf('junk.bdf')
     test_bdf('.', 'junk.bdf')
 
-
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   write_mesh.py:145            ---starting BDF.write_bdf of junk.bdf---
     </text>
-
 
 .. parsed-literal::
 
     debug = False
     bdf_model = junk.bdf
     
-
-
 .. raw:: html
 
     <text style=color:green>INFO:    test_bdf.py:374              starting fem1
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:green>INFO:    test_bdf.py:841              starting fem2
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: test_bdf.py:863              PARAM,POST,0 is not supported by the OP2 reader
     </text>
-
-
 
 .. raw:: html
 
@@ -288,7 +275,6 @@ In this demo, we’ll show off test_bdf
         SPC = 1
     
     </text>
-
 
 ::
 
@@ -367,5 +353,3 @@ In this demo, we’ll show off test_bdf
         LOAD = 1
         METHOD = 42
         SPC = 1
-    
-

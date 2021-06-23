@@ -1,8 +1,8 @@
 .. _xref-pynastran_gui:
 
-==============================
+##############################
 Graphical User Interface (GUI)
-==============================
+##############################
 
 ********
 Overview
@@ -20,7 +20,7 @@ by adding features such as displacements and forces, so the need for a code like
 Patran has decreased, but will not be eliminated.
 
 Introduction
-============
+************
 
 The Graphical User Interface (GUI) looks like:
 
@@ -33,9 +33,8 @@ A somewhat messy, but more featured image:
 The GUI also has a sidebar and transient support.
 
 
-
 Advantages of pyNastranGUI
---------------------------
+==========================
  - command line interface for loading models
  - simple scripting
  - nice looking models
@@ -53,7 +52,7 @@ Advantages of pyNastranGUI
 
 
 Advantages of Patran/FEMAP
---------------------------
+==========================
  - CAD geometry support (e.g., IGES, Parasolid)
  - geometry creation (e.g., points, surfaces)
  - meshing
@@ -214,14 +213,12 @@ Features
 
  * deflection results
  * force results
-
  * command line interface
  * scripting capability
  * high resolution screenshot
  * show/hide elements
 
-   * can edit properties (e.g. color/opacity/size) using
-     ``Edit Geometry Properties...`` on the ``View`` menu
+   * can edit properties (e.g. color/opacity/size) using ``Edit Geometry Properties...`` on the ``View`` menu
 
  * legend menu
  * animation menu
@@ -287,10 +284,13 @@ Some of the results include:
         * element quality (min/max interior angle, skew angle, taper ratio, area ratio)
 
      * real results
+	 
          * stress, strain
          * displacement, eigenvector, temperature, SPC forces, MPC forces, load vector
-     * complex results
-         * displacement, eigenvector
+     
+	 * complex results
+         
+		 * displacement, eigenvector
 
    * **Cart3d** ASCII/binary input (\*.tri); ASCII output (\*.triq)
 
@@ -301,7 +301,6 @@ Some of the results include:
      * Normal
 
    * **LaWGS** input (\*.wgs)
-
    * **Panair** input (\*.inp); output (agps, \*.out)
 
      * Patch ID
@@ -378,7 +377,7 @@ In your output folder, you will find:
 If the file is too big, shrink the size of the window.  Make the max deflection of
 the image fill the screen.  Leave minimal whitespace.
 
-.. note:: If unlickling ``Repeat?`` doesn't disable gif looping, upgrade ``imageio``.
+.. note:: If unclickling ``Repeat?`` doesn't disable gif looping, upgrade ``imageio``.
 
 
 Animation of Complex Mode Shapes (Animate Phase)

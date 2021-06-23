@@ -1,5 +1,6 @@
-OP2: Numpy Demo #1 (Displacement, Solid Stress)
-===============================================
+##############################################
+OP2 Numpy Demo #1 (Displacement, Solid Stress)
+##############################################
 
 The Jupyter notebook for this demo can be found in: -
 docs/quick_start/demo/op2_demo_numpy2.ipynb -
@@ -8,11 +9,9 @@ https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_d
 It’s recommended that you first go through: -
 https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_intro.ipynb
 
-The previous demo was intentionally clunky to demonstrate how one might
-think of a single element.
+The previous demo was intentionally clunky to demonstrate how one might think of a single element.
 
-If you code like that, your code will be slow, so let’s show you how to
-really use the numpy-style with the OP2.
+If you code like that, your code will be slow, so let’s show you how to really use the numpy-style with the OP2.
 
 .. figure:: attachment:image.png
    :alt: image.png
@@ -20,7 +19,7 @@ really use the numpy-style with the OP2.
    image.png
 
 Import the packages
-~~~~~~~~~~~~~~~~~~~
+*******************
 
 .. code:: ipython3
 
@@ -39,14 +38,12 @@ Import the packages
     np.set_printoptions(precision=3, threshold=20, edgeitems=10)
 
 Load the model
-~~~~~~~~~~~~~~
+**************
 
 .. code:: ipython3
 
     op2_filename = os.path.join(model_path, 'solid_bending', 'solid_bending.op2')
     model = read_op2(op2_filename, build_dataframe=False, debug=False)
-
-
 
 .. raw:: html
 
@@ -55,13 +52,9 @@ Load the model
 
 
 Find the min/max Displacement magnitude
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+***************************************
 
-In this example, we access the 3D “data” numpy array object. Then we
-take the L2-norm of the translations to determine the magnitude. We
-broadcast the L2-norm across the column (x, y, z) to end up with
-**nnodes** results. It’s good practice to verify the shapes of your
-arrays just to make sure you get the **axis=1** parameter correct.
+In this example, we access the 3D “data” numpy array object. Then we take the L2-norm of the translations to determine the magnitude. We broadcast the L2-norm across the column (x, y, z) to end up with **nnodes** results. It’s good practice to verify the shapes of your arrays just to make sure you get the **axis=1** parameter correct.
 
 .. code:: ipython3
 
@@ -85,7 +78,6 @@ arrays just to make sure you get the **axis=1** parameter correct.
     print('max displacement=%s max_nodes=%s' % (txyz_mag_max, max_nodes))
     print('min displacement=%s min_nodes=%s' % (txyz_mag_min, min_nodes))
 
-
 .. parsed-literal::
 
     disp_headers = ['t1', 't2', 't3', 'r1', 'r2', 'r3']
@@ -94,7 +86,7 @@ arrays just to make sure you get the **axis=1** parameter correct.
     
 
 Find the max centroidal stress on the CTETRA elements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*****************************************************
 
 .. code:: ipython3
 
@@ -108,17 +100,14 @@ Find the max centroidal stress on the CTETRA elements
     nodes = element_node[:, 1]
     #print(element_node)
 
-
 .. parsed-literal::
 
     stress_headers = ['oxx', 'oyy', 'ozz', 'txy', 'tyz', 'txz', 'omax', 'omid', 'omin', 'von_mises']
     
 
-The 0 location is the centroid
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**The 0 location is the centroid**
 
-You can either query the 0 location or calculate it with a numpy arange.
-CTETRA elements have 4 nodes (even 10 noded CTETRA elements) in the OP2.
+You can either query the 0 location or calculate it with a numpy arange. CTETRA elements have 4 nodes (even 10 noded CTETRA elements) in the OP2.
 
 .. code:: ipython3
 
@@ -143,7 +132,6 @@ CTETRA elements have 4 nodes (even 10 noded CTETRA elements) in the OP2.
     print('max_stress=%s eids=%s' % (vm_stress_max, eids_max))
     print('min_stress=%s eids=%s' % (vm_stress_min, eids_min))
 
-
 .. parsed-literal::
 
     eids_centroid = [  1   2   3   4   5   6   7   8   9  10 ... 177 178 179 180 181 182 183 184 185 186]
@@ -155,10 +143,9 @@ CTETRA elements have 4 nodes (even 10 noded CTETRA elements) in the OP2.
     
 
 Finding the VM stress associated with a single node ID
-------------------------------------------------------
+******************************************************
 
-One node in a tet mesh may be shared by many elements. In this case, 26
-elements share 1 node!
+One node in a tet mesh may be shared by many elements. In this case, 26 elements share 1 node!
 
 .. code:: ipython3
 
@@ -182,7 +169,6 @@ elements share 1 node!
     vm_stress = stress.data[0, ifour, ivm]
     print('vm_stress =', vm_stress, len(vm_stress))
 
-
 .. parsed-literal::
 
     stress_headers = ['oxx', 'oyy', 'ozz', 'txy', 'tyz', 'txz', 'omax', 'omid', 'omin', 'von_mises']
@@ -195,10 +181,9 @@ elements share 1 node!
     
 
 Finding the centroidal VM stress for a set of elements
-------------------------------------------------------
+******************************************************
 
-Some fancy numpy code will be used for this case. Your code will be much
-faster if you are familiar with numpy.
+Some fancy numpy code will be used for this case. Your code will be much faster if you are familiar with numpy.
 
 .. code:: ipython3
 
@@ -228,7 +213,6 @@ faster if you are familiar with numpy.
     print('eids_to_lookup =', eids_to_lookup)
     print('vm_stress =', vm_stress)
 
-
 .. parsed-literal::
 
     stress_headers = ['oxx', 'oyy', 'ozz', 'txy', 'tyz', 'txz', 'omax', 'omid', 'omin', 'von_mises']
@@ -237,10 +221,9 @@ faster if you are familiar with numpy.
     
 
 Finding the centroidal VM stress for a set of elements when you have multiple element types
--------------------------------------------------------------------------------------------
+*******************************************************************************************
 
-In this case, we’ll assume the set of element_ids to lookup contain
-CHEXAs as well as CTETRAs. Thus, we need to filter the data.
+In this case, we’ll assume the set of element_ids to lookup contain CHEXAs as well as CTETRAs. Thus, we need to filter the data.
 
 .. code:: ipython3
 
@@ -264,7 +247,6 @@ CHEXAs as well as CTETRAs. Thus, we need to filter the data.
     print('eids_to_lookup =', eids_to_lookup)
     print('vm_stress =', vm_stress)
 
-
 .. parsed-literal::
 
     stress_headers = ['oxx', 'oyy', 'ozz', 'txy', 'tyz', 'txz', 'omax', 'omid', 'omin', 'von_mises']
@@ -273,14 +255,7 @@ CHEXAs as well as CTETRAs. Thus, we need to filter the data.
     vm_stress = [15900.173 16272.253 16272.253 22275.338 22275.338]
     
 
-We have a problem where our element_id (1000000) is out of range
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Searchsorted is fast, but you need to make sure your data actually
-exists. Otherwise, you’ll end up finding the data for the next element
-in the sorted list.
-
-Let’s filter the data using sets and then use searchsorted.
+We have a problem where our element_id (1000000) is out of range. Searchsorted is fast, but you need to make sure your data actually exists. Otherwise, you’ll end up finding the data for the next element in the sorted list. Let’s filter the data using sets and then use searchsorted.
 
 .. code:: ipython3
 
@@ -292,17 +267,15 @@ Let’s filter the data using sets and then use searchsorted.
     print('filtered_eids =', filtered_eids)
     print('vm_stress =', vm_stress)
 
-
 .. parsed-literal::
 
     filtered_eids = [  5   7  10 186]
-    vm_stress = [15900.173 16272.253 16272.253 22275.338]
-    
+    vm_stress = [15900.173 16272.253 16272.253 22275.338] 
 
 Other Elements that are Similar
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================
 
--  Rod Stress/strain
--  Beam Stress/strain
--  Bar Stress/strain
--  Isotropic CQUAD4 stress/strain
+- Rod Stress/strain
+- Beam Stress/strain
+- Bar Stress/strain
+- Isotropic CQUAD4 stress/strain

@@ -1,16 +1,15 @@
+######################
 Building Documentation
-======================
+######################
 
-If you don't want to use build the docs, just 
-
-See `docs <https://pynastran-git.readthedocs.io/en/latest/>`_
+If you don't want to use build the docs, just see `docs <https://pynastran-git.readthedocs.io/en/latest/>`_
 
 Install extra packages (for Documentation)
-------------------------------------------
+******************************************
 
 Install `GraphViz  <https://www.graphviz.org/>`_
 
-Install additional python packages
+Install additional python packages:
 
 .. code-block:: console
 
@@ -100,7 +99,7 @@ Install additional python packages
 
 
 Build Docs
-----------
+**********
 .. Navigate to ``pyNastran/docs_sphinx`` directory on the command line.
 
 Navigate to ``pyNastran/docs/html_docs`` directory on the command line. Use the ``make html`` Sphinx command to update the .html pages. Alternatively use ``make clean html && make html`` to generate a brand new copy of the .html files.
@@ -108,4 +107,3 @@ Navigate to ``pyNastran/docs/html_docs`` directory on the command line. Use the 
 .. code-block:: console
 
   >>> make html
-

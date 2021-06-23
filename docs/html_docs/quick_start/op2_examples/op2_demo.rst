@@ -1,56 +1,49 @@
+################
 OP2 Introduction
-================
+################
 
-The Jupyter notebook for this demo can be found in: -
-docs/quick_start/demo/op2_demo.ipynb -
-https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_demo.ipynb
+The Jupyter notebook for this demo can be found in: 
 
-Why use the OP2? Why not use the F06/PCH file?
-----------------------------------------------
+- docs/quick_start/demo/op2_demo.ipynb 
+- https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_demo.ipynb
 
-Most people are comfortable with the F06. However, it’s: - Ironically, a
-lot harder to parse. The OP2 is very structured. - Much, much, much
-slower. We can read entire blocks of arrays with a single call. The data
-is already typed. - Much, much more memory inefficient because we aren’t
-appending strings onto lists and turning that into a numpy array.
 
-F06 parsers get ridiculously hard when you start do complicated results,
-like: - single subcase buckling - superelements - SOL 200 optimization
-with sub-optimization - SPOINTs
+Why use the OP2
+***************
 
-The pyNastran OP2 Reader is fast, highly validated, and it supports most
-result types. The data in the OP2 is also more accurate because there is
-no rounding.
+Most people are comfortable with the F06. However, it’s: 
+
+- Ironically, a lot harder to parse. The OP2 is very structured. 
+- Much, much, much slower. We can read entire blocks of arrays with a single call. The data is already typed. 
+- Much, much more memory inefficient because we aren’t appending strings onto lists and turning that into a numpy array.
+
+F06 parsers get ridiculously hard when you start do complicated results, like: 
+- single subcase buckling 
+- superelements 
+- SOL 200 optimization with sub-optimization 
+- SPOINTs
+
+The pyNastran OP2 Reader is fast, highly validated, and it supports most result types. The data in the OP2 is also more accurate because there is no rounding.
 
 Validating an OP2
------------------
+*****************
 
-The ``test_op2`` script is created when you run
-``python setup.py develop`` or ``python setup.py install`` on pyNastran.
-Assuming it’s on your path (it’ll be in Python27:raw-latex:`\Scripts `or
-something similar), you can run:
+The ``test_op2`` script is created when you run ``python setup.py develop`` or ``python setup.py install`` on pyNastran. Assuming it’s on your path (it’ll be in Python27:raw-latex:`\Scripts `or something similar), you can run:
 
 ::
 
    >>> test_op2 -f solid_bending.op2
 
-The ``-f`` tells us to print out ``solid_bending.test_op2.f06``, which
-can be compared to your F06 for a small file to build confidence in the
-reader. It’s also useful when you want an F06 of your model without
-rerunning Nastran just to see what’s in it.
+The ``-f`` tells us to print out ``solid_bending.test_op2.f06``, which can be compared to your F06 for a small file to build confidence in the reader. It’s also useful when you want an F06 of your model without rerunning Nastran just to see what’s in it.
 
-If you have a large model, you can make ``test_op2`` run much, much
-faster. The ``-c`` flag disables double-reading of the OP2. By default,
-``test_op2`` uses two different read methods (the old method and new
-method) to ensure that results are read in properly. When running the
-code, this is turned off, but is turned on for ``test_op2``.
+If you have a large model, you can make ``test_op2`` run much, much faster. The ``-c`` flag disables double-reading of the OP2. By default, ``test_op2`` uses two different read methods (the old method and new method) to ensure that results are read in properly. When running the code, this is turned off, but is turned on for ``test_op2``.
 
 ::
 
    >>> test_op2 -fc solid_bending.op2
 
 Import the packages
--------------------
+===================
 
 .. code:: ipython3
 
@@ -69,20 +62,14 @@ Import the packages
     
     import pandas as pd
 
-Sets default precision of real numbers for pandas output
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sets default precision of real numbers for pandas output:
 
 .. code:: ipython3
 
     pd.set_option('precision', 3)
     np.set_printoptions(precision=3, threshold=20)
 
-As with the BDF, we can use the long form and the short form. However,
-the long form for the ``OP2`` doesn’t really add anything. So, let’s
-just use the short form.
-
-In addition to the default numpy support, there is also **``pandas``**
-dataframe support.
+As with the BDF, we can use the long form and the short form. However, the long form for the ``OP2`` doesn’t really add anything. So, let’s just use the short form. In addition to the default numpy support, there is also **``pandas``** dataframe support.
 
 .. code:: ipython3
 
@@ -107,63 +94,45 @@ dataframe support.
     # define the input file with a file path
     op2 = read_op2(op2_filename, build_dataframe=True, debug=False)
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=1 midsurface: z1=0.4 z2=-0.4 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=2 midsurface: z1=0.4 z2=-0.4 t=0.054 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=3 midsurface: z1=0.4 z2=-0.4 t=0.018 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=7 midsurface: z1=0.418 z2=-0.418 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=34 midsurface: z1=0.194 z2=-0.194 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=38 midsurface: z1=0.284 z2=-0.284 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=46 midsurface: z1=0.199 z2=-0.199 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=37 midsurface: z1=0.309 z2=-0.309 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
@@ -172,15 +141,13 @@ dataframe support.
 
 
 OP2 Introspection
------------------
+*****************
 
-The ``get_op2_stats()`` function lets you quickly understand what in an
-op2.
+The ``get_op2_stats()`` function lets you quickly understand what in an op2.
 
 .. code:: ipython3
 
     print(op2.get_op2_stats())
-
 
 .. parsed-literal::
 
@@ -265,16 +232,12 @@ op2.
       type=RealEigenvalues neigenvalues=167
       title, extraction_order, eigenvalues, radians, cycles, generalized_mass, generalized_stiffness
     
-    
-    
 
-If that’s too long…
-~~~~~~~~~~~~~~~~~~~
+If that’s too long...
 
 .. code:: ipython3
 
     print(op2.get_op2_stats(short=True))
-
 
 .. parsed-literal::
 
@@ -295,26 +258,17 @@ If that’s too long…
     eigenvalues['ISAT_SM_LAUNCH_4PT MODES TO 400 HZ']
     
     
-
 Acccessing the Eigenvectors object
-----------------------------------
+==================================
 
-Eigenvectors are the simplest object. They use the same class as for
-displacements, velocity, acceleration, SPC Forces, MPC Forces, Applied
-Loads, etc. These are all node-based tables with TX, TY, TZ, RX, RY, RZ.
-Results are in the analysis coordinate frame (CD), which is defined by
-the GRID card.
+Eigenvectors are the simplest object. They use the same class as for displacements, velocity, acceleration, SPC Forces, MPC Forces, Applied Loads, etc. These are all node-based tables with TX, TY, TZ, RX, RY, RZ. Results are in the analysis coordinate frame (CD), which is defined by the GRID card.
 
 Numpy-based Approach
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
-We’ll first show off the standard ``numpy`` based results on a transient
-case. Static results are the same, except that you’ll always use the 0th
-index for the “time” index.
+We’ll first show off the standard ``numpy`` based results on a transient case. Static results are the same, except that you’ll always use the 0th index for the “time” index.
 
-The tutorial is intetionally just accessing the objects in a very clear,
-though inefficient way. The OP2 objects can take full advantage of the
-numpy operations.
+The tutorial is intetionally just accessing the objects in a very clear, though inefficient way. The OP2 objects can take full advantage of the numpy operations.
 
 .. code:: ipython3
 
@@ -366,16 +320,11 @@ numpy operations.
     
 
 Pandas-based Approach
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
-If you like pandas, you can access all the OP2 objects, which is very
-useful within the Jupyter Notebook. Different objects will look
-differently, but you can change the layout.
+If you like pandas, you can access all the OP2 objects, which is very useful within the Jupyter Notebook. Different objects will look differently, but you can change the layout.
 
-If you’re trying to learn pandas, there are many tutorials online, such
-as: http://pandas.pydata.org/pandas-docs/stable/10min.html
-
-or a very long, but good video:
+If you’re trying to learn pandas, there are many tutorials online, such as: http://pandas.pydata.org/pandas-docs/stable/10min.html or a very long, but good video:
 
 .. code:: ipython3
 
@@ -383,12 +332,8 @@ or a very long, but good video:
     YouTubeVideo('5JnMutdy6Fw')
     #https://www.youtube.com/watch?v=5JnMutdy6Fw
 
-
-
-
 .. raw:: html
 
-    
     <iframe
         width="400"
         height="300"
@@ -396,9 +341,6 @@ or a very long, but good video:
         frameborder="0"
         allowfullscreen
     ></iframe>
-    
-
-
 
 .. code:: ipython3
 
@@ -406,9 +348,6 @@ or a very long, but good video:
     eig1 = op2.eigenvectors[1]
     
     eig1.data_frame
-
-
-
 
 .. raw:: html
 
@@ -832,17 +771,10 @@ or a very long, but good video:
     </div>
 
 
-
 Accessing the plate stress/strain
 ---------------------------------
 
-Results are stored on a per element type basis.
-
-The OP2 is the same as an F06, so CQUAD4 elements have centroidal-based
-results or centroidal-based as well as the results at the 4 corner
-nodes.
-
-Be careful about what you’re accessing.
+Results are stored on a per element type basis. The OP2 is the same as an F06, so CQUAD4 elements have centroidal-based results or centroidal-based as well as the results at the 4 corner nodes. Be careful about what you’re accessing.
 
 .. code:: ipython3
 
@@ -885,8 +817,7 @@ Be careful about what you’re accessing.
     modes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]
     
 
-Similar to the BDF, we can use object_attributes/methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Similar to the BDF, we can use object_attributes/methods:
 
 .. code:: ipython3
 
@@ -904,14 +835,11 @@ Similar to the BDF, we can use object_attributes/methods
     
     headers = ['fiber_distance', 'oxx', 'oyy', 'txy', 'angle', 'omax', 'omin', 'von_mises']
     
-    
 
-Number of Nodes on a CQUAD4
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Number of Nodes on a CQUAD4:
 
 -  For CENT, there is 1 centroidal stress at two locations
--  For BILIN, there are 5 stresses at two locations (4 nodes +
-   centroidal)
+-  For BILIN, there are 5 stresses at two locations (4 nodes + centroidal)
 -  node_id=0 indicates a centroidal quantity
 -  CTRIA3s are always centroidal
 
@@ -946,8 +874,7 @@ stress (:math:`\sigma_{alt}`) & slope (:math:`\sigma_{mean}`)
    $$ \sigma_{btm} = \sigma_{alt} + \frac{t}{2} \sigma_{mean}$$
 
 -  fiber_distance - upper and lower surface stress (o_top; o_btm)
--  If you have stress, fiber_distance is always returned regardless of
-   your option.
+-  If you have stress, fiber_distance is always returned regardless of your option.
 
 .. _what-sets-this-1:
 
@@ -969,8 +896,7 @@ How do we know if we’re using fiber_distance?
 Accessing results
 -----------------
 
-Note that this is intentionally done iinefficiently to access specific entries in order to explain the data structure.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. note:: This is intentionally done inefficiently to access specific entries in order to explain the data structure.
 
 .. code:: ipython3
 
@@ -1019,7 +945,6 @@ Note that this is intentionally done iinefficiently to access specific entries i
     ovm_mode6_eid1000 = ovm[ieid1000]
     print("ovm_mode6_eid1000 = %s -> %s" % (ovm_mode6_eid1000, abs_max_min(ovm_mode6_eid1000)))
 
-
 .. parsed-literal::
 
     element_node[:10, :] =
@@ -1043,7 +968,6 @@ Note that this is intentionally done iinefficiently to access specific entries i
     ieid1000 = [1998 1999]
     ovm_mode6_eid1000 = [90.618 94.093] -> 94.09257
     
-
 .. code:: ipython3
 
     # see the difference between "transient"/"modal"/"frequency"-style results
@@ -1074,7 +998,6 @@ Note that this is intentionally done iinefficiently to access specific entries i
     else:
         print("curvature = %s" % plate_stress.data[imode, ieid10, 0])
 
-
 .. parsed-literal::
 
     ieid10 = 19
@@ -1089,7 +1012,6 @@ Note that this is intentionally done iinefficiently to access specific entries i
     ovm/max_shear = 24.273378
     fiber_distance = -0.4
     
-
 .. code:: ipython3
 
     from pyNastran.bdf.bdf import read_bdf
@@ -1098,56 +1020,40 @@ Note that this is intentionally done iinefficiently to access specific entries i
     model = read_bdf(bdf_filename, debug=False)
     mass, cg, I = mass_properties(model)
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=1 midsurface: z1=0.4 z2=-0.4 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=2 midsurface: z1=0.4 z2=-0.4 t=0.054 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=3 midsurface: z1=0.4 z2=-0.4 t=0.018 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=7 midsurface: z1=0.418 z2=-0.418 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=34 midsurface: z1=0.194 z2=-0.194 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=38 midsurface: z1=0.284 z2=-0.284 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=46 midsurface: z1=0.199 z2=-0.199 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
@@ -1155,11 +1061,7 @@ Note that this is intentionally done iinefficiently to access specific entries i
     </text>
 
 
-Let’s print out the actual mass properties from the OP2 and get the same result as the F06
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We need ``PARAM,POSTEXT,YES`` in out BDF to get the Grid Point Weight
-Table
+Let’s print out the actual mass properties from the OP2 and get the same result as the F06. We need ``PARAM,POSTEXT,YES`` in our BDF to get the Grid Point Weight Table
 
 .. code:: ipython3
 
@@ -1180,7 +1082,6 @@ Table
         print('IS = ', gpwi.IS)
         print('IQ = ', gpwi.IQ)
         print('Q  = ', gpwi.Q)
-
 
 .. parsed-literal::
 
@@ -1222,7 +1123,6 @@ We can also write the full ``F06``
     op2.write_f06('isat.f06', is_mag_phase=False)
     
     !head -n 40 isat.f06
-
 
 .. parsed-literal::
 
@@ -1267,30 +1167,26 @@ We can also write the full ``F06``
        MODE    EXTRACTION      EIGENVALUE            RADIANS             CYCLES            GENERALIZED         GENERALIZED
         NO.       ORDER                                                                       MASS              STIFFNESS
     
-
 .. code:: ipython3
 
     #from IPython.display import display, Math, Latex
 
 The mass results are different as pyNastran’s mass assumes point masses
 
-.. math:: m_{plates} = A (\rho t + nsm)
+.. math:: m_{plates} = A(\rho t + nsm)
 
-.. math:: m_{solid} = V \rho
+.. math:: m_{solid} = V\rho
 
-.. math:: m_{bars} = L (\rho A + nsm)
+.. math:: m_{bars} = L(\rho A + nsm)
 
 .. math:: I = m r^2
 
-The larger your model is and the further from the origin, the more
-accurate the result. For some applications (e.g. a weight breakdown),
-this is probably be fine.
+The larger your model is and the further from the origin, the more accurate the result. For some applications (e.g. a weight breakdown), this is probably be fine.
 
 .. code:: ipython3
 
     print('cg =\n%s' % gpw[''].cg)
     print('cg = %s' % cg)
-
 
 .. parsed-literal::
 
@@ -1301,20 +1197,16 @@ this is probably be fine.
     cg = [ -0.034  -2.531 -18.468]
     
 
-It’s not like Nastran is perfect either.
-----------------------------------------
+Nastran isn't perfect either
+----------------------------
 
 Limitations
-~~~~~~~~~~~
+^^^^^^^^^^^
 
-1. You cannot do weight statements in Nastran by
-   component/property/material.
+1. You cannot do weight statements in Nastran by component/property/material.
+2. Everything is always summmed up (e.g. you can have different geometry in Subcase 2 and MPCs connecting physical geomtry, with other parts flying off into space).
 
-2. Everything is always summmed up (e.g. you can have different geometry
-   in Subcase 2 and MPCs connecting physical geomtry, with other parts
-   flying off into space).
-
-These are things that pyNastran ``can`` do.
+These are things that pyNastran *can* do:
 
 .. code:: ipython3
 
@@ -1322,56 +1214,40 @@ These are things that pyNastran ``can`` do.
     bdf_filename = os.path.abspath(os.path.join(pkg_path, '..', 'models', 'iSat', 'ISat_Launch_Sm_4pt.dat'))
     model = read_bdf(bdf_filename, debug=False)
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=1 midsurface: z1=0.4 z2=-0.4 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=2 midsurface: z1=0.4 z2=-0.4 t=0.054 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=3 midsurface: z1=0.4 z2=-0.4 t=0.018 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=7 midsurface: z1=0.418 z2=-0.418 t=0.036 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=34 midsurface: z1=0.194 z2=-0.194 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=38 midsurface: z1=0.284 z2=-0.284 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:orange>WARNING: shell.py:2544                PSHELL pid=46 midsurface: z1=0.199 z2=-0.199 t=0.0186 not in range of -1.5t < zi < 1.5t
     </text>
-
-
 
 .. raw:: html
 
@@ -1380,7 +1256,7 @@ These are things that pyNastran ``can`` do.
 
 
 Weight Statement
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 Let’s get the breakdown by property ID
 
@@ -1437,4 +1313,3 @@ Let’s get the breakdown by property ID
     60     0.000000 [0. 0. 0.]                             [0. 0. 0. 0. 0. 0.]
     61     0.000000 [0. 0. 0.]                             [0. 0. 0. 0. 0. 0.]
     mass   0.772000 [  0.     -8.256 -18.238]              [392.813 338.699 118.704  -0.     -0.    138.698]
-    

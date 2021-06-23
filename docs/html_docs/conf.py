@@ -16,14 +16,15 @@
 # -------------                                                               #
 # (02-18-2021) (als0052) Reformated some things and tried to mostly pep-8     #
 #                        things.                                              #
+# (06-23-2021) (als0052) Uncomment numpydoc extension to get sphinx to run?   #
 # =========================================================================== #
 
 import sys
 import os.path
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
 cwd = os.getcwd()
+
 if on_rtd:
     pkg_path = os.path.join(os.path.dirname(cwd), 'pyNastran')
 else:
@@ -33,7 +34,6 @@ else:
 print ("cwd", cwd)
 print ("pkg_path", pkg_path)
 sys.stdout.flush()
-
 sys.path.append(os.path.dirname(cwd))
 sys.path.append(os.path.dirname(pkg_path))
 sys.path.append(pkg_path)
@@ -60,7 +60,7 @@ MOCK_MODULES = [
 	# 'numpy', 'numpy.linalg','numpy.__version__',
     # 'numpydoc',
     # 'vtk', 'PyQt4', 'PySide',
-    # 'numpydoc',
+    'numpydoc',
     # 'openmdao',
     # 'openmdao.main.api',
     # 'openmdao.util',

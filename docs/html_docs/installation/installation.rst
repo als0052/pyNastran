@@ -1,16 +1,18 @@
-============
+############
 Installation
-============
+############
 
--------------------------
+*************************
 Installation From Release
--------------------------
+*************************
 
 pyNastran is an easy package to install once you have the required Python
 modules.  It's a pure Python package so you shouldn't have too many problems.
 Just type on the command line:
 
 ``pip install pyNastran``
+
+.. todo:: List required packages for installation...
 
 That will install the minimum set of what you need to run pyNastran (so no GUI).
 If you want GUI functionality, chances are you have PyQt5 or PySide2, but don't have vtk.
@@ -20,14 +22,14 @@ Additionally, the software can **optionally** use matplotlib, pandas, h5py, colo
 but chances are you already have those.  If you don't, they're very easy to install.
 
 Python
-------
+******
 The software is tested against:
  * Python 3.7 **(Windows/Linux)**
  * Python 3.8 **(Windows/Linux)**
  * Python 3.9 **(Windows/Linux)**  (availible in pyNastran 1.4)
 
 Packages
---------
+********
 pyNastran is tested against a range of package versions (lowest to highest
 based on availbility), so it should work.  The recommended set of packages are:
 
@@ -102,8 +104,9 @@ You've been warned, but in general Anaconda doesn't work well with pip.  You nee
 
 .. copied from building_docs.rst
 
+************************
 Installation From Source
-========================
+************************
 
 pyNastran is meant to an easy package to install once you have the required Python modules.
 It's a pure Python package so you shouldn't have too many problems.
@@ -114,7 +117,7 @@ Installing from source is recommened if:
  - You're on an air-gapped machine
 
 Overview
---------
+========
 .. * Install Python (see :doc:`installation_release`)
 
 .. todo:: Find doc `installation_release`
@@ -183,7 +186,6 @@ To checkout a branch
 .. code-block:: console
 
   >>> git.exe clone --branch 1.3 --progress -v "https://github.com/SteveDoyle2/pyNastran.git" "C:\\work\\pyNastran_1.3"
-
 
 
 Documentation

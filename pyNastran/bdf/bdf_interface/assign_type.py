@@ -43,20 +43,14 @@ RE_INT = re.compile('^[-+]?[0-9]+$', flags=0)
 
 def parse_components(card: BDFCard, ifield: int, fieldname: str) -> str:
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
-    Returns
-    -------
-    components : str
-        a string of the dofs '0' or '123456' (not all are required)
-
+	
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return components: a string of the dofs '0' or '123456' (not all are required)
     """
     assert isinstance(card, BDFCard), type(card)
     assert isinstance(ifield, int), type(ifield)
@@ -101,22 +95,16 @@ def components_or_blank(card: BDFCard,
                         fieldname: str,
                         default: Optional[str]=None) -> Optional[str]:
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : str, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    components : str
-        a string of the dofs '0' or '123456' (not all are required)
-
+	
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: int
+		:param default: the default value for the field (default=None)
+		:type default: str, None
+		:return components: a string of the dofs '0' or '123456' (not all are required)
     """
     #assert isinstance(card, BDFCard), type(card)
     assert isinstance(ifield, int), type(ifield)
@@ -135,17 +123,15 @@ def components_or_blank(card: BDFCard,
 
 def blank(card: BDFCard, ifield: int, fieldname: str, default=None) -> None:
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : None
-        the default value for the field (default=None)
-
+	
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:param default: the default value for the field (default=None)
+		:type default: None
     """
     assert isinstance(card, BDFCard), type(card)
     assert isinstance(ifield, int), type(ifield)
@@ -186,22 +172,17 @@ def blank(card: BDFCard, ifield: int, fieldname: str, default=None) -> None:
 def integer_double_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
     # type (BDFCard, int, str, Union[int, float, str]) -> Optional[Union[int, float, str]]
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : int, float, str, None (default=None)
-        the default value for the field
-
-    Returns
-    -------
-    value : int, float, str, None
-        the field value
-
+	
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:param default: the default value for the field (default=None)
+		:type default: None
+		:return value: the field value
+		:rtype value: int, float, str, None
     """
     svalue = card.field(ifield)
 
@@ -254,18 +235,14 @@ def fields(func, card, fieldname, i, j=None):
     return function_values
 
 def modal_components(card: BDFCard, ifield: int, fieldname: str) -> int:
-    """
-    Gets the modal components (allows a -1 value); used by TIC
+    """Gets the modal components (allows a -1 value); used by TIC
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
     """
     value = integer(card, ifield, fieldname)
     if not(-1 <= value <= 6):
@@ -275,18 +252,14 @@ def modal_components(card: BDFCard, ifield: int, fieldname: str) -> int:
     return value
 
 def modal_components_or_blank(card: BDFCard, ifield: int, fieldname: str, default: any=None) -> int:
-    """
-    Gets the modal components (allows a -1 value); used by TIC
+    """Gets the modal components (allows a -1 value); used by TIC
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
     """
     value = integer_or_blank(card, ifield, fieldname, default=default)
     if not(-1 <= value <= 6):
@@ -296,18 +269,14 @@ def modal_components_or_blank(card: BDFCard, ifield: int, fieldname: str, defaul
     return value
 
 def integer(card: BDFCard, ifield: int, fieldname: str) -> int:
-    """
-    Casts a value to an integer
+    """Casts a value to an integer
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
     """
     svalue = card.field(ifield)
     if isinstance(svalue, float_types):
@@ -339,20 +308,16 @@ def force_integer(card: BDFCard, ifield: int, fieldname: str) -> int:
 
 def integer_or_blank(card: BDFCard, ifield: int, fieldname: str, default: Optional[int]=None):
     # (card, ifield, fieldname, default) -> Optional[int]
-    """
-    Casts a value to an integer
-
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : int, None
-        the default value for the field (default=None)
-
+    """Casts a value to an integer
+	
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+        :param default: the default value for the field (default=None)
+		:type default: int, None
     """
     svalue = card.field(ifield)
 
@@ -414,23 +379,15 @@ def force_integer_or_blank(card: BDFCard, ifield: int, fieldname: str, default: 
                       'card=%s' % (fieldname, svalue, ifield, dtype, card))
 
 def double(card: BDFCard, ifield: int, fieldname: str) -> float:
-    """
-    Casts a value to an double
+    """Casts a value to an double
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
-    Returns
-    -------
-    value : float
-        the value from the desired field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
 
@@ -540,20 +497,15 @@ def force_double(card: BDFCard, ifield: int, fieldname: str) -> float:
 def double_or_blank(card: BDFCard, ifield: int, fieldname: str,
                     default: Optional[Union[float]]=None):
     # (card, ifield, fieldname, default) -> Optional[Union[float]]
-    """
-    Casts a value to an double/blank
+    """Casts a value to an double/blank
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : double, None
-        the default value for the field (default=None)
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
 
@@ -611,18 +563,14 @@ def force_double_or_blank(card: BDFCard, ifield: int, fieldname: str, default: O
     return default
 
 def double_or_string(card: BDFCard, ifield: int, fieldname: str) -> Union[float, str]:
-    """
-    Casts a value to an double/string
+    """Casts a value to an double/string
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
     """
     svalue = card.field(ifield)
 
@@ -666,27 +614,19 @@ def double_or_string(card: BDFCard, ifield: int, fieldname: str) -> Union[float,
 
 def double_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
     # type (BDFCard, int, str, Optional[Union[float, str]]) -> Optional[Union[float, str]]
-    """
-    Casts a value to an double/string/blank
+    """Casts a value to an double/string/blank
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : double, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    value : float / str / None
-        the typed value
-
-    :raises SyntaxError: if there is an invalid type
-
+   
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:param default: the default value for the field (default=None)
+		:type default: double, None
+		:return value: the typed value
+		:raises SyntaxError: if there is an invalid type
     """
     svalue = card.field(ifield)
 
@@ -724,25 +664,16 @@ def double_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=N
     return svalue
 
 def integer_or_double(card: BDFCard, ifield: int, fieldname: str) -> Union[int, float]:
-    """
-    Casts a value to an integer/double
+    """Casts a value to an integer/double
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
-    Returns
-    -------
-    value : int/float
-        the value with the proper type
-
-    :raises SyntaxError: if there's an invalid type
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
+		:raises SyntaxError: if there's an invalid type
     """
     svalue = card.field(ifield)
 
@@ -776,20 +707,17 @@ def integer_or_double(card: BDFCard, ifield: int, fieldname: str) -> Union[int, 
     return value
 
 def integer_double_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
-    """
-    Casts a value to an integer/double/blank
+    """Casts a value to an integer/double/blank
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : int / float / None
-        the default value for the field (default=None)
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
     """
     svalue = card.field(ifield)
 
@@ -810,20 +738,17 @@ def integer_double_or_blank(card: BDFCard, ifield: int, fieldname: str, default=
     return default
 
 def integer_or_string(card: BDFCard, ifield: int, fieldname: str) -> Union[int, str]:
-    """
-    Casts a value to an integer/string
+    """Casts a value to an integer/string
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : int / str
-        the default value for the field (default=None)
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
     """
     svalue = card.field(ifield)
 
@@ -868,21 +793,18 @@ def integer_or_string(card: BDFCard, ifield: int, fieldname: str) -> Union[int, 
 
 
 def integer_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
-    """
-    Casts a value to an integer/string/blank
+    """Casts a value to an integer/string/blank
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : int, str, None
-        the default value for the field (default=None)
-
-    """
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
+	"""
     svalue = card.field(ifield)
     if isinstance(svalue, integer_types):
         return svalue
@@ -906,19 +828,12 @@ def integer_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=
     return default
 
 def _get_dtype(value):
-    """
-    Get the type of the input value in a form that is clear.
+    """Get the type of the input value in a form that is clear.
 
-    Parameters
-    ----------
-    value : int/float/str/None
-        the value to get the type of
-
-    Returns
-    -------
-    dtype : str
-        the type of the value
-
+		:param value: the value to get the type of
+		:type value: int, float, str, None
+		:return dtype: the type of the value
+		:rtype dtype: str
     """
     try:
         value = interpret_value(value)
@@ -941,20 +856,13 @@ def integer_double_or_string(card: BDFCard, ifield: int, fieldname: str) -> Unio
     """
     Casts a value to an integer/double/string
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
-    Returns
-    -------
-    value : varies
-        the value of the field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
     if isinstance(svalue, integer_float_types):
@@ -994,23 +902,15 @@ def integer_double_or_string(card: BDFCard, ifield: int, fieldname: str) -> Unio
 
 
 def string(card: BDFCard, ifield: int, fieldname: str) -> str:
-    """
-    Casts a value to a string
+    """Casts a value to a string
 
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-
-    Returns
-    -------
-    value : str
-        the value of the field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
     if isinstance(svalue, str):
@@ -1067,22 +967,15 @@ def check_string(svalue: str, ifield: int, fieldname: str) -> str:
 
 def string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : str, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    value : varies
-        the value of the field
-
+		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
     if svalue is None:
@@ -1115,22 +1008,15 @@ def string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
 
 def string_choice_or_blank(card: BDFCard, ifield: int, fieldname: str, choices: Tuple[str], default=None):
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : str, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    value : varies
-        the value of the field
-
+   		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
     if svalue is None:
@@ -1152,22 +1038,15 @@ def string_choice_or_blank(card: BDFCard, ifield: int, fieldname: str, choices: 
 
 def loose_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : str, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    value : varies
-        the value of the field
-
+    	:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
+		:return value: the value from the desired field
     """
     svalue = card.field(ifield)
     if svalue is None:
@@ -1200,22 +1079,15 @@ def loose_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=No
 
 def exact_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=None):
     """
-    Parameters
-    ----------
-    card : BDFCard()
-        BDF card as a list
-    ifield : int
-        field number
-    fieldname : str
-        name of field
-    default : str, None
-        the default value for the field (default=None)
-
-    Returns
-    -------
-    value : varies
-        the value of the field
-
+   		:param card: BDF card as a list
+		:type card: BDFCard()
+		:param ifield: field number
+		:type ifield: int
+		:param fieldname: name of field
+		:type fieldname: str
+		:return value: the value from the desired field
+        :param default: the default value for the field (default=None)
+		:type default: int, float, None
     """
     svalue = card.field(ifield)
     if svalue is None:
@@ -1245,21 +1117,14 @@ def exact_string_or_blank(card: BDFCard, ifield: int, fieldname: str, default=No
 
 def interpret_value(value_raw: Optional[str],
                     card: Union[str, BDFCard]='') -> Union[int, float, str, None]:
-    """
-    Converts a value from nastran format into python format.
+    """Converts a value from nastran format into python format.
 
-    Parameters
-    ----------
-    raw_value : str
-        a string representation of a value
-    card : str
-        ???
-
-    Returns
-    -------
-    value : varies
-        the Nastran reprentation of the value
-
+		:param raw_value: a string representation of a value
+		:type raw_value: str
+		:param card: ???
+		:type card: str
+		:return value: the Nastran reprentation of the value
+		:rtype value: 
     """
     if value_raw is None:
         return None

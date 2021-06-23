@@ -7,6 +7,6 @@ Installation
 .. toctree::
    :maxdepth: 1
    
-   installation
-   building_docs
-   installed_programs
+   Installing PyNastran <installation>
+   Generating the Documentation <building_docs>
+   Installed Programs <installed_programs>

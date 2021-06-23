@@ -1,5 +1,6 @@
-OP2: Numpy Demo #2 (Composite Plate Stress)
-===========================================
+##########################################
+OP2 Numpy Demo #2 (Composite Plate Stress)
+##########################################
 
 The Jupyter notebook for this demo can be found in: -
 docs/quick_start/demo/op2_demo_numpy1.ipynb -
@@ -13,7 +14,7 @@ https://github.com/SteveDoyle2/pyNastran/tree/master/docs/quick_start/demo/op2_d
 In this tutorial, composite plate stresses will be covered.
 
 Load the model
---------------
+**************
 
 .. figure:: attachment:image.png
    :alt: image.png
@@ -49,13 +50,10 @@ If the BWB example OP2 doesn’t exist, we’ll run Nastran to create it.
     
     print(model.get_op2_stats(short=True))
 
-
-
 .. raw:: html
 
     <text style=color:green>INFO:    op2_scalar.py:1588           op2_filename = 'c:\\nasa\\m4\\formats\\git\\pynastran\\pyNastran\\..\\models\\bwb\\bwb_saero.op2'
     </text>
-
 
 .. parsed-literal::
 
@@ -72,10 +70,9 @@ If the BWB example OP2 doesn’t exist, we’ll run Nastran to create it.
     cquad4_composite_strain[1]
     ctria3_composite_strain[1]
     
-    
 
 Accessing the Composite Stress
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+******************************
 
 Let’s get the max principal stress.
 
@@ -86,7 +83,6 @@ Let’s get the max principal stress.
     print(stress)
     headers = stress.get_headers()
     imax = headers.index('major')
-
 
 .. parsed-literal::
 
@@ -100,12 +96,10 @@ Let’s get the max principal stress.
     
     
 
-Composite Stress/Strain data is tricky to access as there is not a good way to index the data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Composite Stress/Strain data is tricky to access as there is not a good way to index the data. Let’s cheat a bit using the element ids and layers to make a pivot table. 
 
-Let’s cheat a bit using the element ids and layers to make a pivot
-table. - **table** is (ntimes, nelements, nlayers, ndata) -
-**max_principal_stress_table** is (nelements, nlayers)
+- **table** is (ntimes, nelements, nlayers, ndata) 
+- **max_principal_stress_table** is (nelements, nlayers)
 
 .. figure:: attachment:image.png
    :alt: image.png
@@ -116,7 +110,6 @@ table. - **table** is (ntimes, nelements, nlayers, ndata) -
 
     print('Element, Layer')
     print(stress.element_layer)
-
 
 .. parsed-literal::
 
@@ -129,7 +122,6 @@ table. - **table** is (ntimes, nelements, nlayers, ndata) -
      [22050     9]
      [22050    10]]
     
-
 .. code:: ipython3
 
     from pyNastran.femutils.utils import pivot_table
@@ -146,7 +138,6 @@ table. - **table** is (ntimes, nelements, nlayers, ndata) -
     ueids = np.unique(eids)
     print('max_principal_stress_table:\n%s' % max_principal_stress_table)
 
-
 .. parsed-literal::
 
     max_principal_stress_table:
@@ -160,12 +151,9 @@ table. - **table** is (ntimes, nelements, nlayers, ndata) -
     
 
 More realistic pivot table
---------------------------
+==========================
 
-All the elements have 10 layers. Let’s remove the last 5 layers of the
-last element.
-
-By having empty layers, the pivot table now has nan data in it.
+All the elements have 10 layers. Let’s remove the last 5 layers of the last element. By having empty layers, the pivot table now has nan data in it.
 
 .. code:: ipython3
 
@@ -183,7 +171,6 @@ By having empty layers, the pivot table now has nan data in it.
     max_principal_stress_table2 = table[itime,:,:,imax]
     print('max_principal_stress_table2:\n%s' % max_principal_stress_table2)
 
-
 .. parsed-literal::
 
     max_principal_stress_table2:
@@ -195,10 +182,8 @@ By having empty layers, the pivot table now has nan data in it.
      [ 123.96  143.01   97.41 ...   40.99   44.06   42.47]
      [  90.04  109.97   79.86 ...     nan     nan     nan]]
     
-
-
 Grid Point Forces - Interface Loads
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+***********************************
 
 We need some more data from the geometry
 
@@ -217,34 +202,25 @@ We need some more data from the geometry
         cid=0)
     del nids, out
 
-
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   bdf.py:1006                  ---starting BDF.read_bdf of c:\nasa\m4\formats\git\pynastran\pyNastran\..\models\bwb\bwb_saero.bdf---
     </text>
-
-
 
 .. raw:: html
 
     <text style=color:blue>DEBUG:   pybdf.py:556                 opening 'c:\\nasa\\m4\\formats\\git\\pynastran\\models\\bwb\\bwb_saero.bdf'
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   cross_reference.py:151       Cross Referencing...
     </text>
 
-
-
 .. raw:: html
 
     <text style=color:blue>DEBUG:   bdf.py:1054                  ---finished BDF.read_bdf of c:\nasa\m4\formats\git\pynastran\pyNastran\..\models\bwb\bwb_saero.bdf---
     </text>
-
 
 .. code:: ipython3
 
@@ -292,8 +268,6 @@ We need some more data from the geometry
     print(f'moment = {moment_sumi}; total={np.linalg.norm(moment_sumi):.2f}')
     
     np.set_printoptions(precision=2, threshold=20, linewidth=100, suppress=True)
-    
-
 
 .. parsed-literal::
 
@@ -306,7 +280,6 @@ We need some more data from the geometry
     
     force  = [    -0.05078125     -0.08984375 126271.086     ]; total=126271.09
     moment = [ 1.1500996e+08 -1.5267941e+08  2.0000000e+01]; total=191149920.00
-    
 
 .. figure:: attachment:image.png
    :alt: image.png

@@ -1,10 +1,10 @@
-==================
+##################
 Installed Programs
-==================
+##################
 
---------------------------
+**************************
 List of Installed Programs
---------------------------
+**************************
 
 Various Command line utilities are installed by pyNastran:
 
@@ -16,9 +16,9 @@ Various Command line utilities are installed by pyNastran:
  - f06_
  - format_converter_
 
-------------
+============
 pyNastranGUI
-------------
+============
 
 The Graphical User Interface (GUI) looks like:
 
@@ -40,12 +40,14 @@ The Graphical User Interface (GUI) looks like:
 .. *************************************************************************************************************************
 
 .. See :doc:`../quick_start/gui.rst` for more details.
-See :ref:`Quick Start - GUI<../quick_start/gui.rst>` for more details.
+.. See :ref:`Quick Start - GUI<../quick_start/gui.rst>` for more details.
+
+See :ref:`xref-pynastran_gui` for more details.
 
 
---------
+========
 test_bdf
---------
+========
 Runs through various checks on a BDF that Nastran doesn't do.  Verifies your model is referenced properly.  Creates a summary table.
 
 .. ******************************************************************************************************************************
@@ -63,8 +65,9 @@ Runs through various checks on a BDF that Nastran doesn't do.  Verifies your mod
 .. ******************************************************************************************************************************
 
 .. See :doc:`../quick_start/test_bdf.rst` for more details.
-See :ref:`Quick Start - test_bdf<../quick_start/test_bdf.rst>` for more details.
+.. See :ref:`Quick Start - test_bdf<../quick_start/test_bdf.rst>` for more details.
 
+See :ref:`test-bdf-demo` for more details.
 
 .. .. code-block:: conosle
 .. apparently console is not known? Might be just my install and I don't have dependencies...
@@ -108,9 +111,9 @@ The file ``test.out`` will be created...
     -key=TEMPD   value1=1    value2=1
     *key=CTRIA3  value1=1    value2=0
 
---------
+========
 test_op2
---------
+========
 Runs through various checks on an OP2 file.  Creates a summary table.
 
 .. ******************************************************************************************************************************
@@ -129,8 +132,9 @@ Runs through various checks on an OP2 file.  Creates a summary table.
 .. ******************************************************************************************************************************
 
 .. See :doc:`../quick_start/test_op2.rst` for more details.
-See :ref:`Quick Start - test_op2<../quick_start/test_op2.rst>` for more details.
+.. See :ref:`Quick Start - test_op2<../quick_start/test_op2.rst>` for more details.
 
+See :ref:`xref-test_op2` for more details.
 
 .. .. code-block:: conosle
 .. apparently console is not known? Might be just my install and I don't have dependencies...
@@ -207,9 +211,9 @@ Or more simply:
   cquad4_stress[1]
   eigenvalues[u'ISAT_SM_DEPLOYED MODES TO 400 HZ']
 
---------
+========
 test_op4
---------
+========
 Limited checker for testing to see if an OP4 file will load.
 
 .. .. code-block:: conosle
@@ -234,9 +238,9 @@ Limited checker for testing to see if an OP4 file will load.
    -h, --help           Show this help message and exit
    -v, --version        Show program's version number and exit
 
----
+===
 bdf
----
+===
 
 Interface to various BDF-related command line tools
 
@@ -265,9 +269,9 @@ Interface to various BDF-related command line tools
     bdf bin          -h | --help
     bdf -v | --version
 
----
+===
 f06
----
+===
 
 Interface to various F06-related command line tools
 
@@ -284,9 +288,9 @@ Interface to various F06-related command line tools
     f06 plot_145 -h | --help
     f06 -v | --version
 
-----------------
+================
 format_converter
-----------------
+================
 Converts between various common formats, typically using Nastran as a common format.
 This allows methods like nodal equivalencing to be written once.
 
