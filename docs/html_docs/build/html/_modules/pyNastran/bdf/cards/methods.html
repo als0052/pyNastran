@@ -1,0 +1,1369 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.methods &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.methods</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103,R0902,R0904,R0914</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All method cards are defined in this file.  This includes:</span>
+
+<span class="sd"> * EIGB</span>
+<span class="sd"> * EIGC</span>
+<span class="sd"> * EIGR</span>
+<span class="sd"> * EIGP</span>
+<span class="sd"> * EIGRL</span>
+
+<span class="sd">All cards are Method objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">BaseCard</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">integer_or_blank</span><span class="p">,</span> <span class="n">double</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">string_or_blank</span><span class="p">,</span>
+    <span class="n">parse_components</span><span class="p">,</span> <span class="n">components_or_blank</span><span class="p">,</span> <span class="n">integer_double_string_or_blank</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span>
+    <span class="n">interpret_value</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_card_16</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.Method">[docs]</a><span class="k">class</span> <span class="nc">Method</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic class for all methods.</span>
+<span class="sd">    Part of self.methods</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="EIGB"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB">[docs]</a><span class="k">class</span> <span class="nc">EIGB</span><span class="p">(</span><span class="n">Method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Defines data needed to perform buckling analysis&quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;EIGB&#39;</span>
+
+<div class="viewcode-block" id="EIGB._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;INV&#39;</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="s1">&#39;MAX&#39;</span>
+        <span class="n">L1</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">L2</span> <span class="o">=</span> <span class="mf">2.0</span>
+        <span class="n">nep</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">ndp</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">ndn</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="k">return</span> <span class="n">EIGB</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">L1</span><span class="p">,</span> <span class="n">L2</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span> <span class="n">ndp</span><span class="p">,</span> <span class="n">ndn</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">L1</span><span class="p">,</span> <span class="n">L2</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span> <span class="n">ndp</span><span class="p">,</span> <span class="n">ndn</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">Method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="c1">#: Set identification number. (Unique Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+
+        <span class="c1">#: Method of eigenvalue extraction. (Character: &#39;INV&#39; for inverse</span>
+        <span class="c1">#: power method or &#39;SINV&#39; for enhanced inverse power method.)</span>
+        <span class="c1">#: apparently it can also be blank...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="c1">#: Eigenvalue range of interest. (Real, L1 &lt; L2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L1</span> <span class="o">=</span> <span class="n">L1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L2</span> <span class="o">=</span> <span class="n">L2</span>
+
+        <span class="c1">#: Estimate of number of roots in positive range not used for</span>
+        <span class="c1">#: METHOD = &#39;SINV&#39;. (Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nep</span> <span class="o">=</span> <span class="n">nep</span>
+
+        <span class="c1">#: Desired number of positive and negative roots.</span>
+        <span class="c1">#: (Integer&gt;0; Default = 3*NEP)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndp</span> <span class="o">=</span> <span class="n">ndp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndn</span> <span class="o">=</span> <span class="n">ndn</span>
+
+        <span class="c1">#: Method for normalizing eigenvectors.</span>
+        <span class="c1">#: (&#39;MAX&#39; or &#39;POINT&#39;;Default=&#39;MAX&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">L1</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">L2</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;L1=</span><span class="si">%s</span><span class="s1"> L2=</span><span class="si">%s</span><span class="s1">; L1&lt;L2 is requried&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L2</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;INV&#39;</span><span class="p">,</span> <span class="s1">&#39;SINV&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;method must be INV or SINV.  method=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EIGB.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGB card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">)</span>
+
+        <span class="n">L1</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;L1&#39;</span><span class="p">)</span>
+        <span class="n">L2</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;L2&#39;</span><span class="p">)</span>
+
+        <span class="n">nep</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;nep&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ndp</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;ndp&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nep</span><span class="p">)</span>
+        <span class="n">ndn</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;ndn&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nep</span><span class="p">)</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;norm&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;POINT&#39;</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">parse_components</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">components_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;len(EIGB card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EIGB</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">L1</span><span class="p">,</span> <span class="n">L2</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span> <span class="n">ndp</span><span class="p">,</span> <span class="n">ndn</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span>
+                    <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EIGB.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="EIGB.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGB&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nep</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">ndp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndn</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGB.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#method = set_blank_if_default(self.method,&#39;INV&#39;)</span>
+        <span class="n">nep</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nep</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ndp</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndp</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nep</span><span class="p">)</span>
+        <span class="n">ndn</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndn</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nep</span><span class="p">)</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGB&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L2</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span> <span class="n">ndp</span><span class="p">,</span>
+                       <span class="n">ndn</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGB.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGB.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EIGC"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC">[docs]</a><span class="k">class</span> <span class="nc">EIGC</span><span class="p">(</span><span class="n">Method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines data needed to perform complex eigenvalue analysis</span>
+<span class="sd">    .. todo: not done</span>
+
+<span class="sd">    ``inverse power``</span>
+
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+<span class="sd">    |   1  |    2    |    3    |    4    |    5    |    6    |   7     |  8  |</span>
+<span class="sd">    +======+=========+=========+=========+=========+=========+=========+=====+</span>
+<span class="sd">    | EIGC |   SID   | METHOD  |         |         |         |   EPS   | ND0 |</span>
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+<span class="sd">    |      | ALPHAAj | OMEGAAj | ALPHABj | OMEGABj |   Lj    |   NEj   | NDj |</span>
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+
+<span class="sd">    ``complex Lanczos``</span>
+
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+<span class="sd">    |   1  |    2    |    3    |    4    |    5    |    6    |   7     |  8  |</span>
+<span class="sd">    +======+=========+=========+=========+=========+=========+=========+=====+</span>
+<span class="sd">    |      | SHIFTRj | SHIFTIj | MBLKSZj | IBLKSZj | KSTEPSj |   NDj   |     |</span>
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+
+<span class="sd">    ``iterative Schur-Rayleigh-Ritz``</span>
+
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+<span class="sd">    |   1  |    2    |    3    |    4    |    5    |    6    |   7     |  8  |</span>
+<span class="sd">    +======+=========+=========+=========+=========+=========+=========+=====+</span>
+<span class="sd">    |      | SHIFTR1 | SHIFTI1 |         |         |         | ISRRFLG | ND1 |</span>
+<span class="sd">    +------+---------+---------+---------+---------+---------+---------+-----+</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;EIGC&#39;</span>
+
+<div class="viewcode-block" id="EIGC._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;CLAN&#39;</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">neigenvalues</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">return</span> <span class="n">EIGC</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">neigenvalues</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="n">mblkszs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iblkszs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ksteps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">NJIs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alphaAjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alphaBjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">omegaBjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">LJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NEJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">shift_r1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shift_i1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isrr_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">neigenvalues</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="c1"># common</span>
+                 <span class="n">mblkszs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iblkszs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ksteps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NJIs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># CLAN</span>
+                 <span class="n">alphaAjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alphaBjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># HESS/INV</span>
+                 <span class="n">LJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NEJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">NDJs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># HESS/INV</span>
+                 <span class="n">shift_r1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shift_i1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isrr_flag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># ISRR</span>
+                 <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a EIGC card, which is required for a SOL 107 analysis</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            CMETHOD id in the case control deck</span>
+<span class="sd">        method : str</span>
+<span class="sd">           Method of complex eigenvalue extraction</span>
+<span class="sd">             MSC 2014 = [INV, HESS, CLAN, IRAM]</span>
+<span class="sd">             NX 8.5 = [INV, HESS, CLAN, ISRR]</span>
+<span class="sd">             Autodesk 2015 = [ARNO, HESS, CLAN]</span>
+<span class="sd">             INV  : Inverse Power</span>
+<span class="sd">             IRAM : Implicitly Restarted Arnoldi method</span>
+<span class="sd">             ISRR : Iterative Schur-Rayleigh-Ritz method</span>
+<span class="sd">             CLAN : Complex Lanczos.  For linear perturbation of ANALYSIS=DCEIG</span>
+<span class="sd">                    with large displacement, CLAN is recommended.</span>
+<span class="sd">             HESS : Upper Hessenberg. For linear perturbation of ANALYSIS=DCEIG</span>
+<span class="sd">                    with large displacement, please don&#39;t use HESS.</span>
+<span class="sd">             ARNO: ???</span>
+<span class="sd">        norm : str; default=&#39;MAX&#39;</span>
+<span class="sd">            Method for normalizing eigenvectors</span>
+<span class="sd">            valid_norm = {MAX, POINT}</span>
+<span class="sd">        grid : int</span>
+<span class="sd">            GRID/SPOINT id</span>
+<span class="sd">            Required if norm=&#39;POINT&#39;</span>
+<span class="sd">        component : int</span>
+<span class="sd">            Required if norm=&#39;POINT&#39;</span>
+<span class="sd">        epsilon : float</span>
+<span class="sd">        neigenvalues : int</span>
+<span class="sd">            Number of Eigenvalues</span>
+<span class="sd">        mblkszs : List[float]; default=None</span>
+<span class="sd">            used by CLAN</span>
+<span class="sd">        iblkszs : List[int]; default=None</span>
+<span class="sd">            used by CLAN</span>
+<span class="sd">        ksteps : List[int]; default=None</span>
+<span class="sd">            used by CLAN</span>
+<span class="sd">        NJIs : List[int]; default=None</span>
+<span class="sd">            used by CLAN</span>
+<span class="sd">        alphaAjs : List[float]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        omegaAjs : List[float]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        alphaBjs : List[float]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        omegaBjs : List[float]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        LJs : List[float]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        NEJs : List[int]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        NDJs : List[int]; default=None</span>
+<span class="sd">            used by HESS/INV</span>
+<span class="sd">        shift_r1 : List[float]; default=None</span>
+<span class="sd">            used by ISSR</span>
+<span class="sd">        shift_i1 : List[float]; default=None</span>
+<span class="sd">            used by ISSR</span>
+<span class="sd">        isrr_flag : List[int]; default=None</span>
+<span class="sd">            used by ISSR</span>
+<span class="sd">        nd1 : List[int]; default=None</span>
+<span class="sd">            used by ISSR</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+
+        <span class="c1">#: Set identification number. (Unique Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+
+        <span class="c1">#: Method of complex eigenvalue extraction</span>
+        <span class="c1">#:   MSC 2014 = [INV, HESS, CLAN, IRAM]</span>
+        <span class="c1">#:   NX 8.5 = [INV, HESS, CLAN, ISRR]</span>
+        <span class="c1">#:   Autodesk 2015 = [ARNO, HESS, CLAN]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="c1">#: Method for normalizing eigenvectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="c1">#: Grid or scalar point identification number. Required only if</span>
+        <span class="c1">#: NORM=&#39;POINT&#39;. (Integer&gt;0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">grid</span>
+
+
+        <span class="c1">#: Component number. Required only if NORM=&#39;POINT&#39; and G is a</span>
+        <span class="c1">#: geometric grid point. (1&lt;Integer&lt;6)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">component</span>
+
+        <span class="c1">#: Convergence criterion. (Real &gt; 0.0. Default values are:</span>
+        <span class="c1">#: 10^-4 for METHOD = &quot;INV&quot;,</span>
+        <span class="c1">#: 10^-8 for METHOD = &quot;CLAN&quot;,</span>
+        <span class="c1">#: 10^-8 for METHOD = &quot;ISRR&quot;,</span>
+        <span class="c1">#: 10^-15 for METHOD = &quot;HESS&quot;,</span>
+        <span class="c1">#: E is machine dependent for METHOD = &quot;CLAN&quot;.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+
+        <span class="c1">#Number of eigenvalues and/or eigenvectors desired. See Remark</span>
+        <span class="c1">#3. (Integer &gt; 0 or blank; No default)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neigenvalues</span> <span class="o">=</span> <span class="n">neigenvalues</span>
+
+        <span class="c1"># CLAN</span>
+        <span class="k">if</span> <span class="n">mblkszs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">iblkszs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">iblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">ksteps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ksteps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">NJIs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">NJIs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mblkszs</span> <span class="o">=</span> <span class="n">mblkszs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iblkszs</span> <span class="o">=</span> <span class="n">iblkszs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ksteps</span> <span class="o">=</span> <span class="n">ksteps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NJIs</span> <span class="o">=</span> <span class="n">NJIs</span>
+
+        <span class="c1"># HESS</span>
+        <span class="k">if</span> <span class="n">alphaBjs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alphaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">omegaBjs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">omegaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span> <span class="o">=</span> <span class="n">alphaBjs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span> <span class="o">=</span> <span class="n">omegaBjs</span>
+
+        <span class="k">if</span> <span class="n">LJs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LJs</span> <span class="o">=</span> <span class="n">LJs</span>
+        <span class="k">if</span> <span class="n">NEJs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">NEJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span> <span class="o">=</span> <span class="n">NEJs</span>
+        <span class="k">if</span> <span class="n">NDJs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">NDJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span> <span class="o">=</span> <span class="n">NDJs</span>
+
+        <span class="k">if</span> <span class="n">alphaAjs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alphaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">omegaAjs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">omegaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span> <span class="o">=</span> <span class="n">alphaAjs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span> <span class="o">=</span> <span class="n">omegaAjs</span>
+
+        <span class="c1">#----------</span>
+        <span class="c1"># ISRR</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift_r1</span> <span class="o">=</span> <span class="n">shift_r1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift_i1</span> <span class="o">=</span> <span class="n">shift_i1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isrr_flag</span> <span class="o">=</span> <span class="n">isrr_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nd1</span> <span class="o">=</span> <span class="n">nd1</span>
+
+<div class="viewcode-block" id="EIGC.validate"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="s1">&#39;POINT&#39;</span><span class="p">],</span> <span class="s1">&#39;norm=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span>
+        <span class="n">nalpha_a</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> omegaAj=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;HESS&#39;</span><span class="p">,</span> <span class="s1">&#39;INV&#39;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> alphaBj=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">)</span>
+            <span class="c1">#assert nalpha_a == len(self.omegaBjs), &#39;alphaAjs=%s omegaBjs=%s&#39; % (self.alphaAjs, self.omegaBjs)</span>
+            <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> LJs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> NEJs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> NDJs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;CLAN&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;nalpha_a=</span><span class="si">{</span><span class="n">nalpha_a</span><span class="si">}</span><span class="s1"> nalpha_b=</span><span class="si">{</span><span class="n">nalpha_b</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;nalpha_a=</span><span class="si">{</span><span class="n">nalpha_a</span><span class="si">}</span><span class="s1"> nomega_b=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mblkszs</span><span class="p">),</span> <span class="s1">&#39;alphaAjs=</span><span class="si">%s</span><span class="s1"> mblkszs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mblkszs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iblkszs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ksteps</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NJIs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EIGC.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGC card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">string</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ARNO&#39;</span><span class="p">,</span> <span class="s1">&#39;INV&#39;</span><span class="p">,</span> <span class="s1">&#39;HESS&#39;</span><span class="p">,</span> <span class="s1">&#39;CLAN&#39;</span><span class="p">,</span> <span class="s1">&#39;ISRR&#39;</span><span class="p">,</span> <span class="s1">&#39;IRAM&#39;</span><span class="p">,</span> <span class="s1">&#39;DET&#39;</span><span class="p">],</span> <span class="p">(</span>
+            <span class="s1">&#39;method=</span><span class="si">%s</span><span class="s1"> is not ARNO, INV, HESS, CLAN, ISRR, IRAM, DET&#39;</span> <span class="o">%</span> <span class="n">method</span><span class="p">)</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;norm&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;POINT&#39;</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">component</span> <span class="o">=</span> <span class="n">parse_components</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">component</span> <span class="o">=</span> <span class="n">blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;epsilon&#39;</span><span class="p">)</span>
+        <span class="n">neigenvalues</span> <span class="o">=</span> <span class="n">integer_double_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;ND0/neigenvalues&#39;</span><span class="p">)</span>
+
+        <span class="c1"># ALPHAAJ OMEGAAJ ALPHABJ OMEGABJ LJ NEJ NDJ</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">interpret_value</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">card</span><span class="p">[</span><span class="mi">9</span><span class="p">:]]</span>
+
+        <span class="c1">#-------CLAN--------------</span>
+        <span class="n">mblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">iblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ksteps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">NJIs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#-------CLAN--------------</span>
+
+        <span class="c1">#-------HESS--------------</span>
+        <span class="n">alphaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">alphaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">omegaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">omegaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">iblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ksteps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">LJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">NEJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">NDJs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#-------HESS--------------</span>
+
+        <span class="c1">#-------ISRR--------------</span>
+        <span class="n">shift_r1</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">shift_i1</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">isrr_flag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nd1</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#-------ISRR--------------</span>
+        <span class="n">nfields</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="n">nfields</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">nfields</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#if nrows == 0:</span>
+            <span class="c1">#msg = &#39;invalid row count=0; nfields=%s \ncard=%s\nfields=%s&#39; % (</span>
+                <span class="c1">#nfields, card, fields)</span>
+            <span class="c1">#raise RuntimeError(msg)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;CLAN&#39;</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">_load_clan</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="p">,</span> <span class="n">mblkszs</span><span class="p">,</span> <span class="n">iblkszs</span><span class="p">,</span> <span class="n">ksteps</span><span class="p">,</span> <span class="n">NJIs</span><span class="p">,</span>
+             <span class="n">alphaBjs</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="p">,</span> <span class="n">LJs</span><span class="p">,</span> <span class="n">NEJs</span><span class="p">,</span> <span class="n">NDJs</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;HESS&#39;</span><span class="p">,</span> <span class="s1">&#39;INV&#39;</span><span class="p">,</span> <span class="s1">&#39;DET&#39;</span><span class="p">]:</span>  <span class="c1"># HESS, INV</span>
+            <span class="n">alphaAjs</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="p">,</span> <span class="n">alphaBjs</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="p">,</span> <span class="n">LJs</span><span class="p">,</span> <span class="n">NEJs</span><span class="p">,</span> <span class="n">NDJs</span> <span class="o">=</span> <span class="n">_load_hess_inv</span><span class="p">(</span>
+                <span class="n">nrows</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;ISRR&#39;</span><span class="p">:</span>
+            <span class="n">shift_r1</span><span class="p">,</span> <span class="n">shift_i1</span><span class="p">,</span> <span class="n">isrr_flag</span><span class="p">,</span> <span class="n">nd1</span> <span class="o">=</span> <span class="n">_load_isrr</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;invalid EIGC method...method=</span><span class="si">{</span><span class="n">method</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#assert card.nfields() &lt; 8, &#39;card = %s&#39; % card</span>
+        <span class="k">return</span> <span class="n">EIGC</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">neigenvalues</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="p">,</span> <span class="c1"># common</span>
+                    <span class="n">mblkszs</span><span class="p">,</span> <span class="n">iblkszs</span><span class="p">,</span> <span class="n">ksteps</span><span class="p">,</span> <span class="n">NJIs</span><span class="p">,</span> <span class="c1"># CLAN</span>
+                    <span class="n">alphaAjs</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="p">,</span> <span class="n">alphaBjs</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="p">,</span> <span class="n">LJs</span><span class="p">,</span> <span class="n">NEJs</span><span class="p">,</span> <span class="n">NDJs</span><span class="p">,</span> <span class="c1"># HESS/INV</span>
+                    <span class="n">shift_r1</span><span class="p">,</span> <span class="n">shift_i1</span><span class="p">,</span> <span class="n">isrr_flag</span><span class="p">,</span> <span class="n">nd1</span><span class="p">,</span> <span class="c1"># ISRR</span>
+                    <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EIGC.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="EIGC.raw_method"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.raw_method">[docs]</a>    <span class="k">def</span> <span class="nf">raw_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;HESS&#39;</span><span class="p">,</span> <span class="s1">&#39;INV&#39;</span><span class="p">,</span> <span class="s1">&#39;DET&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">alphaB</span><span class="p">,</span> <span class="n">omegaB</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">NEj</span><span class="p">,</span> <span class="n">NDj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">):</span>
+                <span class="n">alphaA</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">alphaA</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">omegaA</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">omegaA</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">alphaB</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">alphaB</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">omegaB</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">omegaB</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">alphaB</span><span class="p">,</span> <span class="n">omegaB</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">NEj</span><span class="p">,</span> <span class="n">NDj</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;CLAN&#39;</span><span class="p">:</span>
+            <span class="n">nalpha_a</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">):</span>  <span class="c1"># pragma:no cover</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;nalpha_a=</span><span class="si">{</span><span class="n">nalpha_a</span><span class="si">}</span><span class="s1"> nalpha_b=</span><span class="si">{</span><span class="n">nalpha_b</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;nalpha_a=</span><span class="si">{</span><span class="n">nalpha_a</span><span class="si">}</span><span class="s1"> nomega_b=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">alphaB</span><span class="p">,</span> <span class="n">omegaB</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span> <span class="n">Nej</span><span class="p">,</span> <span class="n">Ndj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">alphaBjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaBjs</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">LJs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NEJs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NDJs</span><span class="p">):</span>
+                    <span class="c1">#alphaA = set_blank_if_default(alphaA, 0.0)</span>
+                    <span class="c1">#omegaA = set_blank_if_default(omegaA, 0.0)</span>
+                    <span class="c1">#mblksz = set_blank_if_default(mblksz, 7)</span>
+                    <span class="c1">#iblksz = set_blank_if_default(iblksz, 2)</span>
+                    <span class="c1">#kstep = set_blank_if_default(kstep, 5)</span>
+                    <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">alphaB</span><span class="p">,</span> <span class="n">omegaB</span><span class="p">,</span> <span class="n">Lj</span><span class="p">,</span>
+                                    <span class="n">Nej</span><span class="p">,</span> <span class="n">Ndj</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mblkszs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iblkszs</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ksteps</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">nalpha_a</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NJIs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">mblksz</span><span class="p">,</span> <span class="n">iblksz</span><span class="p">,</span> <span class="n">kstep</span><span class="p">,</span> <span class="n">Nj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">alphaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omegaAjs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mblkszs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iblkszs</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ksteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">NJIs</span><span class="p">):</span>
+                    <span class="n">alphaA</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">alphaA</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">omegaA</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">omegaA</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">mblksz</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">mblksz</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+                    <span class="n">iblksz</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">iblksz</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">kstep</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="n">kstep</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+                    <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">alphaA</span><span class="p">,</span> <span class="n">omegaA</span><span class="p">,</span> <span class="n">mblksz</span><span class="p">,</span> <span class="n">iblksz</span><span class="p">,</span>
+                                    <span class="n">kstep</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Nj</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;ISRR&#39;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_r1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shift_r1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">shift_r1i</span><span class="p">,</span> <span class="n">shift_i1i</span><span class="p">,</span> <span class="n">isrr_flagi</span><span class="p">,</span> <span class="n">nd1i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shift_r1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_i1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrr_flag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nd1</span><span class="p">):</span>
+                <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">shift_r1i</span><span class="p">,</span> <span class="n">shift_i1i</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">isrr_flagi</span><span class="p">,</span> <span class="n">nd1i</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;invalid EIGC method.  method=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">!r}</span><span class="s1"> &#39;</span>
+                               <span class="s1">&#39;expected=[HESS, INV, DET, CLAN, ISRR]&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGC.repr_method"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.repr_method">[docs]</a>    <span class="k">def</span> <span class="nf">repr_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_method</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EIGC.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGC&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">neigenvalues</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">list_fields</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_method</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGC.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGC&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span>
+                       <span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">neigenvalues</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">list_fields</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_method</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGC.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGC.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EIGP"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP">[docs]</a><span class="k">class</span> <span class="nc">EIGP</span><span class="p">(</span><span class="n">Method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines poles that are used in complex eigenvalue extraction by the</span>
+<span class="sd">    Determinant method.</span>
+
+<span class="sd">    +------+-------+--------+--------+-------+--------+--------+-----+</span>
+<span class="sd">    |   1  |   2   |   3    |   4    |   5   |   6    |   7    |  8  |</span>
+<span class="sd">    +======+=======+========+========+=======+========+========+=====+</span>
+<span class="sd">    | EIGP |  SID  | ALPHA1 | OMEGA1 |   M1  | ALPHA2 | OMEGA2 |  M2 |</span>
+<span class="sd">    +------+-------+--------+--------+-------+--------+--------+-----+</span>
+<span class="sd">    | EIGP |  15   |  -5.2  |  0.0   |   2   |  6.3   |  5.5   |  3  |</span>
+<span class="sd">    +------+-------+--------+--------+-------+--------+--------+-----+</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;EIGP&#39;</span>
+
+<div class="viewcode-block" id="EIGP._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">alpha1</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">omega1</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">alpha2</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">omega2</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">m2</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">return</span> <span class="n">EIGP</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">alpha1</span><span class="p">,</span> <span class="n">omega1</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">alpha2</span><span class="p">,</span> <span class="n">omega2</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">alpha1</span><span class="p">,</span> <span class="n">omega1</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">alpha2</span><span class="p">,</span> <span class="n">omega2</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">Method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="c1">#: Set identification number. (Unique Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+        <span class="c1">#: Coordinates of point in complex plane. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha1</span> <span class="o">=</span> <span class="n">alpha1</span>
+        <span class="c1">#: Coordinates of point in complex plane. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omega1</span> <span class="o">=</span> <span class="n">omega1</span>
+        <span class="c1">#: Multiplicity of complex root at pole defined by point at ALPHAi</span>
+        <span class="c1">#: and OMEGAi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m1</span> <span class="o">=</span> <span class="n">m1</span>
+
+        <span class="c1">#: Coordinates of point in complex plane. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha2</span> <span class="o">=</span> <span class="n">alpha2</span>
+        <span class="c1">#: Coordinates of point in complex plane. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omega2</span> <span class="o">=</span> <span class="n">omega2</span>
+        <span class="c1">#: Multiplicity of complex root at pole defined by point at ALPHAi</span>
+        <span class="c1">#: and OMEGAi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span> <span class="o">=</span> <span class="n">m2</span>
+
+<div class="viewcode-block" id="EIGP.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGPX card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+
+        <span class="n">alpha1</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;alpha1&#39;</span><span class="p">)</span>
+        <span class="n">omega1</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;omega1&#39;</span><span class="p">)</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;m1&#39;</span><span class="p">)</span>
+
+        <span class="n">alpha2</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;alpha2&#39;</span><span class="p">)</span>
+        <span class="n">omega2</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;omega2&#39;</span><span class="p">)</span>
+        <span class="n">m2</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;m2&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;len(EIGP card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EIGP</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">alpha1</span><span class="p">,</span> <span class="n">omega1</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">alpha2</span><span class="p">,</span> <span class="n">omega2</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EIGP.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="EIGP.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omega1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m1</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">alpha2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omega2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGP.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EIGP.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGP.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EIGR"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR">[docs]</a><span class="k">class</span> <span class="nc">EIGR</span><span class="p">(</span><span class="n">Method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines data needed to perform real eigenvalue analysis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;EIGR&#39;</span>
+    <span class="n">allowed_methods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;LAN&#39;</span><span class="p">,</span> <span class="s1">&#39;AHOU&#39;</span><span class="p">,</span> <span class="c1"># recommended</span>
+        <span class="s1">&#39;INV&#39;</span><span class="p">,</span> <span class="s1">&#39;SINV&#39;</span><span class="p">,</span> <span class="s1">&#39;GIV&#39;</span><span class="p">,</span> <span class="s1">&#39;MGIV&#39;</span><span class="p">,</span> <span class="s1">&#39;HOU&#39;</span><span class="p">,</span> <span class="s1">&#39;MHOU&#39;</span><span class="p">,</span> <span class="s1">&#39;AGIV&#39;</span> <span class="c1"># obsolete</span>
+    <span class="p">]</span>
+
+<div class="viewcode-block" id="EIGR._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">EIGR</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;LAN&#39;</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ne</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;MASS&#39;</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;LAN&#39;</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ne</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;MASS&#39;</span><span class="p">,</span> <span class="n">G</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a EIGR card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            method id</span>
+<span class="sd">        method : str; default=&#39;LAN&#39;</span>
+<span class="sd">            eigenvalue method</span>
+<span class="sd">            recommended: {LAN, AHOU}</span>
+<span class="sd">            obsolete : {INV, SINV, GIV, MGIV, HOU, MHOU, AGIV}</span>
+<span class="sd">        f1 / f2 : float; default=None</span>
+<span class="sd">            lower/upper bound eigenvalue</span>
+<span class="sd">        f2 : float; default=None</span>
+<span class="sd">            upper bound eigenvalue</span>
+<span class="sd">        ne : int; default=None</span>
+<span class="sd">            estimate of number of roots (used for INV)</span>
+<span class="sd">        nd : int; default=None</span>
+<span class="sd">            desired number of roots</span>
+<span class="sd">        msglvl : int; default=0</span>
+<span class="sd">            debug level; 0-4</span>
+<span class="sd">        maxset : int; default=None</span>
+<span class="sd">            Number of vectors in block or set</span>
+<span class="sd">        shfscl : float; default=None</span>
+<span class="sd">            estimate of first flexible mode natural frequency</span>
+<span class="sd">        norm : str; default=None</span>
+<span class="sd">            {MAX, MASS, AF, POINT}</span>
+<span class="sd">            default=MASS (NX)</span>
+<span class="sd">        G : int; default=None</span>
+<span class="sd">            node id for normalization; only for POINT</span>
+<span class="sd">        C : int; default=None</span>
+<span class="sd">            component for normalization (1-6); only for POINT</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="k">if</span> <span class="n">G</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">C</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">#: Set identification number. (Unique Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+
+        <span class="c1">#: Method of eigenvalue extraction. (Character: &#39;INV&#39; for inverse</span>
+        <span class="c1">#: power method or &#39;SINV&#39; for enhanced inverse power method.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="c1">#: Frequency range of interest</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f1</span> <span class="o">=</span> <span class="n">f1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f2</span> <span class="o">=</span> <span class="n">f2</span>
+
+        <span class="c1">#: Estimate of number of roots in range (Required for</span>
+        <span class="c1">#: METHOD = &#39;INV&#39;). Not used by &#39;SINV&#39; method.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ne</span> <span class="o">=</span> <span class="n">ne</span>
+
+        <span class="c1">#: Desired number of roots (default=600 for SINV 3*ne for INV)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nd</span> <span class="o">=</span> <span class="n">nd</span>
+
+        <span class="c1">#: Method for normalizing eigenvectors. (&#39;MAX&#39; or &#39;POINT&#39;;</span>
+        <span class="c1">#: Default=&#39;MAX&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+
+        <span class="c1">#: Grid or scalar point identification number. Required only if</span>
+        <span class="c1">#: NORM=&#39;POINT&#39;. (Integer&gt;0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
+
+        <span class="c1">#: Component number. Required only if NORM=&#39;POINT&#39; and G is a</span>
+        <span class="c1">#: geometric grid point. (1&lt;Integer&lt;6)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_methods</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;method=</span><span class="si">%s</span><span class="s1">; allowed_methods=[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allowed_methods</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">norm</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;POINT&#39;</span><span class="p">,</span> <span class="s1">&#39;MASS&#39;</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EIGR.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGR card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;LAN&#39;</span><span class="p">)</span>
+
+        <span class="n">f1</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;f1&#39;</span><span class="p">)</span>
+        <span class="n">f2</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;f2&#39;</span><span class="p">)</span>
+        <span class="n">ne</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ne&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">allowed_methods</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;method=</span><span class="si">%s</span><span class="s1">; allowed_methods=[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">allowed_methods</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SINV&#39;</span><span class="p">:</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;INV&#39;</span><span class="p">:</span>
+            <span class="n">ne</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ne&#39;</span><span class="p">)</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">ne</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;GIV&#39;</span><span class="p">,</span> <span class="s1">&#39;MGIV&#39;</span><span class="p">,</span> <span class="s1">&#39;HOU&#39;</span><span class="p">,</span> <span class="s1">&#39;MHOU&#39;</span><span class="p">]:</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;norm&#39;</span><span class="p">,</span> <span class="s1">&#39;MASS&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="s1">&#39;POINT&#39;</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">parse_components</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;len(EIGR card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EIGR</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">ne</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EIGR.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="EIGR.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGR&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ne</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">nd</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGR.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;LAN&#39;</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="s1">&#39;MASS&#39;</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGR&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ne</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">nd</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGR.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGR.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EIGRL"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL">[docs]</a><span class="k">class</span> <span class="nc">EIGRL</span><span class="p">(</span><span class="n">Method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines data needed to perform real eigenvalue (vibration or buckling)</span>
+<span class="sd">    analysis with the Lanczos method</span>
+
+<span class="sd">    +-------+-----+----+----+----+--------+--------+--------+------+</span>
+<span class="sd">    |   1   |  2  |  3 |  4 |  5 |    6   |    7   |    8   |   9  |</span>
+<span class="sd">    +=======+=====+====+====+====+========+========+========+======+</span>
+<span class="sd">    | EIGRL | SID | V1 | V2 | ND | MSGLVL | MAXSET | SHFSCL | NORM |</span>
+<span class="sd">    +-------+-----+----+----+----+--------+--------+--------+------+</span>
+<span class="sd">    |        option_1 = value_1 option_2 = value_2, etc.           |</span>
+<span class="sd">    +--------------------------------------------------------------+</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;EIGRL&#39;</span>
+
+<div class="viewcode-block" id="EIGRL._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">EIGRL</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">v1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">msglvl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">shfscl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">v1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">v2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">msglvl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shfscl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGRL card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            method id</span>
+<span class="sd">        v1 : float; default=None</span>
+<span class="sd">            lower bound eigenvalue</span>
+<span class="sd">        v2 : float; default=None</span>
+<span class="sd">            upper bound eigenvalue</span>
+<span class="sd">        nd : int</span>
+<span class="sd">            number of roots</span>
+<span class="sd">        msglvl : int; default=0</span>
+<span class="sd">            debug level; 0-4</span>
+<span class="sd">        maxset : int; default=None</span>
+<span class="sd">            Number of vectors in block or set</span>
+<span class="sd">        shfscl : float; default=None</span>
+<span class="sd">            estimate of first flexible mode natural frequency</span>
+<span class="sd">        norm : str; default=None</span>
+<span class="sd">            {MAX, MASS, AF}</span>
+<span class="sd">        options : ???; default=None -&gt; []</span>
+<span class="sd">            ???</span>
+<span class="sd">        values : ???; default=None -&gt; []</span>
+<span class="sd">            ???</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">#: Set identification number. (Unique Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+
+        <span class="c1">#: For vibration analysis: frequency range of interest. For</span>
+        <span class="c1">#: buckling analysis: eigenvalue range of interest. See Remark 4.</span>
+        <span class="c1">#: (Real or blank, -5 10e16 &lt;= V1 &lt; V2 &lt;= 5.10e16)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v1</span> <span class="o">=</span> <span class="n">v1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v2</span> <span class="o">=</span> <span class="n">v2</span>
+
+        <span class="c1">#: Number of roots desired</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nd</span> <span class="o">=</span> <span class="n">nd</span>
+
+        <span class="c1">#: Diagnostic level. (0 &lt; Integer &lt; 4; Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msglvl</span> <span class="o">=</span> <span class="n">msglvl</span>
+
+        <span class="c1">#: Number of vectors in block or set. Default is machine dependent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxset</span> <span class="o">=</span> <span class="n">maxset</span>
+
+        <span class="c1">#: Estimate of the first flexible mode natural frequency</span>
+        <span class="c1">#: (Real or blank)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shfscl</span> <span class="o">=</span> <span class="n">shfscl</span>
+
+        <span class="c1">#: Method for normalizing eigenvectors (Character: &#39;MASS&#39; or &#39;MAX&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+
+<div class="viewcode-block" id="EIGRL.validate"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="s1">&#39;MASS&#39;</span><span class="p">,</span> <span class="s1">&#39;AF&#39;</span><span class="p">],</span> <span class="s1">&#39;norm=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">msglvl</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;msglvl=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">msglvl</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;len(options) != len(values); noptions=</span><span class="si">%s</span><span class="s1"> nvalues=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                               <span class="s1">&#39;options=</span><span class="si">%s</span><span class="s1"> values=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">option</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;NORM&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MAX&#39;</span><span class="p">,</span> <span class="p">],</span> <span class="s1">&#39;option=</span><span class="si">%r</span><span class="s1"> value=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;ALPH&#39;</span><span class="p">:</span>
+                <span class="c1"># float</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;NUMS&#39;</span><span class="p">:</span>
+                <span class="c1"># integer</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;option=</span><span class="si">%r</span><span class="s1"> value=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="EIGRL.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an EIGRL card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;v1&#39;</span><span class="p">)</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;v2&#39;</span><span class="p">)</span>
+        <span class="n">nd</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;nd&#39;</span><span class="p">)</span>
+        <span class="n">msglvl</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;msglvl&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">maxset</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;maxset&#39;</span><span class="p">)</span>
+        <span class="n">shfscl</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;shfscl&#39;</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+
+        <span class="n">option_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">interpret_value</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">card</span><span class="p">[</span><span class="mi">9</span><span class="p">:]]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">option_value</span> <span class="ow">in</span> <span class="n">option_values</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">=</span> <span class="n">option_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;parsing EIGRL card incorrectly; option_values=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">option_values</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c1">#: Method for normalizing eigenvectors</span>
+        <span class="c1">#if sol in [103, 115, 146]:</span>
+            <span class="c1">## normal modes,cyclic normal modes, flutter</span>
+            <span class="c1">#self.norm = string_or_blank(card, 8, &#39;norm&#39;, &#39;MASS&#39;)</span>
+        <span class="c1">#elif sol in [105, 110, 111, 116]:</span>
+            <span class="c1">## buckling, modal complex eigenvalues,</span>
+            <span class="c1">## modal frequency response,cyclic buckling</span>
+            <span class="c1">#self.norm = string_or_blank(card, 8, &#39;norm&#39;, &#39;MAX&#39;)</span>
+        <span class="c1">#else:</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+
+        <span class="c1">#assert len(card) &lt;= 9, &#39;len(EIGRL card) = %i\ncard=%s&#39; % (len(card), card)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;len(EIGRL card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+
+        <span class="c1">#msg = &#39;norm=%s sol=%s&#39; % (self.norm, sol)</span>
+        <span class="c1">#assert self.norm in [&#39;MASS&#39;, &#39;MAX&#39;],msg</span>
+        <span class="c1">#assert card.nFields()&lt;9,&#39;card = %s&#39; %(card.fields(0))</span>
+        <span class="k">return</span> <span class="n">EIGRL</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">msglvl</span><span class="p">,</span> <span class="n">maxset</span><span class="p">,</span> <span class="n">shfscl</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EIGRL.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+        <span class="c1">#if self.norm is None:</span>
+            <span class="c1">#if model.is_modal_solution():</span>
+                <span class="c1">#self.norm = &#39;MASS&#39;</span>
+            <span class="c1">#elif mdoel.is_buckling_solution():</span>
+                <span class="c1">#self.norm = &#39;MAX&#39;</span>
+
+<div class="viewcode-block" id="EIGRL.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGRL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nd</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">msglvl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shfscl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+            <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">option</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGRL.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msglvl</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msglvl</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EIGRL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nd</span><span class="p">,</span> <span class="n">msglvl</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">maxset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shfscl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+            <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">option</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="EIGRL.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.EIGRL.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="_load_isrr"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods._load_isrr">[docs]</a><span class="k">def</span> <span class="nf">_load_isrr</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">card</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;loads the iterative Schur-Rayleigh-Ritz&quot;&quot;&quot;</span>
+    <span class="n">shift_r1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">shift_i1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">isrr_flag</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nd1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">irow</span>
+        <span class="n">shift_r1i</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;SHIFT_R1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">shift_i1i</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;SHIFT_I1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="c1">#2</span>
+        <span class="c1">#3</span>
+        <span class="c1">#4</span>
+        <span class="n">isrr_flagi</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ISRR_FLAG&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">nd1i</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;ND1&#39;</span><span class="p">)</span>
+        <span class="n">shift_r1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift_r1i</span><span class="p">)</span>
+        <span class="n">shift_i1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift_i1i</span><span class="p">)</span>
+        <span class="n">isrr_flag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isrr_flagi</span><span class="p">)</span>
+        <span class="n">nd1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nd1i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shift_r1</span><span class="p">,</span> <span class="n">shift_i1</span><span class="p">,</span> <span class="n">isrr_flag</span><span class="p">,</span> <span class="n">nd1</span></div>
+
+<div class="viewcode-block" id="_load_clan"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods._load_clan">[docs]</a><span class="k">def</span> <span class="nf">_load_clan</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">card</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;loads complex Lanczos&quot;&quot;&quot;</span>
+    <span class="n">alphaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">omegaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">iblkszs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ksteps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">NJIs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">alphaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">omegaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ljs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nejs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ndjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">is_nej</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="c1">#NDJ_default = None</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">irow</span>
+        <span class="n">alphaAjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">))</span>
+        <span class="n">omegaAjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;omega&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">))</span>
+
+        <span class="n">nej_blank</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;NEJ_blank&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nej_blank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">assert</span> <span class="n">is_nej</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">is_nej</span>
+            <span class="n">is_nej</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># ALPHAAJ OMEGAAJ ALPHABJ OMEGABJ LJ NEJ NDJ</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nej_blank</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">nej_blank</span>
+            <span class="n">alpha_bj</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;alpha_bj&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">))</span>
+            <span class="n">omega_bj</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;omega_bj&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">))</span>
+            <span class="n">lj</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;LJ&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">nej</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;NEJ&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">))</span>
+            <span class="n">ndj</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;NDJ&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">))</span>
+            <span class="n">alphaBjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha_bj</span><span class="p">)</span>
+            <span class="n">omegaBjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">omega_bj</span><span class="p">)</span>
+            <span class="n">ljs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lj</span><span class="p">)</span>
+            <span class="n">nejs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nej</span><span class="p">)</span>
+            <span class="n">ndjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ndj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">is_nej</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">is_nej</span>
+            <span class="n">is_nej</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># ALPHAAJ OMEGAAJ MBLKSZ IBLKSZ KSTEPS blank NJi</span>
+            <span class="n">mblock_size</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;mblock&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mi">7</span><span class="p">)</span>
+
+            <span class="c1"># iblkszs is an integer, but entered as a float...</span>
+            <span class="n">iblock_size</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;iblksz&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">kstep</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;kstep&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">nji</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;NJI&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">))</span>
+
+            <span class="n">mblkszs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mblock_size</span><span class="p">)</span>
+            <span class="n">iblkszs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iblock_size</span><span class="p">)</span>
+            <span class="n">ksteps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kstep</span><span class="p">)</span>
+            <span class="n">NJIs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nji</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">alphaAjs</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="p">,</span> <span class="n">mblkszs</span><span class="p">,</span> <span class="n">iblkszs</span><span class="p">,</span> <span class="n">ksteps</span><span class="p">,</span> <span class="n">NJIs</span><span class="p">,</span>
+        <span class="n">alphaBjs</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="p">,</span> <span class="n">ljs</span><span class="p">,</span> <span class="n">nejs</span><span class="p">,</span> <span class="n">ndjs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="_load_hess_inv"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods._load_hess_inv">[docs]</a><span class="k">def</span> <span class="nf">_load_hess_inv</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">card</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;loads inverse power&quot;&quot;&quot;</span>
+    <span class="n">alpha_omega_default</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">LJ_default</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;INV&#39;</span><span class="p">:</span>
+        <span class="n">alpha_omega_default</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">LJ_default</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">alphaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">alphaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">omegaAjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">omegaBjs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#mblkszs = []</span>
+    <span class="c1">#iblkszs = []</span>
+    <span class="c1">#ksteps = []</span>
+    <span class="n">LJs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">NEJs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">NDJs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="n">NEj</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">9</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">irow</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;NE</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">NDJ_default</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;INV&#39;</span><span class="p">:</span>
+            <span class="n">NDJ_default</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">NEj</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">9</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">irow</span>
+        <span class="n">alphaAjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;alphaA&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">alpha_omega_default</span><span class="p">))</span>
+        <span class="n">omegaAjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;omegaA&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">alpha_omega_default</span><span class="p">))</span>
+        <span class="n">alphaBjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;alphaB&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">alpha_omega_default</span><span class="p">))</span>
+        <span class="n">omegaBjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;omegaB&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">alpha_omega_default</span><span class="p">))</span>
+        <span class="n">LJs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;LJ&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">LJ_default</span><span class="p">))</span>
+        <span class="n">NEJs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NEj</span><span class="p">)</span>
+        <span class="n">NDJs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;NDJ&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irow</span><span class="p">),</span> <span class="n">NDJ_default</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">alphaAjs</span><span class="p">,</span> <span class="n">omegaAjs</span><span class="p">,</span> <span class="n">alphaBjs</span><span class="p">,</span> <span class="n">omegaBjs</span><span class="p">,</span> <span class="n">LJs</span><span class="p">,</span> <span class="n">NEJs</span><span class="p">,</span> <span class="n">NDJs</span></div>
+
+
+<div class="viewcode-block" id="MODTRAK"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.MODTRAK">[docs]</a><span class="k">class</span> <span class="nc">MODTRAK</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MODTRAK SID LOWRNG HIGHRNG MTFILTER</span>
+<span class="sd">    MODTRAK 100   1      26      0.80</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">low_range</span><span class="p">,</span> <span class="n">high_range</span><span class="p">,</span> <span class="n">mt_filter</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">low_range</span> <span class="o">=</span> <span class="n">low_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_range</span> <span class="o">=</span> <span class="n">high_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mt_filter</span> <span class="o">=</span> <span class="n">mt_filter</span>
+
+<div class="viewcode-block" id="MODTRAK.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.MODTRAK.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">low_range</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;low_range&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">high_range</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;high_range&#39;</span><span class="p">)</span>
+        <span class="n">mt_filter</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;mt_filter&#39;</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MODTRAK</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">low_range</span><span class="p">,</span> <span class="n">high_range</span><span class="p">,</span> <span class="n">mt_filter</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MODTRAK.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.MODTRAK.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MODTRAK&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">low_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">high_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mt_filter</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="MODTRAK.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.methods.html#pyNastran.bdf.cards.methods.MODTRAK.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="c1">#if size == 8:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span></div></div>
+        <span class="c1">#return self.comment + print_card_16(fields)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

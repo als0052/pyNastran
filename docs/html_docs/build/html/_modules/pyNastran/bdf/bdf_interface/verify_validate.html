@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.bdf_interface.verify_validate &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.bdf_interface.verify_validate</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.bdf_interface.verify_validate</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - verify_bdf(model, xref)</span>
+<span class="sd"> - validate_bdf(model)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="verify_bdf"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate.verify_bdf">[docs]</a><span class="k">def</span> <span class="nf">verify_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1">#for key, card in sorted(model.params.items()):</span>
+        <span class="c1">#card._verify(xref)</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">card</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">xref</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span>
+
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">card</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">xref</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span>
+                                                  <span class="n">exc_traceback</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span>
+
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">cbarao</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">ao_element_flags</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBARAO error: eid=</span><span class="si">%s</span><span class="s1"> is not a CBAR&#39;</span> <span class="o">%</span> <span class="n">eid</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cbarao</span><span class="p">))</span>
+            <span class="k">raise</span>
+
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dequations</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">desvars</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">topvar</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dvcrels</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dvmrels</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dvprels</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_model_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dresps</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict_list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dvgrids</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">unused_id</span><span class="p">,</span> <span class="n">gust</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">gusts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">gust</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">_verify_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tics</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">zona</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">xref</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">unused_super_id</span><span class="p">,</span> <span class="n">superelement</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">superelement_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">verify_bdf</span><span class="p">(</span><span class="n">superelement</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_verify_dict"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._verify_dict">[docs]</a><span class="k">def</span> <span class="nf">_verify_dict</span><span class="p">(</span><span class="n">dict_obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``verify_bdf``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">card</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict_obj</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">xref</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="_verify_model_dict"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._verify_model_dict">[docs]</a><span class="k">def</span> <span class="nf">_verify_model_dict</span><span class="p">(</span><span class="n">dict_obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``verify_bdf``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">card</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict_obj</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">xref</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="_verify_dict_list"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._verify_dict_list">[docs]</a><span class="k">def</span> <span class="nf">_verify_dict_list</span><span class="p">(</span><span class="n">dict_list</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``verify_bdf``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">cards</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict_list</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">cards</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">card</span><span class="o">.</span><span class="n">_verify</span><span class="p">(</span><span class="n">xref</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+                <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="_print_card"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._print_card">[docs]</a><span class="k">def</span> <span class="nf">_print_card</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``_validate_msg``&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">card</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+<div class="viewcode-block" id="_validate_msg"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._validate_msg">[docs]</a><span class="k">def</span> <span class="nf">_validate_msg</span><span class="p">(</span><span class="n">card_obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``_validate_traceback``&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">card_obj</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">_print_card</span><span class="p">(</span><span class="n">card_obj</span><span class="p">))</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">card_obj</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="_validate_traceback"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._validate_traceback">[docs]</a><span class="k">def</span> <span class="nf">_validate_traceback</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">unused_error</span><span class="p">,</span>
+                        <span class="n">ifailed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nmax_failed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for ``validate_bdf`` to write a traceback&quot;&quot;&quot;</span>
+    <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="c1">#exc_type, exc_value, exc_traceback = sys.exc_info()</span>
+    <span class="c1"># format_tb(exc_traceback)  # works; ugly</span>
+    <span class="c1"># format_exc(e) # works; short</span>
+    <span class="c1">#traceback.format_stack()</span>
+    <span class="c1">#print(&#39;validate_dict_list&#39;)</span>
+    <span class="c1">#print(&#39;traceback.format_stack()[:-1] = \n&#39;, &#39;&#39;.join(traceback.format_stack()[:-1]))</span>
+    <span class="c1">#model.log.info(&#39;info2&#39;)</span>
+    <span class="c1">#model.log.error(&#39;error2&#39;)</span>
+    <span class="c1">#msg = (</span>
+        <span class="c1">#&#39;\nTraceback (most recent call last):\n&#39; +</span>
+        <span class="c1">#&#39;&#39;.join(traceback.format_stack()) +</span>
+        <span class="c1">##&#39;&#39;.join(traceback.format_tb(exc_traceback)) + #&#39;\n&#39; +</span>
+        <span class="c1">#&#39;%s: %s\n&#39; % (exc_type.__name__, exc_value) +</span>
+        <span class="c1">#obj.get_stats() +</span>
+        <span class="c1">#&#39;----------------------------------------------------------------\n&#39;)</span>
+    <span class="c1">#model.log.error(msg)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">_validate_msg</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="n">ifailed</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">ifailed</span> <span class="o">&gt;</span> <span class="n">nmax_failed</span><span class="p">:</span>
+        <span class="c1"># PY3: raise error from None</span>
+        <span class="k">raise</span>
+    <span class="k">return</span> <span class="n">ifailed</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span></div>
+
+<div class="viewcode-block" id="validate_bdf"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate.validate_bdf">[docs]</a><span class="k">def</span> <span class="nf">validate_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">thermal_materials</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATS1</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATS3</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATS8</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT1</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT2</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT3</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT4</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT5</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT8</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">MATT9</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">creep_materials</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">hyperelastic_materials</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">load_combinations</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dloads</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dloads</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">nlpcis</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">nlparms</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">rotors</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tsteps</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tstepnls</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">transfer_functions</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">delays</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">aeros</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">aeros</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">paeros</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aecomps</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aefacts</span><span class="p">)</span>
+    <span class="c1">#_validate_dict(model, model.panlists)</span>
+
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aelinks</span><span class="p">)</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aeparams</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aesurfs</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">aestats</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trims</span><span class="p">)</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">divergs</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">csschds</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">mkaeros</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">monitor_points</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">aero</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">aero</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">flfacts</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">flutters</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">gusts</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bcs</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">phbdys</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">convection_properties</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tempds</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bcrparas</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bctadds</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bctparas</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bctsets</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bsurf</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bsurfs</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">suport1</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">suport</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_suport</span><span class="p">)</span>
+
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">spcadds</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcadds</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">spcoffs</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dareas</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dphases</span><span class="p">)</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">pbusht</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">pdampt</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">pelast</span><span class="p">)</span>
+
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmi</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmig</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmij</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmiji</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmik</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dmiax</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="c1">#model.asets = []</span>
+    <span class="c1">#model.bsets = []</span>
+    <span class="c1">#model.csets = []</span>
+    <span class="c1">#model.qsets = []</span>
+    <span class="c1">#model.usets = {}</span>
+
+    <span class="c1">##: SExSETy</span>
+    <span class="c1">#model.se_bsets = []</span>
+    <span class="c1">#model.se_csets = []</span>
+    <span class="c1">#model.se_qsets = []</span>
+    <span class="c1">#model.se_usets = {}</span>
+    <span class="c1">#model.se_sets = {}</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">usets</span><span class="p">)</span>
+
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">asets</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">omits</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">bsets</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">csets</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">qsets</span><span class="p">)</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_sets</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_usets</span><span class="p">)</span>
+
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_bsets</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_csets</span><span class="p">)</span>
+    <span class="n">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">se_qsets</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tables_d</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tables_m</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_tables</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">tables_sdamping</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">methods</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">cMethods</span><span class="p">)</span>
+    <span class="c1">#------------------------------------------------</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dconadds</span><span class="p">)</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dconstrs</span><span class="p">)</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">desvars</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">topvar</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">ddvals</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dlinks</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dresps</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">dtable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">dtable</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">doptprm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">doptprm</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dequations</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dvprels</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dvmrels</span><span class="p">)</span>
+    <span class="n">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dvcrels</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">dscreen</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dscreen</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">dscreen</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="n">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dvgrids</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">zona</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">unused_super_id</span><span class="p">,</span> <span class="n">superelement</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">superelement_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">validate_bdf</span><span class="p">(</span><span class="n">superelement</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_validate_dict_list"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._validate_dict_list">[docs]</a><span class="k">def</span> <span class="nf">_validate_dict_list</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">objects_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for validate_bdf&quot;&quot;&quot;</span>
+    <span class="n">ifailed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nmax_failed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">objects_dict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">objects</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">objects_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+            <span class="c1">#print(&#39;obj.get_stats =&#39;, obj.get_stats())</span>
+            <span class="c1">#print(obj.rstrip())</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="n">ifailed</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">_validate_traceback</span><span class="p">(</span>
+                    <span class="n">model</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">ifailed</span><span class="p">,</span> <span class="n">nmax_failed</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ifailed</span><span class="p">:</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="_validate_dict"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._validate_dict">[docs]</a><span class="k">def</span> <span class="nf">_validate_dict</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">objects</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for validate_bdf&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+    <span class="n">ifailed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nmax_failed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">unused_id</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">objects</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">ifailed</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">_validate_traceback</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">ifailed</span><span class="p">,</span> <span class="n">nmax_failed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ifailed</span><span class="p">:</span>
+        <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="_validate_list"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.verify_validate.html#pyNastran.bdf.bdf_interface.verify_validate._validate_list">[docs]</a><span class="k">def</span> <span class="nf">_validate_list</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">objects</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for validate_bdf&quot;&quot;&quot;</span>
+    <span class="n">ifailed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nmax_failed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">ifailed</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">_validate_traceback</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">ifailed</span><span class="p">,</span> <span class="n">nmax_failed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ifailed</span><span class="p">:</span>
+        <span class="k">raise</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

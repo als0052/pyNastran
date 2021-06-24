@@ -1,0 +1,1152 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.elements.beam &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.elements.beam</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.elements.beam</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - CBEAM</span>
+<span class="sd"> - BEAMOR</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.elements.bars</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LineElement</span><span class="p">,</span> <span class="n">init_x_g0</span><span class="p">,</span> <span class="n">BaseCard</span><span class="p">,</span> <span class="n">rotate_v_wa_wb</span><span class="p">,</span> <span class="n">check_offt</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">integer_or_blank</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">,</span> <span class="n">integer_double_string_or_blank</span><span class="p">,</span>
+    <span class="n">integer_double_or_blank</span><span class="p">,</span> <span class="n">integer_string_or_blank</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_card_16</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.mathematics</span> <span class="kn">import</span> <span class="n">integrate_positive_unit_line</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="CBEAM"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM">[docs]</a><span class="k">class</span> <span class="nc">CBEAM</span><span class="p">(</span><span class="n">LineElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |   1   |  2  |  3  |  4  |  5  |  6  |  7  |  8  |    9     |</span>
+<span class="sd">    +=======+=====+=====+=====+=====+=====+=====+=====+==========+</span>
+<span class="sd">    | CBEAM | EID | PID | GA  | GB  | X1  | X2  | X3  | OFFT/BIT |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |       | PA  | PB  | W1A | W2A | W3A | W1B | W2B | W3B      |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |       | SA  | SB  |     |     |     |     |     |          |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+
+<span class="sd">    or</span>
+
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |   1   |  2  |  3  |  4  |  5  |  6  |  7  |  8  |    9     |</span>
+<span class="sd">    +=======+=====+=====+=====+=====+=====+=====+=====+==========+</span>
+<span class="sd">    | CBEAM | EID | PID | GA  | GB  | G0  |     |     | OFFT/BIT |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |       | PA  | PB  | W1A | W2A | W3A | W1B | W2B | W3B      |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+<span class="sd">    |       | SA  | SB  |     |     |     |     |     |          |</span>
+<span class="sd">    +-------+-----+-----+-----+-----+-----+-----+-----+----------+</span>
+
+<span class="sd">    offt/bit are MSC specific fields</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CBEAM&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;ga&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;gb&#39;</span><span class="p">,</span> <span class="c1">#5:&#39;x_g0&#39;, 6:&#39;g1&#39;, 7:&#39;g2&#39;,</span>
+        <span class="c1">#8:&#39;offt&#39;,</span>
+        <span class="mi">9</span><span class="p">:</span><span class="s1">&#39;pa&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span><span class="s1">&#39;pb&#39;</span><span class="p">,</span>
+        <span class="mi">17</span><span class="p">:</span><span class="s1">&#39;sa&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">:</span><span class="s1">&#39;sb&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_update_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">13</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">15</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># offt</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1">=</span><span class="si">%r</span><span class="s1"> is an invalid </span><span class="si">%s</span><span class="s1"> entry or is unsupported.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1">=</span><span class="si">%r</span><span class="s1"> is an invalid </span><span class="si">%s</span><span class="s1"> entry or is unsupported.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CBEAM.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the elements in a vectorized way&quot;&quot;&quot;</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_encoding</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">g0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">pa</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">wa</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">wb</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sa</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sb</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="c1">#comments.append(element.comment)</span>
+            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">g0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">g0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">g0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">bit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">bit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">bit</span><span class="p">)</span>
+                <span class="n">offt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">offti</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">offt</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offti</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                    <span class="n">offti</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">offti</span><span class="p">)</span>
+                <span class="n">offt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offti</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">))</span>
+
+
+            <span class="n">pa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">pa</span><span class="p">)</span>
+            <span class="n">pb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">pb</span><span class="p">)</span>
+            <span class="n">sa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">sa</span><span class="p">)</span>
+            <span class="n">sb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">sb</span><span class="p">)</span>
+            <span class="n">wa</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">wa</span><span class="p">)</span>
+            <span class="n">wb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">wb</span><span class="p">)</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">eids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pids</span><span class="p">)</span>
+        <span class="c1">#print(&#39;x =&#39;, x)</span>
+        <span class="c1">#print(&#39;g0 =&#39;, g0)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;g0&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">g0</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;offt&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">offt</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;bit&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">bit</span><span class="p">)</span>
+
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pa&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pa</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pb&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pb</span><span class="p">)</span>
+
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;sa&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">sa</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;sb&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">sb</span><span class="p">)</span>
+
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;wa&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">wa</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">wb</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">offt</span><span class="o">=</span><span class="s1">&#39;GGG&#39;</span><span class="p">,</span> <span class="n">bit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">pa</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pb</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sa</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sb</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CBEAM card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id</span>
+<span class="sd">        mid : int</span>
+<span class="sd">            material id</span>
+<span class="sd">        nids : List[int, int]</span>
+<span class="sd">            node ids; connected grid points at ends A and B</span>
+<span class="sd">        x : List[float, float, float]</span>
+<span class="sd">            Components of orientation vector, from GA, in the displacement</span>
+<span class="sd">            coordinate system at GA (default), or in the basic coordinate system</span>
+<span class="sd">        g0 : int</span>
+<span class="sd">            Alternate method to supply the orientation vector using grid</span>
+<span class="sd">            point G0. Direction of is from GA to G0. is then transferred</span>
+<span class="sd">            to End A</span>
+<span class="sd">        offt : str; default=&#39;GGG&#39;</span>
+<span class="sd">            Offset vector interpretation flag</span>
+<span class="sd">            None : bit is active</span>
+<span class="sd">        bit : float; default=None</span>
+<span class="sd">            Built-in twist of the cross-sectional axes about the beam axis</span>
+<span class="sd">            at end B relative to end A.</span>
+<span class="sd">            For beam p-elements ONLY!</span>
+<span class="sd">            None : offt is active</span>
+<span class="sd">        pa / pb : int; default=0</span>
+<span class="sd">            Pin Flag at End A/B.  Releases the specified DOFs</span>
+<span class="sd">        wa / wb : List[float, float, float]</span>
+<span class="sd">            Components of offset vectors from the grid points to the end</span>
+<span class="sd">            points of the axis of the shear center</span>
+<span class="sd">        sa / sb : int; default=0</span>
+<span class="sd">            Scalar or grid point identification numbers for the ends A and B,</span>
+<span class="sd">            respectively. The degrees-of-freedom at these points are the</span>
+<span class="sd">            warping variables . SA and SB cannot be specified for</span>
+<span class="sd">            beam p-elements</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        offt/bit are MSC specific fields</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LineElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="k">if</span> <span class="n">wa</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wa</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">wb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">wb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wb</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">offt</span> <span class="o">=</span> <span class="n">offt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">)</span>
+            <span class="n">offt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offt</span><span class="p">)</span> <span class="k">if</span> <span class="n">offt</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="n">offt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="o">=</span> <span class="n">offt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bit</span> <span class="o">=</span> <span class="n">bit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pa</span> <span class="o">=</span> <span class="n">pa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pb</span> <span class="o">=</span> <span class="n">pb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wa</span> <span class="o">=</span> <span class="n">wa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="o">=</span> <span class="n">wb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sa</span> <span class="o">=</span> <span class="n">sa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sb</span> <span class="o">=</span> <span class="n">sb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0_vector</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CBEAM.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;CBEAM eid=</span><span class="si">%s</span><span class="s1">: x is None, so g0=</span><span class="si">%s</span><span class="s1"> must be an integer&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;CBEAM eid=</span><span class="si">%s</span><span class="s1">: x=</span><span class="si">%s</span><span class="s1"> and g0=</span><span class="si">%s</span><span class="s1">, so x must be a list; type(x)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">),</span> <span class="s1">&#39;g0=</span><span class="si">%s</span><span class="s1"> must be an integer&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;G0=</span><span class="si">%s</span><span class="s1"> cannot be GA=</span><span class="si">%s</span><span class="s1"> or GB=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;OFFT/BIT must not be None; offt=</span><span class="si">%r</span><span class="s1"> bit=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="s1">&#39;invalid offt; offt=</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span>
+                <span class="c1">#raise NotImplementedError(&#39;invalid offt; offt=%i&#39; % self.offt)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">check_offt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;invalid offt expected a string of length 3 &#39;</span>
+                                <span class="s1">&#39;offt=</span><span class="si">%r</span><span class="s1">; Type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="CBEAM.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">beamor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CBEAM card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        beamor : BEAMOR() or None</span>
+<span class="sd">            defines the defaults</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;eid&#39;</span><span class="p">)</span>
+
+        <span class="n">pid_default</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="n">x1_default</span><span class="p">,</span> <span class="n">x2_default</span><span class="p">,</span> <span class="n">x3_default</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span>
+        <span class="n">offt_default</span> <span class="o">=</span> <span class="s1">&#39;GGG&#39;</span>
+        <span class="k">if</span> <span class="n">beamor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">beamor</span><span class="o">.</span><span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pid_default</span> <span class="o">=</span> <span class="n">beamor</span><span class="o">.</span><span class="n">pid</span>
+            <span class="k">if</span> <span class="n">beamor</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x1_default</span> <span class="o">=</span> <span class="n">beamor</span><span class="o">.</span><span class="n">g0</span>
+                <span class="n">x2_default</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">x3_default</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x1_default</span><span class="p">,</span> <span class="n">x2_default</span><span class="p">,</span> <span class="n">x3_default</span> <span class="o">=</span> <span class="n">beamor</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">offt_default</span> <span class="o">=</span> <span class="n">beamor</span><span class="o">.</span><span class="n">offt</span>
+
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">pid_default</span><span class="p">)</span>
+        <span class="n">ga</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;ga&#39;</span><span class="p">)</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;gb&#39;</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">g0</span> <span class="o">=</span> <span class="n">init_x_g0</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">x1_default</span><span class="p">,</span> <span class="n">x2_default</span><span class="p">,</span> <span class="n">x3_default</span><span class="p">)</span>
+        <span class="n">offt</span><span class="p">,</span> <span class="n">bit</span> <span class="o">=</span> <span class="n">_init_offt_bit</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">offt_default</span><span class="p">)</span><span class="c1"># offt doesn&#39;t exist in NX nastran</span>
+        <span class="n">pa</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;pa&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;pb&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;w1a&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                       <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;w2a&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                       <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;w3a&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="n">wb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;w1b&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                       <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;w2b&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                       <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="s1">&#39;w3b&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="n">sa</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="s1">&#39;sa&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sb</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="s1">&#39;sb&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">19</span><span class="p">,</span> <span class="s1">&#39;len(CBEAM card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CBEAM</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">offt</span><span class="p">,</span> <span class="n">bit</span><span class="p">,</span>
+                     <span class="n">pa</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span> <span class="n">wa</span><span class="o">=</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="o">=</span><span class="n">wb</span><span class="p">,</span> <span class="n">sa</span><span class="o">=</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="o">=</span><span class="n">sb</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CBEAM card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        f : int</span>
+<span class="sd">            beam flag</span>
+<span class="sd">            0 : basic</span>
+<span class="sd">                [x1, x2, x3] is used</span>
+<span class="sd">            1 : cid</span>
+<span class="sd">                [x1, x2, x3] is used</span>
+<span class="sd">            2 : grid</span>
+<span class="sd">                g0 is used instead of [x1, x2, x3]</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: .. todo:: verify</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;data=</span><span class="si">%s</span><span class="s1"> len(data)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="c1">#data = [[eid,pid,ga,gb,sa,sb, pa,pb,w1a,w2a,w3a,w1b,w2b,w3b],</span>
+        <span class="c1">#        [f,g0]]</span>
+        <span class="c1">#data = [[eid,pid,ga,gb,sa,sb, pa,pb,w1a,w2a,w3a,w1b,w2b,w3b],</span>
+        <span class="c1">#        [f,x1,x2,x3]]</span>
+
+        <span class="n">main</span><span class="p">,</span> <span class="n">aft</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">aft</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">f</span> <span class="o">==</span> <span class="n">flag</span><span class="p">,</span> <span class="s1">&#39;f=</span><span class="si">%s</span><span class="s1"> flag=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># basic cid</span>
+            <span class="c1">#data_in = [[eid, pid, ga, gb, sa, sb, pa, pb, w1a, w2a, w3a, w1b, w2b, w3b],</span>
+                       <span class="c1">#[f, x1, x2, x3]]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;f=</span><span class="si">%s</span><span class="s1"> aft=</span><span class="si">%s</span><span class="s1"> len(aft)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">aft</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">))</span>
+            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span> <span class="o">=</span> <span class="n">aft</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># global cid</span>
+            <span class="c1">#data_in = [[eid, pid, ga, gb, sa, sb, pa, pb, w1a, w2a, w3a, w1b, w2b, w3b],</span>
+                       <span class="c1">#[f, x1, x2, x3]]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;f=</span><span class="si">%s</span><span class="s1"> aft=</span><span class="si">%s</span><span class="s1"> len(aft)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">aft</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">))</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span> <span class="o">=</span> <span class="n">aft</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># grid option</span>
+            <span class="c1">#data_in = [[eid, pid, ga, gb, sa, sb, pa, pb, w1a, w2a, w3a, w1b, w2b, w3b],</span>
+                       <span class="c1">#[f, g0]]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;f=</span><span class="si">%s</span><span class="s1"> aft=</span><span class="si">%s</span><span class="s1"> len(aft)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">aft</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">))</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ga</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">sa</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">sb</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+        <span class="c1">#offt = str(data[6]) # GGG</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># ???</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="s1">&#39;GGG&#39;</span>  <span class="c1">#: .. todo:: is this correct???</span>
+
+        <span class="n">pa</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="n">main</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+        <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">main</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">main</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">main</span><span class="p">[</span><span class="mi">10</span><span class="p">]],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">wb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">main</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">main</span><span class="p">[</span><span class="mi">12</span><span class="p">],</span> <span class="n">main</span><span class="p">[</span><span class="mi">13</span><span class="p">]],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CBEAM</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">offt</span><span class="p">,</span> <span class="n">bit</span><span class="p">,</span>
+                     <span class="n">pa</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span> <span class="n">wa</span><span class="o">=</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="o">=</span><span class="n">wb</span><span class="p">,</span> <span class="n">sa</span><span class="o">=</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="o">=</span><span class="n">sb</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CBEAM.Nodes"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Nodes">[docs]</a>    <span class="k">def</span> <span class="nf">Nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CBEAM.Centroid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Centroid">[docs]</a>    <span class="k">def</span> <span class="nf">Centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">node1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span>
+        <span class="n">node2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span>
+        <span class="n">xyz1</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="n">xyz2</span> <span class="o">=</span> <span class="n">node2</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyz1</span> <span class="o">+</span> <span class="n">xyz2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="k">return</span> <span class="n">centroid</span></div>
+
+<div class="viewcode-block" id="CBEAM.center_of_mass"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.center_of_mass">[docs]</a>    <span class="k">def</span> <span class="nf">center_of_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the centroid formuala is way more complicated if you consider the nonstructural mass axis&quot;&quot;&quot;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span>
+        <span class="n">node1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span>
+        <span class="n">node2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span>
+        <span class="n">xyz1</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="n">xyz2</span> <span class="o">=</span> <span class="n">node2</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="c1">#centroid = ( + self.gb_ref.get_position()) / 2.</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyz1</span> <span class="o">+</span> <span class="n">xyz2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="c1">#length = norm(xyz2 - xyz1)</span>
+        <span class="c1">#cda = model.nodes[n1].cid_ref</span>
+        <span class="c1">#cdb = model.nodes[n2].cid_ref</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">is_failed</span><span class="p">,</span> <span class="n">out</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_axes_by_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="p">,</span> <span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_failed</span><span class="p">:</span>
+            <span class="c1">#model.log.error(out)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">_ihat</span><span class="p">,</span> <span class="n">jhat</span><span class="p">,</span> <span class="n">khat</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">xyz1</span> <span class="o">+</span> <span class="n">wa</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz2</span> <span class="o">+</span> <span class="n">wb</span>
+
+        <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PBEAM&#39;</span><span class="p">:</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Rho</span><span class="p">()</span>
+
+            <span class="c1"># we don&#39;t call the MassPerLength method so we can put the NSM centroid</span>
+            <span class="c1"># on a different axis (the PBEAM is weird)</span>
+            <span class="n">mass_per_lengths</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">nsm_per_lengths</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">nsm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">nsm</span><span class="p">):</span>
+                <span class="n">mass_per_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">area</span> <span class="o">*</span> <span class="n">rho</span><span class="p">)</span>
+                <span class="n">nsm_per_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nsm</span><span class="p">)</span>
+            <span class="n">mass_per_length</span> <span class="o">=</span> <span class="n">integrate_positive_unit_line</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">xxb</span><span class="p">,</span> <span class="n">mass_per_lengths</span><span class="p">)</span>
+            <span class="n">nsm_per_length</span> <span class="o">=</span> <span class="n">integrate_positive_unit_line</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">xxb</span><span class="p">,</span> <span class="n">nsm_per_lengths</span><span class="p">)</span>
+            <span class="n">nsm_n1</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">jhat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m1a</span> <span class="o">+</span> <span class="n">khat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m2a</span><span class="p">)</span>
+            <span class="n">nsm_n2</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">jhat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m1b</span> <span class="o">+</span> <span class="n">khat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m2b</span><span class="p">)</span>
+            <span class="c1">#print(&quot;nsm_per_length=%s&quot; % nsm_per_length)</span>
+            <span class="c1">#print(&quot;nsm_n1=%s&quot; % nsm_n1)</span>
+            <span class="c1">#print(&quot;nsm_n2=%s&quot; % nsm_n2)</span>
+            <span class="n">nsm_centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">nsm_n1</span> <span class="o">+</span> <span class="n">nsm_n2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="c1">#if nsm != 0.:</span>
+                <span class="c1">#p1_nsm = p1 + prop.ma</span>
+                <span class="c1">#p2_nsm = p2 + prop.mb</span>
+        <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">:</span>
+            <span class="n">mass_per_lengths</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get_mass_per_lengths</span><span class="p">()</span>
+            <span class="c1">#mass_per_length = prop.MassPerLength() # includes simplified nsm</span>
+
+            <span class="c1"># m1a, m1b, m2a, m2b=0.</span>
+            <span class="n">nsm_centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+
+            <span class="c1"># mass_per_length already includes nsm</span>
+            <span class="n">mass_per_length</span> <span class="o">=</span> <span class="n">integrate_positive_unit_line</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">xxb</span><span class="p">,</span> <span class="n">mass_per_lengths</span><span class="p">)</span>
+            <span class="n">nsm_per_length</span> <span class="o">=</span> <span class="mf">0.</span>
+
+            <span class="c1">#print(&#39;mass_per_lengths=%s nsm_per_lengths=%s&#39; % (</span>
+                <span class="c1">#mass_per_lengths, nsm_per_lengths))</span>
+            <span class="c1">#print(&#39;mass_per_length=%s nsm_per_length=%s&#39; % (</span>
+                <span class="c1">#mass_per_length, nsm_per_length))</span>
+
+            <span class="c1">#nsm_centroid = np.zeros(3) # TODO: what is this...</span>
+            <span class="c1">#nsm = prop.nsm[0] * length # TODO: simplified</span>
+        <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PBCOMP&#39;</span><span class="p">:</span>
+            <span class="n">mass_per_length</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">MassPerLength</span><span class="p">()</span>
+            <span class="n">nsm_per_length</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">nsm</span>
+            <span class="n">nsm_n1</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">jhat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m1</span> <span class="o">+</span> <span class="n">khat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m2</span><span class="p">)</span>
+            <span class="n">nsm_n2</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">jhat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m1</span> <span class="o">+</span> <span class="n">khat</span> <span class="o">*</span> <span class="n">prop</span><span class="o">.</span><span class="n">m2</span><span class="p">)</span>
+            <span class="n">nsm_centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">nsm_n1</span> <span class="o">+</span> <span class="n">nsm_n2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="c1">#elif prop.type == &#39;PBMSECT&#39;:</span>
+            <span class="c1">#continue</span>
+            <span class="c1">#mass_per_length = prop.MassPerLength()</span>
+            <span class="c1">#m = mass_per_length * length</span>
+            <span class="c1">#nsm = prop.nsm</span>
+        <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PBMSECT&#39;</span><span class="p">:</span>
+            <span class="n">mass_per_length</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1">## TODO: fix me</span>
+            <span class="n">nsm_per_length</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">nsm</span>
+            <span class="n">nsm_centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="n">total_mass</span> <span class="o">=</span> <span class="n">mass_per_length</span> <span class="o">+</span> <span class="n">nsm_per_length</span>
+        <span class="k">if</span> <span class="n">total_mass</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">centroid</span>
+        <span class="n">centroid2</span> <span class="o">=</span> <span class="p">(</span><span class="n">centroid</span> <span class="o">*</span> <span class="n">mass_per_length</span> <span class="o">+</span> <span class="n">nsm_centroid</span> <span class="o">*</span> <span class="n">nsm_per_length</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_mass</span>
+        <span class="k">return</span> <span class="n">centroid2</span></div>
+
+<div class="viewcode-block" id="CBEAM.center_of_mass_xform"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.center_of_mass_xform">[docs]</a>    <span class="k">def</span> <span class="nf">center_of_mass_xform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A          B</span>
+<span class="sd">        *----------*</span>
+<span class="sd">        ^          ^</span>
+<span class="sd">        | wa       | wb</span>
+<span class="sd">        |          |</span>
+<span class="sd">        1----------2</span>
+
+<span class="sd">        1-2 are the nodes of the bar</span>
+<span class="sd">        A-B defines the axis of the shear center</span>
+
+
+<span class="sd">             ^ z</span>
+<span class="sd">        +--+ |</span>
+<span class="sd">        |  | |</span>
+<span class="sd">        |  | 2---&gt; y</span>
+<span class="sd">        |  +--+</span>
+<span class="sd">        |     |</span>
+<span class="sd">        +-----+</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="o">.</span><span class="n">cid_ref</span>
+        <span class="n">cdb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="o">.</span><span class="n">cid_ref</span>
+        <span class="n">ga</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">+</span> <span class="n">cda</span><span class="o">.</span><span class="n">transform_node_to_global_assuming_rectangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">)</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">+</span> <span class="n">cdb</span><span class="o">.</span><span class="n">transform_node_to_global_assuming_rectangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">)</span>
+        <span class="c1">#x = self.get_orientation_vector()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">ga</span> <span class="o">+</span> <span class="n">gb</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span></div>
+
+<div class="viewcode-block" id="CBEAM.get_axes"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.get_axes">[docs]</a>    <span class="k">def</span> <span class="nf">get_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the axes of a CBAR/CBEAM, while respecting the OFFT flag.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        :func:`pyNastran.bdf.cards.elements.bars.rotate_v_wa_wb` for a</span>
+<span class="sd">        description of the OFFT flag.</span>
+
+<span class="sd">        is_passed: bool</span>
+<span class="sd">        out: (wa, wb, ihat, jhat, khat)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1">#TODO: not integrated with CBAR yet...</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">is_failed</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">check_offt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">is_failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ihat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">yhat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">zhat</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="p">(</span><span class="n">nid1</span><span class="p">,</span> <span class="n">nid2</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">node1</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid1</span><span class="p">]</span>
+        <span class="n">node2</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid2</span><span class="p">]</span>
+        <span class="n">xyz1</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="n">xyz2</span> <span class="o">=</span> <span class="n">node2</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+        <span class="n">pid_ref</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">pid_ref</span>
+        <span class="k">if</span> <span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Property</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pid_ref</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">),</span> <span class="n">elem</span>
+
+        <span class="n">is_failed</span><span class="p">,</span> <span class="p">(</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">ihat</span><span class="p">,</span> <span class="n">yhat</span><span class="p">,</span> <span class="n">zhat</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_axes_by_nodes</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">pid_ref</span><span class="p">,</span> <span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">is_failed</span><span class="p">,</span> <span class="p">(</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">ihat</span><span class="p">,</span> <span class="n">yhat</span><span class="p">,</span> <span class="n">zhat</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CBEAM.get_axes_by_nodes"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.get_axes_by_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_axes_by_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">pid_ref</span><span class="p">,</span> <span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the axes of a CBAR/CBEAM, while respecting the OFFT flag.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        :func:`pyNastran.bdf.cards.elements.bars.rotate_v_wa_wb` for a</span>
+<span class="sd">        description of the OFFT flag.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO: not integrated with CBAR yet...</span>
+
+        <span class="n">is_failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="c1">#centroid = (n1 + n2) / 2.</span>
+        <span class="c1">#i = n2 - n1</span>
+        <span class="c1">#Li = norm(i)</span>
+        <span class="c1">#ihat = i / Li</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="c1">#(nid1, nid2) = elem.node_ids</span>
+        <span class="c1">#node1 = model.nodes[nid1]</span>
+        <span class="c1">#node2 = model.nodes[nid2]</span>
+        <span class="c1">#xyz1 = node1.get_position()</span>
+        <span class="c1">#xyz2 = node2.get_position()</span>
+
+        <span class="c1"># wa/wb are not considered in i_offset</span>
+        <span class="c1"># they are considered in ihat</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">xyz2</span> <span class="o">-</span> <span class="n">xyz1</span>
+        <span class="n">Li</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Li</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;xyz1=</span><span class="si">%s</span><span class="s1"> xyz2=</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xyz1</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">i_offset</span> <span class="o">=</span> <span class="n">i</span> <span class="o">/</span> <span class="n">Li</span>
+
+        <span class="n">unused_v</span><span class="p">,</span> <span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">xform</span> <span class="o">=</span> <span class="n">rotate_v_wa_wb</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span>
+            <span class="n">xyz1</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span>
+            <span class="n">i_offset</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">Li</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">wb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># one or more of v, wa, wb are bad</span>
+
+            <span class="c1"># xform is xform_offset...assuming None</span>
+            <span class="n">ihat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">yhat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">zhat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">is_failed</span><span class="p">,</span> <span class="p">(</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">ihat</span><span class="p">,</span> <span class="n">yhat</span><span class="p">,</span> <span class="n">zhat</span><span class="p">)</span>
+
+        <span class="n">ihat</span> <span class="o">=</span> <span class="n">xform</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">yhat</span> <span class="o">=</span> <span class="n">xform</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">zhat</span> <span class="o">=</span> <span class="n">xform</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">is_failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_failed</span><span class="p">,</span> <span class="p">(</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="p">,</span> <span class="n">ihat</span><span class="p">,</span> <span class="n">yhat</span><span class="p">,</span> <span class="n">zhat</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Ga</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gb</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="CBEAM.get_edge_ids"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.get_edge_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_edge_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">))]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">]</span>
+
+    <span class="nd">@nodes</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodes_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="p">]</span>
+
+    <span class="nd">@nodes_ref</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">nodes_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CBEAM.Mid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Mid">[docs]</a>    <span class="k">def</span> <span class="nf">Mid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Element eid=</span><span class="si">%i</span><span class="s1"> has not been &#39;</span>
+                               <span class="s1">&#39;cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CBEAM.Area"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Area">[docs]</a>    <span class="k">def</span> <span class="nf">Area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Element eid=</span><span class="si">%i</span><span class="s1"> has not been &#39;</span>
+                               <span class="s1">&#39;cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CBEAM.Nsm"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Nsm">[docs]</a>    <span class="k">def</span> <span class="nf">Nsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Element eid=</span><span class="si">%i</span><span class="s1"> has not been &#39;</span>
+                               <span class="s1">&#39;cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">Nsm</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_offt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;is the offt flag active?&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;bit=</span><span class="si">%r</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1">#assert isinstance(self.offt, str), &#39;offt=%r&#39; % self.offt</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_bit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;is the bit flag active?&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_offt</span>
+
+<div class="viewcode-block" id="CBEAM.get_offt_bit_defaults"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.get_offt_bit_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">get_offt_bit_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        offt doesn&#39;t exist in NX nastran</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_offt</span><span class="p">:</span>
+            <span class="n">field8</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="s1">&#39;GGG&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">field8</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field8</span></div>
+
+<div class="viewcode-block" id="CBEAM.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CBEAM eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g0_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g0_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">is_nx</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="o">==</span> <span class="s1">&#39;GGG&#39;</span><span class="p">,</span> <span class="s1">&#39;NX only support offt=GGG; offt=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">offt</span></div>
+
+<div class="viewcode-block" id="CBEAM.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CBEAM eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gb</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">g0_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Node=</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g0_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span></div>
+
+<div class="viewcode-block" id="CBEAM.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ga</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gb</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G0</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="n">unused_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="n">unused_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_edge_ids</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>  <span class="c1"># True</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span>
+            <span class="k">assert</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span> <span class="s1">&#39;PBCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PBMSECT&#39;</span><span class="p">],</span> <span class="n">prop</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+            <span class="n">nsm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nsm</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;mid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mid</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nsm</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;nsm=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsm</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span> <span class="s1">&#39;PBCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PBMSECT&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span>
+            <span class="n">mpl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MassPerLength</span><span class="p">()</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Length</span><span class="p">()</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mass</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> A=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> L=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mpl</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> mass_per_length=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">mpl</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> mass=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">L</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> L=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CBEAM.Ga"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Ga">[docs]</a>    <span class="k">def</span> <span class="nf">Ga</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets Ga/G1&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ga_ref</span><span class="o">.</span><span class="n">nid</span></div>
+
+<div class="viewcode-block" id="CBEAM.Gb"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.Gb">[docs]</a>    <span class="k">def</span> <span class="nf">Gb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets Gb/G2&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gb_ref</span><span class="o">.</span><span class="n">nid</span></div>
+
+<div class="viewcode-block" id="CBEAM.G0"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.G0">[docs]</a>    <span class="k">def</span> <span class="nf">G0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets G0&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0_ref</span><span class="o">.</span><span class="n">nid</span></div>
+
+<div class="viewcode-block" id="CBEAM.get_x_g0_defaults"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.get_x_g0_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">get_x_g0_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        X and G0 compete for the same fields, so the method exists to</span>
+<span class="sd">        make it easier to write the card</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x_g0 : varies</span>
+<span class="sd">            g0 : List[int, None, None]</span>
+<span class="sd">            x : List[float, float, float]</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Used by CBAR and CBEAM</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G0</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CBEAM.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_g0_defaults</span><span class="p">()</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_offt_bit_defaults</span><span class="p">()</span>
+        <span class="n">ga</span><span class="p">,</span> <span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">offt</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">pa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pb</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CBEAM.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w1a</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">w2a</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">w3a</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wa</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">w1b</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">w2b</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">w3b</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">pa</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pa</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">sa</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sa</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sb</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_g0_defaults</span><span class="p">()</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_offt_bit_defaults</span><span class="p">()</span>
+        <span class="n">ga</span><span class="p">,</span> <span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">offt</span><span class="p">,</span>
+                       <span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">w1a</span><span class="p">,</span> <span class="n">w2a</span><span class="p">,</span> <span class="n">w3a</span><span class="p">,</span>
+                       <span class="n">w1b</span><span class="p">,</span> <span class="n">w2b</span><span class="p">,</span> <span class="n">w3b</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CBEAM.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CBEAM.write_card_16"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.CBEAM.write_card_16">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="_init_offt_bit"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam._init_offt_bit">[docs]</a><span class="k">def</span> <span class="nf">_init_offt_bit</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">offt_default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    offt doesn&#39;t exist in NX nastran</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field8</span> <span class="o">=</span> <span class="n">integer_double_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;field8&#39;</span><span class="p">,</span> <span class="n">offt_default</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field8</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="n">field8</span>
+    <span class="k">elif</span> <span class="n">field8</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="s1">&#39;GGG&#39;</span>  <span class="c1"># default</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field8</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="n">field8</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field8</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">bit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="n">field8</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid offt parameter of CBEAM...offt=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">offt</span>
+        <span class="k">assert</span> <span class="n">offt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">],</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="n">offt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">],</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="n">offt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">],</span> <span class="n">msg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;field8 on </span><span class="si">%s</span><span class="s1"> card is not a string(offt) or bit &#39;</span>
+               <span class="s1">&#39;(float)...field8=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">field8</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;Card Instantiation: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">offt</span><span class="p">,</span> <span class="n">bit</span></div>
+
+
+<div class="viewcode-block" id="BEAMOR"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.BEAMOR">[docs]</a><span class="k">class</span> <span class="nc">BEAMOR</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+---+---+---+-------+-----+-------+------+</span>
+<span class="sd">    |    1   |  2  | 3 | 4 | 5 |   6   |  7  |   8   |  9   |</span>
+<span class="sd">    +========+=====+===+===+===+=======+=====+=======+======+</span>
+<span class="sd">    | BEAMOR | PID |   |   |   | G0/X1 |  X2 |  X3   | OFFT |</span>
+<span class="sd">    +--------+-----+---+---+---+-------+-----+-------+------+</span>
+<span class="sd">    | BEAMOR | 39  |   |   |   |  0.6  | 2.9 | -5.87 | GOG  |</span>
+<span class="sd">    +--------+-----+---+---+---+-------+-----+-------+------+</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;BEAMOR&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">is_g0</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">offt</span><span class="o">=</span><span class="s1">&#39;GGG&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offt</span> <span class="o">=</span> <span class="n">offt</span>
+
+<div class="viewcode-block" id="BEAMOR._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.BEAMOR._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">is_g0</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">g0</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">BEAMOR</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">is_g0</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">offt</span><span class="o">=</span><span class="s1">&#39;GGG&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BEAMOR.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.BEAMOR.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">)</span>
+
+        <span class="c1"># x / g0</span>
+        <span class="n">field5</span> <span class="o">=</span> <span class="n">integer_double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;g0_x1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field5</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">is_g0</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">field5</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field5</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">is_g0</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">field5</span><span class="p">,</span>
+                          <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;x2&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                          <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;x3&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)],</span>
+                         <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;BEAMOR field5 = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">field5</span><span class="p">)</span>
+        <span class="n">offt</span> <span class="o">=</span> <span class="n">integer_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;offt&#39;</span><span class="p">,</span> <span class="s1">&#39;GGG&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;len(BEAMOR card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BEAMOR</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">is_g0</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">offt</span><span class="o">=</span><span class="n">offt</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BEAMOR.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.BEAMOR.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;BEAMOR&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">offt</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BEAMOR.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam.html#pyNastran.bdf.cards.elements.beam.BEAMOR.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

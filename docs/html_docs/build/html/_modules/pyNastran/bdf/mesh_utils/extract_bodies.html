@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.extract_bodies &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.extract_bodies</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.extract_bodies</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd">  - extract_bodies(bdf_filename)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">read_bdf</span><span class="p">,</span> <span class="n">print_card_16</span>
+
+<div class="viewcode-block" id="extract_bodies"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.extract_bodies.extract_bodies">[docs]</a><span class="k">def</span> <span class="nf">extract_bodies</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">mpc_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds the isolated bodies</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str/BDF</span>
+<span class="sd">        str : the path the the *.bdf file</span>
+<span class="sd">        BDF : a BDF() boject</span>
+<span class="sd">    mpc_id : int; default=0</span>
+<span class="sd">        0 : consider all MPCs</span>
+<span class="sd">        &gt;0 : use this MPC set</span>
+<span class="sd">        not supported</span>
+
+<span class="sd">    Considers:</span>
+<span class="sd">     - elements</span>
+<span class="sd">     - rigid_elements</span>
+
+<span class="sd">    Doesn&#39;t consider:</span>
+<span class="sd">      - elements_mass</span>
+<span class="sd">      - MPC</span>
+<span class="sd">      - MPCADD</span>
+<span class="sd">      - DMIx</span>
+
+<span class="sd">    Doesn&#39;t support:</span>
+<span class="sd">      - xref</span>
+<span class="sd">      - duplicate element ids</span>
+<span class="sd">      - large values</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">bdf_filename</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">nspoints</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nepoints</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">:</span>
+        <span class="n">nspoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">:</span>
+        <span class="n">nepoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">)</span>
+    <span class="n">npoints</span> <span class="o">=</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="n">nspoints</span> <span class="o">+</span> <span class="n">nepoints</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">npoints</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">nelements</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">nid_to_eid_map</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">eid_to_nid_map</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">print_card_16</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()))</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">eid_to_nid_map</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_ids</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">nid_to_eid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+
+    <span class="n">rigid_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span>
+        <span class="n">rigid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">print_card_16</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()))</span>
+        <span class="n">eid</span> <span class="o">+=</span> <span class="n">rigid_offset</span>
+        <span class="k">assert</span> <span class="n">eid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> cannot be used twice&#39;</span> <span class="o">%</span> <span class="n">eid</span>
+        <span class="c1">#node_ids = elem.node_ids</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">independent_nodes</span> <span class="o">+</span> <span class="n">elem</span><span class="o">.</span><span class="n">dependent_nodes</span>
+        <span class="n">eid_to_nid_map</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_ids</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">nid_to_eid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+    <span class="c1">#mpc_offset = rigid_offset + max(model.rigid_elements)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nid_to_eid_map</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">get_bdf_stats</span><span class="p">())</span>
+        <span class="c1">#return {}</span>
+
+    <span class="n">nids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">eids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">ibody</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nid_to_eid_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">all_nids_to_check</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+    <span class="n">key0</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nids_to_check</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">key0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;all_nids_to_check= &#39;</span><span class="p">,</span> <span class="n">all_nids_to_check</span><span class="p">)</span>
+    <span class="n">body_eids</span> <span class="o">=</span> <span class="p">{</span><span class="n">ibody</span> <span class="p">:</span> <span class="nb">set</span><span class="p">()}</span>
+    <span class="n">nbodies_max</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">while</span> <span class="n">all_nids_to_check</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">all_nids_to_check</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">nids_to_check</span><span class="p">:</span>
+            <span class="c1">#if len(nids_to_check) &lt; 10:</span>
+                <span class="c1">#print(&#39;nids_to_check =&#39;, nids_to_check)</span>
+            <span class="n">nid</span> <span class="o">=</span> <span class="n">nids_to_check</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nid = &#39;</span><span class="p">,</span> <span class="n">nid</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;all_nids_to_check =&#39;</span><span class="p">,</span> <span class="n">all_nids_to_check</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_nids_to_check</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nids_to_check = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nids_to_check</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nids_used         =&#39;</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;all_nids_to_check =&#39;</span><span class="p">,</span> <span class="n">all_nids_to_check</span><span class="p">)</span>
+
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  adding nid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nid</span><span class="p">)</span>
+            <span class="n">all_nids_to_check</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  nids_used         =&#39;</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  all_nids_to_check =&#39;</span><span class="p">,</span> <span class="n">all_nids_to_check</span><span class="p">)</span>
+
+            <span class="n">eids</span> <span class="o">=</span> <span class="n">nid_to_eid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  eids = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eids</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">eidi</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">eidi</span> <span class="ow">in</span> <span class="n">eids_used</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">eids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eidi</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">[</span><span class="n">eidi</span> <span class="o">-</span> <span class="n">rigid_offset</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">print_card_16</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;adding eidi=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eidi</span><span class="p">)</span>
+                <span class="n">body_eids</span><span class="p">[</span><span class="n">ibody</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eidi</span><span class="p">)</span>
+                <span class="n">nidsi</span> <span class="o">=</span> <span class="n">eid_to_nid_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">nidi</span> <span class="ow">in</span> <span class="n">nidsi</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nidi</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nids_used</span><span class="p">:</span>
+                        <span class="n">nids_to_check</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nidi</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  adding nid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nidi</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">nidsi</span> <span class="c1"># , elem</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;next eid</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---------------------------&#39;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">nid</span><span class="p">,</span> <span class="n">eids</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_eids</span><span class="p">[</span><span class="n">ibody</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">body_eids</span>
+            <span class="c1"># unused node</span>
+            <span class="c1">#try:</span>
+                <span class="c1">#nid = nids_to_check.pop()</span>
+            <span class="c1">#except KeyError:</span>
+                <span class="c1">#break</span>
+            <span class="c1">#continue</span>
+            <span class="c1">#msg = &#39;cannot find a new body...nbodies=%s\nelements:&#39; % ibody</span>
+            <span class="c1">#for nid, eids in sorted(nid_to_eid_map.items()):</span>
+                <span class="c1">#msg += &#39;  nid=%r eids=%s\n&#39; % (nid, eids)</span>
+                <span class="c1">#for eid in eids:</span>
+                    <span class="c1">#try:</span>
+                        <span class="c1">#elem = model.elements[eid]</span>
+                    <span class="c1">#except KeyError:</span>
+                        <span class="c1">#elem = model.rigid_elements[eid - rigid_offset]</span>
+                    <span class="c1">#msg += print_card_16(elem.repr_fields())</span>
+
+                    <span class="c1">#msg += &#39;eid=%s used=%s\n\n&#39; % (eid, eid in eids_used)</span>
+                <span class="c1">#msg += &#39;----------------\n&#39;</span>
+            <span class="c1">#msg += &#39;&#39;</span>
+            <span class="c1">#raise RuntimeError(msg + model.get_bdf_stats())</span>
+        <span class="n">ibody</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ibody</span> <span class="o">&gt;</span> <span class="n">nbodies_max</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Too many bodies...</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">get_bdf_stats</span><span class="p">())</span>
+        <span class="n">body_eids</span><span class="p">[</span><span class="n">ibody</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1">#print(&#39;--------------------------------------&#39;)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_eids</span><span class="p">[</span><span class="n">ibody</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">body_eids</span><span class="p">[</span><span class="n">ibody</span><span class="p">]</span>
+
+    <span class="n">body_eids2</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ibody</span><span class="p">,</span> <span class="n">body</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">body_eids</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">abody</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">body</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span><span class="p">))</span>
+        <span class="n">ielem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">abody</span> <span class="o">&lt;=</span> <span class="n">rigid_offset</span><span class="p">)</span>
+        <span class="n">irigid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">abody</span> <span class="o">&gt;</span> <span class="n">rigid_offset</span><span class="p">)</span>
+        <span class="c1">#ielem = np.asarray(ielem, dtype=&#39;int32&#39;)</span>
+        <span class="c1">#ielem = np.asarray(ielem, dtype=&#39;int32&#39;)</span>
+        <span class="n">body_eids2</span><span class="p">[</span><span class="n">ibody</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">abody</span><span class="p">[</span><span class="n">ielem</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">abody</span><span class="p">[</span><span class="n">irigid</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="c1">#print(&#39;body_eids = %s&#39; % body_eids2)</span>
+    <span class="n">nbodies</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_eids2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nbodies</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nbodies = </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nbodies</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">body_eids2</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

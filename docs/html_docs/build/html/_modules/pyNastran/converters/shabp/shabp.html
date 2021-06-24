@@ -1,0 +1,936 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.shabp.shabp &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.shabp.shabp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.shabp.shabp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">dfeines:</span>
+<span class="sd"> - read_shabp(shabp_filename, log=None, debug=False)</span>
+<span class="sd"> - SHABP(log=None, debug=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">ones</span><span class="p">,</span> <span class="n">cross</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.converters.shabp.shabp_results</span> <span class="kn">import</span> <span class="n">ShabpOut</span>
+<span class="c1">#from pyNastran.converters.shabp.parse_trailer import parse_trailer</span>
+
+<div class="viewcode-block" id="read_shabp"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.read_shabp">[docs]</a><span class="k">def</span> <span class="nf">read_shabp</span><span class="p">(</span><span class="n">shabp_filename</span><span class="p">,</span> <span class="n">read_special_routines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads an S/HABP file&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SHABP</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_shabp</span><span class="p">(</span><span class="n">shabp_filename</span><span class="p">,</span> <span class="n">read_special_routines</span><span class="o">=</span><span class="n">read_special_routines</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="SHABP"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP">[docs]</a><span class="k">class</span> <span class="nc">SHABP</span><span class="p">(</span><span class="n">ShabpOut</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines the SHABP class&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the SHABP object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        debug : bool/None; default=True</span>
+<span class="sd">            used to set the logger if no logger is passed in</span>
+<span class="sd">                True:  logs debug/info/error messages</span>
+<span class="sd">                False: logs info/error messages</span>
+<span class="sd">                None:  logs error messages</span>
+<span class="sd">        log : logging module object / None</span>
+<span class="sd">            if log is set, debug is ignored and uses the</span>
+<span class="sd">            settings the logging object has</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#self.xyz = {}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_to_component_num</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_to_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_num_to_name</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_num</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shabp_cases</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1">#def write_shabp(self, out_filename):</span>
+        <span class="c1">#&quot;&quot;&quot;writes an S/HABP file&quot;&quot;&quot;</span>
+        <span class="c1">#pass</span>
+
+<div class="viewcode-block" id="SHABP.get_area_xlength_by_component"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.get_area_xlength_by_component">[docs]</a>    <span class="k">def</span> <span class="nf">get_area_xlength_by_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets the area and length of a set of components&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">components</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="c1">#ncomponents = len(components)</span>
+
+        <span class="c1"># we&#39;re not using a vector because component name is</span>
+        <span class="c1"># probably more useful</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">xmax</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">xmin</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+            <span class="n">area</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="k">for</span> <span class="n">unused_i</span><span class="p">,</span> <span class="n">ipatch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+                <span class="n">npoints</span> <span class="o">=</span> <span class="n">nrows</span> <span class="o">*</span> <span class="n">ncols</span>
+                <span class="n">xyz</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">npoints</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">xmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">xmin</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                    <span class="n">xmax</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+                    <span class="n">xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">xmax</span><span class="p">,</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+                <span class="c1"># TODO: can we vectorize this efficiently?</span>
+                <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">jcol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">i1</span> <span class="o">=</span> <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span><span class="n">jcol</span><span class="p">,</span>
+                        <span class="n">i2</span> <span class="o">=</span> <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="n">jcol</span><span class="p">,</span>
+                        <span class="n">i3</span> <span class="o">=</span> <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                        <span class="n">i4</span> <span class="o">=</span> <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span><span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">b</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i2</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">area</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+
+            <span class="n">areas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span>
+            <span class="n">lengths</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+        <span class="k">return</span> <span class="n">areas</span><span class="p">,</span> <span class="n">lengths</span></div>
+
+<div class="viewcode-block" id="SHABP.get_area_by_component"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.get_area_by_component">[docs]</a>    <span class="k">def</span> <span class="nf">get_area_by_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets the area of a set of components&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">components</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="c1">#ncomponents = len(components)</span>
+
+        <span class="c1"># we&#39;re not using a vector because component name is</span>
+        <span class="c1"># probably more useful</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_area_by_patch</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
+            <span class="n">areas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">areas</span></div>
+
+<div class="viewcode-block" id="SHABP.get_area_by_patch"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.get_area_by_patch">[docs]</a>    <span class="k">def</span> <span class="nf">get_area_by_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipatches</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets the area of a set of patches&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ipatches</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">npatches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">ipatches</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="n">npatches</span><span class="p">)</span>
+
+        <span class="n">areas</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ipatches</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ipatch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ipatches</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">npoints</span> <span class="o">=</span> <span class="n">nrows</span> <span class="o">*</span> <span class="n">ncols</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">npoints</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">[</span><span class="n">ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+            <span class="n">area</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="c1"># TODO: can we vectorize this efficiently?</span>
+            <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">jcol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">i1</span> <span class="o">=</span> <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span><span class="n">jcol</span><span class="p">,</span>
+                    <span class="n">i2</span> <span class="o">=</span> <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span><span class="p">(</span><span class="n">jcol</span><span class="p">),</span>
+                    <span class="n">i3</span> <span class="o">=</span> <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span><span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="n">i4</span> <span class="o">=</span> <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i2</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">area</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+            <span class="n">areas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span>
+        <span class="k">return</span> <span class="n">areas</span></div>
+
+<div class="viewcode-block" id="SHABP.read_shabp"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.read_shabp">[docs]</a>    <span class="k">def</span> <span class="nf">read_shabp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shabp_filename</span><span class="p">,</span> <span class="n">read_special_routines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads an SHABP.INP / SHABP.mk5 file&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">shabp_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">shabp_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">shabp_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">shabp_filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.geo&quot;</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># this supports standard .inp and .mk5 files</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># C  1001         10        3  patch 1</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1">#print &quot;%r&quot; % header.strip()</span>
+
+            <span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">header</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="c1">#num = int(header[4:7])</span>
+                <span class="c1">#nrows = int(header[7:20])</span>
+                <span class="c1">#ncols = int(header[20:29])</span>
+                <span class="c1">#name2 = header[29:].strip()</span>
+                <span class="c1">#print lines[i].strip()</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;name=</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> flag=</span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">stream_cross</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>       <span class="c1"># heat/tk A-10</span>
+                <span class="n">symmetry</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>          <span class="c1"># heat/tk A-10</span>
+                <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>      <span class="c1"># heat/tk A-10</span>
+                <span class="c1">#nadj1 = header[18:20]  # not used</span>
+                <span class="c1">#nadj2 = header[20:22]  # not used</span>
+                <span class="c1">#nadj3 = header[22:24]  # not used</span>
+                <span class="c1">#nadj4 = header[24:26]  # not used</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;stream_cross=</span><span class="si">{</span><span class="n">stream_cross</span><span class="si">}</span><span class="s1"> symmetry=</span><span class="si">{</span><span class="n">symmetry</span><span class="si">}</span><span class="s1"> scale_factor=</span><span class="si">{</span><span class="n">scale_factor</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">vis_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">26</span><span class="p">])</span>
+                <span class="c1">#if vis_type == 0:</span>
+                    <span class="c1">#print(&quot;inviscid_A&quot;)</span>
+                <span class="c1">#if vis_type == 1:</span>
+                    <span class="c1">#print(&quot;neither&quot;)</span>
+                <span class="c1">#if vis_type == 2:</span>
+                    <span class="c1">#print(&quot;viscous_A&quot;)</span>
+                <span class="c1">#if vis_type == 3:</span>
+                    <span class="c1">#print(&quot;inviscid_B&quot;)</span>
+
+                <span class="n">name_old</span> <span class="o">=</span> <span class="n">header</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;name=</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> stream_cross=</span><span class="si">{</span><span class="n">stream_cross</span><span class="si">!r}</span><span class="s1"> symmetry=</span><span class="si">{</span><span class="n">symmetry</span><span class="si">!r}</span><span class="s1"> &#39;</span>
+                              <span class="sa">f</span><span class="s1">&#39;scale_factor=</span><span class="si">{</span><span class="n">scale_factor</span><span class="si">!r}</span><span class="s1"> vis_type=</span><span class="si">{</span><span class="n">vis_type</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">header2</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">xsc</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">ysc</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">zsc</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="n">delx</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">dely</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">delz</span> <span class="o">=</span> <span class="n">header2</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sc=</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1"> del=</span><span class="si">%r</span><span class="s1">,</span><span class="si">%r</span><span class="s1">,</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xsc</span><span class="p">,</span> <span class="n">ysc</span><span class="p">,</span> <span class="n">zsc</span><span class="p">,</span> <span class="n">delx</span><span class="p">,</span> <span class="n">dely</span><span class="p">,</span> <span class="n">delz</span><span class="p">))</span>
+                <span class="c1">#print(lines[i].strip())</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="n">name_old</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+                <span class="n">is_last_patch</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">flag</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">is_last_patch</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;last patch flag = </span><span class="si">%r</span><span class="s1">; must be 0 or 1&#39;</span> <span class="o">%</span> <span class="n">flag</span><span class="p">)</span>
+            <span class="c1">#print(f&#39;name={name} nrows={nrows} ncols={ncols:d} name2={name2!r}&#39;)</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1">#-1071.0480   77.2500  -66.94202 -987.7440   77.2500  -66.94200         3</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c1">#print(i, line, end=&#39;&#39;)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1">#t1 = int(line[30])    # STAT - status flag - p. 27</span>
+                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">t1</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">31</span><span class="p">]</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">]</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+                <span class="n">y1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+                <span class="n">z1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">t1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">t1</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">t1</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">])</span>
+                    <span class="n">patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="c1">#assert len(row) == nrows, &#39;len(row)=%s nrows=%s ncols=%s&#39; % (len(row), nrows, ncols)</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">t1</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">31</span><span class="p">:</span><span class="mi">41</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">41</span><span class="p">:</span><span class="mi">51</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">51</span><span class="p">:</span><span class="mi">61</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">61</span><span class="p">:</span><span class="mi">62</span><span class="p">]</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">61</span><span class="p">]</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+                <span class="n">y2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+                <span class="n">z2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">t2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">t2</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">t2</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">])</span>
+                    <span class="n">patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">patchi</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">patch</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;patch =&#39;</span><span class="p">,</span> <span class="n">patch</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">patchi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patch</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;i=</span><span class="si">%s</span><span class="s1"> n=</span><span class="si">%s</span><span class="s1"> patch=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">patchi</span><span class="p">),</span> <span class="n">patchi</span><span class="p">))</span>
+                <span class="k">raise</span>
+
+            <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patchi</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_last_patch</span><span class="p">:</span>
+                <span class="c1">#print &quot;***last patch - lines[%i] = %r&quot; % (i, lines[i])</span>
+                <span class="k">break</span>
+            <span class="c1">#print &quot;lines[%i] = %r&quot; % (i, lines[i])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_patches</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_trailer</span><span class="p">(</span><span class="n">read_special_routines</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed parsing trailer&#39;</span><span class="p">)</span></div>
+            <span class="c1">#raise</span>
+
+<div class="viewcode-block" id="SHABP.build_patches"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.build_patches">[docs]</a>    <span class="k">def</span> <span class="nf">build_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patches</span><span class="p">):</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#XYZ = []</span>
+        <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+            <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1">#xyz = zeros((nrows, ncols, 3), dtype=&#39;float32&#39;)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">irow</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patch</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">icol</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                    <span class="n">x</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">y</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">z</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="c1">#xyz[irow, icol, :] = [col[0], col[1], col[2]]</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">Z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="c1">#XYZ.append(xyz)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="n">Z</span></div>
+        <span class="c1">#self.XYZ = XYZ</span>
+
+<div class="viewcode-block" id="SHABP.get_points_elements_regions"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.get_points_elements_regions">[docs]</a>    <span class="k">def</span> <span class="nf">get_points_elements_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">npatches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ipatch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npatches</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span>
+            <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">npoints</span> <span class="o">+=</span> <span class="n">nrows</span> <span class="o">*</span> <span class="n">ncols</span>
+            <span class="n">nelements</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">ipoint</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">npoints</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">elements2</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">patches</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">impact</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">shadow</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ipatch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npatches</span><span class="p">):</span>
+            <span class="n">comp_num</span><span class="p">,</span> <span class="n">impact_val</span><span class="p">,</span> <span class="n">shadow_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_impact_shadow</span><span class="p">(</span><span class="n">ipatch</span><span class="p">)</span>
+
+            <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">npointsi</span> <span class="o">=</span> <span class="n">nrows</span> <span class="o">*</span> <span class="n">ncols</span>
+            <span class="n">nelementsi</span> <span class="o">=</span> <span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">xyz</span><span class="p">[</span><span class="n">ipoint</span><span class="p">:</span><span class="n">ipoint</span><span class="o">+</span><span class="n">npointsi</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">xyz</span><span class="p">[</span><span class="n">ipoint</span><span class="p">:</span><span class="n">ipoint</span><span class="o">+</span><span class="n">npointsi</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">xyz</span><span class="p">[</span><span class="n">ipoint</span><span class="p">:</span><span class="n">ipoint</span><span class="o">+</span><span class="n">npointsi</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+            <span class="c1">#if comp_num == 0:</span>
+                <span class="c1">#continue</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">jcol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">element</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="n">jcol</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">jcol</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">irow</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                        <span class="n">irow</span><span class="o">*</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">jcol</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="p">]</span>
+                    <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+            <span class="n">patches</span><span class="p">[</span><span class="n">ielement</span><span class="p">:</span><span class="n">ielement</span><span class="o">+</span><span class="n">nelementsi</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">ipatch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">components</span><span class="p">[</span><span class="n">ielement</span><span class="p">:</span><span class="n">ielement</span><span class="o">+</span><span class="n">nelementsi</span><span class="p">]</span> <span class="o">*=</span> <span class="n">comp_num</span>
+            <span class="n">impact</span><span class="p">[</span><span class="n">ielement</span><span class="p">:</span><span class="n">ielement</span><span class="o">+</span><span class="n">nelementsi</span><span class="p">]</span> <span class="o">*=</span> <span class="n">impact_val</span>
+            <span class="n">shadow</span><span class="p">[</span><span class="n">ielement</span><span class="p">:</span><span class="n">ielement</span><span class="o">+</span><span class="n">nelementsi</span><span class="p">]</span> <span class="o">*=</span> <span class="n">shadow_val</span>
+            <span class="n">elements2</span><span class="p">[</span><span class="n">ielement</span><span class="p">:</span><span class="n">ielement</span><span class="o">+</span><span class="n">nelementsi</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">ipoint</span>
+            <span class="c1">#print(&quot;  ipatch=%i Cp[%i:%i]&quot; % (ipatch+1, ielement, ielement+nelementsi))</span>
+            <span class="n">ipoint</span> <span class="o">+=</span> <span class="n">npointsi</span>
+            <span class="n">ielement</span> <span class="o">+=</span> <span class="n">nelementsi</span>
+        <span class="k">return</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">elements2</span><span class="p">,</span> <span class="n">patches</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">impact</span><span class="p">,</span> <span class="n">shadow</span></div>
+
+<div class="viewcode-block" id="SHABP.get_impact_shadow"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.get_impact_shadow">[docs]</a>    <span class="k">def</span> <span class="nf">get_impact_shadow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipatch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;We may not have inviscid pressure&quot;&quot;&quot;</span>
+        <span class="n">comp_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">impact_val</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">shadow_val</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ipatch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_to_component_num</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;skipping ipatch=</span><span class="si">{</span><span class="n">ipatch</span><span class="si">}</span><span class="s1"> comp_num=</span><span class="si">{</span><span class="n">comp_num</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">comp_num</span><span class="p">,</span> <span class="n">impact_val</span><span class="p">,</span> <span class="n">shadow_val</span>
+            <span class="c1">#raise RuntimeError(&#39;ipatch=%s keys=%s&#39; % (</span>
+                <span class="c1">#ipatch, sorted(self.patch_to_component_num)))</span>
+
+        <span class="n">comp_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_to_component_num</span><span class="p">[</span><span class="n">ipatch</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">comp_num</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_num_to_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;skipping ipatch=</span><span class="si">{</span><span class="n">ipatch</span><span class="si">}</span><span class="s1"> comp_num=</span><span class="si">{</span><span class="n">comp_num</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">comp_num</span><span class="p">,</span> <span class="n">impact_val</span><span class="p">,</span> <span class="n">shadow_val</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_num_to_name</span><span class="p">[</span><span class="n">comp_num</span><span class="p">]</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">comp_num</span><span class="o">-</span><span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_to_params</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;skipping ipatch=</span><span class="si">{</span><span class="n">ipatch</span><span class="si">}</span><span class="s1"> comp_num=</span><span class="si">{</span><span class="n">comp_num</span><span class="si">}</span><span class="s1"> name=</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> patch=</span><span class="si">{</span><span class="n">patch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">comp_num</span><span class="p">,</span> <span class="n">impact_val</span><span class="p">,</span> <span class="n">shadow_val</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_to_params</span><span class="p">[</span><span class="n">comp_num</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1">#except KeyError:</span>
+            <span class="c1">#name = self.component_num_to_name[comp_num]</span>
+            <span class="c1">#self.log.error(f&#39;ipatch={ipatch} comp_num={comp_num} name={name}&#39;)</span>
+            <span class="c1">#print(self.component_to_params)</span>
+            <span class="c1">#raise</span>
+        <span class="n">impact_val</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">shadow_val</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;loading ipatch=</span><span class="si">{</span><span class="n">ipatch</span><span class="si">}</span><span class="s1"> comp_num=</span><span class="si">{</span><span class="n">comp_num</span><span class="si">}</span><span class="s1"> name=</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> patch=</span><span class="si">{</span><span class="n">patch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comp_num</span><span class="p">,</span> <span class="n">impact_val</span><span class="p">,</span> <span class="n">shadow_val</span></div>
+
+<div class="viewcode-block" id="SHABP.parse_trailer"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.SHABP.parse_trailer">[docs]</a>    <span class="k">def</span> <span class="nf">parse_trailer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_special_routines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;parses the case information (e.g., number of angles of attack, control surface info)&quot;&quot;&quot;</span>
+        <span class="c1">#out = parse_trailer(self.trailer)</span>
+        <span class="c1">#order, component_names, cases, components = out</span>
+        <span class="c1">#print(&#39;order = %s&#39; % order)</span>
+        <span class="c1">#print(&#39;component_names = %s&#39; % component_names)</span>
+        <span class="c1">#print(&#39;cases = %s&#39; % cases)</span>
+        <span class="c1">#print(&#39;components = %s&#39; % components)</span>
+        <span class="c1">#return out</span>
+
+        <span class="c1">#for line in self.trailer:</span>
+            <span class="c1">#print line.rstrip()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1">#print(&#39;title = %r&#39; % self.title)</span>
+        <span class="n">line2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1">#print(&#39;line2 = %r&#39; % line2[:20])</span>
+        <span class="n">methods</span><span class="p">,</span> <span class="n">summation_flag</span> <span class="o">=</span> <span class="n">_get_methods</span><span class="p">(</span><span class="n">line2</span><span class="p">)</span>
+        <span class="c1">#print(&#39;methods =&#39;, methods)</span>
+        <span class="c1">#print(&#39;summation_flag =&#39;, summation_flag)</span>
+
+        <span class="n">unused_npatches</span> <span class="o">=</span> <span class="n">line2</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1">#print(&#39;npatches =&#39;, npatches)</span>
+
+        <span class="n">mach_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="n">mach</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">pstag</span><span class="p">,</span> <span class="n">tstag</span><span class="p">,</span> <span class="n">igas</span><span class="p">,</span> <span class="n">nalpha_beta</span><span class="p">,</span> <span class="n">ideriv</span><span class="p">,</span> <span class="n">dangle</span> <span class="o">=</span> <span class="n">_parse_flight_condition</span><span class="p">(</span><span class="n">mach_line</span><span class="p">)</span>
+        <span class="c1">#print(f&#39;mach={mach} alt={alt} pstag={pstag} tstag={tstag} igas={igas} &#39;</span>
+              <span class="c1">#f&#39;nalpha_beta={nalpha_beta} ideriv={ideriv} dangle={dangle}&#39;)</span>
+
+        <span class="n">ref_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="n">unused_reference_quantities</span> <span class="o">=</span> <span class="n">_parse_reference_conditions</span><span class="p">(</span><span class="n">ref_line</span><span class="p">)</span>
+        <span class="c1">#sref, cref, bref, xcg, ycg, zcg = reference_quantities</span>
+        <span class="c1">#print(f&#39;sref={sref} cref={cref} bref={bref} cg=[{xcg},{ycg},{zcg}]&#39;)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nalpha_beta</span><span class="p">):</span>
+            <span class="n">alpha_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">cdelta</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">ri</span><span class="p">,</span> <span class="n">pi</span> <span class="o">=</span> <span class="n">_read_alpha_beta_line</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">)</span>
+            <span class="c1">#print(f&#39;alpha={alpha} beta={beta} roll={roll} cdelta={cdelta} pqr=[{qi},{ri},{pi}]&#39;)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">shabp_cases</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mach</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">#self.getMethods()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;methods = </span><span class="si">{</span><span class="n">methods</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;inviscid_pressure: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">ncomponents</span><span class="p">,</span> <span class="n">ifsave</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="n">parse_inviscid_pressure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">component_to_params</span> <span class="o">=</span> <span class="n">params</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">parse_viscous</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">parse_special_routines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span>
+                                           <span class="n">read_special_routines</span><span class="o">=</span><span class="n">read_special_routines</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+
+        <span class="c1">#print &quot;ncomps =&quot;, len(self.component_to_params)</span>
+        <span class="c1">#print &quot;keys =&quot;, sorted(self.component_to_params.keys())</span>
+        <span class="c1">#print &quot;**lines[%i] = %s\n&quot; % (i+1, self.trailer[i].rstrip())</span>
+        <span class="c1">#i += 1</span>
+
+        <span class="c1"># component names   7</span>
+        <span class="n">comp_names_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="c1">#print(&quot;comp_names_line = %r&quot; % comp_names_line)</span>
+        <span class="n">ncomps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">comp_names_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">icomp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncomps</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1">#print(&quot;line =&quot;, line.strip())</span>
+            <span class="n">unused_npatches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trailer</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="c1">#print(&quot;n =&quot;, n)</span>
+                <span class="n">ipatch</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipatch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">int_ipatch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ipatch</span><span class="p">)</span>
+                <span class="c1">#print(&quot;int_ipatch =&quot;, int_ipatch)</span>
+                <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">int_ipatch</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">patch_to_component_num</span><span class="p">[</span><span class="n">int_ipatch</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">icomp</span><span class="o">+</span><span class="mi">1</span>
+            <span class="c1">#print(&quot;patches =&quot;, patches, &#39;\n&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_patch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">component_num_to_name</span><span class="p">[</span><span class="n">icomp</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">component_name_to_num</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">icomp</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+
+        <span class="c1"># 2noseconeright</span>
+        <span class="c1">#3142</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;done with trailer&#39;</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_flight_condition</span><span class="p">(</span><span class="n">mach_line</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads a flight condition line&quot;&quot;&quot;</span>
+    <span class="n">mach</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">pstag</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">tstag</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">igas</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">41</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">nalpha_beta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">41</span><span class="p">:</span><span class="mi">43</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+    <span class="c1"># 0-no derivatives</span>
+    <span class="c1"># 1: pitch static stability derivatives</span>
+    <span class="c1"># 2: pitch control derivatives</span>
+    <span class="c1"># 3: pitch dynamic derivatives</span>
+    <span class="c1"># 4: lat/dir static stability derivatives</span>
+    <span class="c1"># 5: lat/dir control derivatives</span>
+    <span class="c1"># 6: lat/dir dynamic derivatives</span>
+    <span class="c1"># 7: ideriv=1,2,3 (all pitch)</span>
+    <span class="c1"># 8: ideriv=4,5,6 (all lat/dir)</span>
+    <span class="c1"># 9: ideriv=1-6 (all)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ideriv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">43</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="c1"># 0-9</span>
+        <span class="n">dangle</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mach_line</span><span class="p">[</span><span class="mi">45</span><span class="p">:</span><span class="mi">55</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>  <span class="c1"># used for ideriv=1,2,4,5</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="c1"># old SHABP</span>
+        <span class="k">raise</span> <span class="c1"># old SHABP</span>
+        <span class="c1">#iDeriv = 0</span>
+        <span class="c1">#dAngle = 0.0</span>
+    <span class="k">assert</span> <span class="n">igas</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">igas</span> <span class="c1"># 0=air, 1=helium</span>
+    <span class="k">return</span> <span class="n">mach</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">pstag</span><span class="p">,</span> <span class="n">tstag</span><span class="p">,</span> <span class="n">igas</span><span class="p">,</span> <span class="n">nalpha_beta</span><span class="p">,</span> <span class="n">ideriv</span><span class="p">,</span> <span class="n">dangle</span>
+
+<span class="k">def</span> <span class="nf">_get_methods</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    per vecc A-53</span>
+<span class="sd">    1 - Flow Field Analysis</span>
+<span class="sd">    2 - Shielding Analysis</span>
+<span class="sd">    3 - Inviscid Pressures</span>
+<span class="sd">    4 - Viscous Methods</span>
+<span class="sd">    5 - Special Routines</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">20</span><span class="p">,</span> <span class="n">fields</span>
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">inti</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[:</span><span class="mi">20</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">inti</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">methodi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">inti</span><span class="p">)</span>
+        <span class="n">methods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">methodi</span><span class="p">)</span>
+        <span class="n">summation_flag</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">20</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">methods</span><span class="p">,</span> <span class="n">summation_flag</span>
+
+<span class="k">def</span> <span class="nf">_read_alpha_beta_line</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads the alpha line&quot;&quot;&quot;</span>
+    <span class="c1">#print(&quot;alpha_line =&quot;, alpha_line)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+    <span class="n">cdelta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span> <span class="c1"># unused</span>
+    <span class="n">qi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">50</span><span class="p">])</span>
+    <span class="n">ri</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha_line</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">60</span><span class="p">])</span>
+    <span class="c1">#pi = float(alpha_line[60:70])</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">cdelta</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">ri</span><span class="p">,</span> <span class="n">pi</span>
+
+<span class="k">def</span> <span class="nf">_parse_reference_conditions</span><span class="p">(</span><span class="n">ref_line</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads the reference quantities line&quot;&quot;&quot;</span>
+    <span class="n">sref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">cref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">bref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">xcg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">ycg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">zcg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ref_line</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">sref</span><span class="p">,</span> <span class="n">cref</span><span class="p">,</span> <span class="n">bref</span><span class="p">,</span> <span class="n">xcg</span><span class="p">,</span> <span class="n">ycg</span><span class="p">,</span> <span class="n">zcg</span>
+
+<div class="viewcode-block" id="parse_inviscid_pressure"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.parse_inviscid_pressure">[docs]</a><span class="k">def</span> <span class="nf">parse_inviscid_pressure</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads inviscid pressure (method=3)&quot;&quot;&quot;</span>
+    <span class="n">ncomponents</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="c1"># 0 : save component force data; use new Unit 9</span>
+    <span class="c1"># 1 : save component force data; use old Unit 9</span>
+    <span class="c1"># 2 : dont save force data</span>
+    <span class="n">ifsave</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">unused_title</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">ifsave</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ifsave=</span><span class="si">%r</span><span class="s1">; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ifsave</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="c1">#print(line)</span>
+    <span class="c1">#print(f&#39;ncomponents={ncomponents} ifsave={ifsave} title={title!r}&#39;)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1">#return i, ncomponents, ifsave</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">icomponent</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncomponents</span><span class="p">):</span>
+        <span class="n">hinge_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="c1">#print(&#39;hinge_line = %r&#39; % hinge_line)</span>
+        <span class="c1">#print &quot;icount=&quot;,icount</span>
+        <span class="c1"># get deflection angle, check for a hinge</span>
+        <span class="c1">#n+=1</span>
+        <span class="c1">#print &quot;n = &quot;,n</span>
+        <span class="c1">#print &quot;trailer[&quot;,n+1,&quot;] = &quot;,trailer[n+1].strip()</span>
+        <span class="n">hinge_method</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">unused_dangle</span> <span class="o">=</span> <span class="n">hinge_line</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">18</span><span class="p">]</span>
+        <span class="n">unused_hinge_patch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c1">#print(f&#39;hinge_method={hinge_method} dangle={dangle} hinge_patch={hinge_patch}&#39;)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">line2</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="c1">#print(line2)</span>
+        <span class="n">impact</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">shadow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">iprint</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">ipin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">isave</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata4</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata5</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">pdata6</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">60</span><span class="p">:</span><span class="mi">70</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="c1">#print(f&#39;icomponent={icomponent} impact={impact} shadow={shadow} iprint={iprint}&#39;)</span>
+        <span class="n">params</span><span class="p">[</span><span class="n">icomponent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">impact</span><span class="p">,</span> <span class="n">shadow</span><span class="p">,</span> <span class="n">iprint</span><span class="p">,</span>
+            <span class="n">ipin</span><span class="p">,</span> <span class="n">isave</span><span class="p">,</span> <span class="n">pdata1</span><span class="p">,</span> <span class="n">pdata2</span><span class="p">,</span> <span class="n">pdata3</span><span class="p">,</span> <span class="n">pdata4</span><span class="p">,</span> <span class="n">pdata5</span><span class="p">,</span> <span class="n">pdata6</span>
+        <span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">hinge_method</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">hinge_method</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">hinge_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="c1">#print(&#39;hinge_line2 = %r&#39; % hinge_line)</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+            <span class="n">y1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
+            <span class="n">z1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+            <span class="n">x2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+            <span class="n">y2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">50</span><span class="p">])</span>
+            <span class="n">z2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">60</span><span class="p">])</span>
+            <span class="n">unused_hinge</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1">#print(&#39;hinge =&#39;, hinge)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">hinge_line</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">hinge_method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">ncomponents</span><span class="p">,</span> <span class="n">ifsave</span><span class="p">,</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="parse_viscous"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.parse_viscous">[docs]</a><span class="k">def</span> <span class="nf">parse_viscous</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the viscous table (method=4)</span>
+
+<span class="sd">    140   viscous_run (level 2)</span>
+<span class="sd">      11  1</span>
+<span class="sd">    000</span>
+<span class="sd">     5 5000       0.0000    1.0000    0.0000    1.0000    3.0000    3.0000</span>
+<span class="sd">     2 0 4 1 1 1 1 1 0 0 0 1 1 0 1</span>
+<span class="sd">       1.500000E2   3.000000E2   1.600000E1   3.000000E1   9.000000E1</span>
+<span class="sd">       5.000000E2  8.000000E-1   1.200000E1   0.000000E0   0.000000E0</span>
+<span class="sd">      21  1</span>
+<span class="sd">      ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="c1"># Skin Friction Base &amp; Title card; A-73</span>
+    <span class="n">ncomp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">unused_ifsave</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">unused_title</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1">#print(f&#39;ncomp={ncomp} ifsave={ifsave} title={title}&#39;)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1">#print(&#39;***&#39;, line)</span>
+
+    <span class="k">for</span> <span class="n">unused_icompi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncomp</span><span class="p">):</span>
+        <span class="c1">#geometry data source card; A-73</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="c1">#print(line)</span>
+        <span class="n">unused_a</span><span class="p">,</span> <span class="n">unused_b</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">unused_icomp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c1"># 0=skin friction method cards will be read for each alpha/beta</span>
+        <span class="c1"># 1=read only one skin friction method card and assume it applies to all alpha/betas for this component</span>
+        <span class="c1"># 2=use the same skin friction data as for the prepvious component (skip reading data)</span>
+        <span class="n">unused_isk</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">unused_nskin_friction_elements</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+        <span class="c1">#print(f&#39;icomp={icomp} isk={isk} nskin_friction_elements={nskin_friction_elements}&#39;)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">6</span>
+        <span class="c1"># skin friction method cards; A-74</span>
+        <span class="c1"># 0=level 2 viscous</span>
+        <span class="c1"># 1=level 1 viscous</span>
+        <span class="c1">#isfmeth =</span>
+
+        <span class="c1"># 0=dont print</span>
+        <span class="c1"># 1=print detailed skin friction intermediate results</span>
+        <span class="c1">#iprint =</span>
+
+        <span class="c1"># 0=don&#39;t save</span>
+        <span class="c1"># 1=write skin friction coefficient for each element</span>
+        <span class="c1">#isave =</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="c1">#print(line)</span>
+    <span class="k">return</span> <span class="n">i</span></div>
+
+<div class="viewcode-block" id="parse_special_routines"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.shabp.html#pyNastran.converters.shabp.shabp.parse_special_routines">[docs]</a><span class="k">def</span> <span class="nf">parse_special_routines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">read_special_routines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the special routines (method=5)</span>
+
+<span class="sd">    10000000000000000000</span>
+<span class="sd">    01100   1 3 0 0 0 0</span>
+<span class="sd">    01100   2 4 0 0 0 0</span>
+<span class="sd">    11100   3 1 2 5 6 7</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#if not read_special_routines:</span>
+        <span class="c1">#raise RuntimeError(&#39;special routines&#39;)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="c1">#print(&#39;***&#39;, line)</span>
+    <span class="n">special_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">]:</span>
+        <span class="n">special_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="c1">#print(&#39;***&#39;, line)</span>
+    <span class="c1">#print(&#39;**2&#39;, lines[i])</span>
+
+    <span class="k">return</span> <span class="n">i</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

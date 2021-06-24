@@ -1,0 +1,764 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.result_objects.grid_point_weight &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.result_objects.grid_point_weight</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.result_objects.grid_point_weight</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;defines the GridPointWeight class&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">pack</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">object_attributes</span><span class="p">,</span> <span class="n">object_methods</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.result_objects.op2_objects</span> <span class="kn">import</span> <span class="n">_write_table_header</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.write_utils</span> <span class="kn">import</span> <span class="n">export_to_hdf5</span>
+
+<span class="n">float_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">integer_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+<span class="c1">#                                                                       ?           ?       ?                                     ?</span>
+<span class="c1">#good = (4, 2, 4, 8, 1464878927, 538976327, 8, 4, -1, 4, 4, 7, 4, 28, 101, 0, 0, 0, 0,   0, 1, 28, 4, -2, 4, 4, 1, 4, 4, 0, 4, 4, 2, 4, 8,  1464878927, 538976327, 8, 4,                   -3, 4, 4, 1, 4, 4, 0, 4, 4, 146, 4)</span>
+<span class="c1">#bad  = (4, 2, 4, 8, 1464878927, 538976327, 8, 4, -1, 4, 4, 7, 4, 28, 102, 0, 0, 0, 512, 0, 0, 28, 4, -2, 4, 4, 1, 4, 4, 0, 4, 4, 7, 4, 28, 1464878927, 538976327, 9, 27, 19, 0, 1, 28, 4, -3, 4, 4, 1, 4, 4)</span>
+<div class="viewcode-block" id="GridPointWeight"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight">[docs]</a><span class="k">class</span> <span class="nc">GridPointWeight</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference_point</span><span class="p">,</span> <span class="n">MO</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cg</span><span class="p">,</span> <span class="n">IS</span><span class="p">,</span> <span class="n">IQ</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span>
+                 <span class="n">approach_code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">table_code</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+                 <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">superelement_adaptivity_index</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. seealso:: http://www.6dof.com/index.php?option=com_content&amp;view=article&amp;id=298:output-from-the-grid-point-weight-generator&amp;catid=178:courses-and-trainings&amp;Itemid=61</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The Grid Point Weight Generator (GPWG) module computes the rigid body</span>
+        <span class="c1"># mass properties of an entire structure with respect to a user specified point and with</span>
+        <span class="c1"># respect to the center of mass. Output from the module is requested by a PARAM</span>
+        <span class="c1"># GRDPNT card in the Bulk Data Deck which specifies from which grid point mass</span>
+        <span class="c1"># computations are to be referenced. Optionally, the absence of a specific grid point</span>
+        <span class="c1"># (i.e. PARAM, GRDPNT, 0) automatically causes the origin of the basic</span>
+        <span class="c1"># coordinate system to be utilized as a reference. The mass properties are initially</span>
+        <span class="c1"># defined in the basic coordinate system. Subsequently, the mass properties are</span>
+        <span class="c1"># transformed to principal mass axes and to principal inertia axes. The actual printout</span>
+        <span class="c1"># is composed of several elements. These are:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span> <span class="o">=</span> <span class="n">reference_point</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference_point</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;reference_point=</span><span class="si">{</span><span class="n">reference_point</span><span class="si">!r}</span><span class="s1">; type=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">reference_point</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="c1"># M0 RIGID BODY MASS MATRIX IN BASIC COORDINATE SYSTEM</span>
+        <span class="c1"># This is the rigid body mass matrix of the entire structure in</span>
+        <span class="c1"># the basic coordinate system with respect to a reference point</span>
+        <span class="c1"># chosen by the analyst.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MO</span> <span class="o">=</span> <span class="n">MO</span>
+        <span class="k">assert</span> <span class="n">MO</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">MO</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># S TRANSFORMATION MATRIX FOR SCALAR MASS PARTITION</span>
+        <span class="c1"># S is the transformation from the basic coordinate system to the</span>
+        <span class="c1"># set of principal axes for the 3 x 3 scalar mass partition of the</span>
+        <span class="c1"># 6 x 6 mass matrix. The principal axes for just the scalar</span>
+        <span class="c1"># partition are known as the principal mass axes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">S</span>
+        <span class="k">assert</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
+        <span class="k">assert</span> <span class="n">mass</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">mass</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># XC.G. YC.G. ZC.G.</span>
+        <span class="c1"># It is possible in NASTRAN to assemble a structural model having</span>
+        <span class="c1"># different values of mass in each coordinate direction at a grid</span>
+        <span class="c1"># point. This can arise, for example, by assembling scalar mass</span>
+        <span class="c1"># components or from omitting some components by means of bar</span>
+        <span class="c1"># element pin flags. Consequently three distinct mass systems are</span>
+        <span class="c1"># assembled one in each of the three directions of the principal</span>
+        <span class="c1"># mass axes (the S system). This third tabulation has five columns.</span>
+        <span class="c1"># The first column lists the axis direction in the S coordinates.</span>
+        <span class="c1"># The second column lists the mass associated with the appropriate</span>
+        <span class="c1"># axis direction. The final three columns list the x, y, and z</span>
+        <span class="c1"># coordinate distances from the reference point to the center of</span>
+        <span class="c1"># mass for each of the three mass systems.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cg</span> <span class="o">=</span> <span class="n">cg</span>
+        <span class="k">assert</span> <span class="n">cg</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">cg</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># I(S) INERTIAS RELATIVE TO C.G.</span>
+        <span class="c1"># This is the 3 x 3 mass moment of inertia partition with respect</span>
+        <span class="c1"># to the center of gravity referred to the principal mass axes</span>
+        <span class="c1"># (the S system).</span>
+        <span class="c1">#</span>
+        <span class="c1"># This is not necessarily a diagonal matrix because the</span>
+        <span class="c1"># determination of the S system does not involve second moments.</span>
+        <span class="c1"># The values of inertias at the center of gravity are found from</span>
+        <span class="c1"># the values at the reference point employing the</span>
+        <span class="c1"># parallel axes rule.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IS</span> <span class="o">=</span> <span class="n">IS</span>
+        <span class="k">assert</span> <span class="n">IS</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">IS</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># I(Q) PRINCIPAL INERTIAS</span>
+        <span class="c1"># The principal moments of inertia at the center of gravity are displayed</span>
+        <span class="c1"># in matrix form with reference to the Q system of axes. The Q system is</span>
+        <span class="c1"># obtained from an eigenvalue analysis of the I(S) matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span> <span class="o">=</span> <span class="n">IQ</span>
+        <span class="k">assert</span> <span class="n">IQ</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;IQ.shape=</span><span class="si">{</span><span class="n">IQ</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">; IQ=</span><span class="se">\n</span><span class="si">{</span><span class="n">IQ</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="c1"># Q TRANSFORMATION MATRIX I(Q) = Q^T*IBAR(S)*Q</span>
+        <span class="c1"># Q is the coordinate transformation between the S axes and the Q axes.</span>
+        <span class="c1"># IBAR(S) is the same as I(s) except that the signs of the off-diagonal</span>
+        <span class="c1"># terms are reversed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span>
+        <span class="k">assert</span> <span class="n">Q</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">Q</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="n">subtitle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">superelement_adaptivity_index</span> <span class="o">=</span> <span class="n">subtitle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span> <span class="o">=</span> <span class="n">approach_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_code</span> <span class="o">=</span> <span class="n">table_code</span>
+
+<div class="viewcode-block" id="GridPointWeight.export_to_hdf5"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.export_to_hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;exports the object to HDF5 format&quot;&quot;&quot;</span>
+        <span class="n">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GridPointWeight.object_attributes"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.object_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">filter_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                 <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">,</span>
+                                 <span class="n">filter_properties</span><span class="o">=</span><span class="n">filter_properties</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GridPointWeight.object_methods"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.object_methods">[docs]</a>    <span class="k">def</span> <span class="nf">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span> <span class="o">==</span> <span class="n">weight</span><span class="o">.</span><span class="n">reference_point</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">reference_point</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MO</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">MO</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">MO</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">MO</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">S</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">S</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">mass</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">mass</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">cg</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">cg</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">IS</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">IS</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">IQ</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">IQ</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">Q</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;reference_point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">weight</span><span class="o">.</span><span class="n">Q</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;GridPointWeight:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="GridPointWeight.get_stats"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">key2</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s1">]&#39;</span>
+        <span class="k">if</span> <span class="n">short</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;GridPointWeight</span><span class="si">{</span><span class="n">key2</span><span class="si">}</span><span class="s1">: ref_point=%s mass=%g; &#39;</span>
+                   <span class="s1">&#39;[reference_point, M0, S, mass, cg, IS, IQ, Q]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;GridPointWeight</span><span class="si">{</span><span class="n">key2</span><span class="si">}</span><span class="s1">:&#39;</span>
+                <span class="s1">&#39;  reference_point=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  mass=[</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  cg  =[</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+                <span class="s1">&#39;  IS  =[</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+                <span class="s1">&#39;  IQ  =[</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10s</span><span class="s1"> </span><span class="si">%10s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10s</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10s</span><span class="s1"> </span><span class="si">%10s</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+                <span class="s1">&#39;  Q  = [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       [</span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1"> </span><span class="si">%10g</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="n">page_stamp</span> <span class="o">=</span> <span class="s1">&#39;PAGE </span><span class="si">%i</span><span class="s1">&#39;</span>
+        <span class="n">page_num</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">_write_table_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op2_file</span><span class="p">,</span> <span class="n">fascii</span><span class="p">,</span> <span class="n">new_result</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">itable</span><span class="o">=-</span><span class="mi">3</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">inspect</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+        <span class="n">call_frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getouterframes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.write_table_3: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">call_frame</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">new_result</span> <span class="ow">and</span> <span class="n">itable</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="mi">4</span><span class="p">,</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="mi">4</span><span class="p">,</span> <span class="n">itable</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="mi">4</span><span class="p">,</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="o">*</span><span class="n">header</span><span class="p">))</span>
+        <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;table_3_header = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">header</span><span class="p">)</span>
+        <span class="c1">#op2_file.write(pack(&#39;12i&#39;, *[4, itable, 4,</span>
+                              <span class="c1">#4, 1, 4,</span>
+                              <span class="c1">#4, 0, 4,</span>
+                              <span class="c1">#4, 146, 4,</span>
+                              <span class="c1">#]))</span>
+
+        <span class="n">approach_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span>
+        <span class="n">table_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_code</span>
+        <span class="c1">#isubcase = self.isubcase</span>
+        <span class="c1">#random_code = self.random_code</span>
+        <span class="c1">#format_code = 1</span>
+        <span class="n">isubcase</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">num_wide</span> <span class="o">=</span> <span class="mi">79</span> <span class="c1"># self.num_wide</span>
+        <span class="c1">#acoustic_flag = self.acoustic_flag if hasattr(self, &#39;acoustic_flag&#39;) else 0</span>
+        <span class="n">reference_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span>
+        <span class="n">reference_point</span> <span class="o">=</span> <span class="mi">22</span>
+        <span class="c1">#thermal = self.thermal</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%-128s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="n">subtitle</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%-128s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>  <span class="c1"># missing superelement_adaptivity_index</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%-128s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+
+        <span class="c1">#1, 13, 0, 0, 0, 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0</span>
+        <span class="n">ftable3</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span> <span class="o">*</span> <span class="mi">50</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;128s 128s 128s&#39;</span>
+
+        <span class="c1">#print(self.get_stats())</span>
+        <span class="n">table3</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">approach_code</span><span class="p">,</span> <span class="n">table_code</span><span class="p">,</span> <span class="n">reference_point</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num_wide</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">title</span><span class="p">,</span> <span class="n">subtitle</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">ftable3i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="n">table3</span><span class="p">,</span> <span class="n">ftable3</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)):</span>
+            <span class="k">assert</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;i=</span><span class="si">%s</span><span class="s1"> val=</span><span class="si">%s</span><span class="s1"> ftable3i=</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">ftable3i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">4</span>
+                <span class="k">assert</span> <span class="n">ftable3i</span> <span class="o">==</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;i=</span><span class="si">%s</span><span class="s1"> val=</span><span class="si">%s</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">ftable3i</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">4</span>
+                <span class="k">assert</span> <span class="n">ftable3i</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;i=</span><span class="si">%s</span><span class="s1"> val=</span><span class="si">%s</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">ftable3i</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">584</span><span class="p">,</span> <span class="n">n</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">584</span><span class="p">]</span> <span class="o">+</span> <span class="n">table3</span> <span class="o">+</span> <span class="p">[</span><span class="mi">584</span><span class="p">]</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span> <span class="o">+</span> <span class="n">ftable3</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+
+        <span class="c1">#op2_file.write(pack(fascii, &#39;%s header 3c&#39; % table_name, fmt, data))</span>
+        <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> header 3c = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+        <span class="c1">#j = 7</span>
+        <span class="c1">#print(ftable3[:j])</span>
+        <span class="c1">#print(table3[:j])</span>
+        <span class="c1">#pack(ftable3[:j], *table3[:j])</span>
+        <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">))</span>
+
+<div class="viewcode-block" id="GridPointWeight.write_op2"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.write_op2">[docs]</a>    <span class="k">def</span> <span class="nf">write_op2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op2_file</span><span class="p">,</span> <span class="n">op2_ascii</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">endian</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&lt;&#39;</span><span class="p">):</span>
+        <span class="n">itable</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="kn">import</span> <span class="nn">inspect</span>
+        <span class="c1">#allowed_tables = [</span>
+            <span class="c1">#&#39;OUGV1&#39;, &#39;BOUGV1&#39;, &#39;BOPHIG&#39;, &#39;BOPG1&#39;,</span>
+            <span class="c1">#&#39;OUPV1&#39;,</span>
+            <span class="c1">#&#39;OQP1&#39;, &#39;OQMG1&#39;, &#39;OQG1&#39;, &#39;OQGV1&#39;, &#39;OPNL1&#39;,</span>
+            <span class="c1">#&#39;OPG1&#39;, &#39;OPGV1&#39;,</span>
+            <span class="c1">#&#39;OAGATO1&#39;, &#39;OAGCRM1&#39;, &#39;OAGNO1&#39;, &#39;OAGPSD1&#39;, &#39;OAGRMS1&#39;,</span>
+            <span class="c1">#&#39;OQGPSD1&#39;,</span>
+            <span class="c1">#&#39;OCRPG&#39;, &#39;OCRUG&#39;, &#39;OUG1&#39;,</span>
+            <span class="c1">#&#39;OUGV1PAT&#39;,</span>
+        <span class="c1">#]</span>
+        <span class="c1">#assert self.table_name in allowed_tables, self.table_name</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;OGPWG&#39;</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+        <span class="n">call_frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getouterframes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">op2_ascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.write_op2: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">call_frame</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]))</span>
+
+        <span class="n">subtable_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;OGPWG&#39;</span>
+        <span class="k">if</span> <span class="n">itable</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">_write_table_header</span><span class="p">(</span><span class="n">op2_file</span><span class="p">,</span> <span class="n">op2_ascii</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">subtable_name</span><span class="p">)</span>
+            <span class="n">itable</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span>
+
+        <span class="c1">#s = Struct(op2_format)</span>
+
+        <span class="c1">#unused_node = self.node_gridtype[:, 0]</span>
+        <span class="c1">#gridtype = self.node_gridtype[:, 1]</span>
+        <span class="c1">#format_table4_1 = Struct(self._endian + b&#39;15i&#39;)</span>
+        <span class="c1">#format_table4_2 = Struct(self._endian + b&#39;3i&#39;)</span>
+
+        <span class="c1"># table 4 info</span>
+        <span class="c1">#ntimes = self.data.shape[0]</span>
+        <span class="c1">#nnodes = self.data.shape[1]</span>
+        <span class="c1">#nnodes_device = self.node_gridtype[:, 0] * 10 + self.device_code</span>
+
+        <span class="c1">#(2+6) =&gt; (node_id, gridtypei, t1i, t2i, t3i, r1i, r2i, r3i)</span>
+        <span class="c1">#ntotal = nnodes * (2 + 6)</span>
+
+        <span class="c1">#print(&#39;shape = %s&#39; % str(self.data.shape))</span>
+        <span class="c1">#assert nnodes &gt; 1, nnodes</span>
+        <span class="c1">#assert ntotal &gt; 1, ntotal</span>
+
+        <span class="c1">#unused_device_code = self.device_code</span>
+        <span class="c1">#fascii.write(&#39;  ntimes = %s\n&#39; % self.ntimes)</span>
+
+        <span class="c1">#fmt = &#39;%2i %6f&#39;</span>
+        <span class="c1">#print(&#39;ntotal=%s&#39; % (ntotal))</span>
+        <span class="c1">#for itime in range(self.ntimes):</span>
+
+        <span class="c1"># good = (4, -4, 4, 4, 1, 4, 4, 0, 4, 4, 78, 4, 312,    1057795080, 0, 0, 0, 0, 0, 0, 1057795080, 0, 0, 0, 1111254630, 0, 0, 1057795080, 0, -1036229018, 0, 0, 0, 0, 1143715840, -1451229184, 0, 0, 0, -1036229018, -1451229184, 1169886464, 0, 0, 1111254630, 0, 0, 0, 1171293184, 1065353216)</span>
+        <span class="c1">#bad   = (4, -4, 4, 4, 1, 4, 4, 0, 4, 4, 78, 4, 312,    1057795080, 0, 0, 0, 0, 0, 0, 1057795080, 0, 0, 0, 1111254630, 0, 0, 1057795080, 0, -1036229018, 0, 0, 0, 0, 1143715840, -1451229184, 0, 0, 0, -1036229018, -1451229184, 1169886464, 0, 0, 1111254630, 0, 0, 0, 1171293184, 1065353216, 0, 0, 0, 1065353216, 0, 0, 0, 1065353216, 1057795080, 0, -2147483648, 0, 1057795080, 1118530999, 0, -2147483648, 1057795080, 1118530999, 0, 0, 1143715840, 696254464, 0, 696254464, 1156812654, 0, 0, 0, 1160033719, 1143715840, 1156812654, 1160033719, 1065353216, 0, 0, 0, 1065353216, 0, 0, 0, 1065353216, 312, -5, 4, 4, 1, 4, 4, 0, 4, 4, 0, 4, 4, 4, 2, 4, 8, 1447515471, 538976305)</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">78</span>  <span class="c1"># 79 * 4 = 316</span>
+        <span class="n">new_result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_table_3</span><span class="p">(</span><span class="n">op2_file</span><span class="p">,</span> <span class="n">op2_ascii</span><span class="p">,</span> <span class="n">new_result</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">itable</span><span class="p">)</span>
+
+        <span class="c1"># record 4</span>
+        <span class="n">itable</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="n">itable</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="n">ntotal</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="o">*</span><span class="n">ntotal</span><span class="p">]</span>
+        <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="o">*</span><span class="n">header</span><span class="p">))</span>
+        <span class="n">op2_ascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;r4 [4, 0, 4]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">op2_ascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;r4 [4, </span><span class="si">%s</span><span class="s1">, 4]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">itable</span><span class="p">))</span>
+        <span class="n">op2_ascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;r4 [4, </span><span class="si">%i</span><span class="s1">, 4]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">ntotal</span><span class="p">))</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;78f&#39;</span>
+        <span class="n">mcg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">mcg</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass</span>
+        <span class="n">mcg</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MO</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span>
+                <span class="n">mcg</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="kc">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">,</span> <span class="n">data</span>
+        <span class="n">msgi</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span>
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="n">itable</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">ntotal</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="n">itable</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                  <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">]</span>
+        <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;13i&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">header</span><span class="p">))</span>
+        <span class="n">op2_ascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;footer = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">itable</span></div>
+
+
+<div class="viewcode-block" id="GridPointWeight.write_f06"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.GridPointWeight.write_f06">[docs]</a>    <span class="k">def</span> <span class="nf">write_f06</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_file</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        writes the f06</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        f06_file : file / StringIO</span>
+<span class="sd">            a file-like object</span>
+<span class="sd">        page_stamp : str</span>
+<span class="sd">            the page formatter (e.g., &#39;PAGE %i&#39;)</span>
+<span class="sd">        page_num : int</span>
+<span class="sd">            the active page number</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        page_num : int</span>
+<span class="sd">            the new page number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;                           O U T P U T   F R O M   G R I D   P O I N T   W E I G H T   G E N E R A T O R&#39;</span><span class="p">]</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;0                                                     REFERENCE POINT =        </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_point</span><span class="p">)</span>
+
+        <span class="c1"># MO</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                                                M O&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                      * </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MO</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                                                 S&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                               DIRECTION&#39;</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                          MASS AXIS SYSTEM (S)     MASS              X-C.G.        Y-C.G.        Z-C.G.&#39;</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                  X            </span><span class="si">%12.6E</span><span class="s1">     </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                  Y            </span><span class="si">%12.6E</span><span class="s1">     </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                  Z            </span><span class="si">%12.6E</span><span class="s1">     </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                                                I(S)&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                                                I(Q)&#39;</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13s</span><span class="s1"> </span><span class="si">%13s</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13s</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13s</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13s</span><span class="s1"> </span><span class="si">%13s</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IQ</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                                                 Q&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;                                           * </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> </span><span class="si">%13.6E</span><span class="s1"> *&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">page_stamp</span> <span class="o">%</span> <span class="n">page_num</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">page_num</span> <span class="o">+</span> <span class="mi">1</span></div></div>
+
+<div class="viewcode-block" id="make_grid_point_weight"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.grid_point_weight.make_grid_point_weight">[docs]</a><span class="k">def</span> <span class="nf">make_grid_point_weight</span><span class="p">(</span><span class="n">reference_point</span><span class="p">,</span> <span class="n">MO</span><span class="p">,</span>
+                           <span class="n">approach_code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">table_code</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+                           <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                           <span class="n">superelement_adaptivity_index</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;creates a grid point weight table&quot;&quot;&quot;</span>
+    <span class="n">Mtt_</span> <span class="o">=</span> <span class="n">MO</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">Mrr_</span> <span class="o">=</span> <span class="n">MO</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
+    <span class="n">Mtr_</span> <span class="o">=</span> <span class="n">MO</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">:]</span>
+    <span class="n">Mtd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Mtt_</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Mtd</span><span class="p">)</span>
+    <span class="n">e_</span> <span class="o">=</span> <span class="p">[</span><span class="n">Mtt_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Mtt_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">Mtt_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e_</span><span class="p">)</span>
+    <span class="c1">#print(Mtd)</span>
+    <span class="c1">#print(Mte)</span>
+    <span class="c1">#print(Mtd)</span>
+
+    <span class="c1">#print(Mte)</span>
+    <span class="k">if</span> <span class="n">epsilon</span><span class="o">/</span><span class="n">delta</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+        <span class="n">unused_eigvals</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Mtt_</span><span class="p">)</span>
+        <span class="c1">#print(&#39;S1:&#39;)</span>
+        <span class="c1">#print(S)</span>
+        <span class="c1">#print(f&#39;eigvals = {eigvals}&#39;)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;*** USER WARNING MESSAGE 3042 MODULE = GPWG</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;INCONSISTENT SCALAR MASSES HAVE BEEN USED. EPSILON/DELTA = </span><span class="si">{</span><span class="n">epsilon</span><span class="o">/</span><span class="n">delta</span><span class="si">:</span><span class="s1">.7E</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1">#print(&#39;S*:&#39;)</span>
+        <span class="c1">#print(S)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Mtt_</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+
+    <span class="c1">#iswap = []</span>
+    <span class="c1">#if np.sign(S[0, 0]) != np.sign(Mtt_[0, 0]):</span>
+        <span class="c1">#mass[0] *= -1.</span>
+        <span class="c1">#S[:, 0] *= -1</span>
+        <span class="c1">#iswap.append(0)</span>
+
+    <span class="c1">#if np.sign(S[1, 1]) != np.sign(Mtt_[1, 1]):</span>
+        <span class="c1">#iswap.append(1)</span>
+    <span class="c1">#if S[1, 1] &lt; 0.:</span>
+        <span class="c1">#iswap.append(1)</span>
+    <span class="c1">#if S[2, 2] &lt; 0.:</span>
+        <span class="c1">#iswap.append(2)</span>
+
+    <span class="c1">#if abs(S[0, 0]) &lt; np.abs(S[:, 0]).max():</span>
+        <span class="c1">#print(&#39;swap0&#39;)</span>
+        <span class="c1">#iswap.append(0)</span>
+    <span class="c1">#if S[0, 0] &lt; 0.:</span>
+        <span class="c1">#S[:, 0] *= -1</span>
+    <span class="c1">#if abs(S[1, 1]) &lt; np.abs(S[1, 0]).max():</span>
+        <span class="c1">#iswap.append(1)</span>
+    <span class="c1">#if abs(S[0, 0]) &lt; np.abs(S[1, 0]):</span>
+        <span class="c1">#iswap.append(2)</span>
+
+    <span class="c1">#if iswap:</span>
+        <span class="c1">#i1, i2 = iswap</span>
+        <span class="c1">#print(f&#39;swap; {iswap}&#39;)</span>
+        <span class="c1">#m1, m2 = mass[iswap]</span>
+        <span class="c1">#mass[[i2, i1]] = mass[iswap]</span>
+        <span class="c1">#S[[i2, i1], :] = S[iswap, :]</span>
+        <span class="c1">#S[:, [i2, i1]] = S[:, iswap]</span>
+    <span class="c1">#print(&#39;S2:&#39;)</span>
+    <span class="c1">#print(S)</span>
+    <span class="c1">#print(&#39;S3:&#39;)</span>
+    <span class="c1">#S = np.array([</span>
+        <span class="c1">#[.432, 0.902, 0.],</span>
+        <span class="c1">#[-.902, .432, 0.],</span>
+        <span class="c1">#[0., 0., 1.],</span>
+    <span class="c1">#])</span>
+    <span class="c1">#print(S)</span>
+
+    <span class="n">Mtt</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Mtt_</span> <span class="o">@</span> <span class="n">S</span> <span class="c1"># Mt</span>
+    <span class="n">Mtr</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Mtr_</span> <span class="o">@</span> <span class="n">S</span>
+    <span class="n">Mrr</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Mrr_</span> <span class="o">@</span> <span class="n">S</span> <span class="c1"># Mr = I(Q)?</span>
+    <span class="c1">#print(&#39;---------&#39;)</span>
+    <span class="c1">#print(Mtt)</span>
+
+    <span class="c1">#cg = Mtr / mass[:, np.newaxis]</span>
+    <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="n">Mtt</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Mtt</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Mtt</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">])</span>
+    <span class="n">cg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">Mtr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>  <span class="c1"># Xx, Yx, Zx</span>
+        <span class="p">[</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">Mtr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>  <span class="c1"># Xy, Yy, Zy</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Mtr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">Mtr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="c1"># Xz, Yz, Zz</span>
+    <span class="p">])</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/=</span> <span class="n">mx</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">my</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/=</span> <span class="n">my</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/=</span> <span class="n">mz</span>
+    <span class="n">Xx</span><span class="p">,</span> <span class="n">Yx</span><span class="p">,</span> <span class="n">Zx</span> <span class="o">=</span> <span class="n">cg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">Xy</span><span class="p">,</span> <span class="n">Yy</span><span class="p">,</span> <span class="n">Zy</span> <span class="o">=</span> <span class="n">cg</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">Xz</span><span class="p">,</span> <span class="n">Yz</span><span class="p">,</span> <span class="n">Zz</span> <span class="o">=</span> <span class="n">cg</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">IS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">MO</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mrr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">my</span> <span class="o">*</span> <span class="n">Zy</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">mz</span> <span class="o">*</span> <span class="n">Yz</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mrr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mz</span> <span class="o">*</span> <span class="n">Xz</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">mx</span> <span class="o">*</span> <span class="n">Zx</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mrr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">mx</span> <span class="o">*</span> <span class="n">Yx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">my</span> <span class="o">*</span> <span class="n">Xy</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">Mrr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mz</span> <span class="o">*</span> <span class="n">Xz</span> <span class="o">*</span> <span class="n">Yz</span>
+    <span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">IS</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">Mrr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">my</span> <span class="o">*</span> <span class="n">Xy</span> <span class="o">*</span> <span class="n">Zy</span>
+    <span class="n">IS</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">IS</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">Mrr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">mx</span> <span class="o">*</span> <span class="n">Yx</span> <span class="o">*</span> <span class="n">Zx</span>
+
+    <span class="n">neg_off_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">MO</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">IQi</span> <span class="o">=</span> <span class="n">neg_off_diag</span> <span class="o">*</span> <span class="n">IS</span>
+    <span class="c1">#print(IQi)</span>
+    <span class="n">IQ</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">IQi</span><span class="p">)</span>
+    <span class="c1">#IQ = np.diag(Q.T @ IS @ Q)</span>
+
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">GridPointWeight</span><span class="p">(</span>
+        <span class="n">reference_point</span><span class="p">,</span> <span class="n">MO</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cg</span><span class="p">,</span> <span class="n">IS</span><span class="p">,</span> <span class="n">IQ</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span>
+        <span class="n">approach_code</span><span class="o">=</span><span class="n">approach_code</span><span class="p">,</span> <span class="n">table_code</span><span class="o">=</span><span class="n">table_code</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">subtitle</span><span class="o">=</span><span class="n">subtitle</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">superelement_adaptivity_index</span><span class="o">=</span><span class="n">superelement_adaptivity_index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">weight</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

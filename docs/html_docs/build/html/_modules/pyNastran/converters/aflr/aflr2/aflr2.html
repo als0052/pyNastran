@@ -1,0 +1,738 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.aflr.aflr2.aflr2 &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.aflr.aflr2.aflr2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.aflr.aflr2.aflr2</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - read_bedge(bedge_filename, beta_reverse=179.7, log=None, debug=False)</span>
+<span class="sd"> - AFLR2(log=None, debug=False)</span>
+<span class="sd">   - read_bedge(self, bedge_filename, beta_reverse=179.7)</span>
+<span class="sd">   - write_nastran(self, bdf_filename)</span>
+<span class="sd">   - write_fixed_points(self, fixed_points_filename)</span>
+<span class="sd">   - merge_bedge(self, bedge, bedge_filename)</span>
+<span class="sd"> - export_to_bedge(bedge_filename, nodes, grid_bcs, curves, subcurves, axis=1, log=None)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">zeros</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">vstack</span><span class="p">,</span> <span class="n">hstack</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span>
+                   <span class="n">arctan2</span><span class="p">,</span> <span class="n">arccos</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">isnan</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">unique</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">print_bad_path</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+
+<div class="viewcode-block" id="read_bedge"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.read_bedge">[docs]</a><span class="k">def</span> <span class="nf">read_bedge</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span> <span class="n">beta_reverse</span><span class="o">=</span><span class="mf">179.7</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads a *.bedge file&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">AFLR2</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_bedge</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span> <span class="n">beta_reverse</span><span class="o">=</span><span class="n">beta_reverse</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="AFLR2"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.AFLR2">[docs]</a><span class="k">class</span> <span class="nc">AFLR2</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;defines methods for reading interfacing with AFLR2&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the AFLR2 object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        debug : bool/None; default=True</span>
+<span class="sd">            used to set the logger if no logger is passed in</span>
+<span class="sd">                True:  logs debug/info/error messages</span>
+<span class="sd">                False: logs info/error messages</span>
+<span class="sd">                None:  logs error messages</span>
+<span class="sd">        log : logging module object / None</span>
+<span class="sd">            if log is set, debug is ignored and uses the</span>
+<span class="sd">            settings the logging object has</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bars</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subcurves</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_bc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_bcs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_angle</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AFLR2.read_bedge"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.AFLR2.read_bedge">[docs]</a>    <span class="k">def</span> <span class="nf">read_bedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bedge_filename</span><span class="p">,</span> <span class="n">beta_reverse</span><span class="o">=</span><span class="mf">179.7</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads a *.bedge file&quot;&quot;&quot;</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.bedge&#39;</span><span class="p">,</span> <span class="n">print_bad_path</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bedge_file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">bedge_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ncurves</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ncurves = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ncurves</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">inode_curve_min</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">ncurves</span>
+        <span class="n">inode_curve_max</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">ncurves</span>
+
+        <span class="n">nsubcurves_per_curve</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">ncurves</span>
+        <span class="n">icurve</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">icurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncurves</span><span class="p">):</span>
+            <span class="n">nsubcurvesi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">nsubcurves_per_curve</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsubcurvesi</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">del</span> <span class="n">icurve</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nsubcurves_per_curve = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsubcurves_per_curve</span><span class="p">)</span>
+        <span class="n">nsubcurves</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nsubcurves_per_curve</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nsubcurves = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsubcurves</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;data[</span><span class="si">%i</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">; nnodes[0]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+        <span class="n">nnodes_pack</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nsubcurves</span>
+        <span class="n">isubcurve</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">isubcurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsubcurves</span><span class="p">):</span>
+            <span class="n">nnodesi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">nnodes_pack</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">nnodesi</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">del</span> <span class="n">isubcurve</span>
+
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nnodes_pack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nnodes_pack = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes_pack</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nnodes = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+
+
+        <span class="n">inode</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">isubcurve</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">isubcurvei</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">isubcurve_to_curve_map</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nsubcurves</span>
+        <span class="n">icurve</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">icurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncurves</span><span class="p">):</span>
+            <span class="n">nsubcurvesi</span> <span class="o">=</span> <span class="n">nsubcurves_per_curve</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span>
+            <span class="n">inode_curve_min</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode</span>
+            <span class="c1">#delta_node_id = 0</span>
+            <span class="k">for</span> <span class="n">isubcurvei</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsubcurvesi</span><span class="p">):</span>
+                <span class="n">nnodesi</span> <span class="o">=</span> <span class="n">nnodes_pack</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+                <span class="c1">#max_node_id += nnodesi</span>
+                <span class="n">inode</span> <span class="o">+=</span> <span class="n">nnodesi</span>
+                <span class="n">isubcurve_to_curve_map</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">icurve</span>
+                <span class="n">isubcurve</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">inode_curve_max</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode</span> <span class="c1"># max_node_id</span>
+        <span class="n">inode_curve_min</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">inode_curve_max</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;isubcurve_to_curve_map = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">isubcurve_to_curve_map</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">icurve</span><span class="p">,</span> <span class="n">isubcurvei</span>
+
+        <span class="c1"># grid BC</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;data[</span><span class="si">%i</span><span class="s1">]=</span><span class="si">%s</span><span class="s1">; grid_bc[0]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">grid_bc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nsubcurves</span>
+        <span class="k">for</span> <span class="n">isubcurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsubcurves</span><span class="p">):</span>
+            <span class="n">grid_bci</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">grid_bc</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_bci</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">del</span> <span class="n">isubcurve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;grid_bc = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grid_bc</span><span class="p">)</span>
+        <span class="c1">#if grid_bc[0] in [2]:</span>
+            <span class="c1">#raise RuntimeError(&#39;fname=%s&#39; % bedge_filename)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;data[</span><span class="si">%i</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">; nid.x</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="c1">#=============================================================</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c1"># just for testing</span>
+        <span class="c1">#assert data[i] == &#39;4.87406&#39;, &#39;val=%s fname=%s&#39; % (data[i], bedge_filename)</span>
+        <span class="n">istart</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">nactual</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">nexpected</span> <span class="o">=</span> <span class="n">istart</span> <span class="o">+</span> <span class="n">nnodes</span> <span class="o">*</span> <span class="mi">2</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;error with data; inode=</span><span class="si">%s</span><span class="s1">; len(data)=</span><span class="si">%s</span><span class="s1"> &#39;</span>
+                       <span class="s1">&#39;len(data_expected)=</span><span class="si">%s</span><span class="s1">; nmissing=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                           <span class="n">inode</span><span class="p">,</span> <span class="n">nactual</span><span class="p">,</span> <span class="n">nexpected</span><span class="p">,</span> <span class="n">nexpected</span> <span class="o">-</span> <span class="n">nactual</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1">#print(&#39;node[%i] = %s&#39; % (inode, node))</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="c1">#assert nodes[inode, 0] == 21., node</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;node[0] = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;node[</span><span class="si">%i</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+        <span class="c1">#self.log.debug(&#39;nodes = %s&#39; % nodes[:, :2])</span>
+        <span class="k">del</span> <span class="n">inode</span>
+
+
+        <span class="n">initial_normal_spacing</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">initial_normal_spacingi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">initial_normal_spacingi</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;initial_normal_spacingi = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">initial_normal_spacingi</span><span class="p">)</span>
+                <span class="n">nnodesi</span><span class="p">,</span> <span class="n">initial_normal_spacingi</span> <span class="o">=</span> <span class="n">initial_normal_spacingi</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+                <span class="n">nnodesi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nnodesi</span><span class="p">)</span>
+                <span class="n">initial_normal_spacing</span><span class="p">[:</span><span class="n">nnodesi</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_normal_spacingi</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                    <span class="n">initial_normal_spacingi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">initial_normal_spacing</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_normal_spacingi</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;len(data)=</span><span class="si">%s</span><span class="s1"> i=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+
+        <span class="c1">#==================================================</span>
+        <span class="c1"># build the outputs</span>
+
+        <span class="n">ielement0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="n">nnodes</span>
+        <span class="n">curves</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">subcurves</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">grid_bcs</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;***ncurves = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ncurves</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">isubcurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsubcurves</span><span class="p">):</span>
+            <span class="n">nnodesi</span> <span class="o">=</span> <span class="n">nnodes_pack</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+            <span class="n">icurve</span> <span class="o">=</span> <span class="n">isubcurve_to_curve_map</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+            <span class="n">grid_bci</span> <span class="o">=</span> <span class="n">grid_bc</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;isubcurve=</span><span class="si">%s</span><span class="s1"> icurve=</span><span class="si">%s</span><span class="s1"> grid_bc=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">isubcurve</span><span class="p">,</span> <span class="n">icurve</span><span class="p">,</span> <span class="n">grid_bci</span><span class="p">))</span>
+
+            <span class="n">curves</span><span class="p">[</span><span class="n">ielement0</span><span class="p">:</span><span class="n">ielement0</span><span class="o">+</span><span class="n">nnodesi</span><span class="p">]</span> <span class="o">=</span> <span class="n">icurve</span>
+            <span class="n">subcurves</span><span class="p">[</span><span class="n">ielement0</span><span class="p">:</span><span class="n">ielement0</span><span class="o">+</span><span class="n">nnodesi</span><span class="p">]</span> <span class="o">=</span> <span class="n">isubcurve</span>
+            <span class="n">grid_bcs</span><span class="p">[</span><span class="n">ielement0</span><span class="p">:</span><span class="n">ielement0</span><span class="o">+</span><span class="n">nnodesi</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_bci</span>
+            <span class="n">ielement0</span> <span class="o">+=</span> <span class="n">nnodesi</span>
+        <span class="k">del</span> <span class="n">icurve</span>
+
+        <span class="n">inode0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">bars_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">turn_angle_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">isubcurve</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsubcurves</span><span class="p">):</span>
+            <span class="n">nnodesi</span> <span class="o">=</span> <span class="n">nnodes_pack</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+            <span class="n">nbars</span> <span class="o">=</span> <span class="n">nnodesi</span>
+            <span class="n">inode</span> <span class="o">=</span> <span class="n">inode0</span> <span class="o">+</span> <span class="n">nnodesi</span>
+            <span class="n">inodes</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">inode0</span> <span class="o">+</span> <span class="n">inodei</span> <span class="k">for</span> <span class="n">inodei</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nnodesi</span><span class="p">)])</span>
+
+            <span class="n">bars</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nbars</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">inode_last</span> <span class="o">=</span> <span class="n">inodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">icurve</span> <span class="o">=</span> <span class="n">isubcurve_to_curve_map</span><span class="p">[</span><span class="n">isubcurve</span><span class="p">]</span>
+            <span class="c1">#print(&#39;isubcurve=%s icurve=%s inode_last=%s nnodes=%s&#39; % (</span>
+                <span class="c1">#isubcurve, icurve, inode_last, nnodes))</span>
+            <span class="c1">#print(&#39;inode_curve_max = %s&#39; % (inode_curve_max))</span>
+            <span class="c1">#print(&#39;inode_curve_min = %s&#39; % (inode_curve_min))</span>
+            <span class="k">if</span> <span class="n">inode_last</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">nnodes</span><span class="p">:</span>
+                <span class="n">inode_last</span> <span class="o">=</span> <span class="n">inode_curve_min</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span>
+                <span class="c1">#print(&#39;A&#39;)</span>
+                <span class="c1">#inode_last = 0</span>
+            <span class="k">elif</span> <span class="n">inode_last</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">inode_curve_max</span><span class="p">[</span><span class="n">icurve</span><span class="p">]:</span>
+                <span class="n">inode_last</span> <span class="o">=</span> <span class="n">inode_curve_min</span><span class="p">[</span><span class="n">icurve</span><span class="p">]</span>  <span class="c1"># inodes[0] ???</span>
+                <span class="c1">#print(&#39;B&#39;)</span>
+            <span class="c1">#elif inode_last == inode_curve_min[icurve + 1]:</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#print(&#39;C&#39;)</span>
+                <span class="n">inode_last</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+            <span class="c1">#print(&#39;inode_last[%i] = %s&#39; % (isubcurve, inode_last))</span>
+            <span class="n">bars</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">inodes</span>
+            <span class="n">bars</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">inodes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">bars</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode_last</span>
+            <span class="k">assert</span> <span class="n">inode_last</span> <span class="o">!=</span> <span class="n">nnodes</span>
+            <span class="n">bars_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bars</span><span class="p">)</span>
+
+            <span class="n">n1</span> <span class="o">=</span> <span class="n">bars</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="n">bars</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1">#n1 = n1a</span>
+            <span class="c1">#n2a = n2</span>
+            <span class="c1">#print &quot;n1a = &quot;, n1a, len(n1a)</span>
+            <span class="c1">#print &quot;n2a = &quot;, n2a, len(n2a)</span>
+
+            <span class="n">ibar</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nbars</span><span class="p">))</span>
+            <span class="n">ibar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">ibar</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">ibar</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">n1</span> <span class="o">=</span> <span class="n">n1</span>
+            <span class="n">n3</span> <span class="o">=</span> <span class="n">bars</span><span class="p">[</span><span class="n">ibar</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="c1">#print &quot;n1a = &quot;, n1a, len(n1a)</span>
+            <span class="c1">#print &quot;n2a = &quot;, n2a, len(n2a)</span>
+            <span class="c1">#print &quot;n1b = &quot;, n1b, len(n1b)</span>
+            <span class="c1">#print &quot;n2b = &quot;, n2b, len(n2b)</span>
+
+            <span class="c1">#if 0:</span>
+                <span class="c1">#v1 = nodes[n2, :] - nodes[n1, :]</span>
+                <span class="c1">#v2 = nodes[n3, :] - nodes[n1, :]</span>
+
+                <span class="c1">#L1 = norm(v1, axis=1)</span>
+                <span class="c1">#L2 = norm(v2, axis=1)</span>
+
+                <span class="c1">#c = cross(v1, v2)</span>
+                <span class="c1">#cn = norm(c, axis=1)</span>
+
+                <span class="c1">#L1L2 = (L1 * L2)</span>
+                <span class="c1">#izero = where(L1L2 == 0.0)[0]</span>
+                <span class="c1">#L1L2[izero] = 1e-10</span>
+                <span class="c1">#sin_theta = cn / L1L2</span>
+                <span class="c1">#theta = degrees(arcsin(sin_theta))</span>
+
+            <span class="c1"># convention from http://en.wikipedia.org/wiki/Triangle</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># c</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># a</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># b</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">n1</span><span class="p">),</span> <span class="s1">&#39;wrong size...check axis&#39;</span>
+
+            <span class="n">cos_inner</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cos_inner</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+            <span class="n">inan</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">isnan</span><span class="p">(</span><span class="n">beta</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">beta</span><span class="p">[</span><span class="n">inan</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">i180</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">radians</span><span class="p">(</span><span class="n">beta_reverse</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">beta</span><span class="p">[</span><span class="n">i180</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="c1">#print(&#39;beta = %s&#39; % beta)</span>
+            <span class="c1">#print(&#39;beta_nonzero = %s&#39; % beta[where(beta != 0)[0]])</span>
+            <span class="c1">#print(&#39;beta_nonzero deg = %s&#39; % degrees(beta[where(beta != 0)[0]]))</span>
+
+            <span class="c1">#if 0:</span>
+                <span class="c1">#for inani in inan:</span>
+                    <span class="c1">#nids_failed = [n1[inani], n2[inani], n3[inani]]</span>
+                    <span class="c1">#print(&#39;nodes = %s&#39; % nids_failed)</span>
+                    <span class="c1">#for nid in nids_failed:</span>
+                        <span class="c1">#print(&#39;  nodes[%3i] = %s&#39; % (nid, nodes[nid, :]))</span>
+
+            <span class="c1">#centroid = (nodes[n1, :] + nodes[n2, :] + nodes[n3, :]) / 3.</span>
+            <span class="c1">#xcentroid = centroid[:, 0]</span>
+            <span class="c1">#ycentroid = centroid[:, 1]</span>
+
+            <span class="c1"># maybe shift the node to the centroid of the element to fix sign?</span>
+            <span class="n">min_xy</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">delta_xy</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">min_xy</span><span class="p">)</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">delta_xy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;min_xy = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">min_xy</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">min_xy</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">min_xy</span>
+
+            <span class="c1"># y/x for nodes 1, 2, and 3; find theta</span>
+            <span class="n">theta1g</span> <span class="o">=</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">theta2g</span> <span class="o">=</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">theta3g</span> <span class="o">=</span> <span class="n">arctan2</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">theta12g</span> <span class="o">=</span> <span class="n">theta2g</span> <span class="o">-</span> <span class="n">theta1g</span>
+            <span class="n">theta23g</span> <span class="o">=</span> <span class="n">theta3g</span> <span class="o">-</span> <span class="n">theta2g</span>
+
+            <span class="n">mag_theta</span> <span class="o">=</span> <span class="n">sign</span><span class="p">(</span><span class="n">theta12g</span> <span class="o">-</span> <span class="n">theta23g</span><span class="p">)</span>
+            <span class="n">izero</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">beta</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mag_theta</span><span class="p">[</span><span class="n">izero</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="c1">#inotzero = where(beta != 0)</span>
+            <span class="c1">#print(&#39;i&#39;)</span>
+            <span class="c1">#izero = where(allclose(mag_theta, 0.))[0]</span>
+            <span class="c1">#mag_theta[izero] = 1.0</span>
+            <span class="c1">#print(&#39;mag_theta = %s&#39; % mag_theta)</span>
+            <span class="n">turn_angle</span> <span class="o">=</span> <span class="n">mag_theta</span> <span class="o">*</span> <span class="n">beta</span>
+            <span class="c1">#turn_angle = degrees(beta)</span>
+            <span class="n">turn_angle_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">turn_angle</span><span class="p">)</span>
+
+
+            <span class="c1">#print(&#39;inodes[%i]=%s&#39;  % (icurve, inodes))</span>
+            <span class="c1">#print(&#39;bars[%i]=\n%s\n&#39;  % (isubcurve, bars))</span>
+            <span class="k">for</span> <span class="n">bari</span> <span class="ow">in</span> <span class="n">bars</span><span class="p">:</span>
+                <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">bari</span>
+                <span class="c1">#print(bari, nodes[n1, :], nodes[n2, :])</span>
+            <span class="c1">#print(&#39;nodes[%i]=\n%s\n&#39;  % (isubcurve, nodes[n1a, :2]))</span>
+            <span class="n">inode0</span> <span class="o">+=</span> <span class="n">nnodesi</span>
+            <span class="c1">#break</span>
+        <span class="k">del</span> <span class="n">isubcurve</span>
+        <span class="n">bars</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">bars_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">turn_angle_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># turn_angle = turn_angle_list[0]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">turn_angle</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">turn_angle_list</span><span class="p">)</span>
+        <span class="c1">#print(&#39;nodes = \n%s&#39; % nodes)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bars</span> <span class="o">=</span> <span class="n">bars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span> <span class="o">=</span> <span class="n">curves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subcurves</span> <span class="o">=</span> <span class="n">subcurves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_bc</span> <span class="o">=</span> <span class="n">grid_bc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_bcs</span> <span class="o">=</span> <span class="n">grid_bcs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;grid_bcs = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unique</span><span class="p">(</span><span class="n">grid_bcs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn_angle</span> <span class="o">=</span> <span class="n">turn_angle</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AFLR2.write_nastran"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.AFLR2.write_nastran">[docs]</a>    <span class="k">def</span> <span class="nf">write_nastran</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bdf_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;converts the *.bedge to a nastran *.bdf&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bdf_file</span><span class="p">:</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CEND</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BEGIN BULK</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">nid</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+                <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+                <span class="n">nid</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDDATA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AFLR2.write_fixed_points"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.AFLR2.write_fixed_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_fixed_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixed_points_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a *.csv file that can be read by pyNastranGUI to show the points&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fixed_points_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">point_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">unused_z</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="c1">#print(&#39;bars = \n%s&#39; % self.bars)</span>
+                <span class="n">ix</span><span class="p">,</span> <span class="n">iy</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">bars</span><span class="p">)</span>
+                <span class="c1">#print(&#39;ix[%s]=%s iy[%s]=%s&#39; % (i, ix, i, iy))</span>
+                <span class="n">inodes_close</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bars</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">_flip_value</span><span class="p">(</span><span class="n">iy</span><span class="p">)]</span>
+                <span class="n">nodes_close</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">inodes_close</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="c1">#print(&#39;p=(%s,%s); close=\n%s&#39; % (x, y, str(nodes_close)))</span>
+                <span class="c1">#print(&#39;p=(%s,%s); iclose=\n%s&#39; % (x, y, str(inodes_close)))</span>
+
+                <span class="c1"># (N,3) - (3,) subtraction</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">nodes_close</span> <span class="o">-</span> <span class="n">node</span>
+                <span class="n">normi</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">max_edge_length</span> <span class="o">=</span> <span class="n">normi</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="c1">#print(self.bars[ix])</span>
+                <span class="c1">#print(nodes_close)</span>
+                <span class="c1">#print(&#39;delta\n%s&#39; % delta)</span>
+                <span class="c1">#print(normi)</span>
+                <span class="c1">#max_edge_length = max(0.03, max_edge_length)</span>
+                <span class="n">point_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_edge_length</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="AFLR2.merge_bedge"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.AFLR2.merge_bedge">[docs]</a>    <span class="k">def</span> <span class="nf">merge_bedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bedge</span><span class="p">,</span> <span class="n">bedge_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;merges two bedge models into a single new *.bedge file&quot;&quot;&quot;</span>
+        <span class="n">bedge</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">bedge</span><span class="p">)</span>
+
+        <span class="n">curve1_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">subcurve1_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subcurves</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">curve2_max</span> <span class="o">=</span> <span class="n">bedge</span><span class="o">.</span><span class="n">curves</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">subcurve2_max</span> <span class="o">=</span> <span class="n">bedge</span><span class="o">.</span><span class="n">subcurves</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">bedge</span><span class="o">.</span><span class="n">curves</span> <span class="o">+=</span> <span class="n">curve1_max</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">bedge</span><span class="o">.</span><span class="n">subcurves</span> <span class="o">+=</span> <span class="n">subcurve1_max</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;curve1_max=</span><span class="si">%s</span><span class="s1"> curve2_max=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">curve1_max</span><span class="p">,</span> <span class="n">curve2_max</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;subcurve1_max=</span><span class="si">%s</span><span class="s1"> subcurve2_max=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subcurve1_max</span><span class="p">,</span> <span class="n">subcurve2_max</span><span class="p">))</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">bedge</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+        <span class="n">grid_bc</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_bc</span><span class="p">,</span> <span class="n">bedge</span><span class="o">.</span><span class="n">grid_bc</span><span class="p">])</span>
+        <span class="n">curves</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">,</span> <span class="n">bedge</span><span class="o">.</span><span class="n">curves</span><span class="p">])</span>
+        <span class="n">subcurves</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">subcurves</span><span class="p">,</span> <span class="n">bedge</span><span class="o">.</span><span class="n">subcurves</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ugrid_bcs = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unique</span><span class="p">(</span><span class="n">grid_bc</span><span class="p">))</span>
+
+        <span class="n">export_to_bedge</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span>
+                        <span class="n">nodes</span><span class="p">,</span> <span class="n">grid_bc</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">subcurves</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="_flip_value"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2._flip_value">[docs]</a><span class="k">def</span> <span class="nf">_flip_value</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;flips a 0 to 1 and vice-versa&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="mi">0</span> <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">lst</span>
+    <span class="p">]</span></div>
+
+<div class="viewcode-block" id="export_to_bedge"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.aflr2.aflr2.export_to_bedge">[docs]</a><span class="k">def</span> <span class="nf">export_to_bedge</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span>
+                    <span class="n">nodes</span><span class="p">,</span> <span class="n">grid_bcs</span><span class="p">,</span> <span class="n">curves</span><span class="p">,</span> <span class="n">subcurves</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a bedge file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bedge_filename : str</span>
+<span class="sd">        the *.bedge file</span>
+<span class="sd">    nodes : ???</span>
+<span class="sd">        ???</span>
+<span class="sd">    grid_bcs : ???</span>
+<span class="sd">        ???</span>
+<span class="sd">        source is model.grid_bc, not model.grid_bcs</span>
+<span class="sd">    curves : ???</span>
+<span class="sd">        ???</span>
+<span class="sd">    subcurves : ???</span>
+<span class="sd">        ???</span>
+<span class="sd">    axis : int; default=1</span>
+<span class="sd">        the axis to remove (nodes in Nx3)</span>
+<span class="sd">    log : Logger(); default=None</span>
+<span class="sd">        a required logging object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;bedge_filename = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bedge_filename</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;grid_bc = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grid_bcs</span><span class="p">)</span>
+    <span class="c1">#if bedge_filename == &#39;farfield.bedge&#39;:</span>
+        <span class="c1">#print(grid_bcs)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bedge_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bedge_file</span><span class="p">:</span>
+        <span class="c1"># ncurves</span>
+        <span class="n">ucurves</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">curves</span><span class="p">)</span>
+        <span class="n">ncurves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ucurves</span><span class="p">)</span>
+        <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ncurves</span><span class="p">)</span>
+
+        <span class="c1"># write the curves/subcurves</span>
+        <span class="n">nodes_pack</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;looping over ucurves=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ucurves</span><span class="p">)</span>
+        <span class="n">nsubcurves_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">all_usubcurves</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ucurve</span> <span class="ow">in</span> <span class="n">ucurves</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">curves</span> <span class="o">==</span> <span class="n">ucurve</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">subcurvesi</span> <span class="o">=</span> <span class="n">subcurves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ucurve=</span><span class="si">%s</span><span class="s1"> i=</span><span class="si">%s</span><span class="s1"> subcurves[i]=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ucurve</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">subcurvesi</span><span class="p">))</span>
+
+            <span class="n">usubcurves</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">subcurvesi</span><span class="p">)</span>
+            <span class="n">nsubcurves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">usubcurves</span><span class="p">)</span>
+            <span class="n">nsubcurves_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nsubcurves</span><span class="p">)</span>
+            <span class="c1">#f.write(&#39;  %s\n&#39; % nsubcurves)</span>
+
+            <span class="k">for</span> <span class="n">usubcurve</span> <span class="ow">in</span> <span class="n">usubcurves</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">usubcurve</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_usubcurves</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">all_usubcurves</span><span class="p">)</span>
+                    <span class="c1"># stop???</span>
+
+                <span class="n">all_usubcurves</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">usubcurve</span><span class="p">)</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">subcurvesi</span> <span class="o">==</span> <span class="n">usubcurve</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nnodesi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;usubcurve=</span><span class="si">%s</span><span class="s1"> j=</span><span class="si">%s</span><span class="s1"> subcurves[j]=</span><span class="si">%s</span><span class="s1"> nnodes=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">usubcurve</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">subcurvesi</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">nnodesi</span><span class="p">))</span>
+                <span class="c1">#f.write(&#39;%s &#39; % nnodesi)</span>
+                <span class="n">nodes_pack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nnodesi</span><span class="p">)</span>
+            <span class="c1">#f.write(&#39;\n&#39;)</span>
+        <span class="k">del</span> <span class="n">nsubcurves</span>
+
+        <span class="k">for</span> <span class="n">nsubcurvesi</span> <span class="ow">in</span> <span class="n">nsubcurves_list</span><span class="p">:</span>
+            <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsubcurvesi</span><span class="p">)</span>
+        <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">nsubcurves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_bcs</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nsubcurves = </span><span class="si">%s</span><span class="s1">?&#39;</span> <span class="o">%</span> <span class="n">nsubcurves</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsubcurves</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Are you sure you are merging model.grid_bc and not model.grid_bcs?</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;nsubcurves=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nsubcurves</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1">#assert nsubcurves == len(nsubcurves_list) #  wrong check...</span>
+
+        <span class="k">for</span> <span class="n">nnodes</span> <span class="ow">in</span> <span class="n">nodes_pack</span><span class="p">:</span>
+            <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># grid bc</span>
+        <span class="c1"># len(grid_bcs) == nsubcurves, not nnodes ironically enough</span>
+        <span class="k">for</span> <span class="n">grid_bc</span> <span class="ow">in</span> <span class="n">grid_bcs</span><span class="p">:</span>
+            <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">grid_bc</span><span class="p">)</span>
+        <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+        <span class="c1"># nodes</span>
+        <span class="c1">#iaxis = where([0, 1, 2] != axis)[0]</span>
+        <span class="c1">#print(iaxis)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">bedge_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span></div>
+        <span class="c1">#initial_normal_spacing = &#39;112*1.0e-3&#39;</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

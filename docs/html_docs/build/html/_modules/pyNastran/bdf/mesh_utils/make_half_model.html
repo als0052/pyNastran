@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.make_half_model &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.make_half_model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.make_half_model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file defines:</span>
+<span class="sd">  - model = make_half_model(</span>
+<span class="sd">        bdf_filename, plane=&#39;xz&#39;, zero_tol=1e-12,</span>
+<span class="sd">        log=None, debug=True)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">deprecated</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.internal_utils</span> <span class="kn">import</span> <span class="n">get_bdf_model</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.mirror_mesh</span> <span class="kn">import</span> <span class="n">_plane_to_iy</span>
+
+
+<div class="viewcode-block" id="make_symmetric_model"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.make_half_model.html#pyNastran.bdf.mesh_utils.make_half_model.make_symmetric_model">[docs]</a><span class="k">def</span> <span class="nf">make_symmetric_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">,</span>
+                         <span class="n">zero_tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">deprecated</span><span class="p">(</span><span class="s1">&#39;make_symmetric_model&#39;</span><span class="p">,</span> <span class="s1">&#39;make_half_model&#39;</span><span class="p">,</span> <span class="s1">&#39;1.3&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">make_half_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="n">zero_tol</span><span class="o">=</span><span class="n">zero_tol</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="make_half_model"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.make_half_model.html#pyNastran.bdf.mesh_utils.make_half_model.make_half_model">[docs]</a><span class="k">def</span> <span class="nf">make_half_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">,</span>
+                         <span class="n">zero_tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a half/symmetric model from a full model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF()</span>
+<span class="sd">        str : the bdf filename</span>
+<span class="sd">        BDF : the BDF model object</span>
+<span class="sd">    plane : str; {&#39;xy&#39;, &#39;yz&#39;, &#39;xz&#39;}; default=&#39;xz&#39;</span>
+<span class="sd">        the plane to mirror about</span>
+<span class="sd">        xz : +y/-y</span>
+<span class="sd">        yz : +x/-x</span>
+<span class="sd">        xy : +z/-z</span>
+<span class="sd">    zaero_tol : float; default=1e-12</span>
+<span class="sd">        the symmetry plane tolerance</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        BDF : the BDF model object</span>
+
+<span class="sd">    ## TODO: doesn&#39;t handle elements straddling the centerline</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">iy</span><span class="p">,</span> <span class="n">plane</span> <span class="o">=</span> <span class="n">_plane_to_iy</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span>
+    <span class="n">nids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">eids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">caero_ids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="o">-</span><span class="n">zero_tol</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Centroid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">xyz</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">zero</span><span class="p">:</span>
+            <span class="n">eids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xyz</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">zero</span><span class="p">:</span>
+            <span class="n">nids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids_to_remove</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids_to_remove</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">caero_id</span><span class="p">,</span> <span class="n">caero</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO1&#39;</span><span class="p">:</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+            <span class="c1">#print(caero)</span>
+            <span class="k">if</span> <span class="n">p1</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zero</span> <span class="ow">and</span> <span class="n">p4</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zero</span><span class="p">:</span>
+                <span class="c1">#print(&#39;p1=%s p4=%s&#39; % (p1, p4))</span>
+                <span class="n">caero_ids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">caero_id</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">p1</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">zero</span><span class="p">:</span>
+                <span class="n">p1</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">caero</span><span class="o">.</span><span class="n">set_points</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">p4</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">zero</span><span class="p">:</span>
+                <span class="n">p4</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">caero</span><span class="o">.</span><span class="n">set_points</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">:</span>
+            <span class="c1"># TODO: a CAERO2 can&#39;t be half symmetric...can it?</span>
+            <span class="c1"># TODO: it can be skewed though...</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">p1</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zero</span> <span class="ow">and</span> <span class="n">p2</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zero</span><span class="p">:</span>
+                <span class="c1">#print(&#39;p1=%s p4=%s&#39; % (p1, p4))</span>
+                <span class="n">caero_ids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">caero_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">caero</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">caero_id</span> <span class="ow">in</span> <span class="n">caero_ids_to_remove</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">[</span><span class="n">caero_id</span><span class="p">]</span>
+
+    <span class="c1">#print(&#39;nids_to_remove =&#39;, nids_to_remove)</span>
+    <span class="k">for</span> <span class="n">unused_spline_id</span><span class="p">,</span> <span class="n">spline</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">caero</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">caero</span>
+        <span class="c1">#setg = spline.setg</span>
+        <span class="c1">#print(&#39;caero = &#39;, caero)</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">setg_ref</span><span class="o">.</span><span class="n">ids</span>  <span class="c1"># list</span>
+        <span class="c1">#spline.uncross_reference()</span>
+
+        <span class="c1">#i = 0</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">nids_to_remove</span><span class="p">))</span>
+        <span class="n">nids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">spline</span><span class="o">.</span><span class="n">setg_ref</span><span class="o">.</span><span class="n">ids_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">spline</span><span class="o">.</span><span class="n">setg_ref</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">nids</span>
+
+    <span class="n">plane_to_labels_keep_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;yz&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;URDD4&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD2&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD3&#39;</span><span class="p">,</span> <span class="s1">&#39;SIDES&#39;</span><span class="p">,</span> <span class="s1">&#39;YAW&#39;</span><span class="p">],</span> <span class="c1"># yz</span>
+        <span class="s1">&#39;xz&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;URDD1&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD5&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD3&#39;</span><span class="p">,</span> <span class="s1">&#39;PITCH&#39;</span><span class="p">,</span> <span class="s1">&#39;ANGLEA&#39;</span><span class="p">],</span> <span class="c1"># xz plane</span>
+        <span class="s1">&#39;xy&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;URDD1&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD2&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD6&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLL&#39;</span><span class="p">],</span> <span class="c1"># xy plane</span>
+    <span class="p">}</span>
+
+    <span class="n">all_labels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;URDD4&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD2&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD3&#39;</span><span class="p">,</span> <span class="s1">&#39;SIDES&#39;</span><span class="p">,</span> <span class="s1">&#39;YAW&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;URDD1&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD5&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD3&#39;</span><span class="p">,</span> <span class="s1">&#39;PITCH&#39;</span><span class="p">,</span> <span class="s1">&#39;ANGLEA&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;URDD1&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD2&#39;</span><span class="p">,</span> <span class="s1">&#39;URDD6&#39;</span><span class="p">,</span> <span class="s1">&#39;ROLL&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">labels_to_keep</span> <span class="o">=</span> <span class="n">plane_to_labels_keep_map</span><span class="p">[</span><span class="n">plane</span><span class="p">]</span>
+    <span class="n">labels_to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">all_labels</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">labels_to_keep</span><span class="p">]</span>
+
+    <span class="c1">#print(&#39;labels_to_remove =&#39;, labels_to_remove)</span>
+    <span class="k">for</span> <span class="n">aestat_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aestats</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">aestat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">aestats</span><span class="p">[</span><span class="n">aestat_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">aestat</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">labels_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">aestats</span><span class="p">[</span><span class="n">aestat_id</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">unused_trim_id</span><span class="p">,</span> <span class="n">trim</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">trims</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">trim</span><span class="o">.</span><span class="n">labels</span>
+        <span class="n">ilabels_to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels_to_remove</span>
+                             <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+        <span class="c1">#print(&quot;ilabels_to_remove =&quot;, ilabels_to_remove)</span>
+        <span class="n">trim</span><span class="o">.</span><span class="n">uxz</span> <span class="o">=</span> <span class="p">[</span><span class="n">trim</span><span class="o">.</span><span class="n">uxs</span><span class="p">[</span><span class="n">ilabel</span><span class="p">]</span> <span class="k">for</span> <span class="n">ilabel</span> <span class="ow">in</span> <span class="n">ilabels_to_remove</span><span class="p">]</span>
+        <span class="n">trim</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">trim</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">ilabel</span><span class="p">]</span> <span class="k">for</span> <span class="n">ilabel</span> <span class="ow">in</span> <span class="n">ilabels_to_remove</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

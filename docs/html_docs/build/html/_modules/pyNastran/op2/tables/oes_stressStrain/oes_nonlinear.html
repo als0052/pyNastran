@@ -1,0 +1,993 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.oes_stressStrain.oes_nonlinear &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.oes_stressStrain.oes_nonlinear</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.oes_stressStrain.oes_nonlinear</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - RealNonlinearPlateArray</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isnan</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span><span class="p">,</span> <span class="n">cycle</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.result_objects.op2_objects</span> <span class="kn">import</span> <span class="n">get_times_dtype</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.oes_stressStrain.real.oes_objects</span> <span class="kn">import</span> <span class="n">OES_Object</span>
+<span class="kn">from</span> <span class="nn">pyNastran.f06.f06_formatting</span> <span class="kn">import</span> <span class="n">_eigenvalue_header</span><span class="p">,</span> <span class="n">write_float_11e</span><span class="p">,</span> <span class="n">write_float_13e</span>
+
+
+<div class="viewcode-block" id="RealNonlinearPlateArray"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray">[docs]</a><span class="k">class</span> <span class="nc">RealNonlinearPlateArray</span><span class="p">(</span><span class="n">OES_Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;tested by elements/loadstep_elements.op2&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">is_sort1</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="n">OES_Object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">apply_data_code</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#self.code = [self.format_code, self.sort_code, self.s_code]</span>
+
+        <span class="c1">#self.ntimes = 0  # or frequency/mode</span>
+        <span class="c1">#self.ntotal = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># result specific</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_real</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nnodes_per_element</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">88</span><span class="p">:</span>  <span class="c1"># Tria3-nonlinear</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>  <span class="c1"># Quad4-nonlinear</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">#elif self.element_type == 144:</span>
+            <span class="c1">#nnodes_per_element = 5</span>
+        <span class="c1">#elif self.element_type == 64:  # CQUAD8</span>
+            <span class="c1">#nnodes_per_element = 5</span>
+        <span class="c1">#elif self.element_type == 82:  # CQUADR</span>
+            <span class="c1">#nnodes_per_element = 5</span>
+        <span class="c1">#elif self.element_type == 70:  # CTRIAR</span>
+            <span class="c1">#nnodes_per_element = 4</span>
+        <span class="c1">#elif self.element_type == 75:  # CTRIA6</span>
+            <span class="c1">#nnodes_per_element = 4</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;name=</span><span class="si">%r</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">nnodes_per_element</span>
+
+    <span class="k">def</span> <span class="nf">_reset_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_stress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.get_headers"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.get_headers">[docs]</a>    <span class="k">def</span> <span class="nf">get_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+            <span class="s1">&#39;fiber_distance&#39;</span><span class="p">,</span> <span class="s1">&#39;oxx&#39;</span><span class="p">,</span> <span class="s1">&#39;oyy&#39;</span><span class="p">,</span> <span class="s1">&#39;ozz&#39;</span><span class="p">,</span> <span class="s1">&#39;txy&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;eff_plastic_strain&#39;</span><span class="p">,</span> <span class="s1">&#39;eff_plastic_strain&#39;</span><span class="p">,</span> <span class="s1">&#39;eff_creep_strain&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;exx&#39;</span><span class="p">,</span> <span class="s1">&#39;eyy&#39;</span><span class="p">,</span> <span class="s1">&#39;ezz&#39;</span><span class="p">,</span> <span class="s1">&#39;exy&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">headers</span></div>
+
+    <span class="c1">#def is_bilinear(self):</span>
+        <span class="c1">#if self.element_type in [33, 74]:  # CQUAD4, CTRIA3</span>
+            <span class="c1">#return False</span>
+        <span class="c1">#elif self.element_type in [144, 64, 82, 70, 75]:  # CQUAD4</span>
+            <span class="c1">#return True</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#raise NotImplementedError(&#39;name=%s type=%s&#39; % (self.element_name, self.element_type))</span>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.build"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;sizes the vectorized attributes of the RealNonlinearPlateArray&quot;&quot;&quot;</span>
+        <span class="c1">#print(&quot;self.ielement = %s&quot; % self.ielement)</span>
+        <span class="c1">#print(&#39;ntimes=%s nelements=%s ntotal=%s&#39; % (self.ntimes, self.nelements, self.ntotal))</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ntimes=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nelements=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ntotal=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span>
+        <span class="c1">#self.names = []</span>
+
+        <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes_per_element</span>
+        <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="n">nnodes_per_element</span>
+        <span class="c1">#self.nelements //= nnodes_per_element</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nelements=</span><span class="si">%s</span><span class="s1"> ntimes=</span><span class="si">%s</span><span class="s1"> nelements/ntimes=</span><span class="si">%s</span><span class="s1">&#39;</span>  <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">))</span>
+            <span class="c1">#return</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">//=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#self.ntimes = 0</span>
+        <span class="c1">#self.nelements = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_built</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1">#print(&quot;***name=%s type=%s nnodes_per_element=%s ntimes=%s nelements=%s ntotal=%s&quot; % (</span>
+            <span class="c1">#self.element_name, self.element_type, nnodes_per_element, self.ntimes, self.nelements, self.ntotal))</span>
+        <span class="n">dtype</span><span class="p">,</span> <span class="n">idtype</span><span class="p">,</span> <span class="n">fdtype</span> <span class="o">=</span> <span class="n">get_times_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">idtype</span><span class="p">)</span>
+
+        <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">fdtype</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.build_dataframe"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.build_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;creates a pandas dataframe&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nelements2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">is_two_layers</span> <span class="o">=</span> <span class="n">nelements</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">==</span> <span class="n">nelements2</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">is_two_layers</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ElementID&#39;</span><span class="p">,</span> <span class="s1">&#39;Location&#39;</span><span class="p">,</span> <span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fiber_distance</span><span class="p">:</span>
+                <span class="n">fiber_distance</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Top&#39;</span><span class="p">,</span> <span class="s1">&#39;Bottom&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">nelements</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fiber_distance</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Curvature&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">nelements</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fiber_distance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;unicode&#39;</span><span class="p">)</span>
+            <span class="n">element_fd</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">element</span><span class="p">,</span>
+                <span class="n">fd</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="n">iheader</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ElementID&#39;</span><span class="p">,</span> <span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+            <span class="n">element_fd</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">]</span>
+            <span class="n">iheader</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
+            <span class="c1"># TODO: this varies depending on ???</span>
+            <span class="c1">#  - TestOP2.test_cgap_01</span>
+            <span class="c1">#  - TestOP2.test_bdf_op2_other_24</span>
+            <span class="c1">#</span>
+            <span class="c1">#LoadStep                                        1.0</span>
+            <span class="c1">#ElementID Location Item</span>
+            <span class="c1">#7401      Top      fiber_distance     -1.200000e+00</span>
+            <span class="c1">#    Bottom   oxx                -1.161999e+04</span>
+            <span class="c1">#    Top      oyy                 1.450191e-01</span>
+            <span class="c1">#    Bottom   ozz                 0.000000e+00</span>
+            <span class="c1">#    Top      txy                 4.668588e-05</span>
+            <span class="c1">#    Bottom   eff_plastic_strain  1.162006e+04</span>
+            <span class="c1">#    Top      eff_plastic_strain  0.000000e+00</span>
+            <span class="c1">#    Bottom   eff_creep_strain    0.000000e+00</span>
+            <span class="c1">#    Top      exx                -1.162003e-02</span>
+            <span class="c1">#    Bottom   eyy                 3.486142e-03</span>
+            <span class="c1">#    Top      ezz                 0.000000e+00</span>
+            <span class="c1">#    Bottom   exy                 1.213833e-10</span>
+            <span class="c1">#    Top      fiber_distance      1.200000e+00</span>
+            <span class="c1">#    Bottom   oxx                -1.161999e+04</span>
+            <span class="c1">#    Top      oyy                 1.449644e-01</span>
+            <span class="c1">#    Bottom   ozz                 0.000000e+00</span>
+            <span class="c1">#    Top      txy                -4.668589e-05</span>
+            <span class="c1">#    Bottom   eff_plastic_strain  1.162006e+04</span>
+            <span class="c1">#    Top      eff_plastic_strain  0.000000e+00</span>
+            <span class="c1">#    Bottom   eff_creep_strain    0.000000e+00</span>
+            <span class="c1">#    Top      exx                -1.162003e-02</span>
+            <span class="c1">#    Bottom   eyy                 3.486142e-03</span>
+            <span class="c1">#    Top      ezz                 0.000000e+00</span>
+            <span class="c1">#    Bottom   exy                -1.213833e-10</span>
+            <span class="c1">#</span>
+            <span class="c1">#LoadStep                              0.25          0.50</span>
+            <span class="c1">#ElementID Item</span>
+            <span class="c1">#1         oxx                 1.725106e-05  1.075969e-05</span>
+            <span class="c1">#          oyy                 1.500000e+06  3.000000e+06</span>
+            <span class="c1">#          ozz                 0.000000e+00  0.000000e+00</span>
+            <span class="c1">#          txy                -1.751084e-10  2.152285e-09</span>
+            <span class="c1">#          eff_plastic_strain  1.500000e+06  3.000000e+06</span>
+            <span class="c1">#...                                    ...           ...</span>
+            <span class="c1">#100       eff_creep_strain    0.000000e+00  0.000000e+00</span>
+            <span class="c1">#          exx                -2.024292e-06 -4.048583e-06</span>
+            <span class="c1">#          eyy                 6.747639e-06  1.349528e-05</span>
+            <span class="c1">#          ezz                 0.000000e+00  0.000000e+00</span>
+            <span class="c1">#          exy                 0.000000e+00  0.000000e+00</span>
+            <span class="n">column_names</span><span class="p">,</span> <span class="n">column_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_dataframe_transient_header</span><span class="p">()</span>
+            <span class="c1">#element = np.vstack([self.element, self.element]).T.flatten()</span>
+            <span class="c1">#element = self.element</span>
+            <span class="c1">#data_frame = self._build_pandas_transient_elements(</span>
+                <span class="c1">#column_values, column_names,</span>
+                <span class="c1">#headers, element, self.data[:, :, 1:])</span>
+
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_pandas_transient_element_node</span><span class="p">(</span>
+                <span class="n">column_values</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span>
+                <span class="n">headers</span><span class="p">[</span><span class="n">iheader</span><span class="p">:],</span> <span class="n">element_fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iheader</span><span class="p">:],</span>
+                <span class="n">from_tuples</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">from_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># option B - nice!</span>
+            <span class="n">df1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">df1</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ElementID&#39;</span><span class="p">]</span>
+            <span class="n">df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:])</span>
+            <span class="n">df2</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">headers</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="n">df1</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df2</span><span class="p">)</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;ElementID&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span></div>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.add_new_eid_sort1"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.add_new_eid_sort1">[docs]</a>    <span class="k">def</span> <span class="nf">add_new_eid_sort1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ielement</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_sort1</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">add_sort1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;unvectorized method for adding SORT1 transient data&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">)</span> <span class="ow">and</span> <span class="n">eid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;dt=</span><span class="si">%s</span><span class="s1"> eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">fd</span><span class="p">):</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">sz</span><span class="p">):</span>
+            <span class="n">sz</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">ez</span><span class="p">):</span>
+            <span class="n">ez</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="c1">#if self.ielement == 10:</span>
+            <span class="c1">#print(self.element_node[:10, :])</span>
+            <span class="c1">#raise RuntimeError()</span>
+        <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+        <span class="k">assert</span> <span class="n">eid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> self.element[i-1]=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">fd</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eq_header</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sort1</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">is_sort1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;table_name=</span><span class="si">%r</span><span class="s1"> class_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ie</span><span class="p">,</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">):</span>
+                    <span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ie</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ie</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="c1"># TODO: this name order is wrong</span>
+                    <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+                    <span class="p">(</span><span class="n">fiber_distance1</span><span class="p">,</span> <span class="n">oxx1</span><span class="p">,</span> <span class="n">oyy1</span><span class="p">,</span> <span class="n">ozz1</span><span class="p">,</span> <span class="n">txy1</span><span class="p">,</span> <span class="n">exx1</span><span class="p">,</span> <span class="n">eyy1</span><span class="p">,</span> <span class="n">ezz1</span><span class="p">,</span> <span class="n">exy1</span><span class="p">,</span> <span class="n">es1</span><span class="p">,</span> <span class="n">eps1</span><span class="p">,</span> <span class="n">ecs1</span><span class="p">)</span> <span class="o">=</span> <span class="n">t1</span>
+                    <span class="p">(</span><span class="n">fiber_distance2</span><span class="p">,</span> <span class="n">oxx2</span><span class="p">,</span> <span class="n">oyy2</span><span class="p">,</span> <span class="n">ozz2</span><span class="p">,</span> <span class="n">txy2</span><span class="p">,</span> <span class="n">exx2</span><span class="p">,</span> <span class="n">eyy2</span><span class="p">,</span> <span class="n">ezz2</span><span class="p">,</span> <span class="n">exy2</span><span class="p">,</span> <span class="n">es2</span><span class="p">,</span> <span class="n">eps2</span><span class="p">,</span> <span class="n">ecs2</span><span class="p">)</span> <span class="o">=</span> <span class="n">t2</span>
+
+                    <span class="c1"># vm stress can be NaN for some reason...</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">):</span>
+                        <span class="n">eid_spaces</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">eid</span><span class="p">)))</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span>
+                            <span class="c1"># eid   fd  ox  oy  oz  txy ex  ey  ez  exy es  eps ecs1</span>
+                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">    (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">    (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">eid</span><span class="p">,</span>
+                                <span class="n">fiber_distance1</span><span class="p">,</span> <span class="n">oxx1</span><span class="p">,</span> <span class="n">oyy1</span><span class="p">,</span> <span class="n">ozz1</span><span class="p">,</span> <span class="n">txy1</span><span class="p">,</span> <span class="n">exx1</span><span class="p">,</span> <span class="n">eyy1</span><span class="p">,</span> <span class="n">ezz1</span><span class="p">,</span> <span class="n">exy1</span><span class="p">,</span> <span class="n">es1</span><span class="p">,</span> <span class="n">eps1</span><span class="p">,</span> <span class="n">ecs1</span><span class="p">,</span>
+                                <span class="n">eid_spaces</span><span class="p">,</span>
+                                <span class="n">fiber_distance2</span><span class="p">,</span> <span class="n">oxx2</span><span class="p">,</span> <span class="n">oyy2</span><span class="p">,</span> <span class="n">ozz2</span><span class="p">,</span> <span class="n">txy2</span><span class="p">,</span> <span class="n">exx2</span><span class="p">,</span> <span class="n">eyy2</span><span class="p">,</span> <span class="n">ezz2</span><span class="p">,</span> <span class="n">exy2</span><span class="p">,</span> <span class="n">es2</span><span class="p">,</span> <span class="n">eps2</span><span class="p">,</span> <span class="n">ecs2</span><span class="p">))</span>
+                        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="c1">#print(msg)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.get_stats"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_built</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="s1">&#39;  ntimes: </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span>
+                <span class="s1">&#39;  ntotal: </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span><span class="p">,</span>
+            <span class="p">]</span>
+
+        <span class="n">nelements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span>
+        <span class="n">ntimes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span>
+        <span class="n">nlayers</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">//</span> <span class="mi">2</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>  <span class="c1"># transient</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;  type=</span><span class="si">%s</span><span class="s1"> ntimes=</span><span class="si">%i</span><span class="s1"> nelements=</span><span class="si">%i</span><span class="s1"> nnodes_per_element=</span><span class="si">%i</span><span class="s1"> nlayers=</span><span class="si">%i</span><span class="s1"> ntotal=</span><span class="si">%i</span><span class="s1">, table_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nlayers</span><span class="p">,</span> <span class="n">ntotal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name_str</span><span class="p">)</span>
+            <span class="n">ntimes_word</span> <span class="o">=</span> <span class="s1">&#39;ntimes&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;  type=</span><span class="si">%s</span><span class="s1"> nelements=</span><span class="si">%i</span><span class="s1"> nnodes_per_element=</span><span class="si">%i</span><span class="s1"> nlayers=</span><span class="si">%i</span><span class="s1"> ntotal=</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">nelements</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nlayers</span><span class="p">,</span> <span class="n">ntotal</span><span class="p">)</span>
+            <span class="n">ntimes_word</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  data: [</span><span class="si">%s</span><span class="s1">, ntotal, </span><span class="si">%i</span><span class="s1">] where </span><span class="si">%i</span><span class="s1">=[</span><span class="si">%s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntimes_word</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+                                                                 <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">))))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  data.shape=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  element type: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_code</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="RealNonlinearPlateArray.write_f06"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearPlateArray.write_f06">[docs]</a>    <span class="k">def</span> <span class="nf">write_f06</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_file</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">page_stamp</span><span class="o">=</span><span class="s1">&#39;PAGE </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">is_mag_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#msg, nnodes, cen = _get_plate_msg(self)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">88</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;                   N O N L I N E A R   S T R E S S E S   I N   T R I A N G U L A R   E L E M E N T S      ( T R I A 3 )</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;    ELEMENT      FIBER                        STRESSES/ TOTAL STRAINS                     EQUIVALENT    EFF. STRAIN     EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       ID      DISTANCE           X              Y             Z               XY           STRESS    PLASTIC/NLELAST     STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;               N O N L I N E A R   S T R E S S E S   I N   Q U A D R I L A T E R A L   E L E M E N T S    ( Q U A D 4 )</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;    ELEMENT      FIBER                        STRESSES/ TOTAL STRAINS                     EQUIVALENT    EFF. STRAIN     EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;       ID      DISTANCE           X              Y             Z               XY           STRESS    PLASTIC/NLELAST     STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="c1">#&#39;0         1  -2.500000E-02  -4.829193E+00  -1.640651E-05                 -1.907010E-04   4.829185E+00   0.0            0.0\n&#39;</span>
+                <span class="c1">#&#39;                            -4.829188E-05   1.448741E-05                 -4.958226E-09\n&#39;</span>
+                <span class="c1">#&#39;              2.500000E-02   4.770547E+00   1.493975E-04                  1.907012E-04   4.770473E+00   0.0            0.0\n&#39;</span>
+                <span class="c1">#&#39;                             4.770502E-05  -1.431015E-05                  4.958231E-09\n&#39;</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;element_name=</span><span class="si">%s</span><span class="s1"> self.element_type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span><span class="p">))</span>
+
+        <span class="c1">#msg = [</span>
+        <span class="c1">#&#39;               N O N L I N E A R   S T R E S S E S   I N   Q U A D R I L A T E R A L   E L E M E N T S    ( Q U A D 4 )\n&#39;</span>
+        <span class="c1">#&#39; \n&#39;</span>
+        <span class="c1">#&#39;    ELEMENT      FIBER                        STRESSES/ TOTAL STRAINS                     EQUIVALENT    EFF. STRAIN     EFF. CREEP\n&#39;</span>
+        <span class="c1">#&#39;       ID      DISTANCE           X              Y             Z               XY           STRESS    PLASTIC/NLELAST     STRAIN\n&#39;</span>
+        <span class="c1">#&#39;0         1  -2.500000E-02  -4.829193E+00  -1.640651E-05                 -1.907010E-04   4.829185E+00   0.0            0.0\n&#39;</span>
+        <span class="c1">#&#39;                            -4.829188E-05   1.448741E-05                 -4.958226E-09\n&#39;</span>
+        <span class="c1">#&#39;              2.500000E-02   4.770547E+00   1.493975E-04                  1.907012E-04   4.770473E+00   0.0            0.0\n&#39;</span>
+        <span class="c1">#&#39;                             4.770502E-05  -1.431015E-05                  4.958231E-09\n&#39;</span>
+        <span class="c1">#]</span>
+
+        <span class="c1"># write the f06</span>
+        <span class="n">ntimes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">eids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span>
+
+        <span class="c1">#cen_word = &#39;CEN/%i&#39; % nnodes</span>
+        <span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntimes</span><span class="p">):</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">itime</span><span class="p">]</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">_eigenvalue_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">itime</span><span class="p">,</span> <span class="n">ntimes</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">msg</span><span class="p">))</span>
+
+            <span class="c1">#print(&quot;self.data.shape=%s itime=%s ieids=%s&quot; % (str(self.data.shape), itime, str(ieids)))</span>
+
+            <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+            <span class="n">fiber_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">oxx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">oyy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">ozz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">txy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span>
+            <span class="n">es</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">5</span><span class="p">]</span>
+            <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">6</span><span class="p">]</span>
+            <span class="n">ecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">7</span><span class="p">]</span>
+            <span class="n">exx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">8</span><span class="p">]</span>
+            <span class="n">eyy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">9</span><span class="p">]</span>
+            <span class="n">ezz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">10</span><span class="p">]</span>
+            <span class="n">exy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">11</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fdi</span><span class="p">,</span> <span class="n">oxxi</span><span class="p">,</span> <span class="n">oyyi</span><span class="p">,</span> <span class="n">ozzi</span><span class="p">,</span> <span class="n">txyi</span><span class="p">,</span> <span class="n">exxi</span><span class="p">,</span> <span class="n">eyyi</span><span class="p">,</span> <span class="n">ezzi</span><span class="p">,</span> <span class="n">exyi</span><span class="p">,</span> <span class="n">esi</span><span class="p">,</span> <span class="n">epsi</span><span class="p">,</span> <span class="n">ecsi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                 <span class="n">cycle</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">eids</span><span class="p">,</span> <span class="n">fiber_dist</span><span class="p">,</span> <span class="n">oxx</span><span class="p">,</span> <span class="n">oyy</span><span class="p">,</span> <span class="n">ozz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">exy</span><span class="p">,</span> <span class="n">es</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">):</span>
+                <span class="c1">#[fdi, oxxi, oyyi, txyi, major, minor, ovmi] = write_floats_13e(</span>
+                    <span class="c1">#[fdi, oxxi, oyyi, txyi, major, minor, ovmi])</span>
+
+                <span class="c1">#&#39;    ELEMENT      FIBER                        STRESSES/ TOTAL STRAINS                     EQUIVALENT    EFF. STRAIN     EFF. CREEP\n&#39;</span>
+                <span class="c1">#&#39;       ID      DISTANCE           X              Y             Z               XY           STRESS    PLASTIC/NLELAST     STRAIN\n&#39;</span>
+                <span class="c1">#&#39;0         1  -2.500000E-02  -4.829193E+00  -1.640651E-05                 -1.907010E-04   4.829185E+00   0.0            0.0\n&#39;</span>
+                <span class="c1">#&#39;                            -4.829188E-05   1.448741E-05                 -4.958226E-09\n&#39;</span>
+                <span class="c1">#&#39;              2.500000E-02   4.770547E+00   1.493975E-04                  1.907012E-04   4.770473E+00   0.0            0.0\n&#39;</span>
+                <span class="c1">#&#39;                             4.770502E-05  -1.431015E-05                  4.958231E-09\n&#39;</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;0  </span><span class="si">%8i</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">                 </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;                            </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">                 </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="c1"># A</span>
+                            <span class="c1">#    ELEMENT  FIBER  XYZ STRESS     EQUIVALENT  EFF.STRAIN  EFF.CREEP\n&#39;</span>
+                            <span class="n">eid</span><span class="p">,</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">fdi</span><span class="p">),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">oxxi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">oyyi</span><span class="p">),</span>
+                            <span class="c1">#write_float_13e(ozzi),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">txyi</span><span class="p">),</span>
+
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">esi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">epsi</span><span class="p">),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">ecsi</span><span class="p">),</span>
+
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">exxi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">eyyi</span><span class="p">),</span>
+                            <span class="c1">#write_float_13e(ezzi),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">exyi</span><span class="p">),</span>
+                        <span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;             </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">                 </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;                            </span><span class="si">%-13s</span><span class="s1">  </span><span class="si">%-13s</span><span class="s1">                 </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">fdi</span><span class="p">),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">oxxi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">oyyi</span><span class="p">),</span>
+                            <span class="c1">#write_float_13e(ozzi),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">txyi</span><span class="p">),</span>
+
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">esi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">epsi</span><span class="p">),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">ecsi</span><span class="p">),</span>
+
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">exxi</span><span class="p">),</span> <span class="n">write_float_13e</span><span class="p">(</span><span class="n">eyyi</span><span class="p">),</span>
+                            <span class="c1">#write_float_13e(ezzi),</span>
+                            <span class="n">write_float_13e</span><span class="p">(</span><span class="n">exyi</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">page_stamp</span> <span class="o">%</span> <span class="n">page_num</span><span class="p">)</span>
+            <span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">page_num</span> <span class="o">-</span> <span class="mi">1</span></div></div>
+
+<div class="viewcode-block" id="RealNonlinearSolidArray"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearSolidArray">[docs]</a><span class="k">class</span> <span class="nc">RealNonlinearSolidArray</span><span class="p">(</span><span class="n">OES_Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;tested by elements/loadstep_elements.op2&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">is_sort1</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="n">OES_Object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">apply_data_code</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#self.code = [self.format_code, self.sort_code, self.s_code]</span>
+
+        <span class="c1">#self.ntimes = 0  # or frequency/mode</span>
+        <span class="c1">#self.ntotal = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># result specific</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_real</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nnodes_per_element</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">85</span><span class="p">:</span>  <span class="c1"># CTETRANL</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">91</span><span class="p">:</span>  <span class="c1"># CPENTANL</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">93</span><span class="p">:</span>  <span class="c1"># CHEXANL</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">256</span><span class="p">:</span>  <span class="c1"># CPYRAMNL</span>
+            <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;name=</span><span class="si">%r</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">nnodes_per_element</span>
+
+    <span class="k">def</span> <span class="nf">_reset_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_stress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="RealNonlinearSolidArray.get_headers"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearSolidArray.get_headers">[docs]</a>    <span class="k">def</span> <span class="nf">get_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;oxx&#39;</span><span class="p">,</span> <span class="s1">&#39;oyy&#39;</span><span class="p">,</span> <span class="s1">&#39;ozz&#39;</span><span class="p">,</span> <span class="s1">&#39;txy&#39;</span><span class="p">,</span> <span class="s1">&#39;tyz&#39;</span><span class="p">,</span> <span class="s1">&#39;txz&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;eff_plastic_strain&#39;</span><span class="p">,</span> <span class="s1">&#39;eff_plastic_strain&#39;</span><span class="p">,</span> <span class="s1">&#39;eff_creep_strain&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;exx&#39;</span><span class="p">,</span> <span class="s1">&#39;eyy&#39;</span><span class="p">,</span> <span class="s1">&#39;ezz&#39;</span><span class="p">,</span> <span class="s1">&#39;exy&#39;</span><span class="p">,</span> <span class="s1">&#39;eyz&#39;</span><span class="p">,</span> <span class="s1">&#39;exz&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">headers</span></div>
+
+    <span class="c1">#def is_bilinear(self):</span>
+        <span class="c1">#if self.element_type in [33, 74]:  # CQUAD4, CTRIA3</span>
+            <span class="c1">#return False</span>
+        <span class="c1">#elif self.element_type in [144, 64, 82, 70, 75]:  # CQUAD4</span>
+            <span class="c1">#return True</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#raise NotImplementedError(&#39;name=%s type=%s&#39; % (self.element_name, self.element_type))</span>
+
+<div class="viewcode-block" id="RealNonlinearSolidArray.build"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearSolidArray.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;sizes the vectorized attributes of the RealNonlinearPlateArray&quot;&quot;&quot;</span>
+        <span class="c1">#print(&quot;self.ielement = %s&quot; % self.ielement)</span>
+        <span class="c1">#print(f&#39;ntimes={self.ntimes} nelements={self.nelements} ntotal={self.ntotal} - {self.element_name}&#39;)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ntimes=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nelements=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ntotal=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span>
+        <span class="c1">#self.names = []</span>
+        <span class="n">nnodes_per_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes_per_element</span>
+
+        <span class="c1">#nnodes_per_element = 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="n">nnodes_per_element</span>
+        <span class="c1">#self.nelements //= nnodes_per_element</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nelements=</span><span class="si">%s</span><span class="s1"> ntimes=</span><span class="si">%s</span><span class="s1"> nelements/ntimes=</span><span class="si">%s</span><span class="s1">&#39;</span>  <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">//=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#self.ntimes = 0</span>
+        <span class="c1">#self.nelements = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_built</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1">#print(&quot;***name=%s type=%s nnodes_per_element=%s ntimes=%s nelements=%s ntotal=%s&quot; % (</span>
+            <span class="c1">#self.element_name, self.element_type, nnodes_per_element, self.ntimes, self.nelements, self.ntotal))</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;int32&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="c1">#[sx, sy, sz, sxy, syz, sxz, se, eps, ecs,</span>
+        <span class="c1"># ex, ey, ez, exy, eyz, exz]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span></div>
+
+    <span class="c1">#def build_dataframe(self):</span>
+        <span class="c1">#&quot;&quot;&quot;creates a pandas dataframe&quot;&quot;&quot;</span>
+        <span class="c1">#import pandas as pd</span>
+        <span class="c1">#headers = self.get_headers()[1:]</span>
+        <span class="c1">##nelements = self.element.shape[0]</span>
+
+        <span class="c1">#if self.nonlinear_factor not in (None, np.nan):</span>
+            <span class="c1">#column_names, column_values = self._build_dataframe_transient_header()</span>
+            <span class="c1">#self.data_frame = pd.Panel(self.data[:, :, 1:], items=column_values, major_axis=self.element, minor_axis=headers).to_frame()</span>
+            <span class="c1">#self.data_frame.columns.names = column_names</span>
+            <span class="c1">#self.data_frame.index.names = [&#39;ElementID&#39;, &#39;Item&#39;]</span>
+        <span class="c1">#else:</span>
+            <span class="c1">## option B - nice!</span>
+            <span class="c1">#df1 = pd.DataFrame(self.element).T</span>
+            <span class="c1">#df1.columns = [&#39;ElementID&#39;]</span>
+            <span class="c1">#df2 = pd.DataFrame(self.data[0, :, 1:])</span>
+            <span class="c1">#df2.columns = headers</span>
+            <span class="c1">#self.data_frame = df1.join(df2)</span>
+        <span class="c1">#self.data_frame = self.data_frame.reset_index().set_index([&#39;ElementID&#39;])</span>
+        <span class="c1">#print(self.data_frame)</span>
+
+    <span class="k">def</span> <span class="nf">add_sort1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span>
+                  <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sxy</span><span class="p">,</span> <span class="n">syz</span><span class="p">,</span> <span class="n">sxz</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span>
+                  <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">,</span> <span class="n">eyz</span><span class="p">,</span> <span class="n">exz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;unvectorized method for adding SORT1 transient data&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">)</span> <span class="ow">and</span> <span class="n">eid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;dt=</span><span class="si">%s</span><span class="s1"> eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+        <span class="c1">#if isnan(fd):</span>
+            <span class="c1">#fd = 0.</span>
+        <span class="c1">#if isnan(sz):</span>
+            <span class="c1">#sz = 0.</span>
+        <span class="c1">#if isnan(ez):</span>
+            <span class="c1">#ez = 0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="c1">#if self.ielement == 10:</span>
+            <span class="c1">#print(self.element_node[:10, :])</span>
+            <span class="c1">#raise RuntimeError()</span>
+        <span class="c1">#[fiber_dist, oxx, oyy, ozz, txy, es, eps, ecs, exx, eyy, ezz, etxy]</span>
+        <span class="c1">#assert eid == self.element[self.ielement - 1], &#39;eid=%s self.element[i-1]=%s&#39; % (eid, self.element[self.ielement - 1])</span>
+
+        <span class="c1">#print(self.element_node.shape, self.itotal)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itotal</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span><span class="p">,</span> <span class="n">grid</span><span class="p">]</span>
+        <span class="c1">#a = [sx, sy, sz, sxy, syz, sxz, se, eps, ecs,</span>
+             <span class="c1">#ex, ey, ez, exy, eyz, exz]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sxy</span><span class="p">,</span> <span class="n">syz</span><span class="p">,</span> <span class="n">sxz</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span>
+                                                 <span class="n">ex</span><span class="p">,</span> <span class="n">ey</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">exy</span><span class="p">,</span> <span class="n">eyz</span><span class="p">,</span> <span class="n">exz</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eq_header</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sort1</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">is_sort1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;table_name=</span><span class="si">%r</span><span class="s1"> class_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">eids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ie</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="n">eids</span><span class="p">,</span> <span class="n">nids</span><span class="p">):</span>
+                    <span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ie</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ie</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="c1"># TODO: this name order is wrong?</span>
+                    <span class="c1">#[sx, sy, sz, sxy, syz, sxz, se, eps, ecs,</span>
+                    <span class="c1"># ex, ey, ez, exy, eyz, exz]</span>
+                    <span class="p">(</span><span class="n">sx1</span><span class="p">,</span> <span class="n">sy1</span><span class="p">,</span> <span class="n">sz1</span><span class="p">,</span> <span class="n">sxy1</span><span class="p">,</span> <span class="n">syz1</span><span class="p">,</span> <span class="n">sxz1</span><span class="p">,</span> <span class="n">se1</span><span class="p">,</span> <span class="n">eps1</span><span class="p">,</span> <span class="n">ecs1</span><span class="p">,</span> <span class="n">ex1</span><span class="p">,</span> <span class="n">ey1</span><span class="p">,</span> <span class="n">ez1</span><span class="p">,</span> <span class="n">exy1</span><span class="p">,</span> <span class="n">eyz1</span><span class="p">,</span> <span class="n">exz1</span><span class="p">)</span> <span class="o">=</span> <span class="n">t1</span>
+                    <span class="p">(</span><span class="n">sx2</span><span class="p">,</span> <span class="n">sy2</span><span class="p">,</span> <span class="n">sz2</span><span class="p">,</span> <span class="n">sxy2</span><span class="p">,</span> <span class="n">syz2</span><span class="p">,</span> <span class="n">sxz2</span><span class="p">,</span> <span class="n">se2</span><span class="p">,</span> <span class="n">eps2</span><span class="p">,</span> <span class="n">ecs2</span><span class="p">,</span> <span class="n">ex2</span><span class="p">,</span> <span class="n">ey2</span><span class="p">,</span> <span class="n">ez2</span><span class="p">,</span> <span class="n">exy2</span><span class="p">,</span> <span class="n">eyz2</span><span class="p">,</span> <span class="n">exz2</span><span class="p">)</span> <span class="o">=</span> <span class="n">t2</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">):</span>
+                        <span class="n">eid_spaces</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">eid</span><span class="p">)))</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span>
+                            <span class="c1"># eid   sx, sy, sz,sxy,syz,sxz, se,eps,ecs, ex, ey, ez, exy, eyz, exz</span>
+                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">    (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">    (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">eid</span><span class="p">,</span>
+                                <span class="n">sx1</span><span class="p">,</span> <span class="n">sy1</span><span class="p">,</span> <span class="n">sz1</span><span class="p">,</span> <span class="n">sxy1</span><span class="p">,</span> <span class="n">syz1</span><span class="p">,</span> <span class="n">sxz1</span><span class="p">,</span> <span class="n">se1</span><span class="p">,</span> <span class="n">eps1</span><span class="p">,</span> <span class="n">ecs1</span><span class="p">,</span> <span class="n">ex1</span><span class="p">,</span> <span class="n">ey1</span><span class="p">,</span> <span class="n">ez1</span><span class="p">,</span> <span class="n">exy1</span><span class="p">,</span> <span class="n">eyz1</span><span class="p">,</span> <span class="n">exz1</span><span class="p">,</span>
+                                <span class="n">eid_spaces</span><span class="p">,</span>
+                                <span class="n">sx2</span><span class="p">,</span> <span class="n">sy2</span><span class="p">,</span> <span class="n">sz2</span><span class="p">,</span> <span class="n">sxy2</span><span class="p">,</span> <span class="n">syz2</span><span class="p">,</span> <span class="n">sxz2</span><span class="p">,</span> <span class="n">se2</span><span class="p">,</span> <span class="n">eps2</span><span class="p">,</span> <span class="n">ecs2</span><span class="p">,</span> <span class="n">ex2</span><span class="p">,</span> <span class="n">ey2</span><span class="p">,</span> <span class="n">ez2</span><span class="p">,</span> <span class="n">exy2</span><span class="p">,</span> <span class="n">eyz2</span><span class="p">,</span> <span class="n">exz2</span><span class="p">))</span>
+                        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="c1">#print(msg)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="RealNonlinearSolidArray.get_stats"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearSolidArray.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_built</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="s1">&#39;  ntimes: </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span><span class="p">,</span>
+                <span class="s1">&#39;  ntotal: </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span><span class="p">,</span>
+            <span class="p">]</span>
+
+        <span class="n">nelements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span>
+        <span class="n">ntimes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span>
+        <span class="c1">#ntotal = self.ntotal * nnodes</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>  <span class="c1"># transient</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;  type=</span><span class="si">%s</span><span class="s1"> ntimes=</span><span class="si">%i</span><span class="s1"> nelements=</span><span class="si">%i</span><span class="s1"> nnodes_per_element=</span><span class="si">%i</span><span class="s1"> ntotal=</span><span class="si">%i</span><span class="s1">, table_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">ntotal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name_str</span><span class="p">)</span>
+            <span class="n">ntimes_word</span> <span class="o">=</span> <span class="s1">&#39;ntimes&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;  type=</span><span class="si">%s</span><span class="s1"> nelements=</span><span class="si">%i</span><span class="s1"> nnodes_per_element=</span><span class="si">%i</span><span class="s1"> ntotal=</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">nelements</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">ntotal</span><span class="p">)</span>
+            <span class="n">ntimes_word</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  data: [</span><span class="si">%s</span><span class="s1">, ntotal, </span><span class="si">%i</span><span class="s1">] where </span><span class="si">%i</span><span class="s1">=[</span><span class="si">%s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntimes_word</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span>
+                                                                 <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">))))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  data.shape=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  element type: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_code</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="RealNonlinearSolidArray.write_f06"><a class="viewcode-back" href="../../../../../reference/op2/tables/oes_stress_strain/pyNastran.op2.tables.oes_stress_strain.oes_nonlinear.html#pyNastran.op2.tables.oes_stressStrain.oes_nonlinear.RealNonlinearSolidArray.write_f06">[docs]</a>    <span class="k">def</span> <span class="nf">write_f06</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_file</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">page_stamp</span><span class="o">=</span><span class="s1">&#39;PAGE </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">is_mag_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#raise NotImplementedError(&#39;RealNonlinearSolidArray.write_f06&#39;)</span>
+        <span class="c1">#msg, nnodes, cen = _get_plate_msg(self)</span>
+        <span class="c1">#if self.element_type == 85:</span>
+            <span class="c1">##etype = &#39;CTETRANL&#39;</span>
+            <span class="c1">#nnodes_per_element = 5</span>
+        <span class="c1">#elif self.element_type == 91:</span>
+            <span class="c1">##etype = &#39;CPENTANL&#39;</span>
+            <span class="c1">#nnodes_per_element = 7</span>
+        <span class="c1">#elif self.element_type == 93:</span>
+            <span class="c1">##etype = &#39;CHEXANL&#39;</span>
+            <span class="c1">#nnodes_per_element = 9</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#raise NotImplementedError(&#39;name=%r type=%s&#39; % (self.element_name, self.element_type))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">85</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;          N O N L I N E A R   S T R E S S E S   I N   T E T R A H E D R O N   S O L I D   E L E M E N T S   ( T E T R A )&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  ELEMENT GRID/   POINT                         STRESSES/ TOTAL STRAINS                          EQUIVALENT EFF. STRAIN  EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;     ID   GAUSS     ID       X           Y           Z           XY          YZ          ZX        STRESS   PLAS/NLELAS   STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">91</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;          N O N L I N E A R   S T R E S S E S   I N   P E N T A H E D R O N   S O L I D   E L E M E N T S   ( P E N T A )&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  ELEMENT GRID/   POINT                         STRESSES/ TOTAL STRAINS                          EQUIVALENT EFF. STRAIN  EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;     ID   GAUSS     ID       X           Y           Z           XY          YZ          ZX        STRESS   PLAS/NLELAS   STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">93</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;          N O N L I N E A R   S T R E S S E S   I N   H E X A H E D R O N   S O L I D   E L E M E N T S     ( H E X A )</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  ELEMENT GRID/   POINT                         STRESSES/ TOTAL STRAINS                          EQUIVALENT EFF. STRAIN  EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;     ID   GAUSS     ID       X           Y           Z           XY          YZ          ZX        STRESS   PLAS/NLELAS   STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="c1">#&#39;0       1 GRID   CENTER  1.0000E+04  1.5916E-12  1.3642E-12 -3.5862E-13  8.3400E-14   0.0        1.0000E+04   0.0         0.0&#39;</span>
+                <span class="c1">#&#39;                         1.5626E-03 -4.6877E-04 -4.6877E-04 -1.4569E-19  3.3881E-20   0.0&#39;</span>
+                <span class="c1">#&#39;                      1  1.0000E+04 -1.8190E-12  4.5475E-13 -6.3308E-13  7.4789E-13 -4.6225E-13  1.0000E+04   0.0         0.0&#39;</span>
+                <span class="c1">#&#39;                         1.5626E-03 -4.6877E-04 -4.6877E-04 -2.5719E-19  3.0383E-19 -1.8779E-19&#39;</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="mi">256</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;          N O N L I N E A R   S T R E S S E S   I N   P Y R A M I D   S O L I D   E L E M E N T S     ( P Y R A M )</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;  ELEMENT GRID/   POINT                         STRESSES/ TOTAL STRAINS                          EQUIVALENT EFF. STRAIN  EFF. CREEP</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;     ID   GAUSS     ID       X           Y           Z           XY          YZ          ZX        STRESS   PLAS/NLELAS   STRAIN</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;element_name=</span><span class="si">%s</span><span class="s1"> self.element_type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span><span class="p">))</span>
+
+        <span class="c1"># write the f06</span>
+        <span class="n">ntimes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">eids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1">#cen_word = &#39;CEN/%i&#39; % nnodes</span>
+        <span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntimes</span><span class="p">):</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">itime</span><span class="p">]</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">_eigenvalue_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">itime</span><span class="p">,</span> <span class="n">ntimes</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">msg</span><span class="p">))</span>
+
+            <span class="c1">#print(&quot;self.data.shape=%s itime=%s ieids=%s&quot; % (str(self.data.shape), itime, str(ieids)))</span>
+
+            <span class="c1">#oxx, oyy, ozz, txy, tyz, txz, se, eps, ecs,</span>
+            <span class="c1">#exx, eyy, ezz, exy, eyz, exz</span>
+            <span class="n">oxx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">oyy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">ozz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">txy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">tyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span>
+            <span class="n">txz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">5</span><span class="p">]</span>
+
+            <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">6</span><span class="p">]</span>
+            <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">7</span><span class="p">]</span>
+            <span class="n">ecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">8</span><span class="p">]</span>
+
+            <span class="n">exx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">9</span><span class="p">]</span>
+            <span class="n">eyy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">10</span><span class="p">]</span>
+            <span class="n">ezz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">11</span><span class="p">]</span>
+            <span class="n">exy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">12</span><span class="p">]</span>
+            <span class="n">eyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">13</span><span class="p">]</span>
+            <span class="n">exz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">14</span><span class="p">]</span>
+
+            <span class="c1">#oxx, oyy, ozz, txy, tyz, txz, se, eps, ecs,</span>
+            <span class="c1">#exx, eyy, ezz, exy, eyz, exz</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">oxxi</span><span class="p">,</span> <span class="n">oyyi</span><span class="p">,</span> <span class="n">ozzi</span><span class="p">,</span> <span class="n">txyi</span><span class="p">,</span> <span class="n">tyzi</span><span class="p">,</span> <span class="n">txzi</span><span class="p">,</span> <span class="n">sei</span><span class="p">,</span> <span class="n">epsi</span><span class="p">,</span> <span class="n">ecsi</span><span class="p">,</span>
+                 <span class="n">exxi</span><span class="p">,</span> <span class="n">eyyi</span><span class="p">,</span> <span class="n">ezzi</span><span class="p">,</span> <span class="n">exyi</span><span class="p">,</span> <span class="n">eyzi</span><span class="p">,</span> <span class="n">exzi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                 <span class="n">eids</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">oxx</span><span class="p">,</span> <span class="n">oyy</span><span class="p">,</span> <span class="n">ozz</span><span class="p">,</span> <span class="n">txy</span><span class="p">,</span> <span class="n">tyz</span><span class="p">,</span> <span class="n">txz</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">ecs</span><span class="p">,</span>
+                 <span class="n">exx</span><span class="p">,</span> <span class="n">eyy</span><span class="p">,</span> <span class="n">ezz</span><span class="p">,</span> <span class="n">exy</span><span class="p">,</span> <span class="n">eyz</span><span class="p">,</span> <span class="n">exz</span><span class="p">):</span>
+
+                <span class="c1">#&#39;    ELEMENT      FIBER                        STRESSES/ TOTAL STRAINS                     EQUIVALENT    EFF. STRAIN     EFF. CREEP\n&#39;</span>
+                <span class="c1">#&#39;       ID      DISTANCE           X              Y             Z               XY           STRESS    PLASTIC/NLELAST     STRAIN\n&#39;</span>
+                <span class="c1">#&#39;0       1 GRID   CENTER  1.0000E+04  1.5916E-12  1.3642E-12 -3.5862E-13  8.3400E-14   0.0        1.0000E+04   0.0         0.0&#39;</span>
+                <span class="c1">#&#39;                         1.5626E-03 -4.6877E-04 -4.6877E-04 -1.4569E-19  3.3881E-20   0.0&#39;</span>
+                <span class="c1">#&#39;                      1  1.0000E+04 -1.8190E-12  4.5475E-13 -6.3308E-13  7.4789E-13 -4.6225E-13  1.0000E+04   0.0         0.0&#39;</span>
+                <span class="c1">#&#39;                         1.5626E-03 -4.6877E-04 -4.6877E-04 -2.5719E-19  3.0383E-19 -1.8779E-19&#39;</span>
+                <span class="k">if</span> <span class="n">nid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1">#nid = &#39;  CENTER&#39;</span>
+                    <span class="c1">#assert len(nid) == 8</span>
+                    <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;0</span><span class="si">%8i</span><span class="s1"> GRID   CENTER </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;                        </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="c1"># A</span>
+                            <span class="c1">#oxxi, oyyi, ozzi, txyi, tyzi, txzi, sei, epsi, ecsi,</span>
+                            <span class="c1">#exxi, eyyi, ezzi, exyi, eyzi, exzi</span>
+                            <span class="c1">#    ELEMENT  FIBER  XYZ STRESS     EQUIVALENT  EFF.STRAIN  EFF.CREEP\n&#39;</span>
+                            <span class="n">eid</span><span class="p">,</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">oxxi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">oyyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ozzi</span><span class="p">),</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">txyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">tyzi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">txzi</span><span class="p">),</span>
+
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">sei</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">epsi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ecsi</span><span class="p">),</span>
+
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exxi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">eyyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ezzi</span><span class="p">),</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">eyzi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exzi</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39; </span><span class="si">%8s</span><span class="s1">      </span><span class="si">%8s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;                        </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%-11s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="c1"># A</span>
+                            <span class="c1">#oxxi, oyyi, ozzi, txyi, tyzi, txzi, sei, epsi, ecsi,</span>
+                            <span class="c1">#exxi, eyyi, ezzi, exyi, eyzi, exzi</span>
+                            <span class="c1">#    ELEMENT  FIBER  XYZ STRESS     EQUIVALENT  EFF.STRAIN  EFF.CREEP\n&#39;</span>
+                            <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">oxxi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">oyyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ozzi</span><span class="p">),</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">txyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">tyzi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">txzi</span><span class="p">),</span>
+
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">sei</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">epsi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ecsi</span><span class="p">),</span>
+
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exxi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">eyyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">ezzi</span><span class="p">),</span>
+                            <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exyi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">eyzi</span><span class="p">),</span> <span class="n">write_float_11e</span><span class="p">(</span><span class="n">exzi</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">page_stamp</span> <span class="o">%</span> <span class="n">page_num</span><span class="p">)</span>
+            <span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">page_num</span> <span class="o">-</span> <span class="mi">1</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

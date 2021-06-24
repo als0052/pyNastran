@@ -1,0 +1,1023 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.geom.geom1 &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.geom.geom1</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.geom.geom1</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines readers for BDF objects in the OP2 GEOM1/GEOM1S table</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#pylint: disable=C0301,C0103,W0612,R0914,C0326</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.nodes</span> <span class="kn">import</span> <span class="n">GRID</span><span class="p">,</span> <span class="n">POINT</span><span class="p">,</span> <span class="n">SEQGP</span>
+<span class="c1">#from pyNastran.bdf.cards.parametric.geometry import FEFACE</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.coordinate_systems</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CORD1R</span><span class="p">,</span> <span class="n">CORD1C</span><span class="p">,</span> <span class="n">CORD1S</span><span class="p">,</span>
+    <span class="n">CORD2R</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="n">CORD2S</span><span class="p">,</span>
+    <span class="n">CORD3G</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.elements.damper</span> <span class="kn">import</span> <span class="n">CVISC</span>
+<span class="c1">#from pyNastran.bdf.cards.elements.mass import CMASS2</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom_common</span> <span class="kn">import</span> <span class="n">GeomCommon</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_reader</span> <span class="kn">import</span> <span class="n">mapfmt</span><span class="p">,</span> <span class="n">reshape_bytes_block</span>
+
+
+<div class="viewcode-block" id="GEOM1"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.geom1.html#pyNastran.op2.tables.geom.geom1.GEOM1">[docs]</a><span class="k">class</span> <span class="nc">GEOM1</span><span class="p">(</span><span class="n">GeomCommon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines methods for reading op2 nodes/coords&quot;&quot;&quot;</span>
+
+    <span class="c1">#def _add_node_object(self, node, allow_overwrites=False):</span>
+        <span class="c1">#&quot;&quot;&quot;GRDSET creates duplicate nodes...what about duplicate nodes?&quot;&quot;&quot;</span>
+        <span class="c1">#key = node.nid</span>
+        <span class="c1">#assert key &gt; 0, &#39;nid=%s node=%s&#39; % (key, node)</span>
+        <span class="c1">#if key in self.nodes:</span>
+            <span class="c1">#fields1 = self.nodes[key].raw_fields()</span>
+            <span class="c1">#fields2 = node.raw_fields()</span>
+            <span class="c1">##grid, nid, cp, x1, x2, x3, cd, ps, seid</span>
+            <span class="c1">#for i, (v1, v2) in enumerate(zip(fields1, fields2)):</span>
+                <span class="c1">#if v1 != v2:</span>
+                    <span class="c1">#self.log.info(&#39;i=%s v1=%r v2=%r fields1=%s\nfields2=%s&#39; % (</span>
+                        <span class="c1">#i, v1, v2, fields1, fields2))</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#self._type_to_id_map[node.type].append(key)</span>
+        <span class="c1">#self.nodes[key] = node</span>
+
+    <span class="k">def</span> <span class="nf">_read_geom1_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geom1_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GeomCommon</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geom1_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">1701</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD1C&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord1c</span><span class="p">],</span>    <span class="c1"># record 1</span>
+            <span class="p">(</span><span class="mi">1801</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD1R&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord1r</span><span class="p">],</span>    <span class="c1"># record 2</span>
+            <span class="p">(</span><span class="mi">1901</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD1S&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord1s</span><span class="p">],</span>    <span class="c1"># record 3</span>
+            <span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD2C&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2c</span><span class="p">],</span>    <span class="c1"># record 4</span>
+
+            <span class="c1">#F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_consolid31.op2</span>
+            <span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2220009</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GRIDx?&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+
+            <span class="p">(</span><span class="mi">2101</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD2R&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2r</span><span class="p">],</span>    <span class="c1"># record 5</span>
+            <span class="p">(</span><span class="mi">2201</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD2S&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2s</span><span class="p">],</span>   <span class="c1"># record 6</span>
+            <span class="p">(</span><span class="mi">14301</span><span class="p">,</span><span class="mi">143</span><span class="p">,</span><span class="mi">651</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CORD3G&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord3g</span><span class="p">],</span>  <span class="c1"># record 7</span>
+
+            <span class="p">(</span><span class="mi">4501</span><span class="p">,</span>  <span class="mi">45</span><span class="p">,</span>  <span class="mi">1</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_grid</span><span class="p">],</span>    <span class="c1"># record 17</span>
+            <span class="p">(</span><span class="mi">5301</span><span class="p">,</span>  <span class="mi">53</span><span class="p">,</span>  <span class="mi">4</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEQGP&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_seqgp</span><span class="p">],</span>   <span class="c1"># record 27</span>
+
+            <span class="p">(</span><span class="mi">2301</span><span class="p">,</span>  <span class="mi">23</span><span class="p">,</span> <span class="mi">304</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CSUPER&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 8</span>
+            <span class="p">(</span><span class="mi">5501</span><span class="p">,</span>  <span class="mi">55</span><span class="p">,</span> <span class="mi">297</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CSUPEXT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 9</span>
+            <span class="p">(</span><span class="mi">1627</span><span class="p">,</span>  <span class="mi">16</span><span class="p">,</span> <span class="mi">463</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;EXTRN&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_extrn</span><span class="p">],</span>  <span class="c1"># record 10</span>
+            <span class="p">(</span><span class="mi">6101</span><span class="p">,</span>  <span class="mi">61</span><span class="p">,</span> <span class="mi">388</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;FEEDGE&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_feedge</span><span class="p">],</span>  <span class="c1"># record 11</span>
+            <span class="p">(</span><span class="mi">6601</span><span class="p">,</span>  <span class="mi">66</span><span class="p">,</span> <span class="mi">392</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GMCURVE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_gmcurv</span><span class="p">],</span>  <span class="c1"># record 12</span>
+            <span class="p">(</span><span class="mi">6201</span><span class="p">,</span>  <span class="mi">62</span><span class="p">,</span> <span class="mi">389</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;FEFACE&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_feface</span><span class="p">],</span>  <span class="c1"># record 13</span>
+            <span class="p">(</span><span class="mi">6001</span><span class="p">,</span>  <span class="mi">60</span><span class="p">,</span> <span class="mi">377</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;POINT&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_point</span><span class="p">],</span>  <span class="c1"># record 14</span>
+            <span class="p">(</span><span class="mi">10101</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span> <span class="mi">394</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GMSURF&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_gmsurf</span><span class="p">],</span>  <span class="c1"># record 15</span>
+            <span class="p">(</span><span class="mi">6401</span><span class="p">,</span>  <span class="mi">64</span><span class="p">,</span> <span class="mi">402</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GMCORD&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_gmcord</span><span class="p">],</span>  <span class="c1"># record 16</span>
+            <span class="c1"># 17 - GRID  (above)</span>
+            <span class="p">(</span><span class="mi">1527</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">466</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEBNDRY&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 18</span>
+            <span class="p">(</span><span class="mi">1427</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">465</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEBULK&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_sebulk</span><span class="p">],</span>  <span class="c1"># record 19 - superelements/see103q4.op2</span>
+            <span class="p">(</span><span class="mi">427</span><span class="p">,</span>   <span class="mi">4</span><span class="p">,</span> <span class="mi">453</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SECONCT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 20</span>
+
+            <span class="p">(</span><span class="mi">7902</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">302</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEELT&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 21</span>
+            <span class="p">(</span><span class="mi">527</span><span class="p">,</span>  <span class="mi">72</span><span class="p">,</span> <span class="mi">454</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEEXCLD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 22</span>
+            <span class="p">(</span><span class="mi">1027</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">459</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SELABEL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_selabel</span><span class="p">],</span>  <span class="c1"># record 23 - superelements/see103q4.op2</span>
+            <span class="p">(</span><span class="mi">827</span><span class="p">,</span>   <span class="mi">8</span><span class="p">,</span> <span class="mi">457</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SELOC&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_seloc</span><span class="p">],</span>  <span class="c1"># record 24 - superelements/see103q4.op2</span>
+            <span class="p">(</span><span class="mi">927</span><span class="p">,</span>   <span class="mi">9</span><span class="p">,</span> <span class="mi">458</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEMPLN&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_sempln</span><span class="p">],</span>  <span class="c1"># record 25 - superelements/see103q4.op2</span>
+            <span class="p">(</span><span class="mi">1327</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">464</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SENQSET&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 26</span>
+            <span class="c1"># 27 - SEQGP (above)</span>
+            <span class="p">(</span><span class="mi">5401</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">305</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SEQSEP&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 28</span>
+            <span class="p">(</span><span class="mi">5601</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">296</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SESET&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 29</span>
+            <span class="p">(</span><span class="mi">1227</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">462</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SETREE&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 30</span>
+            <span class="p">(</span><span class="mi">5678</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">475</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SNORM&#39;</span><span class="p">,</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 31</span>
+            <span class="p">(</span><span class="mi">5701</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">323</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CSUPER1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 32</span>
+
+            <span class="p">(</span><span class="mi">5801</span><span class="p">,</span>   <span class="mi">58</span><span class="p">,</span> <span class="mi">324</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SUPUP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 33 - CSUPUP in NX; SUPUP in MSC</span>
+            <span class="p">(</span><span class="mi">14101</span><span class="p">,</span> <span class="mi">141</span><span class="p">,</span> <span class="mi">403</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SWLDPRM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record 34</span>
+
+            <span class="p">(</span><span class="mi">1101</span><span class="p">,</span>   <span class="mi">11</span><span class="p">,</span>  <span class="mi">66</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CMASS2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cmass2</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">3901</span><span class="p">,</span>   <span class="mi">39</span><span class="p">,</span>  <span class="mi">50</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CVISC&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cvisc</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">13301</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span> <span class="mi">509</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">1127</span><span class="p">,</span>   <span class="mi">11</span><span class="p">,</span> <span class="mi">461</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SELOAD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record NX</span>
+            <span class="p">(</span><span class="mi">4501</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">1120001</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GRID/BCT?/BOLT?&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_grid_maybe</span><span class="p">],</span>  <span class="c1"># record ???; test_ibulk</span>
+
+            <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_boltsold01d.op2</span>
+            <span class="p">(</span><span class="mi">2101</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">2220008</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;CORDx?&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+
+            <span class="c1"># nx</span>
+            <span class="c1">#(707, 7, 124) :  [&#39;EPOINT&#39;, self._read_epoint],  # record 12</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord1c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (1701,17,6) - the marker for Record 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 6*4</span>
+        <span class="n">struct_6i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;6i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_6i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">one</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">one</span>
+            <span class="k">assert</span> <span class="n">two</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">two</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CORD1C=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">cid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">]</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">CORD1C</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CORD1C&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord1r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (1801,18,5) - the marker for Record 2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 6*4</span>
+        <span class="n">struct_6i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;6i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_6i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">one1</span><span class="p">,</span> <span class="n">one2</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CORD1R=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">one1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">one1</span>
+            <span class="k">assert</span> <span class="n">one2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">one2</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">cid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">]</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">CORD1R</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CORD1R&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord1s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (1901,19,7) - the marker for Record 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 6*4</span>
+        <span class="n">struct_6i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;6i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_6i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">three</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CORD1S=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">three</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">three</span>
+            <span class="k">assert</span> <span class="n">one</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">one</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">cid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">]</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">CORD1S</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CORD1S&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord2c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (2001,20,9) - the marker for Record 4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;GEOM1N&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_22</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2C&#39;</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_13</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2C&#39;</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">n2</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord2r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (2101,21,8) - the marker for Record 5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;GEOM1N&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_22</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2R&#39;</span><span class="p">,</span> <span class="n">CORD2R</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_13</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2R&#39;</span><span class="p">,</span> <span class="n">CORD2R</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">n2</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord2s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (2201,22,10) - the marker for Record 6</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;GEOM1N&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_22</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2S&#39;</span><span class="p">,</span> <span class="n">CORD2S</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cord2x_13</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;CORD2S&#39;</span><span class="p">,</span> <span class="n">CORD2S</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">n2</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord2x_22</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">coord_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">coord_cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">CORD2R</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="n">CORD2S</span><span class="p">],</span>
+                        <span class="n">flags</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (2201,22,10) - the marker for Record 6</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">88</span> <span class="c1"># 22*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i9d&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">sixty5</span><span class="p">,</span> <span class="n">eight</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">cid</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">sixty5</span><span class="p">,</span> <span class="n">eight</span><span class="p">)</span> <span class="o">==</span> <span class="n">flags</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;(sixty5,eight)=</span><span class="si">{</span><span class="p">(</span><span class="n">sixty5</span><span class="p">,</span> <span class="n">eight</span><span class="p">)</span><span class="si">}</span><span class="s1"> flags=</span><span class="si">{</span><span class="n">flags</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">coord_name</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">coord_cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">coord_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord2x_13</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">coord_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">coord_cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">CORD2R</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="n">CORD2S</span><span class="p">],</span>
+                        <span class="n">flags</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">52</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 13*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i9f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">sixty5</span><span class="p">,</span> <span class="n">eight</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">cid</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">coord_name</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">coord_cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">coord_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_cord3g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (14301,143,651) - the marker for Record 7</span>
+<span class="sd">        .. todo:: isnt this a CORD3G, not a CORD3R ???</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">struct_4i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">16</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">16</span><span class="p">]</span>  <span class="c1"># 4*4</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_4i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(cid, n1, n2, n3) = out</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="n">CORD3G</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CORD3G=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_coord_object</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">16</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CORD3G&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_grid_maybe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;(4501, 45, 1120001) - the marker for Record 17&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1">#nfields = (len(data) - n) // 4</span>
+        <span class="c1"># nfields = 3 * 11 * 17 * 71</span>
+
+        <span class="c1"># it&#39;s not 11, 17...</span>
+        <span class="c1">#self.show_data(data[12:], types=&#39;if&#39;)</span>
+
+        <span class="c1"># 2i: correct</span>
+        <span class="c1">#   id, 0</span>
+        <span class="c1"># i: ???</span>
+        <span class="c1"># i/f: ???</span>
+        <span class="c1"># f: correct</span>
+        <span class="c1"># i: ???</span>
+        <span class="c1"># f: correct</span>
+        <span class="c1"># 5i: ???</span>
+        <span class="c1">#                                    ? ?   ?</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i i f i f 5i&#39;</span><span class="p">)</span> <span class="c1"># 11...decent</span>
+
+        <span class="c1">#structi = Struct(self._endian + b&#39;17i&#39;) # 17...not a chance</span>
+
+        <span class="c1"># i: id</span>
+        <span class="c1"># i/f: ???</span>
+        <span class="c1"># 3f</span>
+        <span class="c1">#structi = Struct(self._endian + b&#39;i i 3f 28i&#39;) # 33...better?...still not right</span>
+
+        <span class="c1">#structi = Struct(self._endian + b&#39;51i&#39;) # 17*3..nope</span>
+        <span class="c1">#structi = Struct(self._endian + b&#39;71i&#39;) # 71...nope</span>
+        <span class="c1">#structi = Struct(self._endian + b&#39;187i&#39;) # 11*17...</span>
+
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">11</span>
+
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">leftover</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">leftover</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ndata=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">-</span><span class="n">n</span><span class="si">}</span><span class="s1"> leftover=</span><span class="si">{</span><span class="n">leftover</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">nfailed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+            <span class="k">continue</span>
+            <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">cp</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  GRID=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="o">&lt;</span> <span class="mi">10000000</span><span class="p">:</span>
+                <span class="c1"># cd can be &lt; 0</span>
+                <span class="k">if</span> <span class="n">ps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ps</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">GRID</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">]),</span> <span class="n">cp</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_type_to_id_map</span><span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="c1">#if nid in self.nodes:</span>
+                    <span class="c1">#self.reject_lines.append(str(node))</span>
+                <span class="c1">#else:</span>
+                <span class="c1">#self.nodes[nid] = node</span>
+                <span class="c1">#self.add_node(node)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#self.log.warning(&#39;*nid=%s cp=%s x1=%-5.2f x2=%-5.2f x3=%-5.2f cd=%-2s ps=%s &#39;</span>
+                                 <span class="c1">#&#39;seid=%s&#39; % (nid, cp, x1, x2, x3, cd, ps, seid))</span>
+                <span class="c1">#node = GRID(nid, np.array([x1, x2, x3]), cp, cd, ps, seid)</span>
+                <span class="c1">#self.rejects.append(str(node))</span>
+                <span class="n">nfailed</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">nentries</span> <span class="o">-</span> <span class="n">nfailed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;(4501,45,1) - the marker for Record 17&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;GEOM1N&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_grid_11</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_grid_8</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n2</span>
+
+    <span class="k">def</span> <span class="nf">_read_grid_8</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># 21.8 sec, 18.9</span>
+        <span class="sd">&quot;&quot;&quot;(4501,45,1) - the marker for Record 17&quot;&quot;&quot;</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ii3f3i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">ndatai</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">nentries</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nentries</span>
+        <span class="n">nfailed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">cp</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  GRID=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#if nid &lt; 10000000:</span>
+            <span class="c1"># cd can be &lt; 0</span>
+            <span class="k">if</span> <span class="n">ps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ps</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">GRID</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">]),</span> <span class="n">cp</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type_to_id_map</span><span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="c1">#if nid in self.nodes:</span>
+                <span class="c1">#self.reject_lines.append(str(node))</span>
+            <span class="c1">#else:</span>
+            <span class="c1">#self.nodes[nid] = node</span>
+            <span class="c1">#self.add_node(node)</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#self.log.warning(&#39;*nid=%s cp=%s x1=%-5.2f x2=%-5.2f x3=%-5.2f cd=%-2s ps=%s &#39;</span>
+                                 <span class="c1">#&#39;seid=%s&#39; % (nid, cp, x1, x2, x3, cd, ps, seid))</span>
+                <span class="c1">#node = GRID(nid, np.array([x1, x2, x3]), cp, cd, ps, seid)</span>
+                <span class="c1">#self.rejects.append(str(node))</span>
+                <span class="c1">#nfailed += 1</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ndatai=</span><span class="si">{</span><span class="n">ndatai</span><span class="si">}</span><span class="s1"> ntotal=</span><span class="si">{</span><span class="n">ntotal</span><span class="si">}</span><span class="s1"> leftover=</span><span class="si">{</span><span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">nentries</span> <span class="o">-</span> <span class="n">nfailed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_grid_11</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># 21.8 sec, 18.9</span>
+        <span class="sd">&quot;&quot;&quot;(4501,45,1) - the marker for Record 17&quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">44</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ii 3d 2ii&#39;</span><span class="p">)</span>
+
+        <span class="n">ndatai</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">nentries</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nentries</span>
+        <span class="n">nfailed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#cp, x1, x2, x3, cd, ps, seid</span>
+            <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">cp</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  GRID=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#print(f&#39;nid={nid}, cp={cp} x1={x1}, x2={x2}, x3={x3}, cd={cd} ps={ps}, seid={seid}&#39;)</span>
+            <span class="k">assert</span> <span class="n">cd</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nid=</span><span class="si">{</span><span class="n">nid</span><span class="si">}</span><span class="s1">, cp=</span><span class="si">{</span><span class="n">cp</span><span class="si">}</span><span class="s1"> x1(</span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">x2</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">x3</span><span class="si">}</span><span class="s1">), cd=</span><span class="si">{</span><span class="n">cd</span><span class="si">}</span><span class="s1"> ps=</span><span class="si">{</span><span class="n">ps</span><span class="si">}</span><span class="s1">, seid=</span><span class="si">{</span><span class="n">seid</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">assert</span> <span class="n">seid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nid=</span><span class="si">{</span><span class="n">nid</span><span class="si">}</span><span class="s1">, cp=</span><span class="si">{</span><span class="n">cp</span><span class="si">}</span><span class="s1"> x1(</span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">x2</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">x3</span><span class="si">}</span><span class="s1">), cd=</span><span class="si">{</span><span class="n">cd</span><span class="si">}</span><span class="s1"> ps=</span><span class="si">{</span><span class="n">ps</span><span class="si">}</span><span class="s1">, seid=</span><span class="si">{</span><span class="n">seid</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="o">&lt;</span> <span class="mi">10000000</span><span class="p">:</span>
+                <span class="c1"># cd can be &lt; 0</span>
+                <span class="k">if</span> <span class="n">ps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ps</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">GRID</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">]),</span> <span class="n">cp</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_type_to_id_map</span><span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="c1">#if nid in self.nodes:</span>
+                    <span class="c1">#self.reject_lines.append(str(node))</span>
+                <span class="c1">#else:</span>
+                <span class="c1">#self.nodes[nid] = node</span>
+                <span class="c1">#self.add_node(node)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#self.log.warning(&#39;*nid=%s cp=%s x1=%-5.2f x2=%-5.2f x3=%-5.2f cd=%-2s ps=%s &#39;</span>
+                                 <span class="c1">#&#39;seid=%s&#39; % (nid, cp, x1, x2, x3, cd, ps, seid))</span>
+                <span class="c1">#node = GRID(nid, np.array([x1, x2, x3]), cp, cd, ps, seid)</span>
+                <span class="c1">#self.rejects.append(str(node))</span>
+                <span class="n">nfailed</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ndatai=</span><span class="si">{</span><span class="n">ndatai</span><span class="si">}</span><span class="s1"> ntotal=</span><span class="si">{</span><span class="n">ntotal</span><span class="si">}</span><span class="s1"> leftover=</span><span class="si">{</span><span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">nentries</span> <span class="o">-</span> <span class="n">nfailed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_seqgp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;(5301,53,4) - the marker for Record 27&quot;&quot;&quot;</span>
+        <span class="n">struct_2i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span>  <span class="c1"># 2*4</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1"># (nid, seid) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SEQGP=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">seqgp</span> <span class="o">=</span> <span class="n">SEQGP</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_seqgp_object</span><span class="p">(</span><span class="n">seqgp</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;SEQGP&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        POINT(6001,60,377)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i3f&#39;</span><span class="p">)</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>  <span class="c1"># 5*4</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1"># (nid, cid, x1, x2, x3) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  POINT=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">POINT</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_point_object</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;POINT&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="c1">#def _read_cmass2(self, data: bytes, n: int) -&gt; int:</span>
+        <span class="c1">#struct_i4fi = Struct(self._endian + b&#39;if4i&#39;)</span>
+        <span class="c1">#nentries = (len(data) - n) // 24</span>
+        <span class="c1">#for unused_i in range(nentries):</span>
+            <span class="c1">#edata = data[n:n + 24]  # 6*4</span>
+            <span class="c1">#out = struct_i4fi.unpack(edata)</span>
+            <span class="c1">## (eid, mass, g1, g2, c1, c2) = out</span>
+            <span class="c1">#if self.is_debug_file:</span>
+                <span class="c1">#self.binary_debug.write(&#39;  CMASS2=%s\n&#39; % str(out))</span>
+            <span class="c1">#self.log.debug(&#39;  CMASS2=%s\n&#39; % str(out))</span>
+            <span class="c1">#element = CMASS2.add_op2_data(out)</span>
+            <span class="c1">#print(element)</span>
+            <span class="c1">#self.add_op2_mass(element)</span>
+            <span class="c1">#n += 24</span>
+        <span class="c1">#print(self.elements)</span>
+        <span class="c1">#self.increase_card_count(&#39;CMASS2&#39;, nentries)</span>
+        <span class="c1">#return n</span>
+        <span class="c1">#return len(data)</span>
+
+    <span class="k">def</span> <span class="nf">_read_cvisc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;CVISC(3901,39,50) - the marker for Record 105&quot;&quot;&quot;</span>
+        <span class="n">struct_4i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i&#39;</span><span class="p">)</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># 4*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_4i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CVISC=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1"># (eid, pid, n1, n2) = out</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">CVISC</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CVISC&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+
+    <span class="k">def</span> <span class="nf">_read_extrn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record - EXTRN(1627,16,463)</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 GID I Grid point identification numbers to connect external SE</span>
+<span class="sd">        2 C   I Component numbers</span>
+<span class="sd">        Words 1 through 2 repeat until (-1,-1) occurs</span>
+
+<span class="sd">        (1, 123456, 2, 123456, 3, 123456, 4, 123456, 100001, 1, 100002, 1, 100003, 1, 100004, 1,</span>
+<span class="sd">        -1, -1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping EXTRN in GEOM1&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_feedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (2901, 29, 9601)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 EDGEID     I Edge identification number</span>
+<span class="sd">        2 GRID1      I Identification number of end GRID 1</span>
+<span class="sd">        3 GRID2      I Identification number of end GRID 2</span>
+<span class="sd">        4 CID        I Coordinate system identification number</span>
+<span class="sd">        5 GEOMIN CHAR4 Type of referencing entry: &quot;GMCURV&quot; or &quot;POINT&quot;</span>
+<span class="sd">        6 GEOMID1    I Identification number of a POINT or GMCURV entry</span>
+<span class="sd">        7 GEOMID2    I Identification number of a POINT or GMCURV entry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># C:\NASA\m4\formats\git\examples\move_tpl\phsflux4.op2</span>
+        <span class="c1">#(200000002, 3, 1002, 6, 12, 0, 0)</span>
+        <span class="c1"># FEEDGE EDGEID GRID1 GRID2 CIDBC GEOMIN ID1 ID2</span>
+        <span class="c1">#FEEDGE    1002    6     12</span>
+        <span class="c1">#self.show_data(data[12:])</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 7*4</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i 4s 2i&#39;</span><span class="p">)</span> <span class="c1">#expected</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4q 8s 2q&#39;</span><span class="p">)</span> <span class="c1">#expected</span>
+        <span class="c1">#s = Struct(self._endian + b&#39;7i&#39;)</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span><span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelements</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#print(out)</span>
+            <span class="n">edge_id</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">geomin</span><span class="p">,</span> <span class="n">geom1</span><span class="p">,</span> <span class="n">geom2</span> <span class="o">=</span> <span class="n">out</span> <span class="c1"># expected</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  FEEDGE=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+
+            <span class="n">geomin</span> <span class="o">=</span> <span class="n">geomin</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">geomin</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;POIN&#39;</span><span class="p">:</span>
+                <span class="n">geomin_str</span> <span class="o">=</span> <span class="s1">&#39;POINT&#39;</span>
+            <span class="k">elif</span> <span class="n">geomin</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;GMCU&#39;</span><span class="p">:</span>
+                <span class="n">geomin_str</span> <span class="o">=</span> <span class="s1">&#39;GMCURV&#39;</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">geomin</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">unused_elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_feedge</span><span class="p">(</span><span class="n">edge_id</span><span class="p">,</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">],</span> <span class="n">cid</span><span class="p">,</span> <span class="p">[</span><span class="n">geom1</span><span class="p">,</span> <span class="n">geom2</span><span class="p">],</span> <span class="n">geomin</span><span class="o">=</span><span class="n">geomin_str</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;FEEDGE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nelements</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_gmcurv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 CURVID       I Curve identification number</span>
+<span class="sd">        2 GROUP(2) CHAR4 Group of curves/surfaces to which this curve belongs</span>
+<span class="sd">        4 CIDIN        I Coordinate system identification number for the geometry</span>
+<span class="sd">        5 CIDBC        I Coordinate system identification number for the constraints</span>
+<span class="sd">        6 DATA     CHAR4 Geometry evaluator specific data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">struct_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_i</span>
+            <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;i 8s ii&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">struct_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_q</span>
+            <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;q 16s qq&#39;</span><span class="p">)</span>
+
+        <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">datab</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal1</span><span class="p">]</span>
+            <span class="n">curve_id</span><span class="p">,</span> <span class="n">group_bytes</span><span class="p">,</span> <span class="n">cid_in</span><span class="p">,</span> <span class="n">cid_bc</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">datab</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="n">group_bytes</span> <span class="o">=</span> <span class="n">reshape_bytes_block</span><span class="p">(</span><span class="n">group_bytes</span><span class="p">)</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">group_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="c1">#print(curve_id, group, cid_in, cid_bc)</span>
+            <span class="k">assert</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MSCGRP0&#39;</span><span class="p">,</span> <span class="s1">&#39;MSCGRP1&#39;</span><span class="p">,</span> <span class="s1">&#39;MSCGRP2&#39;</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;GMCURV: curve_id=</span><span class="si">{</span><span class="n">curve_id</span><span class="si">}</span><span class="s1"> group=</span><span class="si">{</span><span class="n">group</span><span class="si">!r}</span><span class="s1"> cid_in=</span><span class="si">{</span><span class="n">cid_in</span><span class="si">}</span><span class="s1"> cid_bc=</span><span class="si">{</span><span class="n">cid_bc</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal1</span>
+
+            <span class="n">databi_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">size</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">size</span>
+            <span class="n">databi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">size</span><span class="p">]</span>
+            <span class="n">datab_int</span><span class="p">,</span> <span class="o">=</span> <span class="n">struct_i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">databi</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">size</span>
+            <span class="k">while</span> <span class="n">datab_int</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">databi_bytes</span> <span class="o">+=</span> <span class="n">databi</span>
+                <span class="n">databi</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">size</span><span class="p">]</span>
+                <span class="n">datab_int</span><span class="p">,</span> <span class="o">=</span> <span class="n">struct_i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">databi</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">size</span>
+            <span class="n">datai</span> <span class="o">=</span> <span class="n">databi_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+            <span class="n">data_split</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;        </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">datai</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">ntotal2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">datai</span><span class="p">),</span> <span class="n">ntotal2</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_gmcurv</span><span class="p">(</span><span class="n">curve_id</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">data_split</span><span class="p">,</span> <span class="n">cid_in</span><span class="o">=</span><span class="n">cid_in</span><span class="p">,</span> <span class="n">cid_bc</span><span class="o">=</span><span class="n">cid_bc</span><span class="p">)</span>
+            <span class="c1">#print(datai)</span>
+
+        <span class="c1">#ints = np.frombuffer(data[n:], dtype=self.idtype).copy()</span>
+        <span class="c1">#iminus1 = np.where(ints == -1)[0].tolist()</span>
+        <span class="c1">#i0 = 0</span>
+        <span class="c1">#for iminus1i in iminus1:</span>
+            <span class="c1">#curve_id = ints[i0]</span>
+            <span class="c1">#cid_in, cid_bc = ints[i0+3:i0+5]</span>
+            <span class="c1">#s0 = n + 4</span>
+            <span class="c1">#s1 = s0 + 8</span>
+            <span class="c1">#group = data[s0:s1].decode(&#39;latin1&#39;).rstrip()</span>
+            <span class="c1">#print(curve_id, group, cid_in, cid_bc)</span>
+            <span class="c1">#assert group in [&#39;MSCGRP1&#39;, &#39;MSCGRP2&#39;], f&#39;GMCURV: curve_id={curve_id} group={group!r} cid_in={cid_in} cid_bc={cid_bc}&#39;</span>
+
+            <span class="c1">#s2 = s1 + 8</span>
+            <span class="c1">#s3 = 12 + iminus1i * 4</span>
+            <span class="c1">#datai = data[s2:s3].decode(&#39;latin1&#39;).rstrip()</span>
+            <span class="c1">#print(&#39;datai = %r&#39; % datai)</span>
+            <span class="c1">#i0 = iminus1i + 1</span>
+            <span class="c1">## n = s3 + 4</span>
+            <span class="c1">#n = 12+(iminus1i + 1)*4</span>
+            <span class="c1">#print(&#39;-----------------&#39;)</span>
+        <span class="c1">#return len(data)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_feface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 FACEID    I Face identification number</span>
+<span class="sd">        2 GRID1     I Identification number of end GRID 1</span>
+<span class="sd">        3 GRID2     I Identification number of end GRID 2</span>
+<span class="sd">        4 GRID3     I Identification number of end GRID 3</span>
+<span class="sd">        5 GRID4     I Identification number of end GRID 4</span>
+<span class="sd">        6 CIDBC     I Coordinate system identification number for the constraints</span>
+<span class="sd">        7 SURFID(2) I Alternate method used to specify the geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;8i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">32</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">32</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">face_id</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">surf_id1</span><span class="p">,</span> <span class="n">surf_id2</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  FEFACE=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+
+            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+            <span class="n">surf_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">surf_id1</span><span class="p">,</span> <span class="n">surf_id2</span><span class="p">]</span>
+            <span class="n">feface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_feface</span><span class="p">(</span><span class="n">face_id</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">surf_ids</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">32</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;FEFACE&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_gmsurf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping GMSURF in GEOM1&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_gmcord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping GMCORD in GEOM1&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_sebulk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record 18 -- SEBULK(1427,14,465)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SEID    I Superelement identification number</span>
+<span class="sd">        2 TYPE    I Superelement type</span>
+<span class="sd">        3 RSEID   I Reference superelement identification number</span>
+<span class="sd">        4 METHOD  I Boundary point search method: 1=automatic or 2=manual</span>
+<span class="sd">        5 TOL    RS Location tolerance</span>
+<span class="sd">        6 LOC     I Coincident location check option: yes=1 or no=2</span>
+<span class="sd">        7 MEDIA   I Media format of boundary data of external SE</span>
+<span class="sd">        8 UNIT    I FORTRAN unit number of OP2 and OP4 input of external SE</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 4*8</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4if3i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+        <span class="n">superelement_type_int_to_superelement_type</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;PRIMARY&#39;</span><span class="p">,</span>
+            <span class="mi">5</span> <span class="p">:</span> <span class="s1">&#39;EXTOP2&#39;</span><span class="p">,</span>
+            <span class="mi">6</span> <span class="p">:</span> <span class="s1">&#39;MIRROR&#39;</span><span class="p">,</span>
+            <span class="mi">7</span> <span class="p">:</span> <span class="s1">&#39;FRFOP2&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">loc_int_to_loc</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;YES&#39;</span><span class="p">,</span>
+            <span class="mi">2</span> <span class="p">:</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">method_int_to_method</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;AUTO&#39;</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;MANUAL&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>  <span class="c1"># 4*8</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">superelement_type_int</span><span class="p">,</span> <span class="n">rseid</span><span class="p">,</span> <span class="n">method_int</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">loc_int</span><span class="p">,</span> <span class="n">media</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">superelement_type</span> <span class="o">=</span> <span class="n">superelement_type_int_to_superelement_type</span><span class="p">[</span><span class="n">superelement_type_int</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;superelement_type=</span><span class="si">{</span><span class="n">superelement_type_int</span><span class="si">}</span><span class="s1"> not in [PRIMARY, EXTOP2, MIRROR, FRFOP2]&#39;</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="n">loc_int_to_loc</span><span class="p">[</span><span class="n">loc_int</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;loc=</span><span class="si">{</span><span class="n">loc_int</span><span class="si">}</span><span class="s1"> not in [YES, NO]&#39;</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">method_int_to_method</span><span class="p">[</span><span class="n">method_int</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;method=</span><span class="si">{</span><span class="n">method_int</span><span class="si">}</span><span class="s1"> not in [AUTO, MANUAL]&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SEBULK=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#media,</span>
+            <span class="n">sebulk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_sebulk</span><span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">superelement_type</span><span class="p">,</span> <span class="n">rseid</span><span class="p">,</span>
+                                     <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">unitno</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+            <span class="n">sebulk</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">32</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;SEBULK&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_seloc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record 23 -- SELOC(827,8,457)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SEID I Superelement identification number</span>
+<span class="sd">        2 GA1  I Grid point 1 identification number in SEID</span>
+<span class="sd">        3 GA2  I Grid point 2 identification number in SEID</span>
+<span class="sd">        4 GA3  I Grid point 3 identification number in SEID</span>
+<span class="sd">        5 GB1  I Grid point 1 identification number in the main Bulk Data</span>
+<span class="sd">        6 GB2  I Grid point 2 identification number in the main Bulk Data</span>
+<span class="sd">        7 GB3  I Grid point 3 identification number in the main Bulk Data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;7i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">28</span> <span class="c1"># 4*7</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">ga1</span><span class="p">,</span> <span class="n">ga2</span><span class="p">,</span> <span class="n">ga3</span><span class="p">,</span> <span class="n">gb1</span><span class="p">,</span> <span class="n">gb2</span><span class="p">,</span> <span class="n">gb3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SELOC=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_seloc</span><span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="p">[</span><span class="n">ga1</span><span class="p">,</span> <span class="n">ga2</span><span class="p">,</span> <span class="n">ga3</span><span class="p">],</span> <span class="p">[</span><span class="n">gb1</span><span class="p">,</span> <span class="n">gb2</span><span class="p">,</span> <span class="n">gb3</span><span class="p">])</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;SELOC&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_sempln</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record 24 -- SEMPLN(927,9,458)</span>
+
+<span class="sd">        1 SEID     I Superelement identification number</span>
+<span class="sd">        2 MIRRTYPE I Mirror type</span>
+
+<span class="sd">        MIRRTYPE=1 Plane</span>
+<span class="sd">        3 G1       I    Grid point 1 identification number in the main Bulk Data</span>
+<span class="sd">        4 G2       I    Grid point 2 identification number in the main Bulk Data</span>
+<span class="sd">        5 G3       I    Grid point 3 identification number in the main Bulk Data</span>
+<span class="sd">        6 UNDEF(2) none Not Defined</span>
+
+<span class="sd">        MIRRTYPE=2 Normal</span>
+<span class="sd">        3 G    I Grid point identification number in the main Bulk Data</span>
+<span class="sd">        4 CID  I Coordinate system identification number</span>
+<span class="sd">        5 N1  RS Normal component in direction 1 of CID</span>
+<span class="sd">        6 N2  RS Normal component in direction 2 of CID</span>
+<span class="sd">        7 N3  RS Normal component in direction 3 of CID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">struct2i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i&#39;</span><span class="p">)</span> <span class="c1"># 8</span>
+        <span class="n">struct5i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;5i&#39;</span><span class="p">)</span> <span class="c1"># 20</span>
+        <span class="c1">#struct2i_3f = Struct(self._endian + b&#39;2i3f&#39;) # 20</span>
+
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">28</span> <span class="c1"># 4*7</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span>  <span class="c1"># 4*2</span>
+            <span class="n">edata2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">8</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">]</span>  <span class="c1"># 4*7</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata1</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">mirror_type</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="n">mirror_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">unused_junk1</span><span class="p">,</span> <span class="n">unused_junk2</span> <span class="o">=</span> <span class="n">struct5i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_sempln</span><span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">mirror_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SEMPLN=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;SEMPLN&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_selabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record 22 -- SELABEL(1027,10,459)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SEID I Superelement identification number</span>
+<span class="sd">        2 LABEL(14) CHAR4 Label associated with superelement SEID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i14s&#39;</span><span class="p">)</span> <span class="c1"># 18</span>
+        <span class="n">structi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i56s&#39;</span><span class="p">)</span> <span class="c1"># 60</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">60</span> <span class="c1"># 4+18</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">60</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">structi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SELABEL=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">selabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_selabel</span><span class="p">(</span><span class="n">seid</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+            <span class="n">selabel</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">60</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;SELABEL&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

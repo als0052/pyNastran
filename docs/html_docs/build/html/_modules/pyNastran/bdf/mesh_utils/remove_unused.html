@@ -1,0 +1,1133 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.remove_unused &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.remove_unused</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.remove_unused</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines some methods for cleaning up a model</span>
+<span class="sd"> - model = remove_unused(bdf_filename, remove_nids=True, remove_cids=True,</span>
+<span class="sd">                         remove_pids=True, remove_mids=True)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">read_bdf</span>
+<span class="c1">#from pyNastran.bdf.mesh_utils.bdf_renumber import bdf_renumber</span>
+
+<div class="viewcode-block" id="remove_unused"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused.remove_unused">[docs]</a><span class="k">def</span> <span class="nf">remove_unused</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">remove_nids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_cids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">remove_pids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_mids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_spcs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_mpcs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an uncross-referenced bdf and removes unused data</span>
+
+<span class="sd">    removes unused:</span>
+<span class="sd">     - nodes</span>
+<span class="sd">     - properties</span>
+<span class="sd">     - materials</span>
+<span class="sd">     - coords</span>
+<span class="sd">     - spcs</span>
+<span class="sd">     - mpcs</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">bdf_filename</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1">#nids = model.nodes.keys()</span>
+    <span class="c1">#cids =</span>
+    <span class="c1">#nids = set(list(model.nodes.keys()))</span>
+    <span class="c1">#cids = set(list(model.coords.keys()))</span>
+    <span class="c1">#pids = set(list(model.properties.keys()))</span>
+
+    <span class="n">nids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">cids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">eids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">pids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">pids_mass_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">mids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">mids_thermal_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">sets_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">desvars_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">mpcs_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">spcs_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c1">#nsms_used = set()</span>
+
+    <span class="c1">#card_types = list(model.card_count.keys())</span>
+    <span class="c1">#card_map = model.get_card_ids_by_card_types(</span>
+        <span class="c1">#card_types=card_types,</span>
+        <span class="c1">#reset_type_to_slot_map=False,</span>
+        <span class="c1">#stop_on_missing_card=True)</span>
+
+    <span class="c1">#for nid, node in model.nodes.items():</span>
+        <span class="c1">#cids_used.update([node.Cp(), node.Cd()])</span>
+
+    <span class="c1"># ureferenced types aren&#39;t referenced by anything</span>
+    <span class="n">unreferenced_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;ENDDATA&#39;</span><span class="p">,</span> <span class="s1">&#39;PARAM&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGR&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGRL&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGB&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGP&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGC&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SPOINT&#39;</span><span class="p">,</span> <span class="s1">&#39;EPOINT&#39;</span><span class="p">,</span> <span class="s1">&#39;DESVAR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SET1&#39;</span><span class="p">,</span> <span class="s1">&#39;FREQ&#39;</span><span class="p">,</span> <span class="s1">&#39;FREQ1&#39;</span><span class="p">,</span> <span class="s1">&#39;FREQ2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEP&#39;</span><span class="p">,</span> <span class="s1">&#39;TSTEPNL&#39;</span><span class="p">,</span> <span class="s1">&#39;NLPCI&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NLPARM&#39;</span><span class="p">,</span> <span class="s1">&#39;ROTORG&#39;</span><span class="p">,</span> <span class="s1">&#39;ROTORD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DAREA&#39;</span><span class="p">,</span> <span class="s1">&#39;DEQATN&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DMIG&#39;</span><span class="p">,</span> <span class="s1">&#39;DMI&#39;</span><span class="p">,</span> <span class="s1">&#39;DMIJ&#39;</span><span class="p">,</span> <span class="s1">&#39;DMIK&#39;</span><span class="p">,</span> <span class="s1">&#39;DMIJI&#39;</span><span class="p">,</span> <span class="s1">&#39;DMIAX&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;POINT&#39;</span><span class="p">,</span> <span class="s1">&#39;EPOINT&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DELAY&#39;</span><span class="p">,</span> <span class="s1">&#39;DPHASE&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CBARAO&#39;</span><span class="p">,</span> <span class="s1">&#39;AEPARM&#39;</span><span class="p">,</span>
+
+        <span class="c1"># properties</span>
+        <span class="s1">&#39;PELAS&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSH&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PELAST&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMPT&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSHT&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PGAP&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;PFAST&#39;</span><span class="p">,</span> <span class="s1">&#39;PVISC&#39;</span><span class="p">,</span> <span class="s1">&#39;PMASS&#39;</span><span class="p">,</span>
+
+        <span class="s1">&#39;FLFACT&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUTTER&#39;</span><span class="p">,</span> <span class="s1">&#39;DLINK&#39;</span><span class="p">,</span> <span class="s1">&#39;DDVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DIVERG&#39;</span><span class="p">,</span> <span class="s1">&#39;GUST&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;AELINK&#39;</span><span class="p">,</span> <span class="s1">&#39;AELIST&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM2&#39;</span><span class="p">,</span> <span class="s1">&#39;PAERO1&#39;</span><span class="p">,</span> <span class="s1">&#39;AEFACT&#39;</span><span class="p">,</span> <span class="s1">&#39;AESTAT&#39;</span><span class="p">,</span>
+
+        <span class="c1"># contact</span>
+        <span class="s1">&#39;BCTPARA&#39;</span><span class="p">,</span> <span class="s1">&#39;BCRPARA&#39;</span><span class="p">,</span> <span class="s1">&#39;BSURF&#39;</span><span class="p">,</span> <span class="s1">&#39;BSURFS&#39;</span><span class="p">,</span> <span class="s1">&#39;BCTADD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BCTSET&#39;</span><span class="p">,</span> <span class="s1">&#39;BFRIC&#39;</span><span class="p">,</span>
+
+        <span class="s1">&#39;TABRNDG&#39;</span><span class="p">,</span> <span class="s1">&#39;DTI&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLEH1&#39;</span><span class="p">,</span>
+
+    <span class="p">}</span>
+
+    <span class="c1"># this are things that haven&#39;t been referenced yet</span>
+    <span class="n">not_implemented_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># not checked------------------------------------------</span>
+        <span class="s1">&#39;PHBDY&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYG&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYP&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYE&#39;</span><span class="p">,</span> <span class="s1">&#39;RADBC&#39;</span><span class="p">,</span> <span class="c1"># &#39;CONV&#39;,</span>
+        <span class="s1">&#39;QVOL&#39;</span><span class="p">,</span> <span class="s1">&#39;PCONVM&#39;</span><span class="p">,</span> <span class="c1"># &#39;PCONV&#39;,</span>
+        <span class="c1">#&#39;PBCOMP&#39;, &#39;PDAMP5&#39;, &#39;CFAST&#39;,</span>
+        <span class="s1">&#39;AECOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO3&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO4&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PAERO2&#39;</span><span class="p">,</span> <span class="s1">&#39;PAERO3&#39;</span><span class="p">,</span> <span class="s1">&#39;PAERO4&#39;</span><span class="p">,</span> <span class="s1">&#39;PAERO5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DCONADD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GMCORD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MONPNT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MONPNT2&#39;</span><span class="p">,</span> <span class="s1">&#39;MONPNT3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DSCREEN&#39;</span><span class="p">,</span> <span class="s1">&#39;DTI&#39;</span><span class="p">,</span> <span class="s1">&#39;NSMADD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;AESURFS&#39;</span><span class="p">,</span> <span class="s1">&#39;CSSCHD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CGEN&#39;</span><span class="p">,</span> <span class="s1">&#39;NXSTRAT&#39;</span><span class="p">,</span>
+
+        <span class="c1"># axisymmetric</span>
+        <span class="s1">&#39;FORCEAX&#39;</span><span class="p">,</span>
+
+        <span class="c1"># acoustic</span>
+        <span class="s1">&#39;PACABS&#39;</span><span class="p">,</span>
+
+        <span class="c1"># superelements</span>
+        <span class="s1">&#39;SELOC&#39;</span><span class="p">,</span>
+
+        <span class="c1"># parametric</span>
+        <span class="s1">&#39;FEEDGE&#39;</span><span class="p">,</span> <span class="s1">&#39;FEFACE&#39;</span>
+    <span class="p">}</span>
+    <span class="n">set_types_simple</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;SET1&#39;</span><span class="p">,</span> <span class="s1">&#39;SET3&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">set_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;ASET&#39;</span><span class="p">,</span> <span class="s1">&#39;ASET1&#39;</span><span class="p">,</span> <span class="s1">&#39;BSET&#39;</span><span class="p">,</span> <span class="s1">&#39;BSET1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSET&#39;</span><span class="p">,</span> <span class="s1">&#39;CSET1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;QSET&#39;</span><span class="p">,</span> <span class="s1">&#39;QSET1&#39;</span><span class="p">,</span> <span class="s1">&#39;USET&#39;</span><span class="p">,</span> <span class="s1">&#39;USET1&#39;</span><span class="p">,</span> <span class="s1">&#39;OMIT&#39;</span><span class="p">,</span> <span class="s1">&#39;OMIT1&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1">#seset_types = {</span>
+        <span class="c1">#&#39;SESET&#39;,</span>
+    <span class="c1">#}</span>
+    <span class="n">load_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;GRAV&#39;</span><span class="p">,</span> <span class="s1">&#39;RANDPS&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE1&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MOMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOAD1&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOAD2&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GMLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;RFORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;RFORCE1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TEMP&#39;</span><span class="p">,</span> <span class="s1">&#39;QBDY1&#39;</span><span class="p">,</span> <span class="s1">&#39;QBDY2&#39;</span><span class="p">,</span> <span class="s1">&#39;QBDY3&#39;</span><span class="p">,</span> <span class="s1">&#39;QHBDY&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ACCEL&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOADX1&#39;</span><span class="p">,</span> <span class="s1">&#39;SLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEL1&#39;</span><span class="p">,</span> <span class="s1">&#39;LOADCYN&#39;</span><span class="p">,</span> <span class="s1">&#39;LOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOAD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LSEQ&#39;</span><span class="p">,</span> <span class="s1">&#39;DLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;QVECT&#39;</span><span class="p">,</span> <span class="s1">&#39;RADM&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPAX&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFORM&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">masses</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CONM1&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS4&#39;</span><span class="p">}</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CGAP&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH2D&#39;</span><span class="p">,</span> <span class="s1">&#39;CFAST&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CVISC&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GENEL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRIAX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD&#39;</span><span class="p">,</span>
+
+        <span class="s1">&#39;CPLSTN3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN4&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN6&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CPLSTS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS6&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CQUADX4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX8&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRAX3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRAX6&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC2D&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC3D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CCONEAX&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEND&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM3&#39;</span><span class="p">,</span>
+
+        <span class="c1"># acoustic</span>
+        <span class="s1">&#39;CHACAB&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">tableht_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="n">tableh1_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="n">pconv_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+
+    <span class="n">friction_ids_used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+
+    <span class="c1"># could remove some if we look at the rid_trace</span>
+    <span class="c1">#for cid, coord in model.coords.items():</span>
+        <span class="c1">#if coord.type in [&#39;CORD1R&#39;, &#39;CORD1C&#39;, &#39;CORD1S&#39;]:</span>
+            <span class="c1">#nids_used.update(node_ids)</span>
+        <span class="c1">#elif coord.type in [&#39;CORD1R&#39;, &#39;CORD1C&#39;, &#39;CORD1S&#39;]:</span>
+            <span class="c1">#cids_used.update(coord.Rid())</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#raise NotImplementedError(coord)</span>
+
+    <span class="k">for</span> <span class="n">card_type</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">_type_to_id_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1">#for card_type, ids in card_map.items():</span>
+        <span class="k">if</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CORD1R&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD1C&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD1S&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">coord</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CORD2R&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD2C&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD2S&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">coord</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">Rid</span><span class="p">())</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MAT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT2&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT3&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT4&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT5&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;MAT8&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT9&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT10&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT11&#39;</span><span class="p">]:</span>
+            <span class="c1"># todo: MATS1, MATT1, etc.</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MATS1&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT2&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT3&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT4&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT5&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;MATT8&#39;</span><span class="p">,</span> <span class="s1">&#39;MATT9&#39;</span><span class="p">,</span> <span class="s1">&#39;MATHE&#39;</span><span class="p">,</span> <span class="s1">&#39;MATHP&#39;</span><span class="p">,</span> <span class="s1">&#39;CREEP&#39;</span><span class="p">]:</span>
+            <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">masses</span><span class="p">:</span>
+            <span class="n">_store_masses</span><span class="p">(</span><span class="n">card_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_mass_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+            <span class="n">_store_elements</span><span class="p">(</span><span class="n">card_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">,</span> <span class="n">mids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PLPLANE&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PPLANE&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PLOTEL&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PSOLID&#39;</span><span class="p">,</span> <span class="s1">&#39;PLSOLID&#39;</span><span class="p">,</span> <span class="s1">&#39;PIHEX&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PDAMP5&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids_thermal_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PBARL&#39;</span><span class="p">,</span> <span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAM3&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;PSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PRAC2D&#39;</span><span class="p">,</span> <span class="s1">&#39;PRAC3D&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEND&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PSHELL&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids</span> <span class="o">=</span> <span class="p">[</span><span class="n">mid</span> <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="n">prop</span><span class="o">.</span><span class="n">material_ids</span> <span class="k">if</span> <span class="n">mid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMPG&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">material_ids</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBCOMP&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mids</span><span class="p">()</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PCOMPS&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mids</span><span class="p">()</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">cordm</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PCONEAX&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="c1"># MID1 T1 MID2 I MID3 T2 NSM</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="c1">#print(prop.object_methods())</span>
+                <span class="n">mids</span> <span class="o">=</span> <span class="p">[</span><span class="n">mid</span> <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mids</span><span class="p">()</span> <span class="k">if</span> <span class="n">mid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">mids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;RBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;RBAR1&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE1&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">,</span> <span class="s1">&#39;RROD&#39;</span><span class="p">,</span> <span class="s1">&#39;RSPLINE&#39;</span><span class="p">,</span> <span class="s1">&#39;RSSCON&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="c1">#print(elem.object_attributes())</span>
+                <span class="c1">#print(elem.object_methods())</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">independent_nodes</span><span class="p">)</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">dependent_nodes</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TLOAD1&#39;</span><span class="p">,</span> <span class="s1">&#39;TLOAD2&#39;</span><span class="p">,</span> <span class="s1">&#39;RLOAD1&#39;</span><span class="p">,</span> <span class="s1">&#39;RLOAD2&#39;</span><span class="p">,</span> <span class="s1">&#39;ACSRCE&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">load_types</span><span class="p">:</span>
+            <span class="n">_store_loads</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">card_type</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">eids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;TEMPD&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+            <span class="c1">#for temp_id in ids:</span>
+                <span class="c1">#tempd = self.tempds[temp_id]</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;MPCADD&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mpcadds</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcadds</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">mpcadd</span> <span class="ow">in</span> <span class="n">mpcadds</span><span class="p">:</span>
+                    <span class="n">mpcs_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mpcadd</span><span class="o">.</span><span class="n">mpc_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;MPC&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mpcs</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">mpc</span> <span class="ow">in</span> <span class="n">mpcs</span><span class="p">:</span>
+                    <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mpc</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;SPCADD&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">spcadds</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">spcadds</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">spcadd</span> <span class="ow">in</span> <span class="n">spcadds</span><span class="p">:</span>
+                    <span class="n">spcs_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spcadd</span><span class="o">.</span><span class="n">spc_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SPC1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPC&#39;</span><span class="p">,</span> <span class="s1">&#39;GMSPC&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCAX&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">spcs</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">spc</span> <span class="ow">in</span> <span class="n">spcs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">spc</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;GMSPC&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCAX&#39;</span><span class="p">]:</span>
+                        <span class="k">pass</span>
+                    <span class="k">elif</span> <span class="n">spc</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SPC1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPC&#39;</span><span class="p">]:</span>
+                        <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spc</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">spc</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TABLED1&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLED2&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLED3&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLED4&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;TABLEM1&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLEM2&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLEM3&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLEM4&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;TABDMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;TABRND1&#39;</span><span class="p">,</span> <span class="s1">&#39;TABLES1&#39;</span><span class="p">,]:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;SUPORT&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">suport</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">suport</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">suport</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;SUPORT1&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">suport1</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">suport1</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">suport1</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;TIC&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tic</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tic</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;GRID&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">unused_nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">node</span><span class="o">.</span><span class="n">Cp</span><span class="p">(),</span> <span class="n">node</span><span class="o">.</span><span class="n">Cd</span><span class="p">()])</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBUSH&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+            <span class="c1">#for pid in ids:</span>
+                <span class="c1">#prop = model.properties[pid]</span>
+                <span class="c1">#raise RuntimeError(prop)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PBUSHT&#39;</span><span class="p">:</span>
+            <span class="c1"># tables</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;AESURF&#39;</span><span class="p">:</span>
+            <span class="c1">#CID1  | ALID1 | CID2   | ALID2</span>
+            <span class="k">for</span> <span class="n">aesurf</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">aesurf</span><span class="o">.</span><span class="n">Cid1</span><span class="p">())</span>
+                <span class="n">cid2</span> <span class="o">=</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">Cid2</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">cid2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cid2</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SPLINE1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE2&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE3&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE4&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE5&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+            <span class="c1">#for spline_id in ids:</span>
+                <span class="c1">#spline = model.splines[spline_id]</span>
+                <span class="c1">#if card_type in [&#39;SPLINE1&#39;, &#39;SPLINE2&#39;, &#39;SPLINE4&#39;, &#39;SPLINE5&#39;]:</span>
+                    <span class="c1">#sets_used.add(spline.Set())</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CAERO1&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">caero</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="c1"># PID, LSPAN, LCHORD</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">caero</span><span class="o">.</span><span class="n">Cp</span><span class="p">())</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">unreferenced_types</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">set_types_simple</span><span class="p">:</span>
+            <span class="c1"># handled based on context in other blocks</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;USET&#39;</span><span class="p">,</span> <span class="s1">&#39;USET1&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">set_cards</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">usets</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">set_card</span> <span class="ow">in</span> <span class="n">set_cards</span><span class="p">:</span>
+                    <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">set_card</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">set_types</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">card_type</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span>
+            <span class="n">sets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="c1"># list of SETs</span>
+            <span class="k">for</span> <span class="n">set_card</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">set_card</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;SESET&#39;</span><span class="p">:</span>
+            <span class="n">sets</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">se_sets</span> <span class="c1"># list of SETs</span>
+            <span class="k">for</span> <span class="n">unused_id</span><span class="p">,</span> <span class="n">set_card</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sets</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">set_card</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DCONSTR&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;DRESP1&#39;</span><span class="p">:</span>
+            <span class="n">_store_dresp1</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;DRESP2&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+            <span class="c1">#for dresp_id in ids:</span>
+                <span class="c1">#dresp = model.dresps[dresp_id]</span>
+                <span class="c1">#dresp.deqatn</span>
+                <span class="c1">#if dresp.property_type in [&#39;PSHELL&#39;, &#39;PCOMP&#39;, &#39;PBAR&#39;, &#39;PBARL&#39;, &#39;PBEAM&#39;, &#39;PROD&#39;]:</span>
+                    <span class="c1">#pids_used.update(dresp.atti_values())</span>
+                <span class="c1">#elif dresp.property_type is None:</span>
+                    <span class="c1">#if dresp.response_type in [&#39;WEIGHT&#39;, &#39;EIGN&#39;, &#39;VOLUME&#39;]:</span>
+                        <span class="c1">#pass</span>
+                    <span class="c1">#elif dresp.response_type in [&#39;DISP&#39;]:</span>
+                        <span class="c1">#nids_used.update(dresp.atti)</span>
+                    <span class="c1">#else:</span>
+                        <span class="c1">#msg = str(dresp) + &#39;response_type=%r&#39; % dresp.response_type</span>
+                        <span class="c1">#raise NotImplementedError(msg)</span>
+                <span class="c1">#else:</span>
+                <span class="c1">#raise NotImplementedError(dresp)</span>
+                <span class="c1">#msg = str(dresp) + &#39;response_type=%r&#39; % dresp.response_type</span>
+                <span class="c1">#raise NotImplementedError(msg)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;DRESP3&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DVPREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVPREL2&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">dvprel_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">dvprel</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dvprels</span><span class="p">[</span><span class="n">dvprel_id</span><span class="p">]</span>
+                <span class="n">desvars_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dvprel</span><span class="o">.</span><span class="n">desvar_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dvprel</span><span class="o">.</span><span class="n">prop_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PSHELL&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PBARL&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span>
+                                        <span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="s1">&#39;PELAS&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span>
+                                        <span class="s1">&#39;PSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PMASS&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMPG&#39;</span><span class="p">,</span>
+                                        <span class="s1">&#39;PVISC&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSHT&#39;</span><span class="p">,</span> <span class="s1">&#39;PELAST&#39;</span><span class="p">,</span> <span class="s1">&#39;PBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;PGAP&#39;</span><span class="p">]:</span>
+                    <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvprel</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="n">dvprel</span><span class="o">.</span><span class="n">prop_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DISP&#39;</span><span class="p">]:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dvprel</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;dvprel.prop_type=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dvprel</span><span class="o">.</span><span class="n">prop_type</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">dvprel</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DVCREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVCREL2&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">dvcrel_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">dvcrel</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dvcrels</span><span class="p">[</span><span class="n">dvcrel_id</span><span class="p">]</span>
+                <span class="n">desvars_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dvcrel</span><span class="o">.</span><span class="n">desvar_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dvcrel</span><span class="o">.</span><span class="n">element_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CMASS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM1&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">,</span>
+                                           <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span>
+                                           <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAP&#39;</span><span class="p">,</span> <span class="s1">&#39;CBAR&#39;</span><span class="p">]:</span>
+                    <span class="c1">#eids_used.add(dvcrel.Eid())  # we don&#39;t remove elements...for now</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dvcrel</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;element_type=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dvcrel</span><span class="o">.</span><span class="n">element_type</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DVMREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVMREL2&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">dvmrel_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">dvmrel</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dvmrels</span><span class="p">[</span><span class="n">dvmrel_id</span><span class="p">]</span>
+                <span class="n">desvars_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dvmrel</span><span class="o">.</span><span class="n">desvar_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dvmrel</span><span class="o">.</span><span class="n">mat_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;MAT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT2&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT8&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT9&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT10&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT11&#39;</span><span class="p">]:</span>
+                    <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvmrel</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dvmrel</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;mat_type=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dvmrel</span><span class="o">.</span><span class="n">mat_type</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;DVGRID&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dvgrid_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">dvgrids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dvgrids</span><span class="p">[</span><span class="n">dvgrid_id</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">dvgrid</span> <span class="ow">in</span> <span class="n">dvgrids</span><span class="p">:</span>
+                    <span class="n">desvars_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvgrid</span><span class="o">.</span><span class="n">desvar_id</span><span class="p">)</span>
+                    <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvgrid</span><span class="o">.</span><span class="n">nid</span><span class="p">)</span>
+                    <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dvgrid</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;TF&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tf_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">tfs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transfer_functions</span><span class="p">[</span><span class="n">tf_id</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">transfer_function</span> <span class="ow">in</span> <span class="n">tfs</span><span class="p">:</span>
+                    <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">transfer_function</span><span class="o">.</span><span class="n">nids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NSM&#39;</span><span class="p">,</span> <span class="s1">&#39;NSM1&#39;</span><span class="p">,</span> <span class="s1">&#39;NSML&#39;</span><span class="p">,</span> <span class="s1">&#39;NSML1&#39;</span><span class="p">]:</span>
+            <span class="n">_store_nsm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;POINTAX&#39;</span><span class="p">,</span> <span class="s1">&#39;AXIC&#39;</span><span class="p">,</span> <span class="s1">&#39;RINGAX&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+            <span class="c1">#for eid in ids:</span>
+                <span class="c1">#elem = model.plotels[eid]</span>
+                <span class="c1">#nids_used.update(elem.node_ids)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PBRSECT&#39;</span><span class="p">,</span> <span class="s1">&#39;PBMSECT&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">outp</span><span class="p">:</span>
+                    <span class="n">sets_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">outp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">brps</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">unused_key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">prop</span><span class="o">.</span><span class="n">brps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">sets_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="c1">#if prop.cores:</span>
+                    <span class="c1">#for key, value in prop.cores.items():</span>
+                        <span class="c1">#pids_used.add(value)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CYJOIN&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">cyjoin</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cyjoin</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cyjoin</span><span class="o">.</span><span class="n">nids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;TABLEHT&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="n">tableh1_ids</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">tableh1_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tableh1_ids</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">tableh1_ids</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;PCONV&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">pconv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">convection_properties</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">pconv</span><span class="o">.</span><span class="n">tid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">tableht_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pconv</span><span class="o">.</span><span class="n">tid</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CONV&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">bcs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">bcs</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">conv</span> <span class="ow">in</span> <span class="n">bcs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">conv</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s1">&#39;CONV&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">pconv_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">pconid</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;BLSEG&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">blseg</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">blseg</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="c1"># line_id</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">blseg</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+                <span class="c1">#print(blseg.get_stats())</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;BCONP&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idi</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                <span class="n">bconp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">bconp</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span>
+                <span class="c1"># master</span>
+                <span class="c1"># slave</span>
+                <span class="c1"># ???</span>
+                <span class="c1">#print(bconp.get_stats())</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bconp</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">friction_ids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bconp</span><span class="o">.</span><span class="n">friction_id</span><span class="p">)</span>
+        <span class="c1">#elif card_type == &#39;FORCEAX&#39;:</span>
+            <span class="c1">#pass</span>
+            <span class="c1">#ring_id</span>
+            <span class="c1">#sid</span>
+        <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="n">not_implemented_types</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;skipping </span><span class="si">{</span><span class="n">card_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">card_type</span><span class="p">)</span>
+
+
+    <span class="c1">#for pid, prop in model.properties.items():</span>
+        <span class="c1">#prop = model.properties[pid]</span>
+        <span class="c1">#if prop.type in no_materials:</span>
+            <span class="c1">#continue</span>
+        <span class="c1">#elif prop.type == &#39;PSHELL&#39;:</span>
+            <span class="c1">#mids_used.extend([mid for mid in prop.material_ids if mid is not None])</span>
+        <span class="c1">#elif prop.type == &#39;PCONEAX&#39;:</span>
+            <span class="c1">#mids_used.extend([mid for mid in model.Mids() if mid is not None])</span>
+
+        <span class="c1">#elif prop.type in prop_mid:</span>
+            <span class="c1">#mids_used.append(prop.Mid())</span>
+        <span class="c1">#elif prop.type in [&#39;PCOMP&#39;, &#39;PCOMPG&#39;, &#39;PCOMPS&#39;]:</span>
+            <span class="c1">#mids_used.extend(prop.Mids())</span>
+
+        <span class="c1">#elif prop.type == &#39;PBCOMP&#39;:</span>
+            <span class="c1">#mids_used.append(prop.Mid())</span>
+            <span class="c1">#mids_used.extend(prop.Mids())</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#raise NotImplementedError(prop)</span>
+    <span class="n">remove_desvars</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">_remove</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">nids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">,</span>
+        <span class="n">pids_used</span><span class="p">,</span> <span class="n">pids_mass_used</span><span class="p">,</span>
+        <span class="n">mids_used</span><span class="p">,</span>
+        <span class="n">spcs_used</span><span class="p">,</span> <span class="n">mpcs_used</span><span class="p">,</span>
+        <span class="n">pconv_used</span><span class="p">,</span> <span class="n">tableht_used</span><span class="p">,</span> <span class="n">tableh1_used</span><span class="p">,</span>
+        <span class="n">desvars_used</span><span class="p">,</span>
+        <span class="n">remove_nids</span><span class="o">=</span><span class="n">remove_nids</span><span class="p">,</span>
+        <span class="n">remove_cids</span><span class="o">=</span><span class="n">remove_cids</span><span class="p">,</span>
+        <span class="n">remove_pids</span><span class="o">=</span><span class="n">remove_pids</span><span class="p">,</span>
+        <span class="n">remove_mids</span><span class="o">=</span><span class="n">remove_mids</span><span class="p">,</span>
+        <span class="n">remove_spcs</span><span class="o">=</span><span class="n">remove_spcs</span><span class="p">,</span> <span class="n">remove_mpcs</span><span class="o">=</span><span class="n">remove_mpcs</span><span class="p">,</span>
+        <span class="n">unused_remove_desvars</span><span class="o">=</span><span class="n">remove_desvars</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_store_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._store_elements">[docs]</a><span class="k">def</span> <span class="nf">_store_elements</span><span class="p">(</span><span class="n">card_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">,</span> <span class="n">mids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHACAB&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CVISC&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP5&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span> <span class="s1">&#39;GENEL&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADR&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CTRIAX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">mids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CPLSTN3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN4&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN6&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN8&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CPLSTS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS6&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTS8&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CQUADX4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX8&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CTRAX3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRAX6&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC2D&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC3D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CONROD&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Mid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CCONEAX&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEND&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CBEAM3&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Ga</span><span class="p">())</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Gb</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">gc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">gc</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span>
+
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CFAST&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CGAP&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">G0</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="o">==</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">G0</span><span class="p">())</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">cid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH2D&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">card_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_store_nsm"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._store_nsm">[docs]</a><span class="k">def</span> <span class="nf">_store_nsm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``remove_unused``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">nsm_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="n">nsms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nsms</span><span class="p">[</span><span class="n">nsm_id</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">nsm</span> <span class="ow">in</span> <span class="n">nsms</span><span class="p">:</span>
+            <span class="n">idsi</span> <span class="o">=</span> <span class="n">nsm</span><span class="o">.</span><span class="n">ids</span>
+
+            <span class="k">if</span> <span class="n">nsm</span><span class="o">.</span><span class="n">nsm_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="s1">&#39;PBARL&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;PSHELL&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idsi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">idsi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ALL&#39;</span><span class="p">:</span>
+                    <span class="n">idsi</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                    <span class="c1">#raise NotImplementedError(&#39;found ALL...\n%s&#39; % str(nsm))</span>
+                <span class="n">pids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">idsi</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">nsm</span><span class="o">.</span><span class="n">nsm_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;ELEMENT&#39;</span><span class="p">]:</span>
+                <span class="c1"># we skip this because we assume all elements are used</span>
+                <span class="c1">#if len(idsi) == 1 and idsi[0] == &#39;ALL&#39;:</span>
+                    <span class="c1">#raise NotImplementedError(&#39;found ALL...\n%s&#39; % str(nsm))</span>
+                <span class="c1">#eids_used.update(idsi)</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;found nsm_type=</span><span class="si">%r</span><span class="s1">...</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nsm</span><span class="o">.</span><span class="n">nsm_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nsm</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_store_loads"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._store_loads">[docs]</a><span class="k">def</span> <span class="nf">_store_loads</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">unused_card_type</span><span class="p">,</span> <span class="n">unused_ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">eids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``remove_unused``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">loads</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">load</span> <span class="ow">in</span> <span class="n">loads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_id</span><span class="p">)</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FORCE1&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE2&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT2&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;GRAV&#39;</span><span class="p">:</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RANDPS&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD&#39;</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD1&#39;</span><span class="p">:</span>
+                <span class="c1">#eid = integer(card, 2, &#39;eid&#39;)</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD2&#39;</span><span class="p">:</span>
+                <span class="c1">#eids_used.update(load.element_ids)</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD4&#39;</span><span class="p">:</span>
+                <span class="c1"># eids, g1, g34</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;DEFORM&#39;</span><span class="p">:</span>
+                <span class="n">eids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Eid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;SPCD&#39;</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;GMLOAD&#39;</span><span class="p">:</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;RFORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;RFORCE1&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_id</span><span class="p">)</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;TEMP&#39;</span><span class="p">:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">temperatures</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;ACCEL&#39;</span><span class="p">:</span>
+                <span class="c1"># nids?</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;ACCEL1&#39;</span><span class="p">:</span>
+                <span class="c1"># nids?</span>
+                <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;QBDY1&#39;</span><span class="p">,</span> <span class="s1">&#39;QBDY2&#39;</span><span class="p">,</span> <span class="s1">&#39;QBDY3&#39;</span><span class="p">,</span> <span class="s1">&#39;QHBDY&#39;</span><span class="p">]:</span>
+                <span class="k">pass</span>
+            <span class="c1">#&#39;QBDY1&#39;, &#39;QBDY2&#39;, &#39;QBDY3&#39;, &#39;QHBDY&#39;, &#39;PLOADX1</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PLOADX1&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SLOAD&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;LOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;LSEQ&#39;</span><span class="p">,</span> <span class="s1">&#39;LOADCYN&#39;</span><span class="p">]:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;QVOL&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPRB&#39;</span><span class="p">]:</span>
+                <span class="c1"># eids</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TEMPAX&#39;</span><span class="p">]:</span>
+                <span class="k">pass</span> <span class="c1"># not done...</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">load</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_store_dresp1"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._store_dresp1">[docs]</a><span class="k">def</span> <span class="nf">_store_dresp1</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_used</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``remove_unused``&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dresp_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="n">dresp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dresps</span><span class="p">[</span><span class="n">dresp_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PSHELL&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMPG&#39;</span><span class="p">,</span> <span class="s1">&#39;PBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PBARL&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PVISC&#39;</span><span class="p">,</span> <span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span> <span class="s1">&#39;PSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PELAS&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;PSOLID&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">]:</span>
+            <span class="n">pids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dresp</span><span class="o">.</span><span class="n">atti_values</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span> <span class="o">==</span> <span class="s1">&#39;ELEM&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;STRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;FRSTRE&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;CFAILURE&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;TFORC&#39;</span><span class="p">,</span> <span class="s1">&#39;FRFORC&#39;</span><span class="p">]:</span>
+                <span class="c1">#eids_used.update(dresp.atti_values())</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">dresp</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;region=</span><span class="si">%r</span><span class="s1"> property_type=</span><span class="si">%r</span><span class="s1"> response_type=</span><span class="si">%r</span><span class="s1">, &#39;</span>
+                    <span class="s1">&#39;atta=</span><span class="si">%r</span><span class="s1"> attb=</span><span class="si">%s</span><span class="s1"> atti=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">dresp</span><span class="o">.</span><span class="n">region</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span><span class="p">,</span>
+                        <span class="n">dresp</span><span class="o">.</span><span class="n">atta</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">attb</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">atti</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1">#elif dresp.property_type == &#39;STRESS&#39;:</span>
+
+        <span class="k">elif</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;WEIGHT&#39;</span><span class="p">,</span> <span class="s1">&#39;EIGN&#39;</span><span class="p">,</span> <span class="s1">&#39;VOLUME&#39;</span><span class="p">,</span> <span class="s1">&#39;LAMA&#39;</span><span class="p">,</span> <span class="s1">&#39;CEIG&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;FREQ&#39;</span><span class="p">,</span> <span class="s1">&#39;STABDER&#39;</span><span class="p">]:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DISP&#39;</span><span class="p">,</span> <span class="s1">&#39;FRDISP&#39;</span><span class="p">,</span> <span class="s1">&#39;TDISP&#39;</span><span class="p">,</span> <span class="s1">&#39;RMSDISP&#39;</span><span class="p">,</span> <span class="s1">&#39;PSDDISP&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;TVELO&#39;</span><span class="p">,</span> <span class="s1">&#39;FRVELO&#39;</span><span class="p">,</span> <span class="s1">&#39;RMSVELO&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;TACCL&#39;</span><span class="p">,</span> <span class="s1">&#39;FRACCL&#39;</span><span class="p">,</span> <span class="s1">&#39;RMSACCL&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;SPCFORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;TSPCF&#39;</span><span class="p">,</span> <span class="s1">&#39;FRSPCF&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;TFORC&#39;</span><span class="p">,</span> <span class="s1">&#39;FRFORC&#39;</span><span class="p">]:</span>
+                <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dresp</span><span class="o">.</span><span class="n">atti</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FLUTTER&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;DIVERG&#39;</span><span class="p">]:</span>
+                <span class="c1"># flutter_id / trim_id</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">dresp</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;region=</span><span class="si">%r</span><span class="s1"> property_type=</span><span class="si">%r</span><span class="s1"> response_type=</span><span class="si">%r</span><span class="s1"> &#39;</span>
+                    <span class="s1">&#39;atta=</span><span class="si">%r</span><span class="s1"> attb=</span><span class="si">%s</span><span class="s1"> atti=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">dresp</span><span class="o">.</span><span class="n">region</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span><span class="p">,</span>
+                        <span class="n">dresp</span><span class="o">.</span><span class="n">atta</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">attb</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">atti</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">dresp</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;region=</span><span class="si">%r</span><span class="s1"> property_type=</span><span class="si">%r</span><span class="s1"> response_type=</span><span class="si">%r</span><span class="s1"> &#39;</span>
+                <span class="s1">&#39;atta=</span><span class="si">%r</span><span class="s1"> attb=</span><span class="si">%s</span><span class="s1"> atti=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">dresp</span><span class="o">.</span><span class="n">region</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">property_type</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">response_type</span><span class="p">,</span>
+                    <span class="n">dresp</span><span class="o">.</span><span class="n">atta</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">attb</span><span class="p">,</span> <span class="n">dresp</span><span class="o">.</span><span class="n">atti</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_store_masses"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._store_masses">[docs]</a><span class="k">def</span> <span class="nf">_store_masses</span><span class="p">(</span><span class="n">card_type</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">nids_used</span><span class="p">,</span> <span class="n">pids_mass_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;handles masses&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CONM1&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Nid</span><span class="p">())</span>
+            <span class="n">cids_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Cid</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CMASS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS3&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">pids_mass_used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">())</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">card_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CMASS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS4&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">nids_used</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">card_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_remove"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._remove">[docs]</a><span class="k">def</span> <span class="nf">_remove</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+            <span class="n">nids_used</span><span class="p">,</span> <span class="n">cids_used</span><span class="p">,</span>
+            <span class="n">pids_used</span><span class="p">,</span> <span class="n">pids_mass_used</span><span class="p">,</span> <span class="n">mids_used</span><span class="p">,</span> <span class="n">spcs_used</span><span class="p">,</span> <span class="n">mpcs_used</span><span class="p">,</span>
+            <span class="n">pconv_used</span><span class="p">,</span> <span class="n">tableht_used</span><span class="p">,</span> <span class="n">tableh1_used</span><span class="p">,</span>
+            <span class="n">unused_desvars_used</span><span class="p">,</span>
+            <span class="n">remove_nids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_cids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">remove_pids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_mids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">remove_spcs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_mpcs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">unused_remove_desvars</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;actually removes the cards&quot;&quot;&quot;</span>
+    <span class="n">nids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">pids_mass</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">cids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">mids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">spcs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># spcadds?</span>
+    <span class="n">mpcs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c1"># mpcadds?</span>
+
+    <span class="n">nids_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nids</span> <span class="o">-</span> <span class="n">nids_used</span><span class="p">)</span>
+    <span class="n">pids_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pids</span> <span class="o">-</span> <span class="n">pids_used</span><span class="p">)</span>
+    <span class="n">pids_mass_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pids_mass</span> <span class="o">-</span> <span class="n">pids_mass_used</span><span class="p">)</span>
+    <span class="n">mids_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mids</span> <span class="o">-</span> <span class="n">mids_used</span><span class="p">)</span>
+    <span class="n">cids_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cids</span> <span class="o">-</span> <span class="n">cids_used</span><span class="p">)</span>
+
+    <span class="c1">#for subcase in model.subcases:</span>
+    <span class="c1">#    if &#39;SPC&#39; in subcase:</span>
+    <span class="c1">#        value = subcase[&#39;SPC&#39;]</span>
+    <span class="c1">#        spcs_used.add(value)</span>
+    <span class="c1">#    if &#39;MPC&#39; in subcase:</span>
+    <span class="c1">#        value = subcase[&#39;MPC&#39;]</span>
+    <span class="c1">#        mpcs_used.add(value)</span>
+    <span class="c1">#    #if &#39;LOAD&#39; in subcase:</span>
+    <span class="c1">#        #value = subcase[&#39;LOAD&#39;]</span>
+    <span class="c1">#        #loads_used.add(value)</span>
+
+    <span class="n">spcs_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spcs</span> <span class="o">-</span> <span class="n">spcs_used</span><span class="p">)</span>
+    <span class="n">mpcs_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mpcs</span> <span class="o">-</span> <span class="n">mpcs_used</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">cids_to_remove</span><span class="p">:</span>
+        <span class="n">cids_to_remove</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">remove_nids</span> <span class="ow">and</span> <span class="n">nids_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+        <span class="n">nids_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removed nodes </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nids_to_remove</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">remove_cids</span> <span class="ow">and</span> <span class="n">cids_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cids_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span>
+        <span class="n">cids_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing coords </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cids_to_remove</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">remove_pids</span> <span class="ow">and</span> <span class="n">pids_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids_mass_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="n">pids_mass_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing properties_mass </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pids_mass_to_remove</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="n">pids_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing properties </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pids_to_remove</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">remove_mids</span> <span class="ow">and</span> <span class="n">mids_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="n">mids_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span>
+        <span class="n">mids_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing materials </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mids_to_remove</span><span class="p">)</span>
+
+    <span class="c1">#if remove_spcs and spcs_to_remove:</span>
+    <span class="c1">#    for spc_id in spcs_to_remove:</span>
+    <span class="c1">#        del model.spcs[spc_id]</span>
+    <span class="c1">#    spcs_to_remove.sort()</span>
+    <span class="c1">#    model.log.debug(&#39;removed spcs %s&#39; % spcs_to_remove)</span>
+    <span class="c1">#if remove_mpcs and mpcs_to_remove:</span>
+    <span class="c1">#    for mpc_id in mpcs_to_remove:</span>
+    <span class="c1">#        del model.mpcs[mpc_id]</span>
+    <span class="c1">#    mpcs_to_remove.sort()</span>
+    <span class="c1">#    model.log.debug(&#39;removed mpcs %s&#39; % mpcs_to_remove)</span>
+    <span class="n">_remove_thermal</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pconv_used</span><span class="p">,</span> <span class="n">tableht_used</span><span class="p">,</span> <span class="n">tableh1_used</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_remove_thermal"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.remove_unused._remove_thermal">[docs]</a><span class="k">def</span> <span class="nf">_remove_thermal</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">pconv_used</span><span class="p">,</span> <span class="n">tableht_used</span><span class="p">,</span> <span class="n">tableh1_used</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;removes some thermal cards&quot;&quot;&quot;</span>
+    <span class="n">pconv</span> <span class="o">=</span> <span class="p">{</span><span class="n">pid</span> <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">convection_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PCONV&#39;</span><span class="p">}</span>
+    <span class="n">tableht</span> <span class="o">=</span> <span class="p">{</span><span class="n">tid</span> <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">table</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;TABLEHT&#39;</span><span class="p">}</span>
+    <span class="n">tableh1</span> <span class="o">=</span> <span class="p">{</span><span class="n">tid</span> <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">table</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;TABLEH1&#39;</span><span class="p">}</span>
+
+    <span class="n">pconv_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pconv</span> <span class="o">-</span> <span class="n">pconv_used</span><span class="p">)</span>
+    <span class="n">tableht_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tableht</span> <span class="o">-</span> <span class="n">tableht_used</span><span class="p">)</span>
+    <span class="n">tableh1_to_remove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tableh1</span> <span class="o">-</span> <span class="n">tableh1_used</span><span class="p">)</span>
+
+    <span class="n">remove_pconv</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">remove_pconv</span> <span class="ow">and</span> <span class="n">pconv_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pconv_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">convection_properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="n">pconv_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing convection_properties </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pconv_to_remove</span><span class="p">)</span>
+
+    <span class="n">remove_tableh1</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">remove_tableht</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">remove_tableh1</span> <span class="ow">and</span> <span class="n">tableh1_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">tableh1_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="n">tableh1_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing TABLEH1 </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tableh1_to_remove</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">remove_tableht</span> <span class="ow">and</span> <span class="n">tableht_to_remove</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">tableht_to_remove</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="n">tableht_to_remove</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;removing TABLEH1 </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tableht_to_remove</span><span class="p">)</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

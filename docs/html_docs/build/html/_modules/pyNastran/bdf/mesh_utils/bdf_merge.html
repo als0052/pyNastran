@@ -1,0 +1,647 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.bdf_merge &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.bdf_merge</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.bdf_merge</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - bdf_merge(bdf_filenames, bdf_filename_out=None, renumber=True, encoding=None, size=8,</span>
+<span class="sd">             is_double=False, cards_to_skip=None, log=None, skip_case_control_deck=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">read_bdf</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.case_control_deck</span> <span class="kn">import</span> <span class="n">CaseControlDeck</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_renumber</span> <span class="kn">import</span> <span class="n">bdf_renumber</span><span class="p">,</span> <span class="n">get_renumber_starting_ids_from_model</span>
+
+<div class="viewcode-block" id="bdf_merge"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge.bdf_merge">[docs]</a><span class="k">def</span> <span class="nf">bdf_merge</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">renumber</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+              <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_case_control_deck</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merges multiple BDF into one file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filenames : List[str]</span>
+<span class="sd">        list of bdf filenames</span>
+<span class="sd">    bdf_filename_out : str / None</span>
+<span class="sd">        the output bdf filename (default=None; None -&gt; no writing)</span>
+<span class="sd">    renumber : bool</span>
+<span class="sd">        should the bdf be renumbered (default=True)</span>
+<span class="sd">    encoding : str</span>
+<span class="sd">        the unicode encoding (default=None; system default)</span>
+<span class="sd">    size : int; {8, 16}; default=8</span>
+<span class="sd">        the bdf write precision</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        the field precision to write</span>
+<span class="sd">    cards_to_skip : List[str]; (default=None -&gt; don&#39;t skip any cards)</span>
+<span class="sd">        There are edge cases (e.g. FLUTTER analysis) where things can break due to</span>
+<span class="sd">        uncross-referenced cards.  You need to disable entire classes of cards in</span>
+<span class="sd">        that case (e.g. all aero cards).</span>
+<span class="sd">    skip_case_control_deck : bool, optional, default : False</span>
+<span class="sd">        If true, don&#39;t consider the case control deck while merging.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF</span>
+<span class="sd">        Merged model.</span>
+<span class="sd">    mappers_all : List[mapper]</span>
+<span class="sd">        mapper : Dict[bdf_attribute] : old_id_to_new_id_dict</span>
+<span class="sd">            List of mapper dictionaries of original ids to merged</span>
+
+<span class="sd">            bdf_attribute : str</span>
+<span class="sd">                a BDF attribute (e.g., &#39;nodes&#39;, &#39;elements&#39;)</span>
+<span class="sd">            old_id_to_new_id_dict : dict[id_old] : id_new</span>
+<span class="sd">                a sub dictionary that is used to map the node/element/etc. ids</span>
+<span class="sd">            mapper = {</span>
+<span class="sd">                &#39;elements&#39; : eid_map,</span>
+<span class="sd">                &#39;nodes&#39; : nid_map,</span>
+<span class="sd">                &#39;coords&#39; : cid_map,</span>
+<span class="sd">                ...</span>
+<span class="sd">            }</span>
+
+<span class="sd">    Supports</span>
+<span class="sd">      nodes:      GRID</span>
+<span class="sd">      coords:     CORDx</span>
+<span class="sd">      elements:   CQUAD4, CTRIA3, CTETRA, CPENTA, CHEXA, CELASx, CBAR, CBEAM</span>
+<span class="sd">                  CONM1, CONM2, CMASS</span>
+<span class="sd">      properties: PSHELL, PCOMP, PSOLID, PMASS</span>
+<span class="sd">      materials:  MAT1, MAT8</span>
+
+<span class="sd">    .. todo:: doesn&#39;t support SPOINTs/EPOINTs</span>
+<span class="sd">    .. warning:: still very preliminary</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bdf_filenames is not a list/tuple...</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;You can&#39;t merge one BDF...bdf_filenames=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">bdf_filename</span> <span class="ow">in</span> <span class="n">bdf_filenames</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">StringIO</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bdf_filenames is not a string/BDF...</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bdf_filename</span><span class="p">)</span>
+
+        <span class="c1">#bdf_filenames = [bdf_filenames]</span>
+
+    <span class="c1">#starting_id_dict_default = {</span>
+        <span class="c1">#&#39;cid&#39; : max(model.coords.keys()),</span>
+        <span class="c1">#&#39;nid&#39; : max(model.nodes.keys()),</span>
+        <span class="c1">#&#39;eid&#39; : max([</span>
+            <span class="c1">#max(model.elements.keys()),</span>
+            <span class="c1">#max(model.masses.keys()),</span>
+        <span class="c1">#]),</span>
+        <span class="c1">#&#39;pid&#39; : max([</span>
+            <span class="c1">#max(model.properties.keys()),</span>
+            <span class="c1">#max(model.properties_mass.keys()),</span>
+        <span class="c1">#]),</span>
+        <span class="c1">#&#39;mid&#39; : max(model.material_ids),</span>
+    <span class="c1">#}</span>
+    <span class="n">bdf_filename0</span> <span class="o">=</span> <span class="n">bdf_filenames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename0</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">bdf_filename0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">disable_cards</span><span class="p">(</span><span class="n">cards_to_skip</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename0</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">skip_case_control_deck</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">case_control_deck</span> <span class="o">=</span> <span class="n">CaseControlDeck</span><span class="p">([],</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;primary=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bdf_filename0</span><span class="p">)</span>
+
+    <span class="n">_mapper_0</span> <span class="o">=</span> <span class="n">_get_mapper_0</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="c1"># mapper for first model</span>
+
+    <span class="n">data_members</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;coords&#39;</span><span class="p">,</span> <span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="s1">&#39;elements&#39;</span><span class="p">,</span> <span class="s1">&#39;masses&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">,</span> <span class="s1">&#39;properties_mass&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;materials&#39;</span><span class="p">,</span> <span class="s1">&#39;sets&#39;</span><span class="p">,</span> <span class="s1">&#39;rigid_elements&#39;</span><span class="p">,</span> <span class="s1">&#39;mpcs&#39;</span><span class="p">,</span> <span class="s1">&#39;caeros&#39;</span><span class="p">,</span> <span class="s1">&#39;splines&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">mappers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">bdf_filename</span> <span class="ow">in</span> <span class="n">bdf_filenames</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">starting_id_dict</span> <span class="o">=</span> <span class="n">get_renumber_starting_ids_from_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="c1">#for param, val in sorted(starting_id_dict.items()):</span>
+            <span class="c1">#print(&#39;  %-3s %s&#39; % (param, val))</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;secondary=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bdf_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+            <span class="n">model2_renumber</span> <span class="o">=</span> <span class="n">bdf_filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model2_renumber</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+            <span class="n">model2_renumber</span><span class="o">.</span><span class="n">disable_cards</span><span class="p">(</span><span class="n">cards_to_skip</span><span class="p">)</span>
+            <span class="n">model2_renumber</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">)</span>
+
+        <span class="n">_apply_scalar_cards</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model2_renumber</span><span class="p">)</span>
+
+        <span class="n">bdf_dump</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span> <span class="c1"># &#39;bdf_merge_temp.bdf&#39;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">mapperi</span> <span class="o">=</span> <span class="n">bdf_renumber</span><span class="p">(</span><span class="n">model2_renumber</span><span class="p">,</span> <span class="n">bdf_dump</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="o">=</span><span class="n">starting_id_dict</span><span class="p">,</span>
+                                  <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">)</span>
+        <span class="n">bdf_dump</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">mappers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mapperi</span><span class="p">)</span>
+        <span class="n">model2</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">model2</span><span class="o">.</span><span class="n">disable_cards</span><span class="p">(</span><span class="n">cards_to_skip</span><span class="p">)</span>
+        <span class="n">model2</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_dump</span><span class="p">)</span>
+
+        <span class="c1">#model.log.info(&#39;model2.node_ids = %s&#39; % np.array(model2.node_ids))</span>
+        <span class="k">for</span> <span class="n">data_member</span> <span class="ow">in</span> <span class="n">data_members</span><span class="p">:</span>
+            <span class="n">data1</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_member</span><span class="p">)</span>
+            <span class="n">data2</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model2</span><span class="p">,</span> <span class="n">data_member</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1">#model.log.info(&#39;  working on %s&#39; % (data_member))</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data2</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">data_member</span> <span class="ow">in</span> <span class="s1">&#39;coords&#39;</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="k">assert</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data1</span><span class="p">,</span> <span class="n">key</span>
+                        <span class="n">data1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">assert</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data1</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data_member</span><span class="si">}</span><span class="s1"> key=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">data1</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="n">data1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="c1">#print(&#39;   %s&#39; % key)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data1</span><span class="p">))</span>
+    <span class="c1">#if bdf_filenames_out:</span>
+        <span class="c1">#model.write_bdf(bdf_filenames_out, size=size)</span>
+
+    <span class="n">mapper_renumber</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">renumber</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;final renumber...&#39;</span><span class="p">)</span>
+
+        <span class="n">starting_id_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;cid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;nid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;eid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;pid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;mid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">mapper_renumber</span> <span class="o">=</span> <span class="n">bdf_renumber</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span>
+                                          <span class="n">starting_id_dict</span><span class="o">=</span><span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                                          <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">)</span>
+        <span class="n">bdf_filename_temp</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_temp</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interspersed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">enddata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">bdf_filename_temp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename_temp</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">_xref</span><span class="p">,</span> <span class="n">punch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">log</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">_nastran_format</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">bdf_filename_out</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">out_filename</span><span class="o">=</span><span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span>
+                        <span class="n">interspersed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">enddata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">mappers_final</span> <span class="o">=</span> <span class="n">_assemble_mapper</span><span class="p">(</span><span class="n">mappers</span><span class="p">,</span> <span class="n">_mapper_0</span><span class="p">,</span> <span class="n">data_members</span><span class="p">,</span>
+                                     <span class="n">mapper_renumber</span><span class="o">=</span><span class="n">mapper_renumber</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">mappers_final</span></div>
+
+<div class="viewcode-block" id="_apply_scalar_cards"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._apply_scalar_cards">[docs]</a><span class="k">def</span> <span class="nf">_apply_scalar_cards</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model2_renumber</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;apply cards from model2 to model if they don&#39;t exist in model&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">aero</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">aero</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">aero</span> <span class="o">=</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">aero</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">aeros</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">aeros</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">aeros</span> <span class="o">=</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">aeros</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">mkaeros</span> <span class="o">+=</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">mkaeros</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model2_renumber</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span></div>
+
+<div class="viewcode-block" id="_assemble_mapper"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._assemble_mapper">[docs]</a><span class="k">def</span> <span class="nf">_assemble_mapper</span><span class="p">(</span><span class="n">mappers</span><span class="p">,</span> <span class="n">mapper_0</span><span class="p">,</span> <span class="n">data_members</span><span class="p">,</span> <span class="n">mapper_renumber</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assemble final mappings from all original ids to the ids in the merged and possibly</span>
+<span class="sd">    renumbered model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mappers : List[mapper]</span>
+<span class="sd">       mapper : dict[key] : value</span>
+<span class="sd">            key : ???</span>
+<span class="sd">                ???</span>
+<span class="sd">            value : ???</span>
+<span class="sd">                ???</span>
+<span class="sd">    mapper_0 : mapper</span>
+<span class="sd">        key : ???</span>
+<span class="sd">            ???</span>
+<span class="sd">        value : ???</span>
+<span class="sd">            ???</span>
+<span class="sd">    data_members : List[str]</span>
+<span class="sd">       list of things to include in the mappers?</span>
+<span class="sd">        data_members = [</span>
+<span class="sd">            &#39;coords&#39;, &#39;nodes&#39;, &#39;elements&#39;, &#39;masses&#39;, &#39;properties&#39;, &#39;properties_mass&#39;,</span>
+<span class="sd">            &#39;materials&#39;, &#39;sets&#39;, &#39;rigid_elements&#39;, &#39;mpcs&#39;,</span>
+<span class="sd">        ]</span>
+<span class="sd">    mapper_renumber : dict[key]: value; default=None</span>
+<span class="sd">        key : str</span>
+<span class="sd">            a BDF attribute</span>
+<span class="sd">        value : dict[id_old] : id_new</span>
+<span class="sd">            a sub dictionary that is used to map the node/element/etc. ids</span>
+<span class="sd">        mapper = {</span>
+<span class="sd">            &#39;elements&#39; : eid_map,</span>
+<span class="sd">            &#39;nodes&#39; : nid_map,</span>
+<span class="sd">            &#39;coords&#39; : cid_map,</span>
+<span class="sd">            ...</span>
+<span class="sd">        }</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mappers_all : List[mappers]</span>
+<span class="sd">        One mapper for each bdf_filename</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mapper_renumber</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mappers_all</span> <span class="o">=</span> <span class="p">[</span><span class="n">_renumber_mapper</span><span class="p">(</span><span class="n">mapper_0</span><span class="p">,</span> <span class="n">mapper_renumber</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">mapper</span> <span class="ow">in</span> <span class="n">mappers</span><span class="p">:</span>
+            <span class="n">mapper_temp</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">map_type</span> <span class="ow">in</span> <span class="n">data_members</span><span class="p">:</span>
+            <span class="c1">#for map_type, sub_mappper in mapper.items():</span>
+                <span class="n">sub_mappper</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="n">map_type</span><span class="p">]</span>
+                <span class="n">mapper_temp</span><span class="p">[</span><span class="n">map_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">id_orig</span><span class="p">,</span> <span class="n">id_merge</span> <span class="ow">in</span> <span class="n">sub_mappper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># map from original to renumbered</span>
+                    <span class="n">mapper_temp</span><span class="p">[</span><span class="n">map_type</span><span class="p">][</span><span class="n">id_orig</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapper_renumber</span><span class="p">[</span><span class="n">map_type</span><span class="p">][</span><span class="n">id_merge</span><span class="p">]</span>
+            <span class="n">mappers_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mapper_temp</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># the first model nids are unchanged</span>
+        <span class="n">mappers_all</span> <span class="o">=</span> <span class="p">[</span><span class="n">mapper_0</span><span class="p">]</span> <span class="o">+</span> <span class="n">mappers</span>
+
+    <span class="k">return</span> <span class="n">mappers_all</span></div>
+
+<div class="viewcode-block" id="_get_mapper_0"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._get_mapper_0">[docs]</a><span class="k">def</span> <span class="nf">_get_mapper_0</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the mapper for the first model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the bdf model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mapper : dict[key]: value</span>
+<span class="sd">        key : str</span>
+<span class="sd">            a BDF attribute</span>
+<span class="sd">        value : dict[id_old] : id_new</span>
+<span class="sd">            a sub dictionary that is used to map the node/element/etc. ids</span>
+<span class="sd">        mapper = {</span>
+<span class="sd">            &#39;elements&#39; : eid_map,</span>
+<span class="sd">            &#39;nodes&#39; : nid_map,</span>
+<span class="sd">            &#39;coords&#39; : cid_map,</span>
+<span class="sd">            ...</span>
+<span class="sd">        }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># build the maps</span>
+    <span class="n">eids_all</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="n">eid_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">eid</span> <span class="p">:</span> <span class="n">eid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids_all</span><span class="p">}</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">nid</span> <span class="p">:</span> <span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">point_ids</span><span class="p">}</span>
+    <span class="n">cid_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">cid</span> <span class="p">:</span> <span class="n">cid</span> <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">coord_ids</span><span class="p">}</span>
+    <span class="n">mid_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">mid</span> <span class="p">:</span> <span class="n">mid</span> <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">material_ids</span><span class="p">}</span>
+    <span class="n">spc_map</span> <span class="o">=</span> <span class="n">_dicts_key_to_key</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">spcadds</span><span class="p">))</span>
+    <span class="n">mpc_map</span> <span class="o">=</span> <span class="n">_dicts_key_to_key</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcadds</span><span class="p">))</span>
+    <span class="n">method_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">methods</span><span class="p">)</span>
+    <span class="n">properties_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+    <span class="n">rigid_elements_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">)</span>
+    <span class="n">cmethod_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cMethods</span><span class="p">)</span>
+    <span class="n">flfact_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">flfacts</span><span class="p">)</span>
+    <span class="n">flutter_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">flutters</span><span class="p">)</span>
+    <span class="n">caero_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">)</span>
+    <span class="n">freq_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+
+    <span class="n">dload_map</span> <span class="o">=</span> <span class="n">_dicts_key_to_key</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">dload_entries</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dloads</span><span class="p">))</span>
+    <span class="n">load_map</span> <span class="o">=</span> <span class="n">_dicts_key_to_key</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">load_combinations</span><span class="p">))</span>
+    <span class="n">lseq_map</span> <span class="o">=</span> <span class="n">load_map</span> <span class="c1"># wrong???</span>
+    <span class="n">temp_map</span> <span class="o">=</span> <span class="n">load_map</span> <span class="c1"># wrong???</span>
+
+    <span class="n">tstep_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tsteps</span><span class="p">)</span>
+    <span class="n">tstepnl_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tstepnls</span><span class="p">)</span>
+    <span class="n">suport1_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">suport1</span><span class="p">)</span>
+    <span class="c1">#suport_map = {}</span>
+
+    <span class="n">nlparm_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nlparms</span><span class="p">)</span>
+    <span class="c1">#nlpci_map = _dict_key_to_key(model.nlpcis)</span>
+    <span class="n">table_sdamping_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tables_sdamping</span><span class="p">)</span>
+    <span class="n">dconadd_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dconadds</span><span class="p">)</span>
+    <span class="n">dconstr_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dconstrs</span><span class="p">)</span>
+    <span class="n">dessub_map</span> <span class="o">=</span> <span class="n">dconadd_map</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dconstr_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dessub_map</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="n">dessub_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">dresp_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dresps</span><span class="p">)</span>
+    <span class="n">gust_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">gusts</span><span class="p">)</span>
+    <span class="n">trim_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">trims</span><span class="p">)</span>
+    <span class="n">tic_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tics</span><span class="p">)</span>
+    <span class="n">csschd_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">csschds</span><span class="p">)</span>
+    <span class="n">tranfer_function_map</span> <span class="o">=</span> <span class="n">_dict_key_to_key</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">transfer_functions</span><span class="p">)</span>
+
+    <span class="n">mapper</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;elements&#39;</span> <span class="p">:</span> <span class="n">eid_map</span><span class="p">,</span>
+        <span class="s1">&#39;nodes&#39;</span> <span class="p">:</span> <span class="n">nid_map</span><span class="p">,</span>
+        <span class="s1">&#39;coords&#39;</span> <span class="p">:</span> <span class="n">cid_map</span><span class="p">,</span>
+        <span class="s1">&#39;materials&#39;</span> <span class="p">:</span> <span class="n">mid_map</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span> <span class="p">:</span> <span class="n">properties_map</span><span class="p">,</span>
+        <span class="s1">&#39;rigid_elements&#39;</span><span class="p">:</span> <span class="n">rigid_elements_map</span><span class="p">,</span>
+        <span class="s1">&#39;spcs&#39;</span> <span class="p">:</span> <span class="n">spc_map</span><span class="p">,</span>
+        <span class="s1">&#39;mpcs&#39;</span> <span class="p">:</span> <span class="n">mpc_map</span><span class="p">,</span>
+        <span class="s1">&#39;METHOD&#39;</span> <span class="p">:</span> <span class="n">method_map</span><span class="p">,</span>
+        <span class="s1">&#39;CMETHOD&#39;</span> <span class="p">:</span> <span class="n">cmethod_map</span><span class="p">,</span>
+        <span class="s1">&#39;FLFACT&#39;</span> <span class="p">:</span> <span class="n">flfact_map</span><span class="p">,</span>
+        <span class="s1">&#39;FMETHOD&#39;</span> <span class="p">:</span> <span class="n">flutter_map</span><span class="p">,</span>
+        <span class="s1">&#39;caeros&#39;</span> <span class="p">:</span> <span class="n">caero_map</span><span class="p">,</span>
+        <span class="s1">&#39;FREQUENCY&#39;</span> <span class="p">:</span> <span class="n">freq_map</span><span class="p">,</span>
+
+        <span class="s1">&#39;DLOAD&#39;</span> <span class="p">:</span> <span class="n">dload_map</span><span class="p">,</span>
+        <span class="s1">&#39;LOAD&#39;</span> <span class="p">:</span> <span class="n">load_map</span><span class="p">,</span>
+        <span class="s1">&#39;LOADSET&#39;</span> <span class="p">:</span> <span class="n">lseq_map</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEP&#39;</span> <span class="p">:</span> <span class="n">tstep_map</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEPNL&#39;</span> <span class="p">:</span> <span class="n">tstepnl_map</span><span class="p">,</span>
+        <span class="s1">&#39;SUPORT1&#39;</span> <span class="p">:</span> <span class="n">suport1_map</span><span class="p">,</span>
+        <span class="s1">&#39;NLPARM&#39;</span> <span class="p">:</span> <span class="n">nlparm_map</span><span class="p">,</span>
+        <span class="s1">&#39;SDAMPING&#39;</span> <span class="p">:</span> <span class="n">table_sdamping_map</span><span class="p">,</span>
+        <span class="s1">&#39;DESSUB&#39;</span> <span class="p">:</span> <span class="n">dessub_map</span><span class="p">,</span>
+        <span class="s1">&#39;DESOBJ&#39;</span> <span class="p">:</span> <span class="n">dresp_map</span><span class="p">,</span>
+        <span class="s1">&#39;GUST&#39;</span> <span class="p">:</span> <span class="n">gust_map</span><span class="p">,</span>
+        <span class="s1">&#39;TRIM&#39;</span> <span class="p">:</span> <span class="n">trim_map</span><span class="p">,</span>
+        <span class="s1">&#39;IC&#39;</span> <span class="p">:</span> <span class="n">tic_map</span><span class="p">,</span>
+        <span class="s1">&#39;CSSCHD&#39;</span> <span class="p">:</span> <span class="n">csschd_map</span><span class="p">,</span>
+        <span class="s1">&#39;TFL&#39;</span> <span class="p">:</span> <span class="n">tranfer_function_map</span><span class="p">,</span>
+        <span class="c1">#&#39;DESSUB&#39; : dessub_map,</span>
+        <span class="c1"># bad...</span>
+        <span class="s1">&#39;TEMPERATURE(LOAD)&#39;</span> <span class="p">:</span> <span class="n">temp_map</span><span class="p">,</span>
+        <span class="s1">&#39;TEMPERATURE(INITIAL)&#39;</span> <span class="p">:</span> <span class="n">temp_map</span><span class="p">,</span>
+        <span class="c1">#&#39;DATAREC&#39; : datarec_map,</span>
+        <span class="c1">#&#39;ADAPT&#39; : adapt_map,</span>
+        <span class="c1">#&#39;SUPER&#39; : super_map,</span>
+        <span class="c1">#&#39;BOUTPUT&#39; : boutput_map,</span>
+        <span class="c1">#&#39;OUTRCV&#39; : outrcv_map,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">mapper</span></div>
+
+<div class="viewcode-block" id="_renumber_mapper"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._renumber_mapper">[docs]</a><span class="k">def</span> <span class="nf">_renumber_mapper</span><span class="p">(</span><span class="n">mapper_0</span><span class="p">,</span> <span class="n">mapper_renumber</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renumbers a mapper</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mapper_0 : dict[key]: value</span>
+<span class="sd">        key : str</span>
+<span class="sd">            a BDF attribute</span>
+<span class="sd">        value : dict[id_old] : id_new</span>
+<span class="sd">            a sub dictionary that is used to map the node/element/etc. ids</span>
+<span class="sd">        mapper = {</span>
+<span class="sd">            &#39;elements&#39; : eid_map,</span>
+<span class="sd">            &#39;nodes&#39; : nid_map,</span>
+<span class="sd">            &#39;coords&#39; : cid_map,</span>
+<span class="sd">            ...</span>
+<span class="sd">        }</span>
+<span class="sd">    mapper_renumber : ???</span>
+<span class="sd">        ???</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mapper : dict[map_type] : sub_mapper</span>
+<span class="sd">        map_type : ???</span>
+<span class="sd">            ???</span>
+<span class="sd">        sub_mapper : dict[key] : value</span>
+<span class="sd">            key : ???</span>
+<span class="sd">                ???</span>
+<span class="sd">            value : ???</span>
+<span class="sd">                ???</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mapper</span> <span class="o">=</span> <span class="n">mapper_0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># apply any renumbering</span>
+    <span class="k">for</span> <span class="n">map_type</span><span class="p">,</span> <span class="n">sub_mapper</span> <span class="ow">in</span> <span class="n">mapper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">id_</span> <span class="ow">in</span> <span class="n">sub_mapper</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sub_mapper</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">==</span> <span class="n">mapper_renumber</span><span class="p">[</span><span class="n">map_type</span><span class="p">][</span><span class="n">id_</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">sub_mapper</span><span class="p">[</span><span class="n">id_</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapper_renumber</span><span class="p">[</span><span class="n">map_type</span><span class="p">][</span><span class="n">id_</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">mapper</span></div>
+
+<div class="viewcode-block" id="_dict_key_to_key"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._dict_key_to_key">[docs]</a><span class="k">def</span> <span class="nf">_dict_key_to_key</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;creates a dummy map from the nominal key to the nominal key&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">key</span> <span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+
+<div class="viewcode-block" id="_dicts_key_to_key"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_merge._dicts_key_to_key">[docs]</a><span class="k">def</span> <span class="nf">_dicts_key_to_key</span><span class="p">(</span><span class="n">dictionaries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a dummy map from the nominal key to the nominal key for</span>
+<span class="sd">    multiple input dictionaries</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">dicti</span> <span class="ow">in</span> <span class="n">dictionaries</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dicti</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

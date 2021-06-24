@@ -1,0 +1,421 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.result_objects.matrix &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.result_objects.matrix</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.result_objects.matrix</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Defines the Matrix class&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">coo_matrix</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.write_utils</span> <span class="kn">import</span> <span class="n">export_to_hdf5</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">object_attributes</span><span class="p">,</span> <span class="n">object_methods</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_codes</span> <span class="kn">import</span> <span class="n">MSC_ELEMENTS</span>
+
+
+<div class="viewcode-block" id="Matrix"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix">[docs]</a><span class="k">class</span> <span class="nc">Matrix</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines a Matrix object that&#39;s stored in op2.matrices</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        the name of the matrix</span>
+<span class="sd">    data : varies</span>
+<span class="sd">        dense : np.ndarray</span>
+<span class="sd">        sparse : coo_matrix</span>
+<span class="sd">        data is initialized by setting the matrix.data attribute externally</span>
+<span class="sd">    is_matpool : bool</span>
+<span class="sd">        is this a matpool matrix</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">is_matpool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a Matrix</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            the name of the matrix</span>
+<span class="sd">        form : int</span>
+<span class="sd">            the matrix type</span>
+<span class="sd">        is_matpool : bool</span>
+<span class="sd">            is this a matpool matrix</span>
+
+<span class="sd">        +------+-----------------+</span>
+<span class="sd">        | Form | Meaning         |</span>
+<span class="sd">        +======+=================+</span>
+<span class="sd">        |  1   | Square          |</span>
+<span class="sd">        |  2   | Rectangular     |</span>
+<span class="sd">        |  6   | Symmetric       |</span>
+<span class="sd">        |  9   | Pseudo identity |</span>
+<span class="sd">        +------+-----------------+</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_matpool</span> <span class="o">=</span> <span class="n">is_matpool</span>
+
+        <span class="c1"># only exist for is_matpool = True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_nid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_dof</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_nid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_dof</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;name=</span><span class="si">%r</span><span class="s1"> must be a string; type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets the matrix description&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;N/A&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;square&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;rectangular&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;symmetric&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;pseudo-identity&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;form = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Matrix.export_to_hdf5"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix.export_to_hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the object to HDF5 format&quot;&quot;&quot;</span>
+        <span class="n">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Matrix.build_dataframe"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix.build_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the object to pandas format&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">coo_matrix</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;row&#39;</span><span class="p">:</span> <span class="n">matrix</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">:</span> <span class="n">matrix</span><span class="o">.</span><span class="n">col</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span> <span class="p">:</span> <span class="n">matrix</span><span class="o">.</span><span class="n">data</span><span class="p">}</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">matrix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">matrix</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">data_frame</span></div>
+
+<div class="viewcode-block" id="Matrix.write"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">print_full</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes to the F06&quot;&quot;&quot;</span>
+        <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">asbytes</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">skip_msg</span> <span class="o">=</span> <span class="s1">&#39;skipping </span><span class="si">%s</span><span class="s1"> because data is None</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">skip_msg</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">coo_matrix</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">print_full</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">col</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                    <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">asbytes</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">%i</span><span class="s2">, </span><span class="si">%i</span><span class="s2">) </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">value</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">matrix</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">asbytes</span><span class="p">(</span><span class="s1">&#39;name=</span><span class="si">%r</span><span class="s1">; shape=</span><span class="si">%s</span><span class="s1">; form=</span><span class="si">%i</span><span class="s1">; Type=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_str</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">print_full</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.18e</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="c1">#f06.write(str(matrix))</span>
+            <span class="c1">#print(&#39;WARNING: matrix type=%s does not support writing&#39; % type(matrix))</span>
+        <span class="n">mat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">asbytes</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Matrix.object_attributes"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix.object_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">filter_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">,</span>
+                                 <span class="n">filter_properties</span><span class="o">=</span><span class="n">filter_properties</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Matrix.object_methods"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.Matrix.object_methods">[docs]</a>    <span class="k">def</span> <span class="nf">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;Matrix[</span><span class="si">%r</span><span class="s1">];&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="s1">&#39;data=None; &#39;</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="s1">&#39;&lt;NoneType&gt;&#39;</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;&lt;NoneType&gt;; &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;class &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;;&#39;</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="s1">&#39; shape=</span><span class="si">%s</span><span class="s1">;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%-18s</span><span class="s1"> </span><span class="si">%-18s</span><span class="s1"> type=</span><span class="si">%-33s</span><span class="s1"> dtype=</span><span class="si">%-10s</span><span class="s1"> desc=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+
+<div class="viewcode-block" id="MatrixDict"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.MatrixDict">[docs]</a><span class="k">class</span> <span class="nc">MatrixDict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;storage object for KDICT, MDICT, BDICT, etc. is op2.matdicts&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numwides</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numgrids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dof_per_grids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sils</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xforms</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="MatrixDict.add"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects2.html#pyNastran.op2.result_objects.matrix.MatrixDict.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eltype</span><span class="p">,</span> <span class="n">numwids</span><span class="p">,</span> <span class="n">numgrid</span><span class="p">,</span> <span class="n">dof_per_grid</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span>
+            <span class="n">eids</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">sil</span><span class="p">,</span> <span class="n">xform</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the next set of the KDICT&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eltype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numwides</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numwids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numgrids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numgrid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dof_per_grids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dof_per_grid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ge</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sils</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sil</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span></div>
+
+    <span class="c1">#@property</span>
+    <span class="c1">#def nodes(self):</span>
+        <span class="c1">#return [sil // 10 for sil in self.sils]</span>
+
+    <span class="c1">#@property</span>
+    <span class="c1">#def dofs(self):</span>
+        <span class="c1">#return [sil % 10 for sil in self.sils]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nelements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span> <span class="k">for</span> <span class="n">eids</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eids</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">MSC_ELEMENTS</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span> <span class="k">for</span> <span class="n">etype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;MatrixDict(name=</span><span class="si">%r</span><span class="s1">, nelements=</span><span class="si">%s</span><span class="s1"> element_types=</span><span class="si">%s</span><span class="s1">, element_names=[</span><span class="si">%s</span><span class="s1">])&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_names</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

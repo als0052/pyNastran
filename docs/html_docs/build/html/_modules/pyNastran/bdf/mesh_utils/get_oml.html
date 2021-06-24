@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.get_oml &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.get_oml</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.get_oml</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - eids_oml = get_oml_eids(bdf_filename, eid_start, theta_tol=30.,</span>
+<span class="sd">                           is_symmetric=True, consider_flippped_normals=True)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+<span class="c1">#from pyNastran.bdf.bdf_interface.dev_utils import get_free_edges</span>
+
+
+<div class="viewcode-block" id="get_oml_eids"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.get_oml.get_oml_eids">[docs]</a><span class="k">def</span> <span class="nf">get_oml_eids</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">eid_start</span><span class="p">,</span> <span class="n">theta_tol</span><span class="o">=</span><span class="mf">30.</span><span class="p">,</span>
+                 <span class="n">is_symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">consider_flippped_normals</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    extracts the OML faces (outer mold line)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str or BDF()</span>
+<span class="sd">        the bdf filename</span>
+<span class="sd">    eid_start : int</span>
+<span class="sd">        the element to start from</span>
+<span class="sd">    theta_tol : float; default=30.</span>
+<span class="sd">        the angular tolerance in degrees</span>
+<span class="sd">    is_symmetric : bool; default=True</span>
+<span class="sd">        is the y=0 plane considered to be part of the OML</span>
+<span class="sd">    consider_flippped_normals : bool; default=True</span>
+<span class="sd">        if you extracted the free faces from tets, you can get flipped normals</span>
+<span class="sd">        this considers a 180 degree error to be 0.0, which will cause other problems</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#ninety = np.radians(90.)</span>
+
+    <span class="c1">#2810 # start for bwb_saero.bdf</span>
+    <span class="c1">#2811 # close</span>
+    <span class="c1">#2819 # close</span>
+    <span class="c1">#2818 # close</span>
+
+    <span class="c1">#eids_oml = np.array([eid_start])</span>
+    <span class="n">eids_oml</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">eid_start</span><span class="p">])</span>
+    <span class="c1">#---------------------------------</span>
+    <span class="n">theta_tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">theta_tol</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">maps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_maps</span><span class="p">(</span>
+        <span class="n">eids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">consider_0d</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consider_0d_rigid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">consider_1d</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">consider_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">consider_3d</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">edge_to_eid_map</span> <span class="o">=</span> <span class="n">maps</span><span class="p">[</span><span class="s1">&#39;edge_to_eid_map&#39;</span><span class="p">]</span>
+    <span class="n">eid_to_edge_map</span> <span class="o">=</span> <span class="n">maps</span><span class="p">[</span><span class="s1">&#39;eid_to_edge_map&#39;</span><span class="p">]</span>
+    <span class="n">nid_to_edge_map</span> <span class="o">=</span> <span class="n">maps</span><span class="p">[</span><span class="s1">&#39;nid_to_edge_map&#39;</span><span class="p">]</span>
+
+    <span class="c1">#free_edges = get_free_edges(model, maps=maps)</span>
+    <span class="c1">#---------------------------------</span>
+    <span class="n">normals</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">etypes_skipped</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">]:</span>
+            <span class="n">normals</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Normal</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">etypes_skipped</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;elem.type=</span><span class="si">%r</span><span class="s1"> is not supported&#39;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">etypes_skipped</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+    <span class="c1">#eid_starts = eids_oml.tolist()</span>
+    <span class="n">eids_next</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">eid_start</span><span class="p">])</span>
+    <span class="k">while</span> <span class="n">eids_next</span><span class="p">:</span>
+        <span class="n">eid_starts</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">eids_next</span><span class="p">)</span>
+        <span class="n">eids_oml_start</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">eids_oml</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eid_starts</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">eid_starts</span><span class="p">:</span>
+            <span class="n">eid_start</span> <span class="o">=</span> <span class="n">eid_starts</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">normal_start</span> <span class="o">=</span> <span class="n">normals</span><span class="p">[</span><span class="n">eid_start</span><span class="p">]</span>
+
+            <span class="c1"># get the next set of edges</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">eid_to_edge_map</span><span class="p">[</span><span class="n">eid_start</span><span class="p">]</span>
+
+
+            <span class="c1">#flattened = []</span>
+            <span class="c1">#for row in matrix:</span>
+                <span class="c1">#for n in row:</span>
+                    <span class="c1">#flattened.append(n)</span>
+            <span class="c1"># flattened = [n for row in matrix for n in row]</span>
+            <span class="c1">#eids_to_consider = [edge_to_eid_map[edge] for edge in edges]</span>
+            <span class="n">list_eids_to_consider</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+                <span class="n">eids_with_edge</span> <span class="o">=</span> <span class="n">edge_to_eid_map</span><span class="p">[</span><span class="n">edge</span><span class="p">]</span>
+                <span class="n">list_eids_to_consider</span> <span class="o">+=</span> <span class="n">eids_with_edge</span>
+            <span class="c1">#list_eids_to_consider = set([eid for eid in edge_to_eid_map[edge] for edge in edges])</span>
+            <span class="c1">#print(&#39;list_eids_to_consider =&#39;, list_eids_to_consider)</span>
+            <span class="n">eids_to_consider</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">list_eids_to_consider</span><span class="p">)</span>
+
+            <span class="c1"># don&#39;t do the same element twice; creates an infinite loop if you do</span>
+            <span class="c1">#eids_to_check = np.setdiff1d(eids_to_consider, eids_oml)</span>
+            <span class="n">eids_to_check</span> <span class="o">=</span> <span class="n">eids_to_consider</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">eids_oml</span><span class="p">)</span>
+
+            <span class="c1"># don&#39;t check elements we&#39;re checking right now</span>
+            <span class="c1">#eids_to_check = np.setdiff1d(eids_to_consider, eid_starts)</span>
+            <span class="n">eids_to_check</span> <span class="o">=</span> <span class="n">eids_to_consider</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">eid_starts</span><span class="p">)</span>
+
+            <span class="c1">#print(&#39;eids_to_check =&#39;, eids_to_check)</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids_to_check</span><span class="p">:</span>
+                <span class="n">normal</span> <span class="o">=</span> <span class="n">normals</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="c1"># a o b = a * b * cos(theta)</span>
+                <span class="c1"># cos(theta) = (a o b)/ (a b); where |a| = 1; |b| = 1</span>
+                <span class="n">cos_theta</span> <span class="o">=</span> <span class="n">normal</span> <span class="o">@</span> <span class="n">normal_start</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos_theta</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="n">theta_tol</span><span class="p">:</span>
+                    <span class="n">eids_next</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                    <span class="n">eids_oml</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">consider_flippped_normals</span><span class="p">:</span>
+                    <span class="c1"># handles flipped normals</span>
+                    <span class="n">cos_theta</span> <span class="o">=</span> <span class="n">normal</span> <span class="o">@</span> <span class="o">-</span><span class="n">normal_start</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos_theta</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="n">theta_tol</span><span class="p">:</span>
+                        <span class="n">eids_next</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                        <span class="n">eids_oml</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="c1">#print(&#39;eids_next =&#39;, eids_next)</span>
+        <span class="n">eids_next</span> <span class="o">=</span> <span class="n">eids_next</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">eids_oml_start</span><span class="p">)</span>
+        <span class="c1">#eids_next = eids_next.difference(eid_starts)</span>
+        <span class="c1">#print(&#39;eids_next =&#39;, eids_next)</span>
+        <span class="c1">#print(&#39;-------------------------------&#39;)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;done...&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;eids_oml.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">eids_file</span><span class="p">:</span>
+        <span class="n">eids_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;eids_oml = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="n">eids_oml</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">eids_oml</span></div>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.get_oml.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;runs the test problem&quot;&quot;&quot;</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="s1">&#39;bwb_saero.bdf&#39;</span>
+    <span class="n">eid_start</span> <span class="o">=</span> <span class="mi">2810</span>
+    <span class="n">eids_oml</span> <span class="o">=</span> <span class="n">get_oml_eids</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">eid_start</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

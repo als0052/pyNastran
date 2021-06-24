@@ -1,0 +1,1045 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.geom.mpt &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.geom.mpt</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.geom.mpt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;defines readers for BDF objects in the OP2 MPT/MPTS table&quot;&quot;&quot;</span>
+<span class="c1">#pylint: disable=C0111,C0103,C0301,W0612,R0914,R0201</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.materials</span> <span class="kn">import</span> <span class="p">(</span><span class="n">CREEP</span><span class="p">,</span> <span class="n">MAT1</span><span class="p">,</span> <span class="n">MAT2</span><span class="p">,</span> <span class="n">MAT3</span><span class="p">,</span> <span class="n">MAT4</span><span class="p">,</span> <span class="n">MAT5</span><span class="p">,</span>
+                                           <span class="n">MAT8</span><span class="p">,</span> <span class="n">MAT9</span><span class="p">,</span> <span class="n">MAT10</span><span class="p">,</span> <span class="n">MAT11</span><span class="p">,</span> <span class="n">MATHP</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.material_deps</span> <span class="kn">import</span> <span class="n">MATS1</span><span class="p">,</span> <span class="n">MATT1</span><span class="p">,</span> <span class="n">MATT2</span><span class="p">,</span> <span class="n">MATT3</span><span class="p">,</span> <span class="n">MATT4</span><span class="p">,</span> <span class="n">MATT5</span><span class="p">,</span> <span class="n">MATT9</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.dynamic</span> <span class="kn">import</span> <span class="n">NLPARM</span><span class="p">,</span> <span class="n">TSTEPNL</span> <span class="c1"># TSTEP</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom_common</span> <span class="kn">import</span> <span class="n">GeomCommon</span>
+<span class="c1">#from pyNastran.bdf.cards.thermal.thermal import (CHBDYE, CHBDYG, CHBDYP, PCONV, PCONVM,</span>
+                                                 <span class="c1">#PHBDY, CONV, CONVM, RADBC)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.thermal.radiation</span> <span class="kn">import</span> <span class="n">RADM</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_reader</span> <span class="kn">import</span> <span class="n">mapfmt</span> <span class="c1"># , reshape_bytes_block</span>
+
+
+<div class="viewcode-block" id="MPT"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.mpt.html#pyNastran.op2.tables.geom.mpt.MPT">[docs]</a><span class="k">class</span> <span class="nc">MPT</span><span class="p">(</span><span class="n">GeomCommon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines methods for reading op2 materials &amp; time-stepping methods&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_read_mpt_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mpt_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GeomCommon</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">big_materials</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1">#F:\work\pyNastran\examples\Dropbox\move_tpl\chkout01.op2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mpt_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">1003</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">245</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;CREEP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_creep</span><span class="p">],</span>  <span class="c1"># record 1</span>
+            <span class="p">(</span><span class="mi">103</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">77</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat1</span><span class="p">],</span>       <span class="c1"># record 3-msc-dmap2014</span>
+            <span class="p">(</span><span class="mi">203</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">78</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat2</span><span class="p">],</span>       <span class="c1"># record 3</span>
+            <span class="p">(</span><span class="mi">1403</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">122</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat3</span><span class="p">],</span>    <span class="c1"># record 4</span>
+            <span class="p">(</span><span class="mi">2103</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">234</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat4</span><span class="p">],</span>    <span class="c1"># record 5</span>
+            <span class="p">(</span><span class="mi">2203</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">235</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT5&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat5</span><span class="p">],</span>    <span class="c1"># record 6</span>
+            <span class="p">(</span><span class="mi">2503</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">288</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT8&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat8</span><span class="p">],</span>    <span class="c1"># record 7</span>
+            <span class="p">(</span><span class="mi">2603</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT9&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat9</span><span class="p">],</span>    <span class="c1"># record 8 - buggy</span>
+            <span class="p">(</span><span class="mi">2801</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">365</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT10&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat10</span><span class="p">],</span>  <span class="c1"># record 9</span>
+            <span class="p">(</span><span class="mi">2903</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">371</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MAT11&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mat11</span><span class="p">],</span>  <span class="c1"># record ??? - NX specific - buggy?</span>
+
+            <span class="p">(</span><span class="mi">4506</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">374</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATHP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mathp</span><span class="p">],</span>   <span class="c1"># record 11</span>
+            <span class="p">(</span><span class="mi">503</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">90</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATS1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mats1</span><span class="p">],</span>      <span class="c1"># record 12</span>
+            <span class="p">(</span><span class="mi">703</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">91</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt1</span><span class="p">],</span>      <span class="c1"># record 13 - not done</span>
+            <span class="p">(</span><span class="mi">803</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">102</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt2</span><span class="p">],</span>     <span class="c1"># record 14</span>
+            <span class="c1">#(1503, 14, 189) : [&#39;MATT3&#39;, self._read_matt3],   # record 15 - not done</span>
+            <span class="p">(</span><span class="mi">1503</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">189</span><span class="p">)</span>  <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt3</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2303</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">237</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt4</span><span class="p">],</span>   <span class="c1"># record 16 - not done</span>
+            <span class="p">(</span><span class="mi">2403</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">238</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT5&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt5</span><span class="p">],</span>   <span class="c1"># record 17 - not done</span>
+            <span class="p">(</span><span class="mi">2703</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">301</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT9&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt9</span><span class="p">],</span>   <span class="c1"># record 19 - not done</span>
+            <span class="p">(</span><span class="mi">8802</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">413</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;RADM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_radm</span><span class="p">],</span>     <span class="c1"># record 25 - not done</span>
+            <span class="c1"># record 26</span>
+            <span class="p">(</span><span class="mi">3003</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">286</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NLPARM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_nlparm</span><span class="p">],</span>   <span class="c1"># record 27</span>
+            <span class="p">(</span><span class="mi">3104</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">350</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NLPCI&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_nlpci</span><span class="p">],</span>     <span class="c1"># record 28</span>
+            <span class="p">(</span><span class="mi">3103</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">337</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TSTEPNL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tstepnl</span><span class="p">],</span> <span class="c1"># record 29</span>
+            <span class="p">(</span><span class="mi">3303</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">988</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT11&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt11</span><span class="p">],</span>
+
+            <span class="p">(</span><span class="mi">903</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">336</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATT8&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_matt8</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8902</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">423</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;RADMT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_radmt</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">9002</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">410</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;RADBND&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_radbnd</span><span class="p">],</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="MPT.add_op2_material"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.mpt.html#pyNastran.op2.tables.geom.mpt.MPT.add_op2_material">[docs]</a>    <span class="k">def</span> <span class="nf">add_op2_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
+        <span class="c1">#if mat.mid &gt; 100000000:</span>
+            <span class="c1">#raise RuntimeError(&#39;bad parsing...&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_structural_material_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="c1">#print(str(mat)[:-1])</span>
+
+    <span class="k">def</span> <span class="nf">_read_creep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CREEP(1003,10,245) - record 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i2f4ifi7f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(mid, T0, exp, form, tidkp, tidcp, tidcs, thresh,</span>
+             <span class="c1">#Type, ag1, ag2, ag3, ag4, ag5, ag6, ag7) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  CREEP=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">CREEP</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_creep_material_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;CREEP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT1(103,1,77) - record 2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 12*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i10fi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(mid, E, G, nu, rho, A, tref, ge, St, Sc, Ss, mcsid) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT2(203,2,78) - record 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ndatai</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="k">if</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="mi">68</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">68</span>  <span class="c1"># 17*4</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i15fi&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">17</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+            <span class="n">nleftover</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i15fi 6i&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unexpected MAT2 format; ndatai=</span><span class="si">{</span><span class="n">ndatai</span><span class="si">}</span><span class="s1"> ntotal=</span><span class="si">{</span><span class="n">ntotal</span><span class="si">}</span><span class="s1"> nmaterials=</span><span class="si">{</span><span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span><span class="si">}</span><span class="s1"> &#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;leftover=</span><span class="si">{</span><span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nleftover</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nleftover</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span>
+
+        <span class="n">nbig_materials</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MAT2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">68</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">g4</span><span class="p">,</span> <span class="n">g5</span><span class="p">,</span> <span class="n">g6</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">aj1</span><span class="p">,</span> <span class="n">aj2</span><span class="p">,</span> <span class="n">aj3</span><span class="p">,</span>
+                 <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">St</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Ss</span><span class="p">,</span> <span class="n">mcsid</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">g4</span><span class="p">,</span> <span class="n">g5</span><span class="p">,</span> <span class="n">g6</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">aj1</span><span class="p">,</span> <span class="n">aj2</span><span class="p">,</span> <span class="n">aj3</span><span class="p">,</span>
+                 <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">St</span><span class="p">,</span> <span class="n">Sc</span><span class="p">,</span> <span class="n">Ss</span><span class="p">,</span> <span class="n">mcsid</span><span class="p">,</span> <span class="o">*</span><span class="n">blanks</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="c1">#print(&quot;MAT2 = &quot;,out)</span>
+
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">mid</span> <span class="o">&lt;=</span> <span class="mf">1e8</span><span class="p">:</span>  <span class="c1"># just a checker for out of range materials</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nbig_materials</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">big_materials</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+
+        <span class="n">ncards</span> <span class="o">=</span> <span class="n">nmaterials</span> <span class="o">-</span> <span class="n">nbig_materials</span>
+        <span class="k">if</span> <span class="n">ncards</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncards</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT3(1403,14,122) - record 4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i8fi5fi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">])</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">eth</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">nuxth</span><span class="p">,</span> <span class="n">nuthz</span><span class="p">,</span> <span class="n">nuzx</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">gzx</span><span class="p">,</span>
+             <span class="n">blank</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ath</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">blank</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MAT3=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT3</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">([</span><span class="n">mid</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">eth</span><span class="p">,</span> <span class="n">ez</span><span class="p">,</span> <span class="n">nuxth</span><span class="p">,</span> <span class="n">nuthz</span><span class="p">,</span>
+                                     <span class="n">nuzx</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">gzx</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ath</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT4(2103,21,234) - record 5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">44</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i10f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">])</span>
+            <span class="c1">#(mid, k, cp, rho, h, mu, hgen, refenth, tch, tdelta, qlat) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT4</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_material_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT5(2203,22,235) - record 6</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i9f&#39;</span><span class="p">)</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">40</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">40</span><span class="p">])</span>
+            <span class="c1">#(mid, k1, k2, k3, k4, k5, k6, cp, rho, hgen) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MAT5=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT5</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_material_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">40</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat8</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT8(2503,25,288) - record 7</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">76</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i18f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">])</span>
+            <span class="c1">#(mid, E1, E2, nu12, G12, G1z, G2z, rho, a1, a2,</span>
+            <span class="c1"># tref, Xt, Xc, Yt, Yc, S, ge, f12, strn) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT8</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat9</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT9(2603,26,300) - record 9</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#self.log.info(&#39;skipping MAT9&#39;)</span>
+        <span class="c1">#return len(data)</span>
+        <span class="n">ndatai</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="k">if</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="mi">140</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i 30f iiii&#39;</span><span class="p">)</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">140</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;unexpected MAT9 format...&#39;</span><span class="p">)</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">35</span> <span class="o">+</span> <span class="mi">21</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="c1"># 35</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i 30f iiii 21i&#39;</span><span class="p">)</span>
+            <span class="c1">#ntotal = 56 * 4</span>
+            <span class="c1">#s1 = Struct(self._endian + b&#39;i 21f 34i&#39;)</span>
+            <span class="c1">#s2 = Struct(self._endian + b&#39;i 21f 34f&#39;)</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;ndatai=</span><span class="si">{</span><span class="n">ndatai</span><span class="si">}</span><span class="s1"> ntotal=</span><span class="si">{</span><span class="n">ntotal</span><span class="si">}</span><span class="s1"> nmaterials=</span><span class="si">{</span><span class="n">nmaterials</span><span class="si">}</span><span class="s1"> leftover=</span><span class="si">{</span><span class="n">ndatai</span> <span class="o">%</span> <span class="n">ntotal</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;  MAT9=(mid, g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, &#39;</span>
+                <span class="s1">&#39;g11, g12, g13, g14, g15, g16, g17, g18, g19, g20, g21, &#39;</span>
+                <span class="s1">&#39;rho, a1, a2, a3, a4, a5, a6, tref, ge, &#39;</span>
+                <span class="s1">&#39;blank1, blank2, blank3, blank4)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s2</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    MAT9=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">35</span><span class="p">:</span>
+                <span class="c1">#print(out)</span>
+                <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">g4</span><span class="p">,</span> <span class="n">g5</span><span class="p">,</span> <span class="n">g6</span><span class="p">,</span> <span class="n">g7</span><span class="p">,</span> <span class="n">g8</span><span class="p">,</span> <span class="n">g9</span><span class="p">,</span> <span class="n">g10</span><span class="p">,</span>
+                 <span class="n">g11</span><span class="p">,</span> <span class="n">g12</span><span class="p">,</span> <span class="n">g13</span><span class="p">,</span> <span class="n">g14</span><span class="p">,</span> <span class="n">g15</span><span class="p">,</span> <span class="n">g16</span><span class="p">,</span> <span class="n">g17</span><span class="p">,</span> <span class="n">g18</span><span class="p">,</span> <span class="n">g19</span><span class="p">,</span> <span class="n">g20</span><span class="p">,</span> <span class="n">g21</span><span class="p">,</span>
+                 <span class="n">rho</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">,</span> <span class="n">a6</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span>
+                 <span class="n">blank1</span><span class="p">,</span> <span class="n">blank2</span><span class="p">,</span> <span class="n">blank3</span><span class="p">,</span> <span class="n">blank4</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">g4</span><span class="p">,</span> <span class="n">g5</span><span class="p">,</span> <span class="n">g6</span><span class="p">,</span> <span class="n">g7</span><span class="p">,</span> <span class="n">g8</span><span class="p">,</span> <span class="n">g9</span><span class="p">,</span> <span class="n">g10</span><span class="p">,</span>
+                 <span class="n">g11</span><span class="p">,</span> <span class="n">g12</span><span class="p">,</span> <span class="n">g13</span><span class="p">,</span> <span class="n">g14</span><span class="p">,</span> <span class="n">g15</span><span class="p">,</span> <span class="n">g16</span><span class="p">,</span> <span class="n">g17</span><span class="p">,</span> <span class="n">g18</span><span class="p">,</span> <span class="n">g19</span><span class="p">,</span> <span class="n">g20</span><span class="p">,</span> <span class="n">g21</span><span class="p">,</span>
+                 <span class="n">rho</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">,</span> <span class="n">a6</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span>
+                 <span class="n">blank1</span><span class="p">,</span> <span class="n">blank2</span><span class="p">,</span> <span class="n">blank3</span><span class="p">,</span> <span class="n">blank4</span><span class="p">,</span> <span class="o">*</span><span class="n">blanks</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">],</span> <span class="n">types</span><span class="o">=</span><span class="s1">&#39;if&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">blanks</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">blank1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blank1</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">mid</span><span class="p">,</span> <span class="p">[</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">,</span> <span class="n">g3</span><span class="p">,</span> <span class="n">g4</span><span class="p">,</span> <span class="n">g5</span><span class="p">,</span> <span class="n">g6</span><span class="p">,</span> <span class="n">g7</span><span class="p">,</span> <span class="n">g8</span><span class="p">,</span> <span class="n">g9</span><span class="p">,</span> <span class="n">g10</span><span class="p">,</span>
+                             <span class="n">g11</span><span class="p">,</span> <span class="n">g12</span><span class="p">,</span> <span class="n">g13</span><span class="p">,</span> <span class="n">g14</span><span class="p">,</span> <span class="n">g15</span><span class="p">,</span> <span class="n">g16</span><span class="p">,</span> <span class="n">g17</span><span class="p">,</span> <span class="n">g18</span><span class="p">,</span> <span class="n">g19</span><span class="p">,</span> <span class="n">g20</span><span class="p">,</span> <span class="n">g21</span><span class="p">],</span>
+                       <span class="n">rho</span><span class="p">,</span> <span class="p">[</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">,</span> <span class="n">a6</span><span class="p">],</span>
+                       <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">]</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT9</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat10</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT10(2801,28,365) - record 9</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 MID   I Material identification number</span>
+<span class="sd">        2 BULK RS Bulk modulus</span>
+<span class="sd">        3 RHO  RS Mass density</span>
+<span class="sd">        4 C    RS Speed of sound</span>
+<span class="sd">        5 GE   RS Structural damping coefficient</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 5*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i4f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">nmaterials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nmaterials</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">bulk</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">ge</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MAT10=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">mid</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bulk</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">and</span> <span class="n">rho</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="mf">0.</span> <span class="ow">and</span> <span class="n">ge</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;  skipping empty MAT10...&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT10</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">mat</span><span class="o">.</span><span class="n">mid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat11</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT11(2903,29,371)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">128</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 23*4</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i 15f 16i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">nmaterials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nmaterials</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(mid, e1, e2, e3, nu12, nu13, nu23, g12, g13, g23,</span>
+             <span class="c1">#rho, a1, a2, a3, tref, ge) = out[:16]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MA11=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT11</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT11&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mat11_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MAT11(2903,29,371)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">80</span>  <span class="c1"># 20*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i 15f 4s 4s 4s 4s&#39;</span><span class="p">)</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">nmaterials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nmaterials</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">80</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">nu12</span><span class="p">,</span> <span class="n">nu13</span><span class="p">,</span> <span class="n">nu23</span><span class="p">,</span> <span class="n">g12</span><span class="p">,</span> <span class="n">g13</span><span class="p">,</span> <span class="n">g23</span><span class="p">,</span>
+             <span class="n">rho</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span>
+             <span class="n">blank1</span><span class="p">,</span> <span class="n">blank2</span><span class="p">,</span> <span class="n">blank3</span><span class="p">,</span> <span class="n">blank4</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MAT11-old=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MAT11</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">mid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_op2_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">80</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MAT11&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mathp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MATHP(4506,45,374) - Record 11</span>
+
+<span class="sd">        NX/MSC</span>
+<span class="sd">        1 MID       I Material identification number</span>
+<span class="sd">        2 A10      RS Material constant related to distortional deformation</span>
+<span class="sd">        3 A01      RS Material constant related to distortional deformation</span>
+<span class="sd">        4 D1       RS Material constant related to volumetric deformation</span>
+<span class="sd">        5 RHO      RS Mass density</span>
+<span class="sd">        6 ALPHA    RS Coefficient of volumetric thermal expansion</span>
+<span class="sd">        7 TREF     RS Reference temperature</span>
+<span class="sd">        8 GE       RS Structural damping element coefficient</span>
+<span class="sd">        9 SF        I ???</span>
+<span class="sd">        10 NA       I Order of the distortional strain energy polynomial function</span>
+<span class="sd">        11 ND       I Order of the volumetric strain energy polynomial function</span>
+<span class="sd">        12 KP      RS ???</span>
+<span class="sd">        13 A20     RS Material constant related to distortional deformation</span>
+<span class="sd">        14 A11     RS Material constant related to distortional deformation</span>
+<span class="sd">        15 A02     RS Material constant related to distortional deformation</span>
+<span class="sd">        16 D2      RS Material constant related to volumetric deformation</span>
+<span class="sd">        17 A30     RS Material constant related to distortional deformation</span>
+<span class="sd">        18 A21     RS Material constant related to distortional deformation</span>
+<span class="sd">        19 A12     RS Material constant related to distortional deformation</span>
+<span class="sd">        20 A03     RS Material constant related to distortional deformation</span>
+<span class="sd">        21 D3      RS Material constant related to volumetric deformation</span>
+<span class="sd">        22 A40     RS Material constant related to distortional deformation</span>
+<span class="sd">        23 A31     RS Material constant related to distortional deformation</span>
+<span class="sd">        24 A22     RS Material constant related to distortional deformation</span>
+<span class="sd">        25 A13     RS Material constant related to distortional deformation</span>
+<span class="sd">        26 A04     RS Material constant related to distortional deformation</span>
+<span class="sd">        27 D4      RS Material constant related to volumetric deformation</span>
+<span class="sd">        28 A50     RS Material constant related to distortional deformation</span>
+<span class="sd">        29 A41     RS Material constant related to distortional deformation</span>
+<span class="sd">        30 A32     RS Material constant related to distortional deformation</span>
+<span class="sd">        31 A23     RS Material constant related to distortional deformation</span>
+<span class="sd">        32 A14     RS Material constant related to distortional deformation</span>
+<span class="sd">        33 A05     RS Material constant related to distortional deformation</span>
+<span class="sd">        34 D5      RS Material constant related to volumetric deformation</span>
+<span class="sd">        35 CONTFLG  I Continuation flag</span>
+<span class="sd">        CONTFLG =1 With continuation</span>
+<span class="sd">        36 TAB1 I TABLES1 identification number which defines tension/compression</span>
+<span class="sd">        37 TAB2 I TABLES1 identification number which defines equibiaxial tension</span>
+<span class="sd">        38 TAB3 I TABLES1 identification number which defines simple shear</span>
+<span class="sd">        39 TAB4 I TABLES1 identification number which defines pure shear</span>
+<span class="sd">        40 UNDEF(3) None</span>
+<span class="sd">        43 TAB5 I TABLES1 identification number which defines volumetric compression</span>
+<span class="sd">        CONTFLG =0 Without continuation</span>
+<span class="sd">        End CONTFLG</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i7f3i23fi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;8i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">140</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 7*4</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">n2</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal1</span><span class="p">]</span>
+            <span class="n">out1</span> <span class="o">=</span> <span class="n">s1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal1</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">a10</span><span class="p">,</span> <span class="n">a01</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">sf</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span>
+             <span class="n">a20</span><span class="p">,</span> <span class="n">a11</span><span class="p">,</span> <span class="n">a02</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span>
+             <span class="n">a30</span><span class="p">,</span> <span class="n">a21</span><span class="p">,</span> <span class="n">a12</span><span class="p">,</span> <span class="n">a03</span><span class="p">,</span> <span class="n">d3</span><span class="p">,</span>
+             <span class="n">a40</span><span class="p">,</span> <span class="n">a31</span><span class="p">,</span> <span class="n">a22</span><span class="p">,</span> <span class="n">a13</span><span class="p">,</span> <span class="n">a04</span><span class="p">,</span> <span class="n">d4</span><span class="p">,</span>
+             <span class="n">a50</span><span class="p">,</span> <span class="n">a41</span><span class="p">,</span> <span class="n">a32</span><span class="p">,</span> <span class="n">a23</span><span class="p">,</span> <span class="n">a14</span><span class="p">,</span> <span class="n">a05</span><span class="p">,</span> <span class="n">d5</span><span class="p">,</span>
+             <span class="n">continue_flag</span><span class="p">)</span> <span class="o">=</span> <span class="n">out1</span>
+
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">n2</span><span class="p">:</span>
+                <span class="c1"># we have to hack the continue_flag because it&#39;s wrong...</span>
+                <span class="c1"># C:\Users\sdoyle\Dropbox\move_tpl\ehq45.op2</span>
+                <span class="n">continue_flag</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">out1</span> <span class="o">=</span> <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">a10</span><span class="p">,</span> <span class="n">a01</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">tref</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">sf</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nd</span><span class="p">,</span> <span class="n">kp</span><span class="p">,</span>
+                        <span class="n">a20</span><span class="p">,</span> <span class="n">a11</span><span class="p">,</span> <span class="n">a02</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span>
+                        <span class="n">a30</span><span class="p">,</span> <span class="n">a21</span><span class="p">,</span> <span class="n">a12</span><span class="p">,</span> <span class="n">a03</span><span class="p">,</span> <span class="n">d3</span><span class="p">,</span>
+                        <span class="n">a40</span><span class="p">,</span> <span class="n">a31</span><span class="p">,</span> <span class="n">a22</span><span class="p">,</span> <span class="n">a13</span><span class="p">,</span> <span class="n">a04</span><span class="p">,</span> <span class="n">d4</span><span class="p">,</span>
+                        <span class="n">a50</span><span class="p">,</span> <span class="n">a41</span><span class="p">,</span> <span class="n">a32</span><span class="p">,</span> <span class="n">a23</span><span class="p">,</span> <span class="n">a14</span><span class="p">,</span> <span class="n">a05</span><span class="p">,</span> <span class="n">d5</span><span class="p">,</span>
+                        <span class="n">continue_flag</span><span class="p">)</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">out1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">continue_flag</span><span class="p">:</span>
+                <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal2</span><span class="p">]</span>
+                <span class="n">out2</span> <span class="o">=</span> <span class="n">s2</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="c1">#(tab1, tab2, tab3, tab4, x1, x2, x3, tab5) = out2</span>
+                <span class="n">data_in</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out2</span><span class="p">)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATHP</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATHP=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_hyperelastic_material_object</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">nmaterials</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">nmaterials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MATP nmaterials=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmaterials</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MATHP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_mats1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MATS1(503,5,90) - record 12</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">44</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 11*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;3ifiiff3i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="n">hr</span><span class="p">,</span> <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">bmat</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">a</span>
+            <span class="k">assert</span> <span class="n">bmat</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bmat</span>
+            <span class="k">assert</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">c</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">mid</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="n">hr</span><span class="p">,</span> <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATS1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATS1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MATS1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MATT1(703,7,91)</span>
+<span class="sd">        checked NX-10.1, MSC-2016</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;12i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span>  <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 12*4</span>
+        <span class="n">ncards</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncards</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(mid, tableid, ...., None) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;MATT1&#39;</span><span class="p">,</span> <span class="n">ncards</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1 MID         I Material identification number</span>
+<span class="sd">        2 TID(15)     I TABLEMi entry identification numbers</span>
+<span class="sd">        17        UNDEF none Not used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">68</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 17*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;17i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g11_table</span><span class="p">,</span> <span class="n">g12_table</span><span class="p">,</span> <span class="n">g13_table</span><span class="p">,</span> <span class="n">g22_table</span><span class="p">,</span>
+             <span class="n">g23_table</span><span class="p">,</span> <span class="n">g33_table</span><span class="p">,</span> <span class="n">rho_table</span><span class="p">,</span>
+             <span class="n">a1_table</span><span class="p">,</span> <span class="n">a2_table</span><span class="p">,</span> <span class="n">a3_table</span><span class="p">,</span> <span class="n">unused_zeroa</span><span class="p">,</span> <span class="n">ge_table</span><span class="p">,</span>
+             <span class="n">st_table</span><span class="p">,</span> <span class="n">sc_table</span><span class="p">,</span> <span class="n">ss_table</span><span class="p">,</span> <span class="n">unused_zerob</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">unused_zeroa</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;unused_zeroa=</span><span class="si">{</span><span class="n">unused_zeroa</span><span class="si">}</span><span class="s1"> out=</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">assert</span> <span class="n">unused_zerob</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;unused_zerob=</span><span class="si">{</span><span class="n">unused_zerob</span><span class="si">}</span><span class="s1"> out=</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT2</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="n">g11_table</span><span class="p">,</span> <span class="n">g12_table</span><span class="p">,</span> <span class="n">g13_table</span><span class="p">,</span> <span class="n">g22_table</span><span class="p">,</span>
+                        <span class="n">g23_table</span><span class="p">,</span> <span class="n">g33_table</span><span class="p">,</span> <span class="n">rho_table</span><span class="p">,</span>
+                        <span class="n">a1_table</span><span class="p">,</span> <span class="n">a2_table</span><span class="p">,</span> <span class="n">a3_table</span><span class="p">,</span> <span class="n">ge_table</span><span class="p">,</span>
+                        <span class="n">st_table</span><span class="p">,</span> <span class="n">sc_table</span><span class="p">,</span> <span class="n">ss_table</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MATT2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 MID     I Material identification number</span>
+<span class="sd">        2 TID(15) I entry identification numbers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 16*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;16i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="o">*</span><span class="n">tables</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT3=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="c1">#mat = MATT3(mid, ex_table=None, eth_table=None, ez_table=None, nuth_table=None,</span>
+                     <span class="c1">#nuxz_table=None, rho_table=None, gzx_table=None,</span>
+                     <span class="c1">#ax_table=None, ath_table=None, az_table=None, ge_table=None,)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT3</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="o">*</span><span class="n">tables</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MATT3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MATT4(2303,23,237)</span>
+<span class="sd">        checked NX-10.1, MSC-2016</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">struct_7i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;7i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 7*4</span>
+        <span class="n">ncards</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncards</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_7i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT4=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(mid, tk, tcp, null, th, tmu, thgen) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT4</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;MATT4&#39;</span><span class="p">,</span> <span class="n">ncards</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MATT5(2403,24,238)</span>
+<span class="sd">        checked NX-10.1, MSC-2016</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;10i&#39;</span><span class="p">)</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">40</span> <span class="c1"># 10*4</span>
+        <span class="n">ncards</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncards</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT4=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(mid, kxx_table, kxy_table, kxz_table, kyy_table, kyz_table, kzz_table,</span>
+            <span class="c1"># cp_table, null, hgen_table) = out</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT5</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;MATT5&#39;</span><span class="p">,</span> <span class="n">ncards</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1"># MATT8 - unused</span>
+    <span class="k">def</span> <span class="nf">_read_matt8</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping MATT8 in MPT&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt9</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 MID    I Material identification number</span>
+<span class="sd">        2 TC(21) I TABLEMi identification numbers for material property matrix</span>
+<span class="sd">        23 TRHO  I TABLEMi identification number for mass density</span>
+<span class="sd">        24 TA(6) I TABLEMi identification numbers for thermal expansion coefficients</span>
+<span class="sd">        30 UNDEF None</span>
+<span class="sd">        31 TGE   I TABLEMi identification number for structural damping coefficient</span>
+<span class="sd">        32 UNDEF(4) None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">140</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 35*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;35i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="o">*</span><span class="n">tc_tables</span><span class="p">,</span> <span class="n">trho</span><span class="p">,</span> <span class="n">ta1</span><span class="p">,</span> <span class="n">ta2</span><span class="p">,</span> <span class="n">ta3</span><span class="p">,</span> <span class="n">ta4</span><span class="p">,</span> <span class="n">ta5</span><span class="p">,</span> <span class="n">ta6</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">tge</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MATT9=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="k">assert</span> <span class="n">e</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span>
+            <span class="c1">#MATT9(mid, g11_table=None, g12_table=None, g13_table=None, g14_table=None,</span>
+                                 <span class="c1">#g15_table=None, g16_table=None, g22_table=None, g23_table=None,</span>
+                                 <span class="c1">#g24_table=None, g25_table=None, g26_table=None, g33_table=None,</span>
+                                 <span class="c1">#g34_table=None, g35_table=None, g36_table=None, g44_table=None,</span>
+                                 <span class="c1">#g45_table=None, g46_table=None, g55_table=None, g56_table=None,</span>
+                                 <span class="c1">#g66_table=None, rho_table=None,</span>
+                                 <span class="c1">#a1_table=None, a2_table=None, a3_table=None,</span>
+                                 <span class="c1">#a4_table=None, a5_table=None, a6_table=None, ge_table=None, comment=&#39;&#39;)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">MATT9</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="o">*</span><span class="n">tc_tables</span><span class="p">,</span> <span class="n">trho</span><span class="p">,</span> <span class="n">ta1</span><span class="p">,</span> <span class="n">ta2</span><span class="p">,</span> <span class="n">ta3</span><span class="p">,</span> <span class="n">ta4</span><span class="p">,</span> <span class="n">ta5</span><span class="p">,</span> <span class="n">ta6</span><span class="p">,</span> <span class="n">tge</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_material_dependence_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MATT9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_matt11</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping MATT11 in MPT&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># MBOLT</span>
+<span class="c1"># MBOLTUS</span>
+<span class="c1"># MSTACK</span>
+<span class="c1"># NLAUTO</span>
+
+    <span class="k">def</span> <span class="nf">_read_radbnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping RADBND in MPT&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_read_radm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        RADM(8802,88,413) - record 25</span>
+<span class="sd">        .. todo:: add object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">struct_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_i</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">ndata</span><span class="p">:</span>  <span class="c1"># 1*4</span>
+            <span class="n">packs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">number</span><span class="p">,</span> <span class="o">=</span> <span class="n">struct_i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">4</span>
+
+            <span class="n">iformat</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i </span><span class="si">%i</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">number</span><span class="p">)</span>
+            <span class="n">struct_i_nf</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="n">iformat</span><span class="p">)</span>
+            <span class="c1">#mid, absorb, emiss1, emiss2, ...</span>
+            <span class="n">ndata_per_pack</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">number</span>
+            <span class="n">nstr_per_pack</span> <span class="o">=</span> <span class="n">ndata_per_pack</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="n">nfields</span> <span class="o">=</span> <span class="p">(</span><span class="n">ndata</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span>
+            <span class="n">npacks</span> <span class="o">=</span> <span class="n">nfields</span> <span class="o">//</span> <span class="n">ndata_per_pack</span>
+            <span class="k">for</span> <span class="n">unused_ipack</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npacks</span><span class="p">):</span>
+                <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">nstr_per_pack</span><span class="p">]</span>
+                <span class="n">pack</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">struct_i_nf</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">))</span>
+                <span class="n">packs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pack</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">nstr_per_pack</span>
+
+                <span class="n">mat</span> <span class="o">=</span> <span class="n">RADM</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">pack</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_bc_object</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">mat</span><span class="o">.</span><span class="n">radmid</span><span class="p">)</span>
+                <span class="n">nmaterials</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;RADM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmaterials</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_radmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping RADMT in MPT&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_nlparm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        NLPARM(3003,30,286) - record 27</span>
+
+<span class="sd">        NX 2019.2</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID       I Set identification number</span>
+<span class="sd">        2 NINC      I Number of increments</span>
+<span class="sd">        3 DT       RS Incremental time interval for creep analysis</span>
+<span class="sd">        4 KMETHOD   I Method for controlling stiffness updates</span>
+<span class="sd">        5 KSTEP     I Number of iterations before the stiffness update</span>
+<span class="sd">        6 MAXITER   I Limit on number of iterations for each load increment</span>
+<span class="sd">        7 CONV      I Flags to select convergence criteria</span>
+<span class="sd">        8 INTOUT    I Intermediate output flag</span>
+<span class="sd">        9 EPSU     RS Error tolerance for displacement U criterion</span>
+<span class="sd">        10 EPSP    RS Error tolerance for displacement P criterion</span>
+<span class="sd">        11 EPSW    RS Error tolerance for displacement W criterion</span>
+<span class="sd">        12 MAXDIV   I Limit on probable divergence conditions</span>
+<span class="sd">        13 MAXQN    I Maximum number of quasi-Newton correction vectors</span>
+<span class="sd">        14 MAXLS    I Maximum number of line searches</span>
+<span class="sd">        15 FSTRESS RS Fraction of effective stress</span>
+<span class="sd">        16 LSTOL   RS Line search tolerance</span>
+<span class="sd">        17 MAXBIS   I Maximum number of bisections</span>
+<span class="sd">        18 MAXR    RS Maximum ratio for the adjusted arc-length increment</span>
+<span class="sd">        19 RTOLB   RS Maximum value of incremental rotation</span>
+
+<span class="sd">        ndata = 80:</span>
+<span class="sd">                  sid nic dt   km ks max con int  epu   epp   epw   mx mx  mx fstr  lso  mx mx    rtolb</span>
+<span class="sd">        ints    = (1, 10, 0,   1, 5, 25, -1, 0,   0.01, 0.01, 0.01, 3, 25, 4, 0.20, 0.5, 5, 20.0, 20.0, 0)</span>
+<span class="sd">        floats  = (1, 10, 0.0, 1, 5, 25, -1, 0.0, 0.01, 0.01, 0.01, 3, 25, 4, 0.20, 0.5, 5, 20.0, 20.0, 0.0)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">76</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 19*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif5i3f3iffiff&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">ndatai</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="n">ndatai</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="n">nentries</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="c1">#assert ndatai % ntotal == 0</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(sid,ninc,dt,kMethod,kStep,maxIter,conv,intOut,epsU,epsP,epsW,</span>
+            <span class="c1"># maxDiv,maxQn,maxLs,fStress,lsTol,maxBisect,maxR,rTolB) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  NLPARM=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_nlparm_object</span><span class="p">(</span><span class="n">NLPARM</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;NLPARM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_nlpci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping NLPCI in MPT&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_tstepnl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;common method to read MSC/NX TSTEPNLs&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dual_card</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tstepnl_nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tstepnl_msc</span><span class="p">,</span>
+                                 <span class="s1">&#39;TSTEPNL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tstepnl_object</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tstepnl_nx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TSTEPNL</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TSTEPNL(3103,31,337) - record 29</span>
+
+<span class="sd">        NX 2019.2</span>
+<span class="sd">        23 KDAMP    I Flags to include differential stiffness to form structural damping</span>
+<span class="sd">        24 KUPDATE  I Method for dynamic matrix update</span>
+<span class="sd">        25 KUSTEP   I Number of iterations before the stiffness update</span>
+<span class="sd">        26 TINTOPT  I Time integration method</span>
+<span class="sd">        27 GAMMA   RS Amplitude decay factor for 2nd order transient integration</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">108</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 27*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif5i3f3if3i4f 4if&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">nentries</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nentries</span>
+        <span class="n">tstepnls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(sid,ndt,dt,no,kMethod,kStep,maxIter,conv,epsU,epsP,epsW,</span>
+            <span class="c1"># maxDiv,maxQn,maxLs,fStress,lsTol,maxBisect,adjust,mStep,rb,maxR,uTol,rTolB) = out</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;method=4; skipping TSTEPNL=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tstepnl</span> <span class="o">=</span> <span class="n">TSTEPNL</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="n">tstepnls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tstepnl</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">tstepnls</span>
+
+    <span class="k">def</span> <span class="nf">_read_tstepnl_msc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">TSTEPNL</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TSTEPNL(3103,31,337) - record 29</span>
+
+<span class="sd">        MSC 2005.2</span>
+<span class="sd">        1 SID       I Set identification number</span>
+<span class="sd">        2 NDT       I Number of time steps of value DT</span>
+<span class="sd">        3 DT       RS Time increment</span>
+<span class="sd">        4 NO        I Time step interval for output</span>
+<span class="sd">        5 METHOD    I Method for dynamic matrix update</span>
+<span class="sd">        6 KSTEP     I Time step interval or number of converged bisections</span>
+<span class="sd">        7 MAXITER   I Limit on number of iterations</span>
+<span class="sd">        8 CONV      I Flags to select convergence criteria</span>
+<span class="sd">        9 EPSU     RS Error tolerance for displacement U criterion</span>
+<span class="sd">        10 EPSP    RS Error tolerance for displacement P criterion</span>
+<span class="sd">        11 EPSW    RS Error tolerance for displacement W criterion</span>
+<span class="sd">        12 MAXDIV   I Limit on probable divergence conditions</span>
+<span class="sd">        13 MAXQN    I Maximum number of quasi-Newton correction vectors</span>
+<span class="sd">        14 MAXLS    I Maximum number of line searches</span>
+<span class="sd">        15 FSTRESS RS Fraction of effective stress</span>
+<span class="sd">        16 MAXBIS   I Maximum number of bisections</span>
+<span class="sd">        17 ADJUST   I Time step skip factor for automatic time step adjustment</span>
+<span class="sd">        18 MSTEP    I Number of steps to obtain the dominant period response</span>
+<span class="sd">        19 RB      RS Define bounds for maintaining the same time step</span>
+<span class="sd">        20 MAXR    RS Maximum ratio for the adjusted arc-length increment</span>
+<span class="sd">        21 UTOL    RS Tolerance on displacement or temperature increment</span>
+<span class="sd">        22 RTOLB   RS Maximum value of incremental rotation</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">88</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 22*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif5i3f3if3i4f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">nentries</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nentries</span>
+        <span class="n">tstepnls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(sid,ndt,dt,no,kMethod,kStep,maxIter,conv,epsU,epsP,epsW,</span>
+            <span class="c1"># maxDiv,maxQn,maxLs,fStress,lsTol,maxBisect,adjust,mStep,rb,maxR,uTol,rTolB) = out</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;method=4; skipping TSTEPNL=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tstepnl</span> <span class="o">=</span> <span class="n">TSTEPNL</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="n">tstepnls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tstepnl</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">tstepnls</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

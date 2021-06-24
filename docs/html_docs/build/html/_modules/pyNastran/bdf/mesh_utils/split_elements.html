@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.split_elements &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.split_elements</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.split_elements</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd">  - split_line_elements(bdf_model, eids, neids=2,</span>
+<span class="sd">                        eid_start=1, nid_start=1)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+
+
+<div class="viewcode-block" id="split_line_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.split_elements.split_line_elements">[docs]</a><span class="k">def</span> <span class="nf">split_line_elements</span><span class="p">(</span><span class="n">bdf_model</span><span class="p">,</span> <span class="n">eids</span><span class="p">,</span> <span class="n">neids</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">eid_start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">nid_start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a set of element ids</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    eids : List[int]</span>
+<span class="sd">        element ids to split</span>
+<span class="sd">    neids : int; default=5</span>
+<span class="sd">        how many elements should a single bar be split into</span>
+<span class="sd">        min=2</span>
+<span class="sd">    eid_start : int; default=1</span>
+<span class="sd">        the starting element id</span>
+<span class="sd">    nid_start : int; default=1</span>
+<span class="sd">        the starting node id</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eids_out : List[int]</span>
+<span class="sd">        the list of elements that have been added</span>
+<span class="sd">    eid_end : int; default=1</span>
+<span class="sd">        the final element id</span>
+<span class="sd">    nid_end : int; default=1</span>
+<span class="sd">        the final node id</span>
+
+<span class="sd">    A-----*-----B; neids=2</span>
+<span class="sd">    A--*--*--*--B; neids=4</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eids_out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">neids</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">neids</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">neids</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+        <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">node1</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">]</span>
+        <span class="n">node2</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span>
+        <span class="n">cp</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">cp</span>
+        <span class="k">assert</span> <span class="n">node1</span><span class="o">.</span><span class="n">cp</span> <span class="o">==</span> <span class="n">node2</span><span class="o">.</span><span class="n">cp</span>
+        <span class="k">assert</span> <span class="n">node1</span><span class="o">.</span><span class="n">cd</span> <span class="o">==</span> <span class="n">node2</span><span class="o">.</span><span class="n">cd</span>
+        <span class="n">xyz1</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">xyz</span>
+        <span class="n">xyz2</span> <span class="o">=</span> <span class="n">node2</span><span class="o">.</span><span class="n">xyz</span>
+        <span class="n">dxyz</span> <span class="o">=</span> <span class="n">xyz2</span> <span class="o">-</span> <span class="n">xyz1</span>
+        <span class="n">etype</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span>
+
+        <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">]:</span>
+            <span class="n">pa</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">pa</span>
+            <span class="n">pb</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">elem</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">ieid</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">neids</span><span class="p">):</span>
+            <span class="n">dxi</span> <span class="o">=</span> <span class="n">dx</span><span class="p">[</span><span class="n">ieid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_xyz</span> <span class="o">=</span> <span class="n">xyz1</span> <span class="o">+</span> <span class="n">dxyz</span> <span class="o">*</span> <span class="n">dxi</span>
+            <span class="k">if</span> <span class="n">dxi</span> <span class="o">&lt;</span> <span class="mf">1.</span><span class="p">:</span>
+                <span class="n">new_node</span> <span class="o">=</span> <span class="n">nid_start</span>
+                <span class="n">nid_start</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">bdf_model</span><span class="o">.</span><span class="n">add_grid</span><span class="p">(</span><span class="n">new_node</span><span class="p">,</span> <span class="n">new_xyz</span><span class="p">,</span> <span class="n">cp</span><span class="o">=</span><span class="n">cp</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_node</span> <span class="o">=</span> <span class="n">n2</span>
+                <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">]:</span>
+                    <span class="n">pb</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">pb</span>
+
+            <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">new_node</span><span class="p">]</span>
+                <span class="n">bdf_model</span><span class="o">.</span><span class="n">add_conrod</span><span class="p">(</span><span class="n">eid_start</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">j</span><span class="p">,</span>
+                                     <span class="n">c</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">nsm</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">nsm</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CROD&#39;</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">new_node</span><span class="p">]</span>
+                <span class="n">bdf_model</span><span class="o">.</span><span class="n">add_crod</span><span class="p">(</span><span class="n">eid_start</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CBAR&#39;</span><span class="p">:</span>
+                <span class="n">ga</span> <span class="o">=</span> <span class="n">n1</span>
+                <span class="n">gb</span> <span class="o">=</span> <span class="n">new_node</span>
+                <span class="n">bdf_model</span><span class="o">.</span><span class="n">add_cbar</span><span class="p">(</span><span class="n">eid_start</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">],</span> <span class="n">elem</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span> <span class="n">offt</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span>
+                                   <span class="n">pa</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span> <span class="n">wa</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">wb</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+                <span class="n">pa</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">:</span>
+                <span class="n">ga</span> <span class="o">=</span> <span class="n">n1</span>
+                <span class="n">gb</span> <span class="o">=</span> <span class="n">new_node</span>
+                <span class="n">bdf_model</span><span class="o">.</span><span class="n">add_cbeam</span><span class="p">(</span><span class="n">eid_start</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">ga</span><span class="p">,</span> <span class="n">gb</span><span class="p">],</span> <span class="n">elem</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">g0</span><span class="p">,</span>
+                                    <span class="n">offt</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">offt</span><span class="p">,</span> <span class="n">bit</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">bit</span><span class="p">,</span>
+                                    <span class="n">pa</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span>
+                                    <span class="n">wa</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">wa</span><span class="p">,</span> <span class="n">wb</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">wb</span><span class="p">,</span> <span class="n">sa</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">sb</span><span class="p">,</span>
+                                    <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+                <span class="n">pa</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">n1</span> <span class="o">=</span> <span class="n">new_node</span>
+            <span class="n">eids_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid_start</span><span class="p">)</span>
+            <span class="n">eid_start</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">eids_out</span><span class="p">,</span> <span class="n">eid_start</span><span class="p">,</span> <span class="n">nid_start</span></div>
+
+
+<div class="viewcode-block" id="split_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.split_elements.split_elements">[docs]</a><span class="k">def</span> <span class="nf">split_elements</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;unimplemented method for splitting elements&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CTRIA3&#39;</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="c1">#        3</span>
+            <span class="c1">#       /|\</span>
+            <span class="c1">#      / | \</span>
+            <span class="c1">#     /  |  \</span>
+            <span class="c1">#    /   4   \</span>
+            <span class="c1">#   /  /   \  \</span>
+            <span class="c1">#  / /       \ \</span>
+            <span class="c1"># 1-------------2</span>
+            <span class="c1">#</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_node_positions</span><span class="p">()</span>
+            <span class="c1">#centroid = (p1 + p2 + p3) / 3.</span>
+
+            <span class="c1">#</span>
+            <span class="c1">#      3</span>
+            <span class="c1">#     /|\</span>
+            <span class="c1">#    / | \</span>
+            <span class="c1">#   /  |  \</span>
+            <span class="c1">#  /   |   \</span>
+            <span class="c1"># 1----4----2</span>
+            <span class="c1">#</span>
+        <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="c1">#</span>
+            <span class="c1"># 4---------3</span>
+            <span class="c1"># | \     / |</span>
+            <span class="c1"># |   \  /  |</span>
+            <span class="c1"># |    5    |</span>
+            <span class="c1"># |  /   \  |</span>
+            <span class="c1"># |/       \|</span>
+            <span class="c1"># 1---------2</span>
+            <span class="c1">#</span>
+            <span class="c1"># the same thing shown in a rotated view</span>
+            <span class="c1">#           4</span>
+            <span class="c1">#          /| \</span>
+            <span class="c1">#       /   |   \</span>
+            <span class="c1">#     /     |     \</span>
+            <span class="c1">#   /       |       \</span>
+            <span class="c1"># 1---------5---------3</span>
+            <span class="c1">#   \       |       /</span>
+            <span class="c1">#     \     |     /</span>
+            <span class="c1">#       \   |   /</span>
+            <span class="c1">#         \ | /</span>
+            <span class="c1">#           2</span>
+            <span class="c1">#</span>
+            <span class="c1"># max_area, taper_ratio, area_ratio</span>
+            <span class="c1"># 4----7----3</span>
+            <span class="c1"># |    |    |</span>
+            <span class="c1"># |    |    |</span>
+            <span class="c1"># 8----9----6</span>
+            <span class="c1"># |    |    |</span>
+            <span class="c1"># |    |    |</span>
+            <span class="c1"># 1----4----2</span>
+            <span class="c1">#</span>
+            <span class="c1"># max_interior_angle</span>
+            <span class="c1">#      4---------3</span>
+            <span class="c1">#     / \       /</span>
+            <span class="c1">#    /   \     /</span>
+            <span class="c1">#   /     \   /</span>
+            <span class="c1">#  /       \ /</span>
+            <span class="c1"># 1---------2</span>
+            <span class="c1">#</span>
+            <span class="c1"># taper_ratio</span>
+            <span class="c1">#     4--6--3</span>
+            <span class="c1">#    /   |   \</span>
+            <span class="c1">#   /    |    \</span>
+            <span class="c1">#  /     |     \</span>
+            <span class="c1"># 1------5------2</span>
+            <span class="c1">#</span>
+            <span class="c1"># taper_ratio</span>
+            <span class="c1">#     4------3</span>
+            <span class="c1">#    / \    / \</span>
+            <span class="c1">#   /   \  /   \</span>
+            <span class="c1">#  /     \/     \</span>
+            <span class="c1"># 1-------5------2</span>
+            <span class="c1">#</span>
+            <span class="c1"># taper_ratio</span>
+            <span class="c1">#     4------3</span>
+            <span class="c1">#    / \      \</span>
+            <span class="c1">#   /   \      \</span>
+            <span class="c1">#  /     \      \</span>
+            <span class="c1"># 1-------5------2</span>
+            <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

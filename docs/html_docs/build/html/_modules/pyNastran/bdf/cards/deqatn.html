@@ -1,0 +1,1001 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.deqatn &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.deqatn</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.deqatn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines the DEQATN class and sub-functions.</span>
+
+<span class="sd">The capitalization of the sub-functions is important.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">log10</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">square</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span>
+    <span class="n">arcsin</span> <span class="k">as</span> <span class="n">asin</span><span class="p">,</span> <span class="n">arccos</span> <span class="k">as</span> <span class="n">acos</span><span class="p">,</span> <span class="n">arctan</span> <span class="k">as</span> <span class="n">atan</span><span class="p">,</span> <span class="n">arctan2</span> <span class="k">as</span> <span class="n">atan2</span><span class="p">,</span>
+    <span class="n">arcsinh</span> <span class="k">as</span> <span class="n">asinh</span><span class="p">,</span> <span class="n">arccosh</span> <span class="k">as</span> <span class="n">acosh</span><span class="p">,</span> <span class="n">arctanh</span> <span class="k">as</span> <span class="n">atanh</span><span class="p">)</span>
+<span class="c1"># atan2h</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">BaseCard</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+<div class="viewcode-block" id="pi"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.pi">[docs]</a><span class="k">def</span> <span class="nf">pi</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;weird way to multiply π by a number&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">num</span></div>
+
+<div class="viewcode-block" id="rss"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.rss">[docs]</a><span class="k">def</span> <span class="nf">rss</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>  <span class="c1"># good</span>
+    <span class="sd">&quot;&quot;&quot;2-norm; generalized magnitude of vector for N components&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="avg"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.avg">[docs]</a><span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;average&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ssq"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.ssq">[docs]</a><span class="k">def</span> <span class="nf">ssq</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sum of squares&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="logx"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.logx">[docs]</a><span class="k">def</span> <span class="nf">logx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;log base_x(y)&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="n">y</span><span class="o">**</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dim"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.dim">[docs]</a><span class="k">def</span> <span class="nf">dim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;positive difference&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="db"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.db">[docs]</a><span class="k">def</span> <span class="nf">db</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">pref</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sound pressure in decibels&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">20.</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="n">pref</span><span class="p">)</span></div>
+
+<span class="c1">#def _Log(z):</span>
+
+<div class="viewcode-block" id="atan2h"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.atan2h">[docs]</a><span class="k">def</span> <span class="nf">atan2h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hyperbolic arctangent</span>
+<span class="sd">    &gt;&gt;&gt; arctanh(z) = 1/2 Log((1+z)/(1-z))</span>
+
+<span class="sd">    real:</span>
+<span class="sd">        the following must be true: |x1| &gt; |x2| and x2 ≠ 0.</span>
+
+<span class="sd">    complex:</span>
+<span class="sd">        x1 = a + bi</span>
+<span class="sd">        x2 = b + di</span>
+<span class="sd">        a = b = 0 and (sign of c) = (sign of d):</span>
+<span class="sd">             the result is 0.</span>
+<span class="sd">        a = b = 0 and (sign of c) ≠ (sign of d):</span>
+<span class="sd">             the result is π.</span>
+<span class="sd">        c = d = 0 and (sign of a) = (sign of b):</span>
+<span class="sd">             the result is π/2.</span>
+<span class="sd">        c = d = 0 and (sign of a) ≠ (sign of b):</span>
+<span class="sd">             the result is −π/2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#integer_float_types = (int, np.int32, float, np.float32)</span>
+    <span class="c1">#if isinstance(x, integer_float_types):</span>
+        <span class="c1">#assert x &gt;= 0, &#39;x=%s y=%s&#39; % (x, y)</span>
+        <span class="c1">#assert y &gt; 0, &#39;x=%s y=%s&#39; % (x, y)</span>
+    <span class="c1">#return np.arctanh(x, y)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="invdb"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.invdb">[docs]</a><span class="k">def</span> <span class="nf">invdb</span><span class="p">(</span><span class="n">dbi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pref</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;inverse Db&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">10.</span> <span class="o">**</span> <span class="p">(</span><span class="n">dbi</span> <span class="o">/</span> <span class="mf">20.</span> <span class="o">+</span> <span class="n">log</span><span class="p">(</span><span class="n">pref</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="dba"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.dba">[docs]</a><span class="k">def</span> <span class="nf">dba</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pref</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sound pressure in decibels (perceived)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    p : float</span>
+<span class="sd">        structural responses or acoustic pressure</span>
+<span class="sd">    f : float</span>
+<span class="sd">        forcing frequency</span>
+<span class="sd">    pref : float</span>
+<span class="sd">        reference pressure</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dbi : float</span>
+<span class="sd">        acoustic pressure in Decibels</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ta1</span><span class="p">,</span> <span class="n">ta2</span> <span class="o">=</span> <span class="n">_get_ta</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">20.</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="n">pref</span><span class="p">)</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">ta1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10.</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">ta2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="invdba"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.invdba">[docs]</a><span class="k">def</span> <span class="nf">invdba</span><span class="p">(</span><span class="n">dbai</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pref</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inverse Dba</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dbai : float</span>
+<span class="sd">        acoustic pressure in Decibels (perceived)</span>
+<span class="sd">    f : float</span>
+<span class="sd">        forcing frequency</span>
+<span class="sd">    pref : float</span>
+<span class="sd">        reference pressure</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p : float</span>
+<span class="sd">        structural responses or acoustic pressure</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ta1</span><span class="p">,</span> <span class="n">ta2</span> <span class="o">=</span> <span class="n">_get_ta</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="c1">#dbai = dba(p, pref, f)</span>
+    <span class="k">return</span> <span class="mf">10.</span> <span class="o">**</span> <span class="p">((</span><span class="n">dbai</span> <span class="o">-</span> <span class="mf">10.</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">ta1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">10.</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">ta2</span><span class="p">))</span><span class="o">/</span><span class="mi">20</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_get_ta"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._get_ta">[docs]</a><span class="k">def</span> <span class="nf">_get_ta</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;gets the factors for dba, invdba&quot;&quot;&quot;</span>
+    <span class="n">k1</span> <span class="o">=</span> <span class="mf">2.242882e16</span>
+    <span class="n">k3</span> <span class="o">=</span> <span class="mf">1.562339</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="mf">20.598997</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="mf">107.65265</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="mf">737.86223</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="mf">12194.22</span>
+    <span class="n">ta1</span> <span class="o">=</span> <span class="n">k3</span> <span class="o">*</span> <span class="n">f</span><span class="o">**</span><span class="mi">4</span> <span class="o">/</span> <span class="p">((</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p3</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">ta2</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="n">f</span><span class="o">**</span><span class="mi">4</span> <span class="o">/</span> <span class="p">((</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p4</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ta1</span><span class="p">,</span> <span class="n">ta2</span></div>
+
+<span class="c1"># we&#39;ll add _ to the beginning of these variables</span>
+<span class="n">BUILTINS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;del&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">,</span> <span class="s1">&#39;yield&#39;</span><span class="p">,</span> <span class="s1">&#39;async&#39;</span><span class="p">,</span> <span class="s1">&#39;await&#39;</span><span class="p">,</span> <span class="s1">&#39;property&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;slice&#39;</span><span class="p">,</span> <span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="s1">&#39;map&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="DEQATN"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN">[docs]</a><span class="k">class</span> <span class="nc">DEQATN</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>  <span class="c1"># needs work...</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Design Equation Defintion</span>
+<span class="sd">    Defines one or more equations for use in design sensitivity analysis.</span>
+
+<span class="sd">    +--------+------+-----+-----+-----+-----+-------+-----+</span>
+<span class="sd">    |    1   |   2  |  3  |  4  |  5  |  6  |    7  |  8  |</span>
+<span class="sd">    +========+======+=====+=====+=====+=====+=======+=====+</span>
+<span class="sd">    | DEQATN | EQID |            EQUATION                 |</span>
+<span class="sd">    +--------+------+-------------------------------------+</span>
+<span class="sd">    |        |                EQUATION (cont.)            |</span>
+<span class="sd">    +--------+--------------------------------------------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;DEQATN&#39;</span>
+    <span class="n">_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dtable&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equation_id</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a DEQATN card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        equation_id : int</span>
+<span class="sd">            the id of the equation</span>
+<span class="sd">        eqs : List[str]</span>
+<span class="sd">            the equations, which may overbound the field</span>
+<span class="sd">            split them by a semicolon (;)</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        DEQATN  41      F1(A,B,C,D,R) = A+B *C–(D**3 + 10.0) + sin(PI(1) * R)</span>
+<span class="sd">                        + A**2 / (B - C); F = A + B - F1 * D</span>
+
+<span class="sd">        def F1(A, B, C, D, R):</span>
+<span class="sd">            F1 = A+B *C-(D**3 + 10.0) + sin(PI(1) * R) + A**2 / (B – C)</span>
+<span class="sd">            F = A + B - F1 * D</span>
+<span class="sd">            return F</span>
+
+<span class="sd">        eqs = [</span>
+<span class="sd">            &#39;F1(A,B,C,D,R) = A+B *C–(D**3 + 10.0) + sin(PI(1) * R) + A**2 / (B – C)&#39;,</span>
+<span class="sd">            &#39;F = A + B – F1 * D&#39;,</span>
+<span class="sd">        ]</span>
+<span class="sd">        &gt;&gt;&gt; deqatn = DEQATN(41, eq, comment=&#39;&#39;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtable</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equation_id</span> <span class="o">=</span> <span class="n">equation_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="n">eqs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<div class="viewcode-block" id="DEQATN._init_from_empty"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">equation_id</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">DEQATN</span><span class="p">(</span><span class="n">equation_id</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DEQATN.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a DEQATN card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : List[str]</span>
+<span class="sd">            this card is special and is not a ``BDFCard`` like other cards</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(card)</span>
+        <span class="n">line0</span> <span class="o">=</span> <span class="n">card</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">line0</span><span class="p">:</span>
+            <span class="n">line0</span> <span class="o">=</span> <span class="n">line0</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">()</span>
+
+        <span class="n">name_eqid</span> <span class="o">=</span> <span class="n">line0</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span>
+        <span class="c1">#print(&#39;name_eqid = %r&#39; % name_eqid)</span>
+        <span class="k">assert</span> <span class="s1">&#39;,&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name_eqid</span><span class="p">,</span> <span class="n">name_eqid</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">eq_id</span> <span class="o">=</span> <span class="n">name_eqid</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;DEQATN&#39;</span><span class="p">,</span> <span class="n">card</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;cannot split </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name_eqid</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Expected data of the form &#39;DEQATN  100&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">card</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">equation_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">eq_id</span><span class="p">)</span>
+
+        <span class="c1"># combine the equations into a single organized block</span>
+        <span class="n">line0_eq</span> <span class="o">=</span> <span class="n">line0</span><span class="p">[</span><span class="mi">16</span><span class="p">:]</span>
+        <span class="n">eqs_temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">line0_eq</span><span class="p">]</span> <span class="o">+</span> <span class="n">card</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1">#eqs_temp2 = [line.replace(&#39;;;&#39;, &#39;;&#39;) for line in eqs_temp]</span>
+        <span class="c1">#for line in eqs_temp2:</span>
+            <span class="c1">#print(line)</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="n">lines_to_eqs</span><span class="p">(</span><span class="n">eqs_temp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DEQATN</span><span class="p">(</span><span class="n">equation_id</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DEQATN._setup_equation"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN._setup_equation">[docs]</a>    <span class="k">def</span> <span class="nf">_setup_equation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates an executable equation object from self.eqs</span>
+
+<span class="sd">        x = 10.</span>
+<span class="sd">        &gt;&gt;&gt; deqatn.func(x)</span>
+<span class="sd">        42.0</span>
+
+<span class="sd">        &gt;&gt;&gt; deqatn.func_str</span>
+<span class="sd">        def stress(x):</span>
+<span class="sd">            x = float(x)</span>
+<span class="sd">            return x + 32.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">default_values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">default_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtable_ref</span><span class="o">.</span><span class="n">default_values</span>
+        <span class="n">func_name</span><span class="p">,</span> <span class="n">nargs</span><span class="p">,</span> <span class="n">func_str</span> <span class="o">=</span> <span class="n">fortran_to_python</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">equation_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="p">,</span> <span class="n">default_values</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_str</span> <span class="o">=</span> <span class="n">func_str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_name</span> <span class="o">=</span> <span class="n">func_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">func_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">func_str</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="c1">#print(locals().keys())</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">func_name</span><span class="p">]</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+        <span class="c1">#print(func)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nargs</span> <span class="o">=</span> <span class="n">nargs</span></div>
+
+<div class="viewcode-block" id="DEQATN.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: get defaults from DTABLE</span>
+        <span class="c1"># TODO: get limits from DCONSTR</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtable</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dtable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtable_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_equation</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DEQATN.safe_cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cross_reference</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DEQATN.uncross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span>
+        <span class="c1">#del self.f</span>
+        <span class="c1">#del getattr(self, self.func_name)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_name</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nargs</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtable_ref</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="DEQATN.evaluate"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes a call to self.func&quot;&quot;&quot;</span>
+        <span class="c1">#args2 = args[:self.nargs]</span>
+        <span class="c1">#print(&#39;args =&#39;, args2)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nargs</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;len(args) &gt; nargs</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;nargs=</span><span class="si">%s</span><span class="s1"> len(args)=</span><span class="si">%s</span><span class="s1">; func_name=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="c1">#self.func(*args)</span>
+
+<div class="viewcode-block" id="DEQATN.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_card</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="DEQATN.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DEQATN.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.DEQATN.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1">#self.evaluate(1, 2)</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="n">split_equations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="p">)</span>
+        <span class="n">equation_line0</span> <span class="o">=</span> <span class="n">eqs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#assert len(equation_line0) &lt;= 56, equation_line0</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;DEQATN  </span><span class="si">%-8i%-56s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">equation_id</span><span class="p">,</span> <span class="n">equation_line0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">equation_line0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">56</span><span class="p">,</span> <span class="n">equation_line0</span>
+        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">eqs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;        </span><span class="si">%-64s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eq</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">eq</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">eq</span>
+        <span class="c1">#print(msg)</span>
+        <span class="k">return</span> <span class="n">msg</span></div></div>
+
+<div class="viewcode-block" id="lines_to_eqs"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.lines_to_eqs">[docs]</a><span class="k">def</span> <span class="nf">lines_to_eqs</span><span class="p">(</span><span class="n">eqs_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;splits the equations&quot;&quot;&quot;</span>
+    <span class="n">eqs_wrapped</span> <span class="o">=</span> <span class="n">_split_equations_by_semicolon</span><span class="p">(</span><span class="n">eqs_in</span><span class="p">)</span>
+    <span class="n">eqs</span> <span class="o">=</span> <span class="n">_join_wrapped_equation_lines</span><span class="p">(</span><span class="n">eqs_in</span><span class="p">,</span> <span class="n">eqs_wrapped</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">eqs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eqs</span>
+    <span class="k">return</span> <span class="n">eqs</span></div>
+
+<div class="viewcode-block" id="_split_equations_by_semicolon"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._split_equations_by_semicolon">[docs]</a><span class="k">def</span> <span class="nf">_split_equations_by_semicolon</span><span class="p">(</span><span class="n">eqs_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``lines_to_eqs``&quot;&quot;&quot;</span>
+    <span class="n">eqs_temp_out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nchars</span> <span class="o">=</span> <span class="mi">72</span> <span class="o">-</span> <span class="mi">16</span>
+    <span class="k">for</span> <span class="n">iline</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eqs_in</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">iline</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eq2</span> <span class="o">=</span> <span class="n">eq</span><span class="p">[:</span><span class="n">nchars</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\t\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eq2</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">()[</span><span class="mi">8</span><span class="p">:</span><span class="n">nchars</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\t\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">semicolon</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span> <span class="k">if</span> <span class="n">eq2</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">eq2</span> <span class="o">=</span> <span class="n">eq2</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\t</span><span class="s1">;&#39;</span><span class="p">)</span>
+        <span class="c1">#nline = len(eq.rstrip(&#39;; \n&#39;)) + 16</span>
+
+        <span class="c1">#print(&#39;eq2=%r&#39; % eq2)</span>
+        <span class="k">if</span> <span class="s1">&#39;;&#39;</span> <span class="ow">in</span> <span class="n">eq2</span><span class="p">:</span>
+            <span class="n">eq2s</span> <span class="o">=</span> <span class="n">eq2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+            <span class="n">eq_tempi</span> <span class="o">=</span> <span class="p">[</span><span class="n">eqi</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;;&#39;</span> <span class="k">for</span> <span class="n">eqi</span> <span class="ow">in</span> <span class="n">eq2s</span> <span class="k">if</span> <span class="n">eqi</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+            <span class="c1">#for check_line in eq2s:</span>
+                <span class="c1">#print(check_line)</span>
+                <span class="c1">#_check_for_valid_line(check_line, eq)</span>
+
+            <span class="c1">#print(&#39;eq_tempi = %r&#39; % eq_tempi)</span>
+            <span class="c1">#eq_tempi[-1] += semicolon</span>
+            <span class="n">eqs_temp_out</span> <span class="o">+=</span> <span class="n">eq_tempi</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">check_line</span> <span class="o">=</span> <span class="n">eq2</span> <span class="o">+</span> <span class="n">semicolon</span>
+            <span class="c1">#print(&#39;check_line = %r&#39; % (check_line))</span>
+            <span class="c1">#_check_for_valid_line(check_line, eq)</span>
+            <span class="n">eqs_temp_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">check_line</span><span class="p">)</span>
+        <span class="n">nchars</span> <span class="o">=</span> <span class="mi">72</span>
+    <span class="k">return</span> <span class="n">eqs_temp_out</span></div>
+
+<span class="c1">#def _check_for_valid_line(check_line, full_line):</span>
+    <span class="c1">#if &#39;=&#39; not in check_line:</span>
+        <span class="c1">#msg = (</span>
+            <span class="c1">#&#39;expected an equal sign (the first 8 characters are removed)\n&#39;</span>
+            <span class="c1">#&#39;line     =%r\n&#39;</span>
+            <span class="c1">#&#39;full_line=%r&#39; % (check_line, full_line))</span>
+        <span class="c1">#raise SyntaxError(msg)</span>
+
+<div class="viewcode-block" id="_join_wrapped_equation_lines"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._join_wrapped_equation_lines">[docs]</a><span class="k">def</span> <span class="nf">_join_wrapped_equation_lines</span><span class="p">(</span><span class="n">unused_eqs_temp_in</span><span class="p">,</span> <span class="n">eqs_temp</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;helper for ``lines_to_eqs``&quot;&quot;&quot;</span>
+    <span class="n">eqs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">neqs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">eqs_temp</span><span class="p">)</span>
+    <span class="n">is_join</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">eqi</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">eq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eqs_temp</span><span class="p">):</span>
+        <span class="c1">#print(f&#39;i={i} join={is_join} eq={eq!r}&#39;)</span>
+        <span class="k">if</span> <span class="n">is_join</span><span class="p">:</span>
+            <span class="n">eq</span> <span class="o">=</span> <span class="n">eqi</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="n">eq</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+        <span class="n">eqi</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">eqi</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="c1">#self.eqs.append(eqi)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># first line</span>
+            <span class="k">if</span> <span class="n">eqi</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+                <span class="n">eqi</span> <span class="o">=</span> <span class="n">eqi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="n">eqi</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">),</span> <span class="n">eq</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_join</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">eqi</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">56</span><span class="p">,</span> <span class="n">eqi</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">neqs</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># mid line</span>
+            <span class="c1">#assert len(eqi) &lt;= 64, &#39;len(eqi)=%s eq=%r&#39; % (len(eqi), eqi)</span>
+            <span class="k">if</span> <span class="n">eqi</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+                <span class="n">eqi</span> <span class="o">=</span> <span class="n">eqi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">is_join</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="n">eqi</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">),</span> <span class="n">eq</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_join</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># last line</span>
+            <span class="n">is_join</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_join</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">eqi</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;line=</span><span class="si">%r</span><span class="s1"> expected an equal sign&#39;</span> <span class="o">%</span> <span class="n">eqi</span><span class="p">)</span>
+            <span class="n">eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eqi</span><span class="p">)</span>
+        <span class="c1">#print(i, eqi)</span>
+    <span class="c1">#assert not is_join</span>
+    <span class="k">if</span> <span class="n">is_join</span><span class="p">:</span>
+        <span class="n">eqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eqi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">eqs</span></div>
+
+<div class="viewcode-block" id="split_equations"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.split_equations">[docs]</a><span class="k">def</span> <span class="nf">split_equations</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;takes an overbounded DEQATN card and shortens it&quot;&quot;&quot;</span>
+    <span class="c1"># first line must be &lt; 56</span>
+    <span class="c1"># second line may be &lt; 64</span>
+    <span class="n">lines2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="c1">#print(&#39;-------------------------&#39;)</span>
+        <span class="c1"># we&#39;ll add ; to the end of each line</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lines2</span> <span class="o">+=</span> <span class="n">_split_equation</span><span class="p">([],</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="mi">56</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines2</span> <span class="o">+=</span> <span class="n">_split_equation</span><span class="p">([],</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+
+    <span class="c1"># remove the trailing semicolon</span>
+    <span class="n">lines2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lines2</span></div>
+
+<div class="viewcode-block" id="_split_equation"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._split_equation">[docs]</a><span class="k">def</span> <span class="nf">_split_equation</span><span class="p">(</span><span class="n">lines_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                    <span class="n">isplit</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an overbounded DEQATN line and shortens it using recursion</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lines_out : List[str]</span>
+<span class="sd">        len(lines) = 0 : first iteration</span>
+<span class="sd">        len(lines) = 1 : second iteration</span>
+<span class="sd">    line : str</span>
+<span class="sd">        the line to split</span>
+<span class="sd">    n : int</span>
+<span class="sd">        the maximum number of characters allowed</span>
+<span class="sd">        the first line of the DEQATN has a different number of fields</span>
+<span class="sd">        allowed vs. subsequent lines</span>
+<span class="sd">    isplit : int; default=0</span>
+<span class="sd">        the number of levels deep in the recursive function we are</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lines_out : List[str]</span>
+<span class="sd">        the long line broken into shorter lines</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print(&#39;n=%s -&gt; line=%r len=%s&#39; % (n, line, len(line)))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">lines_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">lines_out</span>
+    <span class="c1"># equation must be split</span>
+    <span class="n">line0</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">n</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">)</span>
+    <span class="c1"># fore, aft = line0.split(&#39;+-()*&#39;, 1)</span>
+    <span class="c1">#print(&#39;line0 = %r; len=%s&#39; % (str(line0[::-1]), len(line0)))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="ow">in</span> <span class="n">line0</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">line0</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">operator</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">imin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Couldn&#39;t find an operator ()+-/*= in </span><span class="si">%r</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">line</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;line = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">operator</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">imin</span><span class="p">]</span>
+    <span class="c1">#print(&#39;operator = %r&#39; % operator)</span>
+    <span class="n">unused_fore</span><span class="p">,</span> <span class="n">aft</span> <span class="o">=</span> <span class="n">line0</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aft</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">line_out</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
+    <span class="c1">#print(&#39;appending %r; len=%s&#39; % (line_out, len(line_out)))</span>
+    <span class="c1">#print(&#39;fore = %r&#39; % fore[::-1])</span>
+    <span class="c1">#print(&#39;aft  = %r&#39; % aft[::-1])</span>
+    <span class="n">lines_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">isplit</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">isplit</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Recursion issue splitting line; isplit=</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span>  <span class="n">isplit</span><span class="p">)</span>
+    <span class="n">lines_out</span> <span class="o">=</span> <span class="n">_split_equation</span><span class="p">(</span><span class="n">lines_out</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">:],</span> <span class="n">n</span><span class="p">,</span> <span class="n">isplit</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines_out</span></div>
+
+<div class="viewcode-block" id="fortran_to_python_short"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.fortran_to_python_short">[docs]</a><span class="k">def</span> <span class="nf">fortran_to_python_short</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unused_default_values</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;the function used by the DRESP2&quot;&quot;&quot;</span>
+    <span class="n">func_str</span> <span class="o">=</span> <span class="s1">&#39;def func(args):</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">func_str</span> <span class="o">+=</span> <span class="s1">&#39;    return </span><span class="si">%s</span><span class="s1">(args)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">local_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exec</span><span class="p">(</span><span class="n">func_str</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">local_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">local_dict</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="split_to_equations"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.split_to_equations">[docs]</a><span class="k">def</span> <span class="nf">split_to_equations</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a line like::</span>
+
+<span class="sd">        b = a + z; c = 42</span>
+
+<span class="sd">    into::</span>
+
+<span class="sd">        b = a + z</span>
+<span class="sd">        c = 42</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">equation_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; ;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">lines2</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+            <span class="n">equation_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">lines2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">equation_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">equation_lines</span></div>
+
+<div class="viewcode-block" id="fortran_to_python"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.fortran_to_python">[docs]</a><span class="k">def</span> <span class="nf">fortran_to_python</span><span class="p">(</span><span class="n">deqatn_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                      <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                      <span class="n">default_values</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+                      <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates the python function</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lines : List[str]</span>
+<span class="sd">        the equations to write broken up by statement</span>
+<span class="sd">    default_values : dict[name] = value</span>
+<span class="sd">        the default values from the DTABLE card</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    func_name : str</span>
+<span class="sd">        the name of the function</span>
+<span class="sd">    nargs : int</span>
+<span class="sd">        the number of variables to the function</span>
+<span class="sd">    func_msg : str</span>
+<span class="sd">        the python function</span>
+
+<span class="sd">    def f(x, y=10.):</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        $ deqatn</span>
+<span class="sd">        DEQATN  1000    f(x,y) = x+y</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        try:</span>
+<span class="sd">            if isinstance(x, (int, float, str)):</span>
+<span class="sd">                x = float(x)</span>
+<span class="sd">            if isinstance(y, (int, float, str)):</span>
+<span class="sd">                y = float(y)</span>
+<span class="sd">        except:</span>
+<span class="sd">            print(locals())</span>
+<span class="sd">            raise</span>
+<span class="sd">        f = x + y</span>
+<span class="sd">        return f</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">func_msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lines</span>
+
+    <span class="n">equation_lines</span> <span class="o">=</span> <span class="n">split_to_equations</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">equation_lines</span><span class="p">):</span>
+        <span class="c1">#print(&#39;--------------------&#39;)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="c1">#func_msg += &#39;#i=%s\n&#39; % i</span>
+        <span class="k">assert</span> <span class="s1">&#39;;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">,</span> <span class="n">line</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># f(x, y) = 10.</span>
+            <span class="c1"># f(x, y) = abs(x) + y</span>
+            <span class="c1"># f = 42.</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">eq</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;= not found in </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">line</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;only 1 = sign may be found a line</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;line = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;lines:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">eq</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+
+        <span class="c1">#print(&#39;f=%r eq=%r&#39; % (f, eq))</span>
+        <span class="k">for</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">builtin</span> <span class="o">==</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">builtin</span><span class="p">,</span> <span class="n">builtin</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">builtin</span> <span class="o">==</span> <span class="n">eq</span><span class="p">:</span>
+                <span class="n">eq</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">builtin</span><span class="p">,</span> <span class="n">builtin</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">func_name</span><span class="p">,</span> <span class="n">func_msg</span><span class="p">,</span> <span class="n">variables</span> <span class="o">=</span> <span class="n">write_function_header</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">eq</span><span class="p">,</span> <span class="n">default_values</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">func_name</span>  <span class="c1"># return the value...</span>
+            <span class="n">func_msg</span> <span class="o">+=</span> <span class="s1">&#39;    # i=0 write_function_header</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="c1">#print(func_msg)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">f</span>
+            <span class="n">func_msg</span> <span class="o">+=</span> <span class="s1">&#39;    </span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">eq</span><span class="p">)</span>
+            <span class="c1">#print(&#39;out = %r&#39; % out)</span>
+            <span class="c1">#print(&#39;eq = %r&#39; % eq)</span>
+
+    <span class="n">func_msg</span> <span class="o">+=</span> <span class="s1">&#39;    return </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">f</span>
+    <span class="c1">#print(func_msg)</span>
+    <span class="k">if</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The function name </span><span class="si">{</span><span class="n">func_name</span><span class="si">!r}</span><span class="s1"> for DEQATN,</span><span class="si">{</span><span class="n">deqatn_id</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> &#39;</span>
+                           <span class="sa">f</span><span class="s1">&#39;must not also be an argument; arguments=</span><span class="si">{</span><span class="n">variables</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">nargs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">nargs</span><span class="p">,</span> <span class="n">func_msg</span></div>
+
+
+<div class="viewcode-block" id="write_function_header"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn.write_function_header">[docs]</a><span class="k">def</span> <span class="nf">write_function_header</span><span class="p">(</span><span class="n">func_header</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">default_values</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                          <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    initializes the python function</span>
+
+<span class="sd">    def f(x, y=10.):</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        $ deqatn</span>
+<span class="sd">        DEQATN  1000    f(x,y) = x+y</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        try:</span>
+<span class="sd">            if isinstance(x, (int, float, str)):</span>
+<span class="sd">                x = float(x)</span>
+<span class="sd">            if isinstance(y, (int, float, str)):</span>
+<span class="sd">                y = float(y)</span>
+<span class="sd">        except:</span>
+<span class="sd">            print(locals())</span>
+<span class="sd">            raise</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f : str</span>
+<span class="sd">        the function header</span>
+<span class="sd">        f(a, b, c)</span>
+<span class="sd">    eq : str</span>
+<span class="sd">        the value on the other side of the equals sign (f=eq)</span>
+<span class="sd">        1.</span>
+<span class="sd">        max(a, b, c)</span>
+<span class="sd">    default_values : dict[name] = value</span>
+<span class="sd">        the default values from the DTABLE card</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    func_name : str</span>
+<span class="sd">        the name of the function ``f``</span>
+<span class="sd">    msg : str</span>
+<span class="sd">        see above</span>
+<span class="sd">    variables : List[str]</span>
+<span class="sd">        the variables used by the equation header</span>
+<span class="sd">        a, b, c</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">eq</span><span class="p">)</span>
+        <span class="n">is_float</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">is_float</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">func_name</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="n">func_header</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;(,)&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+    <span class="n">func_name</span> <span class="o">=</span> <span class="n">func_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">arguments</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">BUILTINS</span> <span class="k">else</span> <span class="n">var</span>
+                 <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">func_name</span>
+
+    <span class="k">if</span> <span class="n">is_float</span><span class="p">:</span>
+        <span class="c1"># f(a,b,c) = 1.</span>
+        <span class="c1">#</span>
+        <span class="c1"># means</span>
+        <span class="c1">#</span>
+        <span class="c1"># def f(a,b,c):</span>
+        <span class="c1">#     f = 1.</span>
+        <span class="c1">#</span>
+        <span class="n">func_line</span> <span class="o">=</span> <span class="n">_write_function_line</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">default_values</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># f(a,b,c) = min(a,b,c)</span>
+        <span class="c1">#</span>
+        <span class="c1"># means</span>
+        <span class="c1">#</span>
+        <span class="c1"># def f(a,b,c):</span>
+        <span class="c1">#     f = min(a,b,c)</span>
+        <span class="c1">#</span>
+        <span class="n">func_line</span> <span class="o">=</span> <span class="n">_write_function_line</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">default_values</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="n">func_line</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="n">_write_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="n">_write_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+        <span class="n">ubuiltin</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">builtin</span>
+        <span class="k">if</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">func_line</span> <span class="ow">and</span> <span class="n">ubuiltin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">func_line</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;cannot have an equation with </span><span class="si">%r</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">builtin</span><span class="p">,</span> <span class="n">func_line</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">variables</span> <span class="ow">and</span> <span class="n">ubuiltin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;cannot have an equation with </span><span class="si">%r</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">builtin</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+            <span class="c1">#import re</span>
+            <span class="c1">#eq = &#39;YIELD_A_YIELD&#39;</span>
+            <span class="c1">#eq = &#39;/YIELD&#39;</span>
+            <span class="c1">#p = re.compile(r&quot;\byield\b&quot;, flags=re.IGNORECASE)</span>
+            <span class="c1">#p2 = p.sub(eq,&#39;_yield&#39;)</span>
+            <span class="c1">#print(&#39;P2 = %r&#39; % p2)</span>
+            <span class="c1">#y = re.search(r&quot;\byield\b&quot;, eq, flags=re.IGNORECASE)</span>
+            <span class="c1">#if y is not None:</span>
+                <span class="c1">#print(&#39;groups= &#39;, y.groups())</span>
+                <span class="c1">#for group in y.groups():</span>
+                    <span class="c1">#print(&#39;group = %r&#39; % group)</span>
+                <span class="c1">#print(y.group(0))</span>
+                <span class="c1">#print(&#39;***eq = %r&#39; % eq)</span>
+    <span class="k">for</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">builtin</span> <span class="ow">in</span> <span class="n">eq</span> <span class="ow">and</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">builtin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">eq</span><span class="p">:</span>
+            <span class="n">eq</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">builtin</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">builtin</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;    </span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">eq</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">variables</span></div>
+
+<div class="viewcode-block" id="_write_function_line"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._write_function_line">[docs]</a><span class="k">def</span> <span class="nf">_write_function_line</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">variables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                         <span class="n">default_values</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;writes the ``def f(x, y, z=1.):`` part of the function&quot;&quot;&quot;</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">is_default</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">+=</span> <span class="s1">&#39;_&#39;</span>
+
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">default_values</span><span class="p">:</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">default_values</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
+            <span class="n">is_default</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">is_default</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;default variables must be set at the end of the function</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;variables = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">variables</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;default_values = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">default_values</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">vals2</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;def </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">vals2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="_write_comment"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._write_comment">[docs]</a><span class="k">def</span> <span class="nf">_write_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;writes the deqatn to the comment block&quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">comment</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;    &quot;&quot;&quot;</span><span class="se">\n</span><span class="s1">    </span><span class="si">%s</span><span class="s1">&quot;&quot;&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msgi</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="_write_variables"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.deqatn.html#pyNastran.bdf.cards.deqatn._write_variables">[docs]</a><span class="k">def</span> <span class="nf">_write_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;type checks the inputs&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;    try:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">BUILTINS</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">+=</span> <span class="s1">&#39;_&#39;</span>
+        <span class="c1">#msg += &quot;    assert isinstance(%s, float), &#39;%s is not a float; type(%s)=%s&#39; % (%s)&quot;)</span>
+        <span class="c1">#msg += &#39;        %s = float(%s)\n&#39; % (var, var)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;        if isinstance(</span><span class="si">%s</span><span class="s1">, (int, str)):</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">var</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;            </span><span class="si">%s</span><span class="s1"> = float(</span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;    except:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;        print(locals())</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;        raise</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

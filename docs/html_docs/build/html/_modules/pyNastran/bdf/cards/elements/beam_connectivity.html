@@ -1,0 +1,1223 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.elements.beam_connectivity &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.elements.beam_connectivity</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.elements.beam_connectivity</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0326</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines the faces for representing the PBARL/PBEAML cards as 3D objects</span>
+<span class="sd">instead of just 1D elements.</span>
+
+<span class="sd">These functions intentionally do not handle offsets.</span>
+<span class="sd">Node 1/2 should be the offset/actual coordinates.</span>
+
+<span class="sd">The following shapes are fully supported:</span>
+<span class="sd"> - ROD</span>
+<span class="sd"> - TUBE</span>
+<span class="sd"> - BAR</span>
+<span class="sd"> - BOX</span>
+<span class="sd"> - L</span>
+<span class="sd"> - H</span>
+<span class="sd"> - I1  (I1 is handled correctly because it&#39;s doubly symmetric)</span>
+<span class="sd"> - T</span>
+<span class="sd"> - T1</span>
+<span class="sd"> - T2</span>
+<span class="sd"> - Z</span>
+<span class="sd"> - HEXA</span>
+
+<span class="sd">The following shapes don&#39;t do the shear center correctly:</span>
+<span class="sd"> - CHAN</span>
+<span class="sd"> - CHAN1</span>
+<span class="sd"> - I</span>
+<span class="sd"> - HAT</span>
+
+<span class="sd">The following shapes aren&#39;t supported:</span>
+<span class="sd"> - CROSS</span>
+<span class="sd"> - TUBE2</span>
+<span class="sd"> - CHAN2 (will be a shear center issue)</span>
+<span class="sd"> - BOX1  (will be a shear center issue)</span>
+<span class="sd"> - HAT1  (will be a shear center issue)</span>
+<span class="sd"> - DBOX  (will be a shear center issue)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.aero.utils</span> <span class="kn">import</span> <span class="n">elements_from_quad</span><span class="p">,</span> <span class="n">tri_cap</span>
+
+
+<div class="viewcode-block" id="rod_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.rod_faces">[docs]</a><span class="k">def</span> <span class="nf">rod_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+              <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+              <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span> <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;defines points in a circle with triangle based end caps&quot;&quot;&quot;</span>
+    <span class="c1"># 4,8,12,16,... becomes 5,9,13,17,...</span>
+    <span class="n">ntheta</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">ntheta</span><span class="p">))</span>
+
+    <span class="n">nfaces</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">all_faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntheta</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">radius</span><span class="p">,</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">assert</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">ntheta</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">xyz</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+
+        <span class="c1"># the tri_cap buils triangles that fan out from the first node</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">tri_cap</span><span class="p">(</span><span class="n">ntheta</span><span class="p">)</span>
+
+        <span class="c1"># we need to use the tolist because we&#39;re going to</span>
+        <span class="c1"># combine quads and tris (the elements have different</span>
+        <span class="c1"># lengths)</span>
+        <span class="n">all_faces</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nfaces</span> <span class="o">+</span> <span class="n">tris</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">nfaces</span> <span class="o">+=</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># the main cylinder uses the points defined independent</span>
+    <span class="c1"># of the points n1/n2</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">elements_from_quad</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ntheta</span><span class="p">)</span>
+    <span class="n">all_faces</span> <span class="o">+=</span> <span class="n">faces</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="c1"># used by the tri_caps</span>
+    <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+    <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_faces</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="tube_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.tube_faces">[docs]</a><span class="k">def</span> <span class="nf">tube_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+               <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+               <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;defines a rod with a hole&quot;&quot;&quot;</span>
+    <span class="c1"># 4,8,12,16,... becomes 5,9,13,17,...</span>
+    <span class="n">ntheta</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span><span class="p">,</span> <span class="n">ntheta</span><span class="p">))</span>
+    <span class="n">npoints</span> <span class="o">=</span> <span class="n">ntheta</span> <span class="o">*</span> <span class="mi">2</span>
+
+    <span class="n">points_list1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">points_list2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntheta</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">radius_out</span><span class="p">,</span> <span class="n">radius_in</span> <span class="o">=</span> <span class="n">dim</span>
+
+        <span class="c1"># outer rod</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">radius_out</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">radius_out</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">xyz1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">points1i</span> <span class="o">=</span> <span class="n">xyz1</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">points1i</span><span class="p">)</span>
+
+        <span class="c1"># inner rod</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">radius_in</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">radius_in</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="n">xyz2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">points2i</span> <span class="o">=</span> <span class="n">xyz2</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">points2i</span><span class="p">)</span>
+
+    <span class="c1"># the main cylinder uses the points defined independent</span>
+    <span class="c1"># of the inner/outer faces</span>
+    <span class="n">faces_n1</span> <span class="o">=</span> <span class="n">elements_from_quad</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ntheta</span><span class="p">)</span>
+    <span class="n">faces_n2</span> <span class="o">=</span> <span class="n">faces_n1</span> <span class="o">+</span> <span class="n">npoints</span>
+
+    <span class="c1">#faces_n1</span>
+    <span class="c1">#[[ 0 17 18  1]</span>
+     <span class="c1">#[ 1 18 19  2]</span>
+     <span class="c1">#[ 2 19 20  3]</span>
+     <span class="c1">#[ 3 20 21  4]</span>
+     <span class="c1">#[ 4 21 22  5]</span>
+     <span class="c1">#[ 5 22 23  6]</span>
+
+    <span class="c1"># we use slicing to link the outer surface to the</span>
+    <span class="c1"># inner surface using quads</span>
+    <span class="c1">#</span>
+    <span class="c1"># we&#39;d like to hstack the column arrays, but hstack and a</span>
+    <span class="c1"># transpose is easier.  Presumably, a &quot;newaxis&quot; index would work...</span>
+    <span class="n">faces_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span>
+        <span class="n">faces_n1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">faces_n1</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">faces_n2</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">faces_n2</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">faces_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span>
+        <span class="n">faces_n1</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">faces_n1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="n">faces_n2</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="n">faces_n2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># combine everything together</span>
+    <span class="n">all_faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">faces_n1</span><span class="p">,</span> <span class="n">faces_n2</span><span class="p">,</span> <span class="n">faces_out</span><span class="p">,</span> <span class="n">faces_in</span><span class="p">])</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list1</span> <span class="o">+</span> <span class="n">points_list2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_faces</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="bar_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.bar_faces">[docs]</a><span class="k">def</span> <span class="nf">bar_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+              <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+              <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       ^y</span>
+<span class="sd">       |</span>
+<span class="sd">    0-----3</span>
+<span class="sd">    |     |</span>
+<span class="sd">    |     |----&gt; z</span>
+<span class="sd">    |     |</span>
+<span class="sd">    1-----2</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">h</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 3</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="box_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.box_faces">[docs]</a><span class="k">def</span> <span class="nf">box_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+              <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+              <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         ^ y</span>
+<span class="sd">         |</span>
+<span class="sd">    0---------3</span>
+<span class="sd">    |         |</span>
+<span class="sd">    |  4---7  |</span>
+<span class="sd">    |  | + |  |---&gt; z</span>
+<span class="sd">    |  5---6  |</span>
+<span class="sd">    |         |</span>
+<span class="sd">    1---------2</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+
+        <span class="c1"># outer</span>
+        <span class="c1"># around the box (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+
+        <span class="c1"># inner</span>
+        <span class="c1"># backwards - I don&#39;t think this matters</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">wbox</span><span class="p">,</span> <span class="n">hbox</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">tw</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">hbox_in</span> <span class="o">=</span> <span class="n">hbox</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">th</span>
+        <span class="n">wbox_in</span> <span class="o">=</span> <span class="n">wbox</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">tw</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hbox</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="n">wbox</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hbox</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">wbox</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hbox</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">wbox</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hbox</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">wbox</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 3</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hbox_in</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="n">wbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">wbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">wbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">wbox_in</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 7</span>
+        <span class="p">])</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="i_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.i_faces">[docs]</a><span class="k">def</span> <span class="nf">i_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+            <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>   <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         ^y</span>
+<span class="sd">         |</span>
+<span class="sd">    0----------11 - y3</span>
+<span class="sd">    |          |</span>
+<span class="sd">    1---2  9---10 - y2</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">    4---3  8---7 - y1</span>
+<span class="sd">    |          |</span>
+<span class="sd">    5-----+----6-----&gt; z</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># around the I (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">10</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">11</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">hall</span><span class="p">,</span> <span class="n">bflange_btm</span><span class="p">,</span> <span class="n">bflange_top</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">tflange_btm</span><span class="p">,</span> <span class="n">tflange_top</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">hweb</span> <span class="o">=</span> <span class="n">hall</span> <span class="o">-</span> <span class="n">tflange_top</span> <span class="o">-</span> <span class="n">tflange_btm</span>
+        <span class="n">ysc</span> <span class="o">=</span> <span class="o">-</span><span class="n">hall</span> <span class="o">/</span> <span class="mf">2.</span>  <span class="c1"># TODO: fix the shear center formula</span>
+
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">ysc</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">tflange_btm</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">hweb</span>
+        <span class="n">y3</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">tflange_top</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 5</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 7</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 8</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 9</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 10</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 11</span>
+        <span class="p">])</span>  <span class="c1"># 24 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="i1_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.i1_faces">[docs]</a><span class="k">def</span> <span class="nf">i1_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+             <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+             <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         ^y</span>
+<span class="sd">         |</span>
+<span class="sd">    0----------11 - y3</span>
+<span class="sd">    |          |</span>
+<span class="sd">    1---2  9---10 - y2</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">    4---3  8---7 - y1</span>
+<span class="sd">    |          |</span>
+<span class="sd">    5-----+----6-----&gt; z</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># around the I (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">10</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">11</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+    <span class="p">]</span>
+
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bfoot_2x</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">hin</span><span class="p">,</span> <span class="n">hall</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">bflange</span> <span class="o">=</span> <span class="n">bfoot_2x</span> <span class="o">+</span> <span class="n">tweb</span>
+        <span class="n">bflange_top</span> <span class="o">=</span> <span class="n">bflange</span>
+        <span class="n">bflange_btm</span> <span class="o">=</span> <span class="n">bflange</span>
+        <span class="n">tflange_top</span> <span class="o">=</span> <span class="p">(</span><span class="n">hall</span> <span class="o">-</span> <span class="n">hin</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">tflange_btm</span> <span class="o">=</span> <span class="n">tflange_top</span>
+
+        <span class="n">hweb</span> <span class="o">=</span> <span class="n">hall</span> <span class="o">-</span> <span class="n">tflange_top</span> <span class="o">-</span> <span class="n">tflange_btm</span>
+        <span class="n">ysc</span> <span class="o">=</span> <span class="o">-</span><span class="n">hall</span> <span class="o">/</span> <span class="mf">2.</span>  <span class="c1"># TODO: fix the shear center formula</span>
+
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">ysc</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">tflange_btm</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">hweb</span>
+        <span class="n">y3</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">tflange_top</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 5</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">bflange_btm</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 7</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 8</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>      <span class="p">],</span>   <span class="c1"># 9</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 10</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="n">bflange_top</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>   <span class="c1"># 11</span>
+        <span class="p">])</span>  <span class="c1"># 24 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="h_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.h_faces">[docs]</a><span class="k">def</span> <span class="nf">h_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+            <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            ^y</span>
+<span class="sd">            |</span>
+<span class="sd">    0----11 |  8----7</span>
+<span class="sd">    |    |  |  |    |</span>
+<span class="sd">    |    10----9    |</span>
+<span class="sd">    |    |  |  |    |</span>
+<span class="sd">    |    |  +--|----|---&gt; z</span>
+<span class="sd">    |    |     |    |</span>
+<span class="sd">    |    3-----4    |</span>
+<span class="sd">    |    |     |    |</span>
+<span class="sd">    |    |     |    |</span>
+<span class="sd">    1----2     5----6</span>
+
+<span class="sd">          &lt;---&gt; dim1</span>
+<span class="sd">    &lt;----&gt; 0.5*dim2</span>
+<span class="sd">    &lt;---------------&gt; w_all</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">],</span>
+
+        <span class="c1"># around the H (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">10</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">11</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">winner</span><span class="p">,</span> <span class="n">wouter</span><span class="p">,</span> <span class="n">hall</span><span class="p">,</span> <span class="n">hinner</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">w_all</span> <span class="o">=</span> <span class="n">winner</span> <span class="o">+</span> <span class="n">wouter</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">w_all</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>        <span class="c1"># 0 - upper far left</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">w_all</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>        <span class="c1"># 1 - lower far left</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>   <span class="o">-</span><span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 2 - lower near left</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hinner</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 3 - lower H left</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hinner</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 4 - lower H right</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 5 - lower near right</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">w_all</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>         <span class="c1"># 6 - lower far right</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">w_all</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>         <span class="c1"># 7  - upper far right</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 8  - upper near right</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hinner</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 9  - upper H right</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hinner</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 10 - upper H left</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>   <span class="o">-</span><span class="n">winner</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>     <span class="c1"># 11 - upper near left</span>
+        <span class="p">])</span>  <span class="c1"># 24 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="chan_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.chan_faces">[docs]</a><span class="k">def</span> <span class="nf">chan_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+               <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+               <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ^y</span>
+<span class="sd">    |  0--------7</span>
+<span class="sd">    |  |        |</span>
+<span class="sd">    |  |  5-----6</span>
+<span class="sd">    |  |  |</span>
+<span class="sd">    +--|--|-------&gt; z</span>
+<span class="sd">       |  |</span>
+<span class="sd">       |  4-----3</span>
+<span class="sd">       |        |</span>
+<span class="sd">       1--------2</span>
+<span class="sd">    &lt;----&gt; e/zsc</span>
+
+<span class="sd">       &lt;--------&gt; bflange</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+
+        <span class="c1"># around the C (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bflange</span><span class="p">,</span> <span class="n">hall</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">tflange</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="c1"># distance from shear center to neutral axis</span>
+        <span class="c1">#zsc_na = 3 * bflange ** 2 / (6 * bflange + h) # per msc 2018 refman</span>
+
+        <span class="n">zsc</span> <span class="o">=</span> <span class="mf">0.</span> <span class="c1">## TODO: consider the shear center</span>
+        <span class="c1">#if 0:  # pragma: no cover</span>
+            <span class="c1"># msc 2018 refman; p.670</span>
+            <span class="c1">#h = hall - tflange</span>
+            <span class="c1">#tw = tweb</span>
+            <span class="c1">#tf = tflange</span>
+            <span class="c1">#b = bflange - tw / 2.</span>
+            <span class="c1">#bf = bflange - tw</span>
+            <span class="c1">#hw = hall - 2. * tf</span>
+            <span class="c1">#A = 2 * tf * bf + (h + tf) * tw</span>
+            <span class="c1">#zc = bf * tf * (bf + tw) / A</span>
+            <span class="c1">#zsc = b**2 * tf / (2*b*tw + 1/3. * h * tf)</span>
+            <span class="c1">#E = zs - tw / 2.</span>
+            <span class="c1">#zna = zc + zsc</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">zsc</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">zsc</span><span class="p">],</span> <span class="c1"># 1</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">tweb</span><span class="p">],</span> <span class="c1"># 4</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">tweb</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="chan1_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.chan1_faces">[docs]</a><span class="k">def</span> <span class="nf">chan1_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+                <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ^y</span>
+<span class="sd">    |  0--------7      ^ hall</span>
+<span class="sd">    |  |        |      |</span>
+<span class="sd">    |  |  5-----6      |  ^</span>
+<span class="sd">    |  |  |            |  | hweb</span>
+<span class="sd">    +--|--|-------&gt; z  |  |</span>
+<span class="sd">       |  |            |  v</span>
+<span class="sd">       |  4-----3      |  ^</span>
+<span class="sd">       |        |      |  | tflange</span>
+<span class="sd">       1--------2      v  v</span>
+
+<span class="sd">       &lt;--&gt; tweb</span>
+<span class="sd">          &lt;-----&gt; bflange_out</span>
+<span class="sd">       &lt;--------&gt; bflange</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">zsc</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># TODO: consider the shear center</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+
+        <span class="c1"># around the C (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bflange_out</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">hin</span><span class="p">,</span> <span class="n">hall</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">bflange</span> <span class="o">=</span> <span class="n">bflange_out</span> <span class="o">+</span> <span class="n">tweb</span>
+        <span class="n">tflange</span> <span class="o">=</span> <span class="p">(</span><span class="n">hall</span> <span class="o">-</span> <span class="n">hin</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">zsc</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">zsc</span><span class="p">],</span> <span class="c1"># 1</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">tweb</span><span class="p">],</span> <span class="c1"># 4</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">tweb</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="n">zsc</span> <span class="o">+</span> <span class="n">bflange</span><span class="p">],</span> <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="z_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.z_faces">[docs]</a><span class="k">def</span> <span class="nf">z_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+            <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           ^ y</span>
+<span class="sd">           |</span>
+<span class="sd">    0--------7        ^ hall</span>
+<span class="sd">    |      | |        |</span>
+<span class="sd">    1----2 | |        |  ^</span>
+<span class="sd">         | | |   z    |  | hin</span>
+<span class="sd">         | +-|---&gt;    |  |</span>
+<span class="sd">         |   |        |  v</span>
+<span class="sd">         |   6-----5  |</span>
+<span class="sd">         |         |  |</span>
+<span class="sd">         3---------4  v</span>
+<span class="sd">         &lt;---&gt; tweb</span>
+<span class="sd">             &lt;-----&gt; bfoot</span>
+<span class="sd">       &lt;-----------&gt; bflange</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span>
+
+        <span class="c1"># around the C (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bfoot</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">hin</span><span class="p">,</span> <span class="n">hall</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">wall</span> <span class="o">=</span> <span class="n">bfoot</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">+</span> <span class="n">tweb</span>
+        <span class="n">tflange</span> <span class="o">=</span> <span class="p">(</span><span class="n">hall</span> <span class="o">-</span> <span class="n">hin</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="o">-</span><span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="o">-</span><span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">tflange</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>          <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>           <span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>             <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="hexa_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.hexa_faces">[docs]</a><span class="k">def</span> <span class="nf">hexa_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+               <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+               <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          ^ y</span>
+<span class="sd">          |</span>
+<span class="sd">       0-----5        ^ hall</span>
+<span class="sd">      /   |   \       |</span>
+<span class="sd">     /    |    \      |</span>
+<span class="sd">    1     +-----4---z |</span>
+<span class="sd">    \           /     |</span>
+<span class="sd">     \         /      |</span>
+<span class="sd">      2_______3       v</span>
+<span class="sd">              &lt;-&gt; wtri</span>
+<span class="sd">    &lt;-----------&gt; wall</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+
+        <span class="c1"># around the C (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">wtri</span><span class="p">,</span> <span class="n">wall</span><span class="p">,</span> <span class="n">hall</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="n">wall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">wtri</span><span class="p">],</span>  <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>      <span class="o">-</span><span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">wall</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">wtri</span><span class="p">],</span>  <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">wall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">wtri</span><span class="p">],</span>  <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>       <span class="n">wall</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>   <span class="n">wall</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">wtri</span><span class="p">],</span> <span class="c1"># 5</span>
+        <span class="p">])</span>  <span class="c1"># 12 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="l_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.l_faces">[docs]</a><span class="k">def</span> <span class="nf">l_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+            <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       ^y</span>
+<span class="sd">       |</span>
+<span class="sd">    0-----5               ^ hall</span>
+<span class="sd">    |  |  |               |</span>
+<span class="sd">    |  |  |               |</span>
+<span class="sd">    |  |  |               |</span>
+<span class="sd">    |  |  4---3           |  ^ tflange</span>
+<span class="sd">    |  +------|-------&gt; z |  |</span>
+<span class="sd">    1---------2           v  v</span>
+
+<span class="sd">    &lt;----&gt; tweb</span>
+<span class="sd">    &lt;---------&gt; bflange</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bflange</span><span class="p">,</span> <span class="n">hall</span><span class="p">,</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">tweb</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span> <span class="o">-</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>        <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">bflange</span> <span class="o">-</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">bflange</span> <span class="o">-</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>        <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hall</span> <span class="o">-</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 5</span>
+        <span class="p">])</span>  <span class="c1"># 12 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+
+        <span class="c1"># around the C (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="t_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.t_faces">[docs]</a><span class="k">def</span> <span class="nf">t_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+            <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         ^ y</span>
+<span class="sd">         |</span>
+<span class="sd">    0----------7</span>
+<span class="sd">    |    +     |----&gt; z</span>
+<span class="sd">    1---2  5---6</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">        3--4</span>
+
+<span class="sd">      bflange</span>
+<span class="sd">    &lt;----------&gt;</span>
+
+<span class="sd">    8----------15</span>
+<span class="sd">    |    +     |</span>
+<span class="sd">    9---10 13--14</span>
+<span class="sd">        |  |</span>
+<span class="sd">        |  |</span>
+<span class="sd">        11-12</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># around the T (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>
+
+        <span class="c1"># front/back face</span>
+        <span class="c1">#[0, 1, 2,  3,  4,  5,  6,  7],</span>
+        <span class="c1">#[8, 9, 10, 11, 12, 13, 14, 15],</span>
+    <span class="p">]</span>
+
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bflange</span><span class="p">,</span> <span class="n">htotal</span><span class="p">,</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">tweb</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="c1">#htotal = tflange + hweb</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">htotal</span><span class="o">+</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">htotal</span><span class="o">+</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="t1_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.t1_faces">[docs]</a><span class="k">def</span> <span class="nf">t1_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+             <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+             <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                 ^ y</span>
+<span class="sd">                 |</span>
+<span class="sd">               6---5       ^ hall</span>
+<span class="sd">               | | |       |</span>
+<span class="sd">               | | |       |</span>
+<span class="sd">    0----------7 | |       | ^</span>
+<span class="sd">    |            +-|---&gt; z | | tflange</span>
+<span class="sd">    1----------2   |       | v</span>
+<span class="sd">               |   |       |</span>
+<span class="sd">               |   |       |</span>
+<span class="sd">               3---4       v</span>
+<span class="sd">    &lt;---------&gt;&lt;---&gt;</span>
+<span class="sd">     bfoot      tweb</span>
+
+<span class="sd">      bflange</span>
+<span class="sd">    &lt;----------&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+
+        <span class="c1"># around the T (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">hall</span><span class="p">,</span> <span class="n">bfoot</span><span class="p">,</span> <span class="n">tweb</span><span class="p">,</span> <span class="n">tflange</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="c1">#htotal = tflange + hweb</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="n">bfoot</span> <span class="o">-</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">bfoot</span> <span class="o">-</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>     <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>     <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">hall</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>  <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="t2_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.t2_faces">[docs]</a><span class="k">def</span> <span class="nf">t2_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+             <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+             <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>  <span class="c1"># validated</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       &lt;--&gt;  tweb</span>
+<span class="sd">         ^y</span>
+<span class="sd">         |</span>
+<span class="sd">       0--7    ^</span>
+<span class="sd">       |  |    | hweb</span>
+<span class="sd">       |  |    V</span>
+<span class="sd">    2--1  6--5 ^ hflange</span>
+<span class="sd">    |        |-|--&gt;z</span>
+<span class="sd">    3--------4 v</span>
+
+<span class="sd">      bflange</span>
+<span class="sd">    &lt;--------&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span>
+
+        <span class="c1"># around the T (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">bflange</span><span class="p">,</span> <span class="n">htotal</span><span class="p">,</span> <span class="n">tflange</span><span class="p">,</span> <span class="n">tweb</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="n">hweb</span> <span class="o">=</span> <span class="n">htotal</span> <span class="o">-</span> <span class="n">tflange</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="c1"># x, y, z</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hweb</span> <span class="o">+</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>        <span class="o">-</span><span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>     <span class="o">-</span><span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="o">-</span><span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 3</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>    <span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>     <span class="n">bflange</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>        <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">hweb</span> <span class="o">+</span> <span class="n">tflange</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tweb</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># 7</span>
+        <span class="p">])</span>  <span class="c1"># 16 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hat_faces"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.beam_connectivity.html#pyNastran.bdf.cards.elements.beam_connectivity.hat_faces">[docs]</a><span class="k">def</span> <span class="nf">hat_faces</span><span class="p">(</span><span class="n">n1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xform</span><span class="p">,</span>
+              <span class="n">dim1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+              <span class="n">dim2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            &lt;--------d3-------&gt;</span>
+
+<span class="sd">            0----------------11              ^   --y3</span>
+<span class="sd">       d4   |        A        |   d4         |</span>
+<span class="sd">     &lt;----&gt; +-d2-5-------6-d2-+ &lt;----&gt;       |   --y2</span>
+<span class="sd">            | B  |       |  B |              | d1</span>
+<span class="sd">     2------1----+       +----10-----9       |   --y1</span>
+<span class="sd">     |     C     |       |     C     | t=d2  |</span>
+<span class="sd">     3-----------4       7-----------8       v   --y0</span>
+<span class="sd">     |</span>
+<span class="sd">     -z0    |-z1 |-z2    |z2  |z1    |z0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># front face</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+
+        <span class="c1"># back face</span>
+        <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span>
+
+        <span class="c1"># around the T (counter-clockwise)</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">10</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">11</span><span class="p">,],</span>
+        <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">dim1</span><span class="p">),</span> <span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">dim2</span><span class="p">)]:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">d3</span><span class="p">,</span> <span class="n">d4</span> <span class="o">=</span> <span class="n">dim</span>
+        <span class="c1">#hall, that, wmid, bfoot</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">d3</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">d4</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">d3</span><span class="o">/</span><span class="mf">2.</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">d3</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">d2</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">d2</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">d2</span>
+        <span class="n">y3</span> <span class="o">=</span> <span class="n">d1</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="c1"># x, y, z</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="o">-</span><span class="n">z1</span><span class="p">],</span>  <span class="c1"># 0</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">z1</span><span class="p">],</span>  <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="o">-</span><span class="n">z0</span><span class="p">],</span>  <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="o">-</span><span class="n">z0</span><span class="p">],</span>  <span class="c1"># 3</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="o">-</span><span class="n">z2</span><span class="p">],</span>  <span class="c1"># 4</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="o">-</span><span class="n">z2</span><span class="p">],</span>  <span class="c1"># 5</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span>  <span class="n">z2</span><span class="p">],</span>  <span class="c1"># 6</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span>  <span class="n">z2</span><span class="p">],</span>  <span class="c1"># 7</span>
+
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">z0</span><span class="p">],</span>  <span class="c1"># 3</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z0</span><span class="p">],</span>  <span class="c1"># 2</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">],</span>  <span class="c1"># 1</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="n">z1</span><span class="p">],</span>  <span class="c1"># 0</span>
+        <span class="p">])</span>  <span class="c1"># 24 x 3</span>
+        <span class="n">pointsi</span> <span class="o">=</span> <span class="n">points</span> <span class="o">@</span> <span class="n">xform</span> <span class="o">+</span> <span class="n">nid</span>
+        <span class="n">points_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointsi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">faces</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">points_list</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

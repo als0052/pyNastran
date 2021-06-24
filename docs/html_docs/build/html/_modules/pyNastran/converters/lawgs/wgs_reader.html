@@ -1,0 +1,493 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.lawgs.wgs_reader &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.lawgs.wgs_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.lawgs.wgs_reader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - Panel()</span>
+<span class="sd"> - read_lawgs(wgs_filename, log=None, debug=False)</span>
+<span class="sd"> - LaWGS(self, log=None, debug=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+
+<div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rotate : float</span>
+<span class="sd">        rotates the patch</span>
+<span class="sd">    translate : float</span>
+<span class="sd">        translates the patch</span>
+<span class="sd">    scale : float</span>
+<span class="sd">        scales the patch</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+        <span class="c1">#print(&quot;key=%s \nheader=|%s|&quot; % (key, header))   # ,iSymG</span>
+        <span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">nline</span><span class="p">,</span> <span class="n">npnt</span><span class="p">,</span> <span class="n">unused_isyml</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">rz</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">tz</span><span class="p">,</span> <span class="n">xscale</span><span class="p">,</span>
+         <span class="n">yscale</span><span class="p">,</span> <span class="n">zscale</span><span class="p">,</span> <span class="n">unused_isymg</span><span class="p">)</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ID=</span><span class="si">%s</span><span class="s2"> name=</span><span class="si">%s</span><span class="s2"> imax=</span><span class="si">%s</span><span class="s2"> jmax=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">nline</span><span class="p">,</span> <span class="n">npnt</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Rotate    = &lt;</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">rz</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Translate = &lt;</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">rz</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Scale     = &lt;</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xscale</span><span class="p">,</span> <span class="n">yscale</span><span class="p">,</span> <span class="n">zscale</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">rz</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translate</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">tz</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">xscale</span><span class="p">,</span> <span class="n">yscale</span><span class="p">,</span> <span class="n">zscale</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">npnt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npnt</span><span class="p">)</span>
+        <span class="n">nline</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nline</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">=</span> <span class="n">npnt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">=</span> <span class="n">nline</span>
+        <span class="n">ngroup_lines</span> <span class="o">=</span> <span class="n">npnt</span> <span class="o">//</span> <span class="mi">2</span>  <span class="c1"># self.ncols</span>
+        <span class="n">is_single_line</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">npnt</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># self.ncols</span>
+            <span class="n">is_single_line</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#ngroup_lines += 1</span>
+
+        <span class="c1">#X = array((nrows, ncols))</span>
+        <span class="c1">#Y = array((nrows, ncols))</span>
+        <span class="c1">#Z = array((nrows, ncols))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_irow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">unused_row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngroup_lines</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span>
+                <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">]</span>
+                <span class="n">points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">]</span>
+                <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+
+            <span class="k">if</span> <span class="n">is_single_line</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span>
+                <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">]</span>
+                <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">#for i,point in enumerate(points):</span>
+            <span class="c1">#print(&quot;point[%s] = %s&quot; % (i, point))</span>
+
+        <span class="c1"># put in plot3d format</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">points</span>
+
+<div class="viewcode-block" id="Panel.build_rotation_matrix"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.build_rotation_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">build_rotation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Form the rotation matrix used for geometrical transformations</span>
+<span class="sd">        Taken from NASA TM 85767 defining LaWGS.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># rotation angles, degrees</span>
+        <span class="c1">#r = radians([self.phi,self.theta,self.psi])</span>
+        <span class="c1">#print(&quot;self.rotate = &quot;,self.rotate)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="n">radians</span><span class="p">(</span><span class="n">ri</span><span class="p">)</span> <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="p">]</span>
+        <span class="n">cphi</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">sphi</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ctheta</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">stheta</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">cpsi</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">spsi</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="c1">#print(rot)</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctheta</span> <span class="o">*</span> <span class="n">cpsi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctheta</span> <span class="o">*</span> <span class="n">spsi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">stheta</span>
+
+        <span class="n">rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">spsi</span> <span class="o">*</span> <span class="n">cphi</span> <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">cpsi</span> <span class="o">*</span> <span class="n">sphi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpsi</span> <span class="o">*</span> <span class="n">cphi</span> <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">spsi</span> <span class="o">*</span> <span class="n">sphi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctheta</span> <span class="o">*</span> <span class="n">sphi</span>
+
+        <span class="n">rot</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">spsi</span> <span class="o">*</span> <span class="n">sphi</span> <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">cpsi</span> <span class="o">*</span> <span class="n">cphi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cpsi</span> <span class="o">*</span> <span class="n">sphi</span> <span class="o">+</span> <span class="n">stheta</span> <span class="o">*</span> <span class="n">spsi</span> <span class="o">*</span> <span class="n">cphi</span>
+        <span class="n">rot</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctheta</span> <span class="o">*</span> <span class="n">cphi</span>
+
+        <span class="k">return</span> <span class="n">rot</span></div>
+
+<div class="viewcode-block" id="Panel.update_points"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.update_points">[docs]</a>    <span class="k">def</span> <span class="nf">update_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_rotation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="n">translate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translate</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span>
+        <span class="n">points2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;size(points) = (</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncols</span><span class="p">):</span>
+                <span class="n">points2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">translate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">points2</span></div>
+
+<div class="viewcode-block" id="Panel.get_points"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.get_points">[docs]</a>    <span class="k">def</span> <span class="nf">get_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span>
+        <span class="k">return</span> <span class="n">points</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">npoints</span></div>
+
+<div class="viewcode-block" id="Panel.get_elements"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.get_elements">[docs]</a>    <span class="k">def</span> <span class="nf">get_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pointI</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#print(&quot;name=%s n=%s nout=%s&quot; %(self.name,n))</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">pointI</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">n</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="p">,</span> <span class="n">n</span></div>
+
+<div class="viewcode-block" id="Panel.get_element"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.get_element">[docs]</a>    <span class="k">def</span> <span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pointI</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">pointI</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">pointI</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">pointI</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncols</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">pointI</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Panel.write_as_plot3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.Panel.write_as_plot3d">[docs]</a>    <span class="k">def</span> <span class="nf">write_as_plot3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p3d_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a plot3d section&quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncols</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">Y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                <span class="n">Z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">p3d_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">p3d_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">Z</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">p3d_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="read_lawgs"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.read_lawgs">[docs]</a><span class="k">def</span> <span class="nf">read_lawgs</span><span class="p">(</span><span class="n">wgs_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads an lawgs file&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LaWGS</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_lawgs</span><span class="p">(</span><span class="n">wgs_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="LaWGS"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.LaWGS">[docs]</a><span class="k">class</span> <span class="nc">LaWGS</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;defines a reader for the LaWGS legacy file format&quot;&quot;&quot;</span>
+    <span class="n">model_type</span> <span class="o">=</span> <span class="s1">&#39;LaWGS&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the LaWGS object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        debug : bool/None; default=True</span>
+<span class="sd">            used to set the logger if no logger is passed in</span>
+<span class="sd">                True:  logs debug/info/error messages</span>
+<span class="sd">                False: logs info/error messages</span>
+<span class="sd">                None:  logs error messages</span>
+<span class="sd">        log : logging module object / None</span>
+<span class="sd">            if log is set, debug is ignored and uses the</span>
+<span class="sd">            settings the logging object has</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="LaWGS.read_lawgs"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.LaWGS.read_lawgs">[docs]</a>    <span class="k">def</span> <span class="nf">read_lawgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wgs_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads an lawgs file&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">wgs_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">lawgs_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">lawgs_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">nlines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nlines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="c1">#print(&quot;found blank line, breaking...&quot;)</span>
+                <span class="k">break</span>
+            <span class="c1">#print(line)</span>
+            <span class="k">if</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="c1">#print(&quot;if&quot;)</span>
+                <span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="n">group</span><span class="p">]</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39; </span><span class="se">\t\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="n">group</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="n">group</span><span class="p">]</span>
+
+        <span class="k">del</span> <span class="n">groups</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">header_group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="n">header_group</span>
+            <span class="c1">#if key==&#39;BODY&#39;:</span>
+            <span class="c1">#if 1:</span>
+            <span class="n">panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+            <span class="n">panel</span><span class="o">.</span><span class="n">update_points</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel</span></div>
+
+<div class="viewcode-block" id="LaWGS.get_points_elements"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.LaWGS.get_points_elements">[docs]</a>    <span class="k">def</span> <span class="nf">get_points_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">points</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">unused_regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_points_elements_regions</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">points</span><span class="p">,</span> <span class="n">elements</span></div>
+
+<div class="viewcode-block" id="LaWGS.get_points_elements_regions"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.LaWGS.get_points_elements_regions">[docs]</a>    <span class="k">def</span> <span class="nf">get_points_elements_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pointI</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">iregion</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">unused_name</span><span class="p">,</span> <span class="n">panel</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="p">(</span><span class="n">pointsI</span><span class="p">,</span> <span class="n">pointi</span><span class="p">)</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+            <span class="p">(</span><span class="n">elementsI</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(</span><span class="n">pointI</span><span class="p">)</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="n">pointsI</span>
+            <span class="n">elements</span> <span class="o">+=</span> <span class="n">elementsI</span>
+            <span class="n">pointI</span> <span class="o">+=</span> <span class="n">pointi</span>
+            <span class="n">regions</span> <span class="o">+=</span> <span class="p">[</span><span class="n">iregion</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>
+            <span class="n">iregion</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1">#print(&quot;name=%s len(All_elements)=%s len(all_points)=%s&quot; % (</span>
+                <span class="c1">#name, len(elements), len(points)))</span>
+
+        <span class="c1">#for point in points:</span>
+            <span class="c1">#print(point)</span>
+        <span class="k">return</span> <span class="n">points</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span></div>
+
+<div class="viewcode-block" id="LaWGS.write_as_plot3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.lawgs.html#pyNastran.converters.lawgs.wgs_reader.LaWGS.write_as_plot3d">[docs]</a>    <span class="k">def</span> <span class="nf">write_as_plot3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p3dname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a plot3d file&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">p3dname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p3d_file</span><span class="p">:</span>
+            <span class="n">p3d_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">unused_name</span><span class="p">,</span> <span class="n">panel</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">p3d_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">nrows</span><span class="p">,</span> <span class="n">panel</span><span class="o">.</span><span class="n">ncols</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">unused_name</span><span class="p">,</span> <span class="n">panel</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">panel</span><span class="o">.</span><span class="n">write_as_plot3d</span><span class="p">(</span><span class="n">p3d_file</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

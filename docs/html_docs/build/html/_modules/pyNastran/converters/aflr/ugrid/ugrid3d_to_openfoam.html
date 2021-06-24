@@ -1,0 +1,635 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">argsort</span><span class="p">,</span> <span class="n">searchsorted</span><span class="p">,</span> <span class="n">allclose</span><span class="p">,</span> <span class="n">array</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.converters.aflr.ugrid.ugrid_reader</span> <span class="kn">import</span> <span class="n">read_ugrid</span>
+<span class="kn">from</span> <span class="nn">pyNastran.converters.aflr.surf.surf_reader</span> <span class="kn">import</span> <span class="n">TagReader</span>
+
+<div class="viewcode-block" id="write_foam"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam.write_foam">[docs]</a><span class="k">def</span> <span class="nf">write_foam</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">foam_filename</span><span class="p">,</span> <span class="n">tag_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes an OpenFOAM file&quot;&quot;&quot;</span>
+    <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">foam_filename</span><span class="p">)</span>
+    <span class="n">unused_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">foam_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">points_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s1">&#39;points&#39;</span><span class="p">)</span>
+    <span class="n">boundary_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s1">&#39;boundary&#39;</span><span class="p">)</span>
+    <span class="n">faces_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s1">&#39;faces&#39;</span><span class="p">)</span>
+    <span class="c1">#neighbor_filename = os.path.join(dirname, &#39;neighbor&#39;)</span>
+    <span class="c1">#owner_filename = os.path.join(dirname, &#39;owner&#39;)</span>
+
+    <span class="c1"># boundary</span>
+    <span class="c1"># 1. get array of unique properties</span>
+    <span class="c1"># 2. loop over in sorted order</span>
+    <span class="c1"># 3.   find where values are equal to the property id in ctrias</span>
+    <span class="c1">#      and cquads (surface elements)</span>
+    <span class="c1"># 4.   find the min/max</span>
+
+    <span class="c1"># points</span>
+    <span class="c1"># 1. loop over points and write</span>
+
+    <span class="c1"># faces</span>
+    <span class="c1"># 1. loop over tets/penta5s/penta/chexas:  DO CPENTA5s last!</span>
+    <span class="c1"># 2.    element.faces</span>
+    <span class="c1"># 3.    only write it once!  (Sort the data for checking, but</span>
+    <span class="c1">#       write out with proper connectivity)</span>
+
+    <span class="c1">#f.write(&#39;CEND\n&#39;)</span>
+    <span class="c1">#f.write(&#39;BEGIN BULK\n&#39;)</span>
+    <span class="c1">#f.write(&#39;PSHELL,1,1, 0.1\n&#39;)</span>
+    <span class="c1">#f.write(&#39;MAT1, 1, 1.0e7,, 0.3\n&#39;)</span>
+
+    <span class="c1">#pids = self.pids</span>
+    <span class="c1">#mid = 1</span>
+    <span class="c1">#points_filename = foam_filename  # remove...</span>
+    <span class="n">_write_points</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">points_filename</span><span class="p">)</span>
+    <span class="n">_write_boundary</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">boundary_filename</span> <span class="o">+</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="n">tag_filename</span><span class="p">)</span>
+    <span class="n">_write_faces</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">faces_filename</span> <span class="o">+</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_write_points"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam._write_points">[docs]</a><span class="k">def</span> <span class="nf">_write_points</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">points_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes an OpenFOAM points file&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">points_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">points_file</span><span class="p">:</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;/*--------------------------------*- C++ -*----------------------------------*</span><span class="se">\\\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;| =========                 |                                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;| </span><span class="se">\\\\</span><span class="s1">      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|  </span><span class="se">\\\\</span><span class="s1">    /   O peration     | Version:  1.7.1                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|   </span><span class="se">\\\\</span><span class="s1">  /    A nd           | Web:      www.OpenFOAM.com                      |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|    </span><span class="se">\\\\</span><span class="s1">/     M anipulation  |                                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">*---------------------------------------------------------------------------*/</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;FoamFile</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;{</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    version     2.0;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    format      ascii;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    class       vectorField;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    location    &quot;constant/polyMesh&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    object      points;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * /</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+
+        <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
+        <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ugrid</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s1">&#39;    (</span><span class="si">%-12s</span><span class="s1"> </span><span class="si">%-12s</span><span class="s1"> </span><span class="si">%-12s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">points_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_write_boundary"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam._write_boundary">[docs]</a><span class="k">def</span> <span class="nf">_write_boundary</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">boundary_filename</span><span class="p">,</span> <span class="n">tag_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes an OpenFOAM boundary file&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">boundary_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">boundary_file</span><span class="p">:</span>
+        <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#f.write(&#39;%i\n&#39; % (nnodes))</span>
+        <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">uboundaries</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">ugrid</span><span class="o">.</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">nboundaries</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">uboundaries</span><span class="p">)</span>
+        <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nboundaries</span><span class="p">)</span>
+        <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">tagger</span> <span class="o">=</span> <span class="n">TagReader</span><span class="p">()</span>
+        <span class="n">tag_data</span> <span class="o">=</span> <span class="n">tagger</span><span class="o">.</span><span class="n">read_tag_filename</span><span class="p">(</span><span class="n">tag_filename</span><span class="p">)</span>
+
+
+        <span class="n">isort</span> <span class="o">=</span> <span class="n">argsort</span><span class="p">(</span><span class="n">ugrid</span><span class="o">.</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">pids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="c1">#print(isort)</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">pids</span>
+        <span class="k">for</span> <span class="n">iboundary</span> <span class="ow">in</span> <span class="n">uboundaries</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">tag_data</span><span class="p">[</span><span class="n">iboundary</span><span class="p">]</span>
+            <span class="c1">#name, is_visc, is_recon, is_rebuild, is_fixed, is_source,</span>
+            <span class="c1">#is_trans, is_delete, bl_spacing, bl_thickness, nlayers = data</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">iboundary</span> <span class="o">==</span> <span class="n">pids</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nfaces</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">i</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">startface</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nfaces</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The data is unsorted...len(i)=</span><span class="si">%s</span><span class="s1"> nfaces=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">nfaces</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    {</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        type patch;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1">#f.write(&#39;        type 1(wall);\n&#39;)  # create a new group</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        nFaces </span><span class="si">%i</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nfaces</span><span class="p">)</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        startFace </span><span class="si">%i</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">startface</span><span class="p">)</span>
+            <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    }</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">boundary_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ugrid</span><span class="o">.</span><span class="n">isort</span> <span class="o">=</span> <span class="n">isort</span></div>
+
+<div class="viewcode-block" id="_write_faces"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam._write_faces">[docs]</a><span class="k">def</span> <span class="nf">_write_faces</span><span class="p">(</span><span class="n">ugrid</span><span class="p">,</span> <span class="n">faces_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes an OpenFOAM faces file&quot;&quot;&quot;</span>
+    <span class="n">nhexas</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">hexas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">npenta6s</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta6s</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">npenta5s</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta5s</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ntets</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">nquad_faces</span> <span class="o">=</span> <span class="n">nhexas</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">npenta5s</span> <span class="o">+</span> <span class="n">npenta6s</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="n">ntri_faces</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">npenta5s</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">npenta6s</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">nfaces</span> <span class="o">=</span> <span class="n">ntri_faces</span> <span class="o">+</span> <span class="n">nquad_faces</span>
+    <span class="k">assert</span> <span class="n">nfaces</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nfaces</span>
+
+    <span class="c1">#tri_face_to_eids = ones((nt, 2), dtype=&#39;int32&#39;)</span>
+    <span class="n">tri_face_to_eids</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="c1">#quad_face_to_eids = ones((nq, 2), dtype=&#39;int32&#39;)</span>
+    <span class="n">quad_face_to_eids</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="n">tri_faces</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">ntri_faces</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">quad_faces</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nquad_faces</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">faces_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">faces_file</span><span class="p">:</span>
+        <span class="n">faces_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#faces_file.write(&#39;%i\n&#39; % (nnodes))</span>
+        <span class="n">faces_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">it_start</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">iq_start</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">min_eids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">iq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">it_start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+        <span class="n">iq_start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">iq</span>
+        <span class="n">min_eids</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">tets</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">tets</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span> <span class="o">=</span> <span class="n">element</span>
+            <span class="n">face1</span> <span class="o">=</span> <span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n1</span><span class="p">]</span>
+            <span class="n">face2</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+            <span class="n">face3</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n1</span><span class="p">]</span>
+            <span class="n">face4</span> <span class="o">=</span> <span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face1</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face2</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face3</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face4</span>
+
+            <span class="n">face1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face3</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face4</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face1</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face2</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face3</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face4</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">it</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">it_start</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+        <span class="n">iq_start</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">iq</span>
+        <span class="n">min_eids</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">hexas</span>
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;HEXA it=</span><span class="si">%s</span><span class="s1"> iq=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">iq</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">hexas</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n8</span><span class="p">)</span> <span class="o">=</span> <span class="n">element</span>
+
+            <span class="n">face1</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+            <span class="n">face2</span> <span class="o">=</span> <span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+            <span class="n">face3</span> <span class="o">=</span> <span class="p">[</span><span class="n">n6</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n8</span><span class="p">,</span> <span class="n">n7</span><span class="p">]</span>
+            <span class="n">face4</span> <span class="o">=</span> <span class="p">[</span><span class="n">n5</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n8</span><span class="p">]</span>
+            <span class="n">face5</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n8</span><span class="p">]</span>
+            <span class="n">face6</span> <span class="o">=</span> <span class="p">[</span><span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n1</span><span class="p">]</span>
+
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face1</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face2</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face3</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face4</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face5</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face6</span>
+
+            <span class="n">face1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face3</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face4</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face5</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face6</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face1</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face2</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face3</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face4</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face5</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face6</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">iq</span> <span class="o">+=</span> <span class="mi">6</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">it_start</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+        <span class="n">iq_start</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">iq</span>
+        <span class="n">min_eids</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta5s</span>
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;PENTA5 it=</span><span class="si">%s</span><span class="s1"> iq=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">iq</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta5s</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">)</span> <span class="o">=</span> <span class="n">element</span>
+
+            <span class="n">face1</span> <span class="o">=</span> <span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n5</span><span class="p">]</span>
+            <span class="n">face2</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n5</span><span class="p">]</span>
+            <span class="n">face3</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n5</span><span class="p">]</span>
+            <span class="n">face4</span> <span class="o">=</span> <span class="p">[</span><span class="n">n5</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+            <span class="n">face5</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n1</span><span class="p">]</span>
+
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face1</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face2</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face3</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face4</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face5</span>
+
+            <span class="n">face1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face3</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face4</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face5</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face1</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face2</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face3</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face4</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face5</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+
+            <span class="n">it</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">iq</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">it_start</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+        <span class="n">iq_start</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">iq</span>
+        <span class="n">min_eids</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta6s</span>
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;PENTA6 it=</span><span class="si">%s</span><span class="s1"> iq=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="p">,</span> <span class="n">iq</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">ugrid</span><span class="o">.</span><span class="n">penta6s</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">)</span> <span class="o">=</span> <span class="n">element</span>
+
+            <span class="n">face1</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+            <span class="n">face2</span> <span class="o">=</span> <span class="p">[</span><span class="n">n5</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n6</span><span class="p">]</span>
+            <span class="n">face3</span> <span class="o">=</span> <span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+            <span class="n">face4</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n6</span><span class="p">]</span>
+            <span class="n">face5</span> <span class="o">=</span> <span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n1</span><span class="p">]</span>
+
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face1</span>
+            <span class="n">tri_faces</span><span class="p">[</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face2</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face3</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face4</span>
+            <span class="n">quad_faces</span><span class="p">[</span><span class="n">iq</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">face5</span>
+
+            <span class="n">face1</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face3</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face4</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">face5</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face1</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tri_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face2</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face3</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face4</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">quad_face_to_eids</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">face5</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">it</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="n">iq</span> <span class="o">+=</span> <span class="mi">3</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># find the unique faces</span>
+        <span class="n">tri_faces_sort</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">tri_faces</span><span class="p">)</span>
+        <span class="n">quad_faces_sort</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">quad_faces</span><span class="p">)</span>
+        <span class="c1">#print(&#39;t0&#39;, tri_faces_sort[0, :])</span>
+        <span class="c1">#print(&#39;t1&#39;, tri_faces_sort[1, :])</span>
+
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nt=</span><span class="si">%s</span><span class="s1"> nq=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntri_faces</span><span class="p">,</span> <span class="n">nquad_faces</span><span class="p">))</span>
+        <span class="n">tri_faces_sort</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#for i, tri in enumerate(tri_faces):</span>
+            <span class="c1">#assert tri[2] &gt; tri[0], &#39;i=%s tri=%s&#39; % (i, tri)</span>
+        <span class="c1">#print(&#39;*t0&#39;, tri_faces_sort[0, :])</span>
+        <span class="c1">#print(&#39;*t1&#39;, tri_faces_sort[1, :])</span>
+
+        <span class="n">quad_faces_sort</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#for i, quad in enumerate(quad_faces):</span>
+            <span class="c1">#assert quad[3] &gt; quad[0], &#39;i=%s quad=%s&#39; % (i, quad)</span>
+
+
+        <span class="c1">#iq_start_keys = iq_start.keys()</span>
+        <span class="c1">#it_start_keys = it_start.keys()</span>
+        <span class="c1">#iq_start_keys.sort()</span>
+        <span class="c1">#it_start_keys.sort()</span>
+
+        <span class="n">unused_face_to_eid</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">eid_keys</span> <span class="o">=</span> <span class="n">min_eids</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">eid_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">type_mapper</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;tets&#39;</span><span class="p">,</span>
+            <span class="mi">2</span> <span class="p">:</span> <span class="s1">&#39;hexas&#39;</span><span class="p">,</span>
+            <span class="mi">3</span> <span class="p">:</span> <span class="s1">&#39;penta5s&#39;</span><span class="p">,</span>
+            <span class="mi">4</span> <span class="p">:</span> <span class="s1">&#39;penta6s&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ugrid</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;eid_keys = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">eid_keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">eids</span> <span class="ow">in</span> <span class="n">tri_face_to_eids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1">#if it&#39;s a boundary face, wer&#39;re fine, otherwise, error...</span>
+                <span class="c1">#print(&#39;*face=%s eids=%s&#39; % (face, eids))</span>
+                <span class="c1">#pid = lookup from quads/tris</span>
+                <span class="n">eid</span> <span class="o">=</span> <span class="n">eids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">unused_owner</span> <span class="o">=</span> <span class="n">eid</span>
+                <span class="n">unused_neighbor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">continue</span>
+                <span class="c1">#raise RuntimeError()</span>
+
+            <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="o">=</span> <span class="n">eids</span>
+            <span class="n">i1</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">eid_keys</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+            <span class="n">i2</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">eid_keys</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># tet</span>
+                <span class="n">it1</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">it2</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span>
+                <span class="n">faces1_sort</span> <span class="o">=</span> <span class="n">tri_faces_sort</span><span class="p">[</span><span class="n">it1</span><span class="p">:</span><span class="n">it2</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">faces1_unsorted</span> <span class="o">=</span> <span class="n">tri_faces</span><span class="p">[</span><span class="n">it1</span><span class="p">:</span><span class="n">it2</span><span class="p">,</span> <span class="p">:]</span>
+
+                <span class="c1">#print(&quot;faces1 = \n&quot;, faces1_sort, &#39;\n&#39;)</span>
+
+                <span class="c1"># figure out irow; 3 for the test case</span>
+                <span class="n">face</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+                <span class="c1">#print(&#39;face  = %s&#39; % face)</span>
+                <span class="c1">#print(&#39;face3 = %s&#39; % faces1_sort[3, :])</span>
+
+                <span class="k">if</span> <span class="n">allclose</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">faces1_sort</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]):</span>
+                    <span class="n">n1</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="n">allclose</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">faces1_sort</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]):</span>
+                    <span class="n">n1</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">allclose</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">faces1_sort</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]):</span>
+                    <span class="n">n1</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">allclose</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">faces1_sort</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]):</span>
+                    <span class="n">n1</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;cant find face=</span><span class="si">%s</span><span class="s1"> in faces for eid1=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">e1</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">allclose</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">faces1_unsorted</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]):</span>
+                    <span class="n">unused_owner</span> <span class="o">=</span> <span class="n">e1</span>
+                    <span class="n">unused_neighbor</span> <span class="o">=</span> <span class="n">e2</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">unused_owner</span> <span class="o">=</span> <span class="n">e2</span>
+                    <span class="n">unused_neighbor</span> <span class="o">=</span> <span class="n">e1</span>
+                <span class="n">unused_face_new</span> <span class="o">=</span> <span class="n">faces1_unsorted</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="k">elif</span> <span class="n">i1</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># CHEXA</span>
+                <span class="n">iq1</span> <span class="o">=</span> <span class="n">iq_start</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">unused_iq2</span> <span class="o">=</span> <span class="n">iq1</span> <span class="o">+</span> <span class="mi">6</span>
+
+            <span class="k">elif</span> <span class="n">i1</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># CPENTA5</span>
+                <span class="c1">#e1_new = e1 - eid_keys[2]</span>
+                <span class="n">iq1</span> <span class="o">=</span> <span class="n">iq_start</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">unused_iq2</span> <span class="o">=</span> <span class="n">iq1</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">it1</span> <span class="o">=</span> <span class="n">it_start</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">it2</span> <span class="o">=</span> <span class="n">it1</span> <span class="o">+</span> <span class="mi">4</span>
+            <span class="k">elif</span> <span class="n">i1</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># CPENTA6</span>
+                <span class="n">iq1</span> <span class="o">=</span> <span class="n">iq_start</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">unused_iq2</span> <span class="o">=</span> <span class="n">iq1</span> <span class="o">+</span> <span class="mi">3</span>
+                <span class="n">it1</span> <span class="o">=</span> <span class="n">it_start</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">it2</span> <span class="o">=</span> <span class="n">it1</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This is a </span><span class="si">%s</span><span class="s1"> and is not supported&#39;</span> <span class="o">%</span> <span class="n">type_mapper</span><span class="p">[</span><span class="n">i1</span><span class="p">])</span>
+
+            <span class="c1"># do we need to check this???</span>
+            <span class="k">if</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># tet</span>
+
+                    <span class="n">it1</span> <span class="o">=</span> <span class="n">it_start_keys</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span>
+                    <span class="n">it2</span> <span class="o">=</span> <span class="n">it1</span> <span class="o">+</span> <span class="mi">4</span>
+                    <span class="n">unused_faces2</span> <span class="o">=</span> <span class="n">tri_faces_sort</span><span class="p">[</span><span class="n">it1</span><span class="p">:</span><span class="n">it2</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="c1">#print(&#39;face=%s eids=%s&#39; % (face, eids))</span>
+                    <span class="c1">#print(&quot;faces2 = \n&quot;, unused_faces2)</span>
+                    <span class="c1"># spits out 3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">asdf</span>
+            <span class="c1">#type1 = type_mapper[i1]</span>
+            <span class="c1">#type2 = type_mapper[i2]</span>
+            <span class="c1">#if type1:</span>
+        <span class="n">faces_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid3d_to_openfoam.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Tests UGrid&quot;&quot;&quot;</span>
+    <span class="n">ugrid_filename</span> <span class="o">=</span> <span class="s1">&#39;bay_steve_recon1_fixed0.b8.ugrid&#39;</span>
+    <span class="c1">#bdf_filename = &#39;bay_steve_recon1_fixed0.b8.bdf&#39;</span>
+    <span class="n">foam_filename</span> <span class="o">=</span> <span class="s1">&#39;bay_steve_recon1_fixed0.b8.foam&#39;</span>
+    <span class="n">tag_filename</span> <span class="o">=</span> <span class="s1">&#39;bay_steve.tags&#39;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tag_filename</span><span class="p">)</span>
+    <span class="n">ugrid_model</span> <span class="o">=</span> <span class="n">read_ugrid</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">)</span>
+    <span class="c1">#ugrid_model.write_bdf(bdf_filename)</span>
+    <span class="n">write_foam</span><span class="p">(</span><span class="n">ugrid_model</span><span class="p">,</span> <span class="n">foam_filename</span><span class="p">,</span> <span class="n">tag_filename</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

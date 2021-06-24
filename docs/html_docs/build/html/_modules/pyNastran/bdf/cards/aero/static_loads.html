@@ -1,0 +1,1380 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.aero.static_loads &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.aero.static_loads</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.aero.static_loads</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All trim aero cards are defined in this file.  This includes:</span>
+<span class="sd"> * AEROS</span>
+<span class="sd"> * AESTAT</span>
+<span class="sd"> * CSSCHD</span>
+<span class="sd"> * DIVERG</span>
+<span class="sd"> * TRIM</span>
+
+<span class="sd">All cards are BaseCard objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.aero.dynamic_loads</span> <span class="kn">import</span> <span class="n">Aero</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span><span class="p">,</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">BaseCard</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">integer_or_blank</span><span class="p">,</span> <span class="n">double</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span>
+    <span class="n">string_or_blank</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="AEROS"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS">[docs]</a><span class="k">class</span> <span class="nc">AEROS</span><span class="p">(</span><span class="n">Aero</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gives basic aerodynamic parameters for unsteady aerodynamics.</span>
+
+<span class="sd">    +-------+-------+-------+------+------+-------+-------+-------+</span>
+<span class="sd">    |   1   |   2   |   3   |  4   |  5   |   6   |   7   |   8   |</span>
+<span class="sd">    +=======+=======+=======+======+======+=======+=======+=======+</span>
+<span class="sd">    | AEROS | ACSID | RCSID | REFC | REFB | REFS  | SYMXZ | SYMXY |</span>
+<span class="sd">    +-------+-------+-------+------+------+-------+-------+-------+</span>
+<span class="sd">    | AEROS |   10  |   20  | 10.  | 100. | 1000. |   1   |       |</span>
+<span class="sd">    +-------+-------+-------+------+------+-------+-------+-------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;AEROS&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;acsid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;rcsid&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;cRef&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;bRef&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="s1">&#39;Sref&#39;</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span><span class="s1">&#39;symXZ&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span><span class="s1">&#39;symXY&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_anti_symmetric_xy&#39;</span><span class="p">,</span> <span class="s1">&#39;is_anti_symmetric_xz&#39;</span><span class="p">,</span> <span class="s1">&#39;is_symmetric_xy&#39;</span><span class="p">,</span> <span class="s1">&#39;is_symmetric_xz&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AEROS._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">cref</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">bref</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">sref</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">return</span> <span class="n">AEROS</span><span class="p">(</span><span class="n">cref</span><span class="p">,</span> <span class="n">bref</span><span class="p">,</span> <span class="n">sref</span><span class="p">,</span> <span class="n">acsid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rcsid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sym_xz</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sym_xy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cref</span><span class="p">,</span> <span class="n">bref</span><span class="p">,</span> <span class="n">sref</span><span class="p">,</span> <span class="n">acsid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rcsid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sym_xz</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sym_xy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an AEROS card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cref : float</span>
+<span class="sd">            the aerodynamic chord</span>
+<span class="sd">        bref : float</span>
+<span class="sd">            the wing span</span>
+<span class="sd">            for a half model, this should be the full span</span>
+<span class="sd">            for a full model, this should be the full span</span>
+<span class="sd">        sref : float</span>
+<span class="sd">            the wing area</span>
+<span class="sd">            for a half model, this should be the half area</span>
+<span class="sd">            for a full model, this should be the full area</span>
+<span class="sd">        acsid : int; default=0</span>
+<span class="sd">            aerodyanmic coordinate system</span>
+<span class="sd">            defines the direction of the wind</span>
+<span class="sd">        rcsid : int; default=0</span>
+<span class="sd">            coordinate system for rigid body motions</span>
+<span class="sd">        sym_xz : int; default=0</span>
+<span class="sd">            xz symmetry flag (+1=symmetry; -1=antisymmetric)</span>
+<span class="sd">        sym_xy : int; default=0</span>
+<span class="sd">            xy symmetry flag (+1=symmetry; -1=antisymmetric)</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Aero</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+
+        <span class="c1">#: Aerodynamic coordinate system identification.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid</span> <span class="o">=</span> <span class="n">acsid</span>
+
+        <span class="c1">#: Reference coordinate system identification for rigid body motions.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span> <span class="o">=</span> <span class="n">rcsid</span>
+
+        <span class="c1">#: Reference chord length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cref</span> <span class="o">=</span> <span class="n">cref</span>
+
+        <span class="c1">#: Reference span</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bref</span> <span class="o">=</span> <span class="n">bref</span>
+
+        <span class="c1">#: Reference wing area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sref</span> <span class="o">=</span> <span class="n">sref</span>
+
+        <span class="c1">#: Symmetry key for the aero coordinate x-z plane. See Remark 6.</span>
+        <span class="c1">#: (Integer = +1 for symmetry, 0 for no symmetry, and -1 for antisymmetry;</span>
+        <span class="c1">#: Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span> <span class="o">=</span> <span class="n">sym_xz</span>
+
+        <span class="c1">#: The symmetry key for the aero coordinate x-y plane can be used to</span>
+        <span class="c1">#: simulate ground effects. (Integer = +1 for antisymmetry, 0 for no</span>
+        <span class="c1">#: symmetry, and -1 for symmetry; Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span> <span class="o">=</span> <span class="n">sym_xy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">acsid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acsid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AEROS.Acsid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.Acsid">[docs]</a>    <span class="k">def</span> <span class="nf">Acsid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;air velocity defined as moving into the +x direction&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">acsid_ref</span><span class="o">.</span><span class="n">cid</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">acsid</span></div>
+
+<div class="viewcode-block" id="AEROS.Rcsid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.Rcsid">[docs]</a>    <span class="k">def</span> <span class="nf">Rcsid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;rigid body coordinate system&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcsid_ref</span><span class="o">.</span><span class="n">cid</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span></div>
+
+<div class="viewcode-block" id="AEROS.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;acsid=</span><span class="si">%s</span><span class="s1"> must be an integer; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;rcsid=</span><span class="si">%s</span><span class="s1"> must be an integer; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cref</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;cref=</span><span class="si">%s</span><span class="s1"> must be an float; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cref</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cref</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bref</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;bref=</span><span class="si">%s</span><span class="s1"> must be an float; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bref</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bref</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sref</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;sref=</span><span class="si">%s</span><span class="s1"> must be an float; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sref</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sref</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;sym_xz=</span><span class="si">%s</span><span class="s1"> must be an integer; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;sym_xy=</span><span class="si">%s</span><span class="s1"> must be an integer; type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;There are errors on the AEROS card:</span><span class="se">\n</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AEROS.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross refernece aerodynamic coordinate system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF</span>
+<span class="sd">            The BDF object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by AEROS&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AEROS.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Safe cross refernece aerodynamic coordinate system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF</span>
+<span class="sd">            The BDF object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by AEROS&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AEROS.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an AEROS card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">acsid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;acsid&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">rcsid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;rcsid&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">cref</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;cRef&#39;</span><span class="p">)</span>
+        <span class="n">bref</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;bRef&#39;</span><span class="p">)</span>
+        <span class="n">sref</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Sref&#39;</span><span class="p">)</span>
+        <span class="n">sym_xz</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;sym_xz&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sym_xy</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;sym_xy&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;len(AEROS card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AEROS</span><span class="p">(</span><span class="n">cref</span><span class="p">,</span> <span class="n">bref</span><span class="p">,</span> <span class="n">sref</span><span class="p">,</span> <span class="n">acsid</span><span class="p">,</span> <span class="n">rcsid</span><span class="p">,</span> <span class="n">sym_xz</span><span class="p">,</span> <span class="n">sym_xy</span><span class="p">,</span>
+                     <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">acsid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rcsid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cref</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">bref</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">sref</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">sym_xz</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">sym_xy</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;data = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">AEROS</span><span class="p">(</span><span class="n">cref</span><span class="p">,</span> <span class="n">bref</span><span class="p">,</span> <span class="n">sref</span><span class="p">,</span> <span class="n">acsid</span><span class="p">,</span> <span class="n">rcsid</span><span class="p">,</span> <span class="n">sym_xz</span><span class="p">,</span> <span class="n">sym_xy</span><span class="p">,</span>
+                     <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AEROS.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="AEROS.update"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        maps = {</span>
+<span class="sd">            &#39;coord&#39; : cid_map,</span>
+<span class="sd">        }</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cid_map</span> <span class="o">=</span> <span class="n">maps</span><span class="p">[</span><span class="s1">&#39;coord&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsid</span> <span class="o">=</span> <span class="n">cid_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">acsid</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span> <span class="o">=</span> <span class="n">cid_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rcsid</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AEROS.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their unmodified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : list[varies]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AEROS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Acsid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rcsid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cref</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">bref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="AEROS.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their simplified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : List[varies]</span>
+<span class="sd">          the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sym_xz</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xz</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sym_xy</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sym_xy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AEROS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Acsid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rcsid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cref</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">bref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sref</span><span class="p">,</span> <span class="n">sym_xz</span><span class="p">,</span> <span class="n">sym_xy</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="AEROS.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AEROS.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="AESTAT"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AESTAT">[docs]</a><span class="k">class</span> <span class="nc">AESTAT</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifies rigid body motions to be used as trim variables in static</span>
+<span class="sd">    aeroelasticity.</span>
+
+<span class="sd">    +--------+------+--------+</span>
+<span class="sd">    |    1   |   2  |    3   |</span>
+<span class="sd">    +========+======+========+</span>
+<span class="sd">    | AESTAT |  ID  | LABEL  |</span>
+<span class="sd">    +--------+------+--------+</span>
+<span class="sd">    | AESTAT | 5001 | ANGLEA |</span>
+<span class="sd">    +--------+------+--------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;AESTAT&#39;</span>
+
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;label&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<div class="viewcode-block" id="AESTAT._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AESTAT._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AESTAT</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aestat_id</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an AESTAT card, which is a variable to be used in a TRIM analysis</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        id : int</span>
+<span class="sd">            unique id</span>
+<span class="sd">        label : str</span>
+<span class="sd">            name for the id</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aestat_id</span> <span class="o">=</span> <span class="n">aestat_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+
+<div class="viewcode-block" id="AESTAT.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AESTAT.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an AESTAT card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">aestat_id</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">string</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;len(AESTAT card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AESTAT</span><span class="p">(</span><span class="n">aestat_id</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">aestat_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;data = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">AESTAT</span><span class="p">(</span><span class="n">aestat_id</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+    <span class="c1">#def cross_reference(self, model: BDF) -&gt; None:</span>
+        <span class="c1">#pass</span>
+
+    <span class="c1">#def uncross_reference(self) -&gt; None:</span>
+        <span class="c1">#pass</span>
+
+<div class="viewcode-block" id="AESTAT.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AESTAT.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their unmodified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : List[int/str]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AESTAT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aestat_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="AESTAT.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.AESTAT.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CSSCHD"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD">[docs]</a><span class="k">class</span> <span class="nc">CSSCHD</span><span class="p">(</span><span class="n">Aero</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines a scheduled control surface deflection as a function of</span>
+<span class="sd">    Mach number and angle of attack.</span>
+
+<span class="sd">    +--------+-----+-------+--------+-------+-------+</span>
+<span class="sd">    |    1   |  2  |   3   |   4    |   5   |   6   |</span>
+<span class="sd">    +========+=====+=======+========+=======+=======+</span>
+<span class="sd">    | CSSCHD | SlD | AESID | LALPHA | LMACH | LSCHD |</span>
+<span class="sd">    +--------+-----+-------+--------+-------+-------+</span>
+<span class="sd">    | CSSCHD |  5  |  50   |   12   |   15  |   25  |</span>
+<span class="sd">    +--------+-----+-------+--------+-------+-------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CSSCHD&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;aesid&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;lalpha&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;lmach&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="s1">&#39;lschd&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;is_anti_symmetric_xy&#39;</span><span class="p">,</span> <span class="s1">&#39;is_anti_symmetric_xz&#39;</span><span class="p">,</span> <span class="s1">&#39;is_symmetric_xy&#39;</span><span class="p">,</span> <span class="s1">&#39;is_symmetric_xz&#39;</span><span class="p">]</span> <span class="c1">## TODO: remove these</span>
+
+<div class="viewcode-block" id="CSSCHD._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">aesid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">lschd</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">CSSCHD</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">aesid</span><span class="p">,</span> <span class="n">lschd</span><span class="p">,</span> <span class="n">lalpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lmach</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">aesid</span><span class="p">,</span> <span class="n">lschd</span><span class="p">,</span> <span class="n">lalpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lmach</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an CSSCHD card, which defines a specified control surface</span>
+<span class="sd">        deflection as a function of Mach and alpha (used in SOL 144/146).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            the unique id</span>
+<span class="sd">        aesid : int</span>
+<span class="sd">            the control surface (AESURF) id</span>
+<span class="sd">        lalpha : int; default=None</span>
+<span class="sd">            the angle of attack profile (AEFACT) id</span>
+<span class="sd">        lmach : int; default=None</span>
+<span class="sd">            the mach profile (AEFACT) id</span>
+<span class="sd">        lschd : int; default=None</span>
+<span class="sd">            the control surface deflection profile (AEFACT) id</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Aero</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aesid</span> <span class="o">=</span> <span class="n">aesid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span> <span class="o">=</span> <span class="n">lalpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach</span> <span class="o">=</span> <span class="n">lmach</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd</span> <span class="o">=</span> <span class="n">lschd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CSSCHD.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lalpha=</span><span class="si">%r</span><span class="s1"> must be an int or None&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmach</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmach</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;lmach=</span><span class="si">%r</span><span class="s1"> must be an int or None&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmach</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmach</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CSSCHD sid=</span><span class="si">%s</span><span class="s1">; lalpha and lmach are both None&#39;</span>
+                   <span class="s1">&#39; (one must be an integer (AEFACT)</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CSSCHD.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CSSCHD card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">aesid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;aesid&#39;</span><span class="p">)</span>             <span class="c1"># AESURF</span>
+        <span class="n">lalpha</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;lAlpha&#39;</span><span class="p">)</span>  <span class="c1"># AEFACT</span>
+        <span class="n">lmach</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;lMach&#39;</span><span class="p">)</span>    <span class="c1"># AEFACT</span>
+        <span class="n">lschd</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;lSchd&#39;</span><span class="p">)</span>             <span class="c1"># AEFACT</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;len(CSSCHD card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CSSCHD</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">aesid</span><span class="p">,</span> <span class="n">lalpha</span><span class="p">,</span> <span class="n">lmach</span><span class="p">,</span> <span class="n">lschd</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">aesid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>   <span class="c1"># AESURF</span>
+        <span class="n">lalpha</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># AEFACT</span>
+        <span class="n">lmach</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>   <span class="c1"># AEFACT</span>
+        <span class="n">lschd</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>   <span class="c1"># AEFACT</span>
+        <span class="k">return</span> <span class="n">CSSCHD</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">aesid</span><span class="p">,</span> <span class="n">lalpha</span><span class="p">,</span> <span class="n">lmach</span><span class="p">,</span> <span class="n">lschd</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CSSCHD.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CSSCHD sid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">AESurf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aesid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">AEFact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">AEFact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmach</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">AEFact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lschd</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CSSCHD.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CSSCHD sid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">AESurf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aesid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_aefact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_aefact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lmach</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_aefact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lschd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CSSCHD.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aesid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AESid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LAlpha</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LMach</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LSchd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CSSCHD.AESid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.AESid">[docs]</a>    <span class="k">def</span> <span class="nf">AESid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aesid_ref</span><span class="o">.</span><span class="n">aesid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aesid</span></div>
+
+<div class="viewcode-block" id="CSSCHD.LAlpha"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.LAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">LAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lalpha_ref</span><span class="o">.</span><span class="n">sid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lalpha</span></div>
+
+<div class="viewcode-block" id="CSSCHD.LMach"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.LMach">[docs]</a>    <span class="k">def</span> <span class="nf">LMach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmach_ref</span><span class="o">.</span><span class="n">sid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lmach</span></div>
+
+<div class="viewcode-block" id="CSSCHD.LSchd"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.LSchd">[docs]</a>    <span class="k">def</span> <span class="nf">LSchd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lschd_ref</span><span class="o">.</span><span class="n">sid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lschd</span></div>
+
+<div class="viewcode-block" id="CSSCHD.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their unmodified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : list[varies]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CSSCHD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AESid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">LAlpha</span><span class="p">(),</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">LMach</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">LSchd</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CSSCHD.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.CSSCHD.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DIVERG"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.DIVERG">[docs]</a><span class="k">class</span> <span class="nc">DIVERG</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+--------+----+----+----+----+----+----+</span>
+<span class="sd">    |   1    |  2  |   3    | 4  | 5  | 6  | 7  | 8  | 9  |</span>
+<span class="sd">    +========+=====+========+====+====+====+====+====+====+</span>
+<span class="sd">    | DIVERG | SID | NROOT  | M1 | M2 | M3 | M4 | M5 | M6 |</span>
+<span class="sd">    +--------+-----+--------+----+----+----+----+----+----+</span>
+<span class="sd">    |        |  M7 |  etc.  |    |    |    |    |    |    |</span>
+<span class="sd">    +--------+-----+--------+----+----+----+----+----+----+</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sid : int</span>
+<span class="sd">        The name.</span>
+<span class="sd">    nroots : int</span>
+<span class="sd">        the number of roots</span>
+<span class="sd">    machs : List[float, ..., float]</span>
+<span class="sd">        list of Mach numbers</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;DIVERG&#39;</span>
+
+<div class="viewcode-block" id="DIVERG._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.DIVERG._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">nroots</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">machs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">DIVERG</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">nroots</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">nroots</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an DIVERG card, which is used in divergence</span>
+<span class="sd">        analysis (SOL 144).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            The name</span>
+<span class="sd">        nroots : int</span>
+<span class="sd">            the number of roots</span>
+<span class="sd">        machs : List[float, ..., float]</span>
+<span class="sd">            list of Mach numbers</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nroots</span> <span class="o">=</span> <span class="n">nroots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">machs</span> <span class="o">=</span> <span class="n">machs</span>
+
+<div class="viewcode-block" id="DIVERG.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.DIVERG.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a DIVERG card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">nroots</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;nroot&#39;</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">machs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)):</span>
+            <span class="n">mach</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Mach_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
+            <span class="n">machs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mach</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">DIVERG</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">nroots</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="c1">#def cross_reference(self, model: BDF) -&gt; None:</span>
+        <span class="c1">#pass</span>
+
+    <span class="c1">#def uncross_reference(self) -&gt; None:</span>
+        <span class="c1">#pass</span>
+
+<div class="viewcode-block" id="DIVERG.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.DIVERG.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DIVERG&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nroots</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">machs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="DIVERG.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.DIVERG.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TRIM"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM">[docs]</a><span class="k">class</span> <span class="nc">TRIM</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifies constraints for aeroelastic trim variables.</span>
+
+<span class="sd">    +------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    |   1  |   2    |   3  |    4   |    5   |  6  |    7   |  8  |     9    |</span>
+<span class="sd">    +======+========+======+========+========+=====+========+=====+==========+</span>
+<span class="sd">    | TRIM |   ID   | MACH |    Q   | LABEL1 | UX1 | LABEL2 | UX2 | IS_RIGID |</span>
+<span class="sd">    +------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    |      | LABEL3 |  UX3 | LABEL4 |   UX4  | ... |        |     |          |</span>
+<span class="sd">    +------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;TRIM&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;mach&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span><span class="s1">&#39;aeqr&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_get_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets complicated parameters on the TRIM card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            the field number to update</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        value : varies</span>
+<span class="sd">            the value for the appropriate field</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">ni</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">value</span>
+
+            <span class="k">if</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">ni</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">value</span>
+
+            <span class="c1">#list_fields += [label, ux]</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1">#list_fields += [self.aeqr]</span>
+                <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1"> is an invalid TRIM entry.&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates complicated parameters on the TRIM card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            the field number to update</span>
+<span class="sd">        value : varies</span>
+<span class="sd">            the value for the appropriate field</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">ni</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">ni</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1">=</span><span class="si">%r</span><span class="s1"> is an invalid TRIM entry.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+<div class="viewcode-block" id="TRIM._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mach</span> <span class="o">=</span> <span class="mf">0.6</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="mf">300.</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ALPHA&#39;</span><span class="p">]</span>
+        <span class="n">uxs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">TRIM</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a TRIM card for a static aero (144) analysis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sid : int</span>
+<span class="sd">            the trim id; referenced by the Case Control TRIM field</span>
+<span class="sd">        mach : float</span>
+<span class="sd">            the mach number</span>
+<span class="sd">        q : float</span>
+<span class="sd">            dynamic pressure</span>
+<span class="sd">        labels : List[str]</span>
+<span class="sd">            names of the fixed variables</span>
+<span class="sd">        uxs : List[float]</span>
+<span class="sd">            values corresponding to labels</span>
+<span class="sd">        aeqr : float</span>
+<span class="sd">            0.0 : rigid trim analysis</span>
+<span class="sd">            1.0 : elastic trim analysis (default)</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="c1">#: Trim set identification number. (Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">sid</span>
+        <span class="c1">#: Mach number. (Real &gt; 0.0 and != 1.0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mach</span> <span class="o">=</span> <span class="n">mach</span>
+        <span class="c1">#: Dynamic pressure. (Real &gt; 0.0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="c1">#: The label identifying aerodynamic trim variables defined on an</span>
+        <span class="c1">#: AESTAT or AESURF entry.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
+
+        <span class="c1">#: The magnitude of the aerodynamic extra point degree-of-freedom.</span>
+        <span class="c1">#: (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uxs</span> <span class="o">=</span> <span class="n">uxs</span>
+
+        <span class="c1">#: Flag to request a rigid trim analysis (Real &gt; 0.0 and &lt; 1.0;</span>
+        <span class="c1">#: Default = 1.0. A value of 0.0 provides a rigid trim analysis.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span> <span class="o">=</span> <span class="n">aeqr</span>
+
+<div class="viewcode-block" id="TRIM.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;mach = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;mach = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;q=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;not all labels are unique; labels=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nlabels=</span><span class="si">%s</span><span class="s1"> != nux=</span><span class="si">%s</span><span class="s1">; labels=</span><span class="si">%s</span><span class="s1"> uxs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TRIM.verify_trim"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.verify_trim">[docs]</a>    <span class="k">def</span> <span class="nf">verify_trim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suport</span><span class="p">,</span> <span class="n">suport1</span><span class="p">,</span> <span class="n">aestats</span><span class="p">,</span> <span class="n">aeparms</span><span class="p">,</span> <span class="n">aelinks</span><span class="p">,</span> <span class="n">aesurf</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Magic function that makes TRIM cards not frustrating.</span>
+
+<span class="sd">        .. warning ::  This probably gets AELINKs/AEPARMs/AESURFSs wrong.</span>
+
+<span class="sd">        **The TRIM equality**</span>
+<span class="sd">        ndelta = (naestat + naesurf + naeparm) - (</span>
+<span class="sd">               - (ntrim + ntrim_aesurf? + naelink + nsuport_dofs + nsuport1_dofs)</span>
+<span class="sd">        ndelta = 0</span>
+<span class="sd">        ntrim_aesurf is not included, but it might exist...</span>
+
+<span class="sd">        **Steps to a TRIM analysis**</span>
+<span class="sd">        1.  Define the number of independent control surfaces (naesurf)</span>
+<span class="sd">            Make an AESURF for each.  Dual link the AESURFs if you can</span>
+<span class="sd">            to avoid needing an AELINK (e.g., +roll is left aileron down,</span>
+<span class="sd">            right aileron up).</span>
+<span class="sd">            Horizontal Tail : name it DPITCH</span>
+<span class="sd">            Vertical Tail   : name it DYAW</span>
+<span class="sd">            Aileron         : name it DROLL</span>
+<span class="sd">        2.  Create AELINKs if necessary.</span>
+<span class="sd">        3.  Add the AESTAT variables.  Include one for each DOF the</span>
+<span class="sd">            aircraft can move in the frame of the model</span>
+<span class="sd">            (e.g., half/full model).</span>
+<span class="sd">                Half model (2.5g pullup, abrupt pitch):</span>
+<span class="sd">                  - 2d pitch/plunge, 1 control : URDD3, URDD5, PITCH, ANGLEA</span>
+<span class="sd">                Full model (2.5g pullup, abrupt pitch):</span>
+<span class="sd">                  - 3d pitch/plunge, 3 control : URDD3, URDD5, PITCH, ANGLEA, YAW (???)</span>
+<span class="sd">        4.  Add the TRIM card to lock the variables that could theoretically move</span>
+<span class="sd">            in the plane of the analysis that are known.</span>
+<span class="sd">                Half model:</span>
+<span class="sd">                   2.5g pullup   : lock URDD3=2.5, URDD5=0, PITCH=0</span>
+<span class="sd">                                   solve for ANGLEA, DPITCH</span>
+<span class="sd">                                   use DPITCH</span>
+<span class="sd">                   abrupt pitch  : lock URDD3=1.0, URDD5=0, ANGLEA=5</span>
+<span class="sd">                                   solve for PITCH, DPITCH</span>
+<span class="sd">                                   use DPITCH</span>
+<span class="sd">                Full model:</span>
+<span class="sd">                   2.5g pullup   : lock URDD3=2.5, URDD4=0, URDD5=0,  PITCH=0, YAW=0,</span>
+<span class="sd">                                   lock SIDES=0,  ROLL=0</span>
+<span class="sd">                                   solve for ANGLEA, DPITCH</span>
+<span class="sd">                                   use DPITCH, DYAW, DROLL</span>
+<span class="sd">                                   TODO: probably wrong</span>
+<span class="sd">                   30 degree yaw : lock URDD3=1.0, URDD4=0, ANGLEA=5, PITCH=0, YAW=30,</span>
+<span class="sd">                                   lock DPITCH=0, ROLL=0</span>
+<span class="sd">                                   solve for SIDES, URDD5</span>
+<span class="sd">                                   use DPITCH, DYAW, DROLL</span>
+<span class="sd">                                   TODO: probably wrong</span>
+
+<span class="sd">        5.  Note that we could have simplified our full model AESTAT/TRIM</span>
+<span class="sd">            cards (they can be the same as for a half model), but we&#39;d</span>
+<span class="sd">            like to be able to do multiple load cases in the same deck.</span>
+
+<span class="sd">        6.  Add some SUPORT/SUPORT1 DOFs to ignore non-relevant motion in</span>
+<span class="sd">            certain DOFs (e.g., z-motion).  Add enough to satisfy the TRIM</span>
+<span class="sd">            equality.</span>
+
+<span class="sd">        **Doesn&#39;t Consider**</span>
+<span class="sd">         - AELINK</span>
+<span class="sd">         - AEPARM</span>
+<span class="sd">         - AESURFS</span>
+
+<span class="sd">        +------------------------------------------------+</span>
+<span class="sd">        |                 Default AESTATs                |</span>
+<span class="sd">        +--------+---------+-----------------------------+</span>
+<span class="sd">        | ANGLEA | ur (R2) | Angle of Attack             |</span>
+<span class="sd">        | YAW    | ur (R3) | Yaw Rate                    |</span>
+<span class="sd">        | SIDES  | ur (R3) | Angle of Sideslip           |</span>
+<span class="sd">        +--------+---------+-----------------------------+</span>
+<span class="sd">        | ROLL   | ůr (R1) | Roll Rate                   |</span>
+<span class="sd">        | PITCH  | ůr (R2) | Pitch Rate                  |</span>
+<span class="sd">        +--------+---------+-----------------------------+</span>
+<span class="sd">        | URDD1  | ür (T1) | Longitudinal (See Remark 3) |</span>
+<span class="sd">        | URDD2  | ür (T2) | Lateral                     |</span>
+<span class="sd">        | URDD3  | ür (T3) | Vertical                    |</span>
+<span class="sd">        | URDD4  | ür (R1) | Roll                        |</span>
+<span class="sd">        | URDD5  | ür (R2) | Pitch                       |</span>
+<span class="sd">        | URDD6  | ür (R3) | Yaw                         |</span>
+<span class="sd">        +--------+---------+-----------------------------+</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>
+            <span class="n">nsuport_dofs</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nsuport1_dofs</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">suport_dofs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">suport</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">suport</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">suporti</span> <span class="ow">in</span> <span class="n">suport</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">suporti</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">suporti</span><span class="o">.</span><span class="n">Cs</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">cs</span><span class="p">:</span>
+                        <span class="c1">#print(&#39;  SUPORT: nid=%r C=%r&#39; % (nid, ci))</span>
+                        <span class="n">dof</span> <span class="o">=</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">ci</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">dof</span> <span class="ow">in</span> <span class="n">suport_dofs</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Duplicate DOF</span><span class="se">\n</span><span class="s1">  dof=</span><span class="si">%s</span><span class="s1"> suport_dofs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">dof</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">suport_dofs</span><span class="p">))</span>
+                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">suport_dofs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dof</span><span class="p">)</span>
+                        <span class="n">nsuport_dofs</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">suport_dof_msg2</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">suport1</span><span class="p">:</span>
+                <span class="c1">#unused_conid = suport1.conid</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">suport1</span><span class="o">.</span><span class="n">node_ids</span>
+                <span class="n">suport_dof_msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">components</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">suport1</span><span class="o">.</span><span class="n">Cs</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">componenti</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+                        <span class="n">dof</span> <span class="o">=</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">componenti</span><span class="p">)</span>
+                        <span class="n">suport_dof_msg</span> <span class="o">+=</span> <span class="s1">&#39;    (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">componenti</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">dof</span> <span class="ow">in</span> <span class="n">suport_dofs</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;dof=</span><span class="si">%s</span><span class="s1"> suport_dofs=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dof</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">suport_dofs</span><span class="p">))</span>
+                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">suport_dofs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dof</span><span class="p">)</span>
+                        <span class="n">nsuport1_dofs</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">suport_dof_msg2</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">suport_dofs (nid, comp):</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">suport_dof_msg</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+            <span class="n">aesurf_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">aesurfi</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">aesurfi</span> <span class="ow">in</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">aestat_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">aestat</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">aestat</span> <span class="ow">in</span> <span class="n">aestats</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">aeparm_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">aeparm</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">aeparm</span> <span class="ow">in</span> <span class="n">aeparms</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">naestat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aestat_labels</span><span class="p">)</span>
+            <span class="n">ntrim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">trim_aesurf_common</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">aesurf_names</span><span class="p">)))</span>
+            <span class="n">trim_aesurf_common</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">ntrim_aesurfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trim_aesurf_common</span><span class="p">)</span>
+            <span class="n">naesurf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aesurf_names</span><span class="p">)</span>
+            <span class="n">naeparm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aeparm_labels</span><span class="p">)</span>
+
+            <span class="n">aelinksi</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">aelinks</span><span class="p">:</span>
+                <span class="n">aelinksi</span> <span class="o">+=</span> <span class="p">[</span><span class="n">aelink</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">aelink</span> <span class="ow">in</span> <span class="n">aelinks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="c1">#if &#39;ALWAYS&#39; in aelinks:</span>
+                <span class="c1">#aelinksi += [aelink.label for aelink in aelinks[&#39;ALWAYS&#39;]]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span> <span class="ow">in</span> <span class="n">aelinks</span><span class="p">:</span>
+                <span class="n">aelinksi</span> <span class="o">+=</span> <span class="p">[</span><span class="n">aelink</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">aelink</span> <span class="ow">in</span> <span class="n">aelinks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">]]</span>
+            <span class="n">naelink</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aelinksi</span><span class="p">)</span>
+
+
+            <span class="n">ntrim_aesurf</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">aestat_labels</span> <span class="o">+</span> <span class="n">aesurf_names</span> <span class="o">+</span> <span class="n">aeparm_labels</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;TRIM label=</span><span class="si">%r</span><span class="s1"> is not defined</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">label</span>
+
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">aesurf_names</span><span class="p">:</span>
+                    <span class="c1">#print(&#39;AESTAT/AESURF label = %r&#39; % label)</span>
+                    <span class="n">ntrim_aesurf</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> aestat_labels=</span><span class="si">%s</span><span class="se">\n</span><span class="s1"> aeparm_labels=</span><span class="si">%s</span><span class="se">\n</span><span class="s1"> aesurf_names=</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">aestat_labels</span><span class="p">,</span> <span class="n">aeparm_labels</span><span class="p">,</span> <span class="n">aesurf_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c1"># TODO: this doesn&#39;t work for multiple subcases</span>
+            <span class="c1">#ntotal_suport_dofs = nsuport_dofs, nsuport1_dofs</span>
+            <span class="c1">#ndelta = ntrim - nsuport_dofs - nsuport1_dofs - naesurf</span>
+            <span class="c1">#if ndelta != 0:</span>
+                <span class="c1">#msg = &#39;ntrim - nsuport_dofs - nsuport1_dofs - naesurf = ndelta = %s; ndelta != 0\n&#39; % ndelta</span>
+                <span class="c1">#msg += &#39;ntrim=%s nsuport_dofs=%s nsuport1_dofs=%s naesurfs=%s&#39; % (</span>
+                    <span class="c1">#ntrim, nsuport_dofs, nsuport1_dofs, naesurf)</span>
+                <span class="c1">#raise RuntimeError(msg)</span>
+
+            <span class="c1">#ndelta = (naestat + naesurf + naeparm + ntrim_aesurf) - (ntrim + naelink + nsuport_dofs + nsuport1_dofs)</span>
+            <span class="c1">#if ndelta != 0:</span>
+                <span class="c1">#msg = (</span>
+                    <span class="c1">#&#39;(naestat + naesurf + naeparm + ntrim_aesurf) - &#39;</span>
+                    <span class="c1">#&#39;(ntrim + naelink + nsuport_dofs + nsuport1_dofs) = ndelta = %s; ndelta != 0\n&#39;</span>
+                    <span class="c1">#&#39;naestat=%s naesurf=%s naeparm=%s ntrim_aesurfs=%s\n&#39;</span>
+                    <span class="c1">#&#39;ntrim=%s naelink=%s nsuport_dofs=%s nsuport1_dofs=%s&#39; % (</span>
+                        <span class="c1">#ndelta,</span>
+                        <span class="c1">#naestat, naesurf, naeparms, ntrim_aesurf,</span>
+                        <span class="c1">#ntrim, naelink, nsuport_dofs, nsuport1_dofs))</span>
+
+            <span class="n">nplus</span> <span class="o">=</span> <span class="p">(</span><span class="n">naestat</span> <span class="o">+</span> <span class="n">naesurf</span> <span class="o">+</span> <span class="n">naeparm</span><span class="p">)</span>
+            <span class="n">nminus</span> <span class="o">=</span> <span class="n">ntrim</span> <span class="o">+</span> <span class="n">naelink</span> <span class="o">+</span> <span class="n">nsuport_dofs</span> <span class="o">+</span> <span class="n">nsuport1_dofs</span>
+
+            <span class="n">ndelta</span> <span class="o">=</span> <span class="n">nplus</span> <span class="o">-</span> <span class="n">nminus</span> <span class="o">+</span> <span class="mi">0</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">ntrim_aesurfs</span>
+            <span class="k">if</span> <span class="n">ndelta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1">#msg = (</span>
+                    <span class="c1">#&#39;(naestat + naesurf + naeparm) - (ntrim + ntrim_aesurf? + naelink + &#39;</span>
+                    <span class="c1">#&#39;nsuport_dofs + nsuport1_dofs) = ndelta = %s; ndelta != 0\n&#39;</span>
+                    <span class="c1">#&#39;naestat=%s naesurf=%s naeparm=%s ntrim=%s ntrim_aesurf=%s &#39;</span>
+                    <span class="c1">#&#39;naelink=%s nsuport_dofs=%s nsuport1_dofs=%s\n&#39; % (</span>
+                        <span class="c1">#ndelta,</span>
+                        <span class="c1">#naestat, naesurf, naeparm, ntrim, ntrim_aesurf,</span>
+                        <span class="c1">#naelink, nsuport_dofs, nsuport1_dofs)</span>
+                <span class="c1">#)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s1">&#39;Invalid trim state (ndelta != 0):</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;   (naestat + naesurf + naeparm + 0*2*ntrim_aesurf?) = (</span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1"> + 0*2*</span><span class="si">%s</span><span class="s1">) = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39; - (ntrim + naelink + nsuport_dofs + nsuport1_dofs) = (</span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1">) = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;===================================================================</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  ndelta = </span><span class="si">%s</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;Summary</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;-------</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  +naestat = </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  +naesurf = </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  +naeparm = </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  +0*2*ntrim_aesurf? = </span><span class="si">%s</span><span class="s1"> -&gt; 0; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  -ntrim = </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  -naelink = </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  -nsuport_dofs = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;  -nsuport1_dofs = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">naestat</span><span class="p">,</span> <span class="n">naesurf</span><span class="p">,</span> <span class="n">naeparm</span><span class="p">,</span> <span class="n">ntrim_aesurf</span><span class="p">,</span> <span class="n">nplus</span><span class="p">,</span>
+                        <span class="n">ntrim</span><span class="p">,</span> <span class="n">naelink</span><span class="p">,</span> <span class="n">nsuport_dofs</span><span class="p">,</span> <span class="n">nsuport1_dofs</span><span class="p">,</span> <span class="n">nminus</span><span class="p">,</span>
+
+                        <span class="n">ndelta</span><span class="p">,</span>
+                        <span class="n">naestat</span><span class="p">,</span> <span class="n">aestat_labels</span><span class="p">,</span>
+                        <span class="n">naesurf</span><span class="p">,</span> <span class="n">aesurf_names</span><span class="p">,</span>
+                        <span class="n">naeparm</span><span class="p">,</span> <span class="n">aeparm_labels</span><span class="p">,</span>
+                        <span class="mi">2</span><span class="o">*</span><span class="n">ntrim_aesurf</span><span class="p">,</span> <span class="n">trim_aesurf_common</span><span class="p">,</span>
+                        <span class="n">ntrim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span>
+                        <span class="n">naelink</span><span class="p">,</span> <span class="n">aelinksi</span><span class="p">,</span>
+                        <span class="n">nsuport_dofs</span><span class="p">,</span> <span class="n">nsuport1_dofs</span><span class="p">,</span> <span class="n">suport_dof_msg2</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TRIM.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+        <span class="c1">#self.suport = model.suport</span>
+        <span class="c1">#self.suport1 = model.suport1</span>
+        <span class="c1">#self.aestats = model.aestats</span>
+        <span class="c1">#self.aelinks = model.aelinks</span>
+        <span class="c1">#self.aesurf = model.aesurf</span>
+
+<div class="viewcode-block" id="TRIM.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="TRIM.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="TRIM.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a TRIM card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">mach</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;mach&#39;</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">uxs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;label1&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">ux</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ux1&#39;</span><span class="p">)</span>
+            <span class="n">uxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="n">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;label2&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">ux</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;ux1&#39;</span><span class="p">)</span>
+            <span class="n">uxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">aeqr</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;aeqr&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">string</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;label</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">ux</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ux</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">uxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">TRIM</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TRIM.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their unmodified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : list[varies]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">]</span>
+        <span class="n">nlabels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">nlabels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">ux</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">):</span>
+            <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="n">ux</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nlabels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="TRIM.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># fixes a Nastran bug</span>
+        <span class="n">aeqr</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="n">list_fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">aeqr</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="TRIM.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TRIM2"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM2">[docs]</a><span class="k">class</span> <span class="nc">TRIM2</span><span class="p">(</span><span class="n">TRIM</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines the state of the aerodynamic extra points for a trim analysis.</span>
+<span class="sd">    All undefined extra points will be set to zero.</span>
+
+<span class="sd">    +-------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    |   1   |   2    |   3  |    4   |    5   |  6  |    7   |  8  |     9    |</span>
+<span class="sd">    +=======+========+======+========+========+=====+========+=====+==========+</span>
+<span class="sd">    | TRIM2 |   ID   | MACH |    Q   |        |     |        |     | IS_RIGID |</span>
+<span class="sd">    +-------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    |       | LABEL1 |  UX1 | LABEL2 |   UX2  | ... |        |     |          |</span>
+<span class="sd">    +-------+--------+------+--------+--------+-----+--------+-----+----------+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;TRIM2&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;mach&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span><span class="s1">&#39;aeqr&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="TRIM2._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM2._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mach</span> <span class="o">=</span> <span class="mf">0.6</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="mf">300.</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ALPHA&#39;</span><span class="p">]</span>
+        <span class="n">uxs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">TRIM2</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">TRIM</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="o">=</span><span class="n">aeqr</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TRIM2.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM2.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>  <span class="c1"># TODO: not done...</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a TRIM2 card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+        <span class="n">mach</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;mach&#39;</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">)</span>
+        <span class="n">aeqr</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;aeqr&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">uxs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">string</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;label</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">ux</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;ux</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">uxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ux</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">TRIM2</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">mach</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">uxs</span><span class="p">,</span> <span class="n">aeqr</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TRIM2.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM2.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their unmodified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : list[varies]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TRIM2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mach</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span><span class="p">]</span>
+        <span class="n">nlabels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">nlabels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
+        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">ux</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uxs</span><span class="p">):</span>
+            <span class="n">list_fields</span> <span class="o">+=</span> <span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="n">ux</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="TRIM2.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/aero/pyNastran.bdf.cards.aero.static_loads.html#pyNastran.bdf.cards.aero.static_loads.TRIM2.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># fixes a Nastran bug</span>
+        <span class="n">aeqr</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aeqr</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="n">list_fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">aeqr</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

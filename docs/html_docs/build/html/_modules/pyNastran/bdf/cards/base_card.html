@@ -1,0 +1,896 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.base_card &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.base_card</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.base_card</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - BaseCard()</span>
+<span class="sd"> - Element()</span>
+<span class="sd"> - Property()</span>
+<span class="sd"> - Material()</span>
+<span class="sd"> - word, num = break_word_by_trailing_integer(pname_fid)</span>
+<span class="sd"> - word, num = break_word_by_trailing_parentheses_integer_ab(pname_fid)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span><span class="p">,</span> <span class="n">abstractclassmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1">#from numpy import nan, empty, unique</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.bdf_card</span> <span class="kn">import</span> <span class="n">BDFCard</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">object_attributes</span><span class="p">,</span> <span class="n">object_methods</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer</span> <span class="kn">import</span> <span class="n">print_card</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">is_same</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">deprecated</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.expand_card</span> <span class="kn">import</span>  <span class="n">expand_thru</span><span class="p">,</span> <span class="n">expand_thru_by</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="c1">#from abc import ABC, abstractmethod</span>
+
+<div class="viewcode-block" id="BaseCard"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard">[docs]</a><span class="k">class</span> <span class="nc">BaseCard</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines a series of base methods for every card class</span>
+<span class="sd">    (e.g., GRID, CTRIA3) including:</span>
+
+<span class="sd">     - deepcopy()</span>
+<span class="sd">     - get_stats()</span>
+<span class="sd">     - validate()</span>
+<span class="sd">     - object_attributes(mode=&#39;public&#39;, keys_to_skip=None)</span>
+<span class="sd">     - object_methods(self, mode=&#39;public&#39;, keys_to_skip=None)</span>
+<span class="sd">     - comment</span>
+<span class="sd">     - update_field(self, n, value)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1">#ABC.__init__(self)</span>
+
+    <span class="c1">#@abstractproperty</span>
+    <span class="c1">#def _field_map(self) -&gt; str:</span>
+        <span class="c1">#return &#39;&#39;</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+<div class="viewcode-block" id="BaseCard.raw_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.raw_fields">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="BaseCard.add_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.add_card">[docs]</a>    <span class="nd">@abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="n">BaseCard</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo_dict</span><span class="p">):</span>
+        <span class="c1">#raw_fields = self.repr_fields()</span>
+        <span class="n">raw_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="n">BDFCard</span><span class="p">(</span><span class="n">raw_fields</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_card</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseCard.get_stats"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Prints out an easy to read summary of the card&quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;---</span><span class="si">%s</span><span class="s1">---</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object_attributes</span><span class="p">()):</span>
+            <span class="c1">#if short and &#39;_ref&#39; in name:</span>
+                <span class="c1">#continue</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  </span><span class="si">%-6s</span><span class="s1"> : </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+    <span class="k">def</span> <span class="nf">deprecated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deprecated_version</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;deprecates methods&quot;&quot;&quot;</span>
+        <span class="n">deprecated</span><span class="p">(</span><span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span> <span class="n">deprecated_version</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<div class="viewcode-block" id="BaseCard.validate"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;card checking method that should be overwritten&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="BaseCard.object_attributes"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.object_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span>
+                          <span class="n">keys_to_skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">filter_properties</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;.. seealso:: `pyNastran.utils.object_attributes(...)`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: List[str]</span>
+        <span class="k">return</span> <span class="n">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">,</span>
+                                 <span class="n">filter_properties</span><span class="o">=</span><span class="n">filter_properties</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseCard.object_methods"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.object_methods">[docs]</a>    <span class="k">def</span> <span class="nf">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span>
+                       <span class="n">keys_to_skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;.. seealso:: `pyNastran.utils.object_methods(...)`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: List[str]</span>
+        <span class="k">return</span> <span class="n">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;accesses the comment&quot;&quot;&quot;</span>
+        <span class="c1"># just for testing</span>
+        <span class="c1">#self.deprecated(&#39;comment()&#39;, &#39;comment2()&#39;, &#39;0.7&#39;)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_comment&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comment</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="nd">@comment</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_comment</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;sets a comment&quot;&quot;&quot;</span>
+        <span class="c1">#comment = new_comment.rstrip()</span>
+        <span class="c1">#self._comment = comment + &#39;\n&#39; if comment else &#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comment</span> <span class="o">=</span> <span class="n">_format_comment</span><span class="p">(</span><span class="n">new_comment</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_test_update_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_field</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># dummy updating the field</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">return</span>
+
+<div class="viewcode-block" id="BaseCard.update_field"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.update_field">[docs]</a>    <span class="k">def</span> <span class="nf">update_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates a field based on it&#39;s field number.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            the field number</span>
+<span class="sd">        value : int/float/str/None</span>
+<span class="sd">           the value to update the field to</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            This is dynamic if the card length changes.</span>
+
+<span class="sd">        update_field can be used as follows to change the z coordinate</span>
+<span class="sd">        of a node::</span>
+
+<span class="sd">          &gt;&gt;&gt; nid = 1</span>
+<span class="sd">          &gt;&gt;&gt; node = model.nodes[nid]</span>
+<span class="sd">          &gt;&gt;&gt; node.update_field(3, 0.1)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_map</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_field_helper</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        dynamic method for non-standard attributes</span>
+<span class="sd">        (e.g., node.update_field(3, 0.1) to update z)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has not overwritten _update_field_helper; out of range&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;dynamic method for non-standard attributes (e.g., node.get_field(3, 0.1) to get z)&quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has not overwritten _get_field_helper; out of range&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseCard.get_field"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.get_field">[docs]</a>    <span class="k">def</span> <span class="nf">get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a field based on it&#39;s field number</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">           the field number</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        value : int/float/str/None</span>
+<span class="sd">            the value of the field</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           nid = 1</span>
+<span class="sd">           node = model.nodes[nid]</span>
+<span class="sd">           # [&#39;GRID&#39;, nid, cp, x, y, z]</span>
+<span class="sd">           z = node.get_field(5)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_map</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_field_helper</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifies all methods for this object work</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xref : bool</span>
+<span class="sd">            has this model been cross referenced</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# skipping _verify (type=</span><span class="si">%s</span><span class="s1">) because _verify is &#39;</span>
+              <span class="s1">&#39;not implemented&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enables functions like:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           &gt;&gt;&gt; GRID(nid=1, ...) === GRID(nid=1, ...)</span>
+<span class="sd">           True</span>
+<span class="sd">           &gt;&gt;&gt; GRID(nid=1, ...) === GRID(nid=2, ...)</span>
+<span class="sd">           False</span>
+<span class="sd">           &gt;&gt;&gt; GRID(nid=1, ...) === CQUAD4(eid=1, ...)</span>
+<span class="sd">           False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">card</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">fields1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="n">fields2</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_same_fields</span><span class="p">(</span><span class="n">fields1</span><span class="p">,</span> <span class="n">fields2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_is_same_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">fields1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]],</span>
+                        <span class="n">fields2</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fields1</span><span class="p">,</span> <span class="n">fields2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_same</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="BaseCard._is_same_fields_long"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard._is_same_fields_long">[docs]</a>    <span class="k">def</span> <span class="nf">_is_same_fields_long</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields1</span><span class="p">,</span> <span class="n">fields2</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;helper for __eq__&quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fields1</span><span class="p">,</span> <span class="n">fields2</span><span class="p">):</span>
+            <span class="n">is_samei</span> <span class="o">=</span> <span class="n">is_same</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_samei</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+    <span class="k">def</span> <span class="nf">print_raw_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;A card&#39;s raw fields include all defaults for all fields&quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card</span><span class="p">(</span><span class="n">list_fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseCard.repr_fields"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the fields in their simplified form</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : List[varies]</span>
+<span class="sd">            the fields that define the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseCard.print_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.print_card">[docs]</a>    <span class="k">def</span> <span class="nf">print_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;prints the card in 8/16/16-double format&quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card</span><span class="p">(</span><span class="n">list_fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">print_repr_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;prints the card in 8/16/16-double format&quot;&quot;&quot;</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card</span><span class="p">(</span><span class="n">list_fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints a card in the simplest way possible</span>
+<span class="sd">        (default values are left blank).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">comment</span> <span class="o">+</span> <span class="n">print_card</span><span class="p">(</span><span class="n">list_fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">comment</span> <span class="o">+</span> <span class="n">print_card</span><span class="p">(</span><span class="n">list_fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;problem printing </span><span class="si">%s</span><span class="s1"> card&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;list_fields = &quot;</span><span class="p">,</span> <span class="n">list_fields</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+<div class="viewcode-block" id="BaseCard.rstrip"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.rstrip">[docs]</a>    <span class="k">def</span> <span class="nf">rstrip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">UnicodeEncodeError</span><span class="p">:</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;$ dropped comment due to unicode error</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseCard.write_card"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the card with the specified width and precision</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int (default=8)</span>
+<span class="sd">            size of the field; {8, 16}</span>
+<span class="sd">        is_double : bool (default=False)</span>
+<span class="sd">            is this card double precision</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        msg : str</span>
+<span class="sd">            the string representation of the card</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has not overwritten write_card&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseCard.write_card_16"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard.write_card_16">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">print_card</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Property"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Property">[docs]</a><span class="k">class</span> <span class="nc">Property</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base Property Class&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;dummy init&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Property.Pid"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Property.Pid">[docs]</a>    <span class="k">def</span> <span class="nf">Pid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the property ID of an property</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            the Property ID</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span></div>
+
+<div class="viewcode-block" id="Property.Mid"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Property.Mid">[docs]</a>    <span class="k">def</span> <span class="nf">Mid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the material ID of an element</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mid : int</span>
+<span class="sd">            the Material ID</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">mid</span></div>
+
+    <span class="c1">#@abstractmethod</span>
+    <span class="c1">#def cross_reference(self, model: BDF) -&gt; None:</span>
+        <span class="c1">#pass</span>
+    <span class="c1">#@abstractmethod</span>
+    <span class="c1">#def uncross_reference(self) -&gt; None:</span>
+        <span class="c1">#pass</span>
+<div class="viewcode-block" id="Property.write_card_8"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Property.write_card_8">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_8</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_card</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Property.write_card_16"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Property.write_card_16">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_card</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Material"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Material">[docs]</a><span class="k">class</span> <span class="nc">Material</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base Material Class&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;dummy init&quot;&quot;&quot;</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">TRef</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># pramga: no cover</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tref&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> object has no attribute tref&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tref</span>
+
+    <span class="nd">@TRef</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">TRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tref</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pramga: no cover</span>
+        <span class="sd">&quot;&quot;&quot;sets the self.Tref attributes&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tref&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> object has no attribute tref&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tref</span> <span class="o">=</span> <span class="n">tref</span>
+
+<div class="viewcode-block" id="Material.cross_reference"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Material.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;dummy cross reference method for a Material&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Material.Mid"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Material.Mid">[docs]</a>    <span class="k">def</span> <span class="nf">Mid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the material ID of an element</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mid : int</span>
+<span class="sd">            the Material ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span></div></div>
+
+
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="n">BaseCard</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines the Element class&quot;&quot;&quot;</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># CONM2, rigid</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;dummy init&quot;&quot;&quot;</span>
+        <span class="n">BaseCard</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1">#: the list of node IDs for an element (default=None)</span>
+        <span class="c1">#self.nodes = None</span>
+
+<div class="viewcode-block" id="Element.verify_unique_node_ids"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.verify_unique_node_ids">[docs]</a>    <span class="k">def</span> <span class="nf">verify_unique_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verify_unique_node_ids</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Element._verify_unique_node_ids"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element._verify_unique_node_ids">[docs]</a>    <span class="k">def</span> <span class="nf">_verify_unique_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required_node_ids</span><span class="p">,</span> <span class="n">non_required_node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># type (Any, Any) -&gt; None</span>
+        <span class="k">if</span> <span class="n">required_node_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">non_required_node_ids</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;only required nodes implemented&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">urnids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">required_node_ids</span><span class="p">)</span>
+                <span class="n">n_unique_node_ids</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">urnids</span><span class="p">)</span>
+                <span class="n">n_node_ids</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_node_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">n_unique_node_ids</span> <span class="o">!=</span> <span class="n">n_node_ids</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nunique_node_ids=</span><span class="si">%s</span><span class="s1"> nnode_ids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n_unique_node_ids</span><span class="p">,</span> <span class="n">n_node_ids</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;only required nodes implemented&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Element.Pid"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.Pid">[docs]</a>    <span class="k">def</span> <span class="nf">Pid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the Property ID of an element</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            the Property ID</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">pid</span></div>
+
+<div class="viewcode-block" id="Element.get_node_positions"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.get_node_positions">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;returns the positions of multiple node objects&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">nodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span>
+
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">positions</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;node=</span><span class="si">%s</span><span class="s2">; type=</span><span class="si">%s</span><span class="s2"> must be a Node</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">positions</span></div>
+
+<div class="viewcode-block" id="Element.get_node_positions_no_xref"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.get_node_positions_no_xref">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_positions_no_xref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;returns the positions of multiple node objects&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">positions</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+                <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position_no_xref</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">positions</span></div>
+
+    <span class="k">def</span> <span class="nf">_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">allow_empty_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;returns nodeIDs for repr functions&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="n">allow_empty_nodes</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Element.prepare_node_ids"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.prepare_node_ids">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">allow_empty_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Verifies all node IDs exist and that they&#39;re integers&quot;&quot;&quot;</span>
+        <span class="c1">#self.nodes = nids</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_node_ids</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nids</span></div>
+
+<div class="viewcode-block" id="Element.validate_node_ids"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element.validate_node_ids">[docs]</a>    <span class="k">def</span> <span class="nf">validate_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">allow_empty_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">allow_empty_nodes</span><span class="p">:</span>
+            <span class="c1"># verify we have nodes</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> requires at least one node id be specified; node_ids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c1">#unique_nodes = unique(nodes)</span>
+            <span class="c1">#if len(nodes) != len(unique_nodes):</span>
+                <span class="c1">#msg = &#39;%s requires that all node ids be unique; node_ids=%s&#39; % (self.type, nodes)</span>
+                <span class="c1">#raise IndexError(msg)</span>
+
+            <span class="c1"># remove 0 nodes</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="k">if</span> <span class="n">nid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+                      <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="n">nodes</span>
+            <span class="c1">#unique_nodes = unique(self.nodes)</span>
+            <span class="c1">#if len(self.nodes) != len(unique_nodes):</span>
+                <span class="c1">#msg = &#39;%s requires that all node ids be unique; node_ids=%s&#39; % (</span>
+                    <span class="c1">#self.type, self.nodes)</span>
+                <span class="c1">#raise IndexError(msg)</span>
+
+        <span class="c1">#nodes3 = []</span>
+        <span class="c1">#for nid in nodes:</span>
+            <span class="c1">#if isinstance(nid, integer_types):</span>
+                <span class="c1">#nodes3.append(nid)</span>
+            <span class="c1">#elif nid is None and allow_empty_nodes or np.isnan(nid):</span>
+                <span class="c1">#nodes3.append(None)</span>
+            <span class="c1">#else:  # string???</span>
+                <span class="c1">#msg = &#39;this element may have missing nodes...\n&#39;</span>
+                <span class="c1">#msg += &#39;nids=%s allow_empty_nodes=False;\ntype(nid)=%s&#39; % (nodes, type(nid))</span>
+                <span class="c1">#raise RuntimeError(msg)</span>
+        <span class="c1">#print(&#39;nodes&#39;, nodes)</span>
+        <span class="c1">#print(&#39;nodes2&#39;, nodes2)</span>
+        <span class="c1">#print(&#39;nodes3 =&#39;, nodes3)</span>
+        <span class="c1">#self.nodes = nodes2</span>
+        <span class="k">return</span> <span class="n">nodes2</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_format_comment</span><span class="p">(</span><span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format a card comment to precede the card using</span>
+<span class="sd">    nastran-compatible comment character $. The comment</span>
+<span class="sd">    string can have multiple lines specified as linebreaks.</span>
+
+<span class="sd">    Empty comments or just spaces are returned as an empty string.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; _format_comment(&#39;a comment\ntaking two lines&#39;)</span>
+<span class="sd">    $a comment</span>
+<span class="sd">    $taking two lines</span>
+
+<span class="sd">    &gt;&gt;&gt; _format_comment(&#39;&#39;)</span>
+<span class="sd">    &lt;empty string&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; _format_comment(&#39;       &#39;)</span>
+<span class="sd">    &lt;empty string&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; _format_comment(&#39;$ a comment within a comment looks weird&#39;)</span>
+<span class="sd">    &#39;$$ a comment within a comment looks weird&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; _format_comment(&#39;no trailing whitespace   &#39;)</span>
+<span class="sd">    $no trailing extra whitespace</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">comment</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>  <span class="c1"># deals with a bunch of spaces</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">u</span><span class="s1">&#39;$</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">comment_line</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">comment_line</span> <span class="ow">in</span> <span class="n">comment</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)])</span>
+
+
+<span class="k">def</span> <span class="nf">_node_ids</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">assert</span> <span class="n">nodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">card</span><span class="o">.</span><span class="vm">__dict__</span>
+
+        <span class="k">if</span> <span class="n">allow_empty_nodes</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">nodes2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                    <span class="n">nodes2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nodes2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">nid</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nodes2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">nodes2</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                    <span class="n">node_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">node_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">nid</span><span class="p">)</span>
+
+            <span class="c1">#if isinstance(nodes[0], integer_types):</span>
+                <span class="c1">#node_ids = [node for node in nodes]</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#node_ids = [node.nid for node in nodes]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;type=</span><span class="si">%s</span><span class="s1"> nodes=</span><span class="si">%s</span><span class="s1"> allow_empty_nodes=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">msg=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">card</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">,</span> <span class="s1">&#39;node_ids = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">node_ids</span>
+        <span class="k">assert</span> <span class="n">node_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node_ids</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;type=</span><span class="si">%s</span><span class="s1"> nodes=</span><span class="si">%s</span><span class="s1"> allow_empty_nodes=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">msg=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+        <span class="k">raise</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;huh...&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="break_word_by_trailing_integer"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.break_word_by_trailing_integer">[docs]</a><span class="k">def</span> <span class="nf">break_word_by_trailing_integer</span><span class="p">(</span><span class="n">pname_fid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a word that has a value that is an integer</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pname_fid : str</span>
+<span class="sd">        the DVPRELx term (e.g., A(11), NSM(5))</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    word : str</span>
+<span class="sd">        the value not in parentheses</span>
+<span class="sd">    value : int</span>
+<span class="sd">        the value in parentheses</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; break_word_by_trailing_integer(&#39;T11&#39;)</span>
+<span class="sd">    (&#39;T&#39;, &#39;11&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; break_word_by_trailing_integer(&#39;THETA11&#39;)</span>
+<span class="sd">    (&#39;THETA&#39;, &#39;11&#39;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nums</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">letter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">pname_fid</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">letter</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">nums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">letter</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="n">num</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">nums</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">num</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;pname_fid=</span><span class="si">%r</span><span class="s2"> does not follow the form &#39;T1&#39;, &#39;T11&#39;, &#39;THETA42&#39; &quot;</span>
+               <span class="s2">&quot;(letters and a number)&quot;</span> <span class="o">%</span> <span class="n">pname_fid</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">word</span> <span class="o">=</span> <span class="n">pname_fid</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pname_fid</span><span class="p">),</span> <span class="s1">&#39;word=</span><span class="si">%r</span><span class="s1"> num=</span><span class="si">%r</span><span class="s1"> pname_fid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">pname_fid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">word</span><span class="p">,</span> <span class="n">num</span></div>
+
+<div class="viewcode-block" id="break_word_by_trailing_parentheses_integer_ab"><a class="viewcode-back" href="../../../../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.break_word_by_trailing_parentheses_integer_ab">[docs]</a><span class="k">def</span> <span class="nf">break_word_by_trailing_parentheses_integer_ab</span><span class="p">(</span><span class="n">pname_fid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a word that has a value that can be A/B as well as an integer</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pname_fid : str</span>
+<span class="sd">        the DVPRELx term; A(11), NSM(5), NSM(B)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    word : str</span>
+<span class="sd">        the value not in parentheses</span>
+<span class="sd">    value : int/str</span>
+<span class="sd">        the value in parenthese</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; break_word_by_trailing_parentheses_integer(&#39;A(11)&#39;)</span>
+<span class="sd">    (&#39;A&#39;, &#39;11&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; break_word_by_trailing_parentheses_integer(&#39;NSM(11)&#39;)</span>
+<span class="sd">    (&#39;NSM&#39;, &#39;11&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; break_word_by_trailing_parentheses_integer(&#39;NSM(B)&#39;)</span>
+<span class="sd">    (&#39;NSM&#39;, &#39;B&#39;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">pname_fid</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">),</span> <span class="n">pname_fid</span>
+    <span class="n">word</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span> <span class="n">pname_fid</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">]:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">word</span><span class="p">,</span> <span class="n">num</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

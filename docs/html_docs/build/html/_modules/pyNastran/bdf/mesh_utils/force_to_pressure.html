@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.force_to_pressure &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.force_to_pressure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.force_to_pressure</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span><span class="p">,</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">FORCE</span><span class="p">,</span> <span class="n">PLOAD4</span>
+
+
+<div class="viewcode-block" id="force_to_pressure"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.force_to_pressure.force_to_pressure">[docs]</a><span class="k">def</span> <span class="nf">force_to_pressure</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;converts FORCE cards to PLOAD4s for a shell model&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">bdf_filename</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">punch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">)</span>
+
+    <span class="c1">#if 0:</span>
+        <span class="c1">##card_types = [&#39;CQUAD4&#39;, &#39;CTRIA3&#39;]</span>
+        <span class="c1">#card_ids_map = model.get_card_ids_by_card_types(card_types=None,</span>
+                                                        <span class="c1">#reset_type_to_slot_map=False,</span>
+                                                        <span class="c1">#stop_on_missing_card=False)</span>
+
+        <span class="c1">#for eid in card_ids_map[&#39;CQUAD4&#39;]:</span>
+            <span class="c1">#elem = model.elements[eid]</span>
+            <span class="c1">##for nid in elem.node_ids:</span>
+            <span class="c1">##raise NotImplementedError(elem)</span>
+
+        <span class="c1">#for eid in card_ids_map[&#39;CTRIA3&#39;]:</span>
+            <span class="c1">#elem = model.elements[eid]</span>
+            <span class="c1">#raise NotImplementedError(elem)</span>
+
+    <span class="n">nid_elem_count</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">nid_elem_map</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">nid_elem_count</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">nid_elem_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+
+
+    <span class="c1">#model.cross_reference()</span>
+
+    <span class="n">forces</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">load_id</span><span class="p">,</span> <span class="n">load</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">loadi</span> <span class="ow">in</span> <span class="n">loads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">loadi</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span>
+                <span class="n">loadi</span> <span class="o">=</span> <span class="n">FORCE</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
+                <span class="n">loadi</span><span class="o">.</span><span class="n">get</span>
+
+                <span class="c1">#if load.node_id not in nids:</span>
+                    <span class="c1">#continue</span>
+                <span class="k">if</span> <span class="n">load</span><span class="o">.</span><span class="n">Cid</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">cp</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">cid</span>
+                    <span class="n">forcei</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">transform_vector_to_global</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">forcei</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span> <span class="o">*</span> <span class="n">load</span><span class="o">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="n">scale</span>
+
+                <span class="n">elem_count</span> <span class="o">=</span> <span class="n">nid_elem_count</span><span class="p">[</span><span class="n">load</span><span class="o">.</span><span class="n">node</span><span class="p">]</span>
+                <span class="n">f</span> <span class="o">/=</span> <span class="n">elem_count</span>
+                <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">nid_elem_map</span><span class="p">:</span>
+                    <span class="n">forces</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">+=</span> <span class="n">forcei</span>
+                <span class="c1">#node = self.Node(load.node_id)</span>
+                <span class="c1">#r = xyz[node.nid] - p</span>
+                <span class="c1">#m = cross(r, f)</span>
+                <span class="c1">#F += f</span>
+                <span class="c1">#M += m</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">loadi</span><span class="p">)</span>
+
+    <span class="c1">#pressures = {}</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">cross_reference</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">loads</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;pressures.out&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pressure_file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">press</span> <span class="ow">in</span> <span class="n">forces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">eids</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">forcei</span> <span class="o">=</span> <span class="n">forces</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span>
+            <span class="n">pressures</span> <span class="o">=</span> <span class="p">[</span><span class="n">pressure</span><span class="p">,</span> <span class="n">pressure</span><span class="p">,</span> <span class="n">pressure</span><span class="p">,</span> <span class="n">pressure</span><span class="p">]</span>
+            <span class="n">pload4</span> <span class="o">=</span> <span class="n">PLOAD4</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">eids</span><span class="p">,</span> <span class="n">pressures</span><span class="p">,</span>
+                            <span class="n">g1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">g34</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nvector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">surf_or_line</span><span class="o">=</span><span class="s1">&#39;SURF&#39;</span><span class="p">,</span> <span class="n">line_load_dir</span><span class="o">=</span><span class="s1">&#39;NORM&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1">#pressure_file.write(pload4.write_card(size=8, is_double=False))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">pload4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bdf_filename_out</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

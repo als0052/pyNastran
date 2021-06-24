@@ -1,0 +1,589 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.format_converter &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.format_converter</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.format_converter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Multi-input/output format converter&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="c1"># stl_to_plot3d ???</span>
+
+
+<div class="viewcode-block" id="process_nastran"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_nastran">[docs]</a><span class="k">def</span> <span class="nf">process_nastran</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts Nastran to STL/Cart3d/Tecplot/UGRID3d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">,</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">,</span> <span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;abaqus&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+    <span class="n">xref</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">:</span>
+        <span class="n">xref</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="n">xref</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">*</span> <span class="n">scale</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">cp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">del</span> <span class="n">node</span><span class="o">.</span><span class="n">cp_ref</span>
+
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.nastran.nastran_to_stl</span> <span class="kn">import</span> <span class="n">nastran_to_stl</span>
+        <span class="n">nastran_to_stl</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">is_binary</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--binary&#39;</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.nastran.nastran_to_cart3d</span> <span class="kn">import</span> <span class="n">nastran_to_cart3d</span>
+        <span class="n">cart3d</span> <span class="o">=</span> <span class="n">nastran_to_cart3d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">cart3d</span><span class="o">.</span><span class="n">write_cart3d</span><span class="p">(</span><span class="n">fname2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.nastran.nastran_to_tecplot</span> <span class="kn">import</span> <span class="n">nastran_to_tecplot</span>
+        <span class="n">tecplot</span> <span class="o">=</span> <span class="n">nastran_to_tecplot</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">tecplot_filename</span> <span class="o">=</span> <span class="n">fname2</span>
+        <span class="n">tecplot</span><span class="o">.</span><span class="n">write_tecplot</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">adjust_nids</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.nastran.nastran_to_ugrid</span> <span class="kn">import</span> <span class="n">nastran_to_ugrid</span>
+        <span class="n">nastran_to_ugrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;abaqus&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.nastran.nastran_to_abaqus</span> <span class="kn">import</span> <span class="n">nastran_to_abaqus</span>
+        <span class="n">nastran_to_abaqus</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">fname2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_nastran&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_cart3d"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_cart3d">[docs]</a><span class="k">def</span> <span class="nf">process_cart3d</span><span class="p">(</span><span class="n">cart3d_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts Cart3d to STL/Nastran/Tecplot/Cart3d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.cart3d.cart3d</span> <span class="kn">import</span> <span class="n">read_cart3d</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_cart3d</span><span class="p">(</span><span class="n">cart3d_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">points</span> <span class="o">*=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.cart3d.cart3d_to_stl</span> <span class="kn">import</span> <span class="n">cart3d_to_stl_filename</span>
+        <span class="n">cart3d_to_stl_filename</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">is_binary</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--binary&#39;</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.cart3d.cart3d_to_nastran</span> <span class="kn">import</span> <span class="n">cart3d_to_nastran_filename</span>
+        <span class="n">cart3d_to_nastran_filename</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.cart3d.cart3d_to_tecplot</span> <span class="kn">import</span> <span class="n">cart3d_to_tecplot</span>
+        <span class="n">cart3d_to_tecplot</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_cart3d</span><span class="p">(</span><span class="n">fname2</span><span class="p">,</span> <span class="n">is_binary</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--binary&#39;</span><span class="p">])</span>
+    <span class="c1"># elif fmt2 == &#39;ugrid&#39;:</span>
+        <span class="c1"># cart3d_to_ugrid(model, fname2)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_cart3d&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_stl"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_stl">[docs]</a><span class="k">def</span> <span class="nf">process_stl</span><span class="p">(</span><span class="n">stl_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts STL to Nastran/Cart3d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">stl_filename</span><span class="p">:</span>
+        <span class="n">stl_filenames</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">stl_filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stl_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">stl_filename</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">stl_filenames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stl_filenames</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.stl.utils</span> <span class="kn">import</span> <span class="n">merge_stl_files</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">merge_stl_files</span><span class="p">(</span><span class="n">stl_filenames</span><span class="p">,</span> <span class="n">stl_out_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;scale=</span><span class="si">%r</span><span class="s1"> type=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">scale</span><span class="p">))</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">nodes</span> <span class="o">*=</span> <span class="n">scale</span>
+
+    <span class="c1"># model = STL()</span>
+    <span class="c1"># model.read_stl(stl_filename)</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.stl.stl_to_nastran</span> <span class="kn">import</span> <span class="n">stl_to_nastran</span>
+        <span class="n">stl_to_nastran</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.stl.stl_to_cart3d</span> <span class="kn">import</span> <span class="n">stl_to_cart3d</span>
+        <span class="n">stl_to_cart3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">is_binary</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--binary&#39;</span><span class="p">]</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_stl</span><span class="p">(</span><span class="n">fname2</span><span class="p">,</span> <span class="n">is_binary</span><span class="o">=</span><span class="n">is_binary</span><span class="p">,</span> <span class="n">float_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%6.12f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">stop_on_failure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># elif fmt2 == &#39;tecplot&#39;:</span>
+        <span class="c1"># stl_to_tecplot(model, fname2)</span>
+    <span class="c1"># elif fmt2 == &#39;ugrid&#39;:</span>
+        <span class="c1"># stl_to_ugrid(model, fname2)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_stl&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="element_slice"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.element_slice">[docs]</a><span class="k">def</span> <span class="nf">element_slice</span><span class="p">(</span><span class="n">tecplot</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;removes solid elements from a tecplot model&quot;&quot;&quot;</span>
+    <span class="n">xslice</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xx&#39;</span><span class="p">]</span>
+    <span class="n">yslice</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yy&#39;</span><span class="p">]</span>
+    <span class="n">zslice</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--zz&#39;</span><span class="p">]</span>
+    <span class="c1"># if xslice is not None:</span>
+        <span class="c1"># xslice = data[&#39;--xx&#39;]</span>
+        <span class="c1"># tecplot.slice_x(xslice)</span>
+    <span class="c1"># if yslice is not None:</span>
+        <span class="c1"># yslice = data[&#39;--yy&#39;]</span>
+        <span class="c1"># tecplot.slice_y(yslice)</span>
+    <span class="c1"># if zslice is not None:</span>
+        <span class="c1"># zslice = data[&#39;--zz&#39;]</span>
+        <span class="c1"># tecplot.slice_z(zslice)</span>
+    <span class="c1">#print(tecplot)</span>
+    <span class="n">tecplot</span><span class="o">.</span><span class="n">slice_xyz</span><span class="p">(</span><span class="n">xslice</span><span class="p">,</span> <span class="n">yslice</span><span class="p">,</span> <span class="n">zslice</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_tecplot"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_tecplot">[docs]</a><span class="k">def</span> <span class="nf">process_tecplot</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts Tecplot to Tecplot</span>
+
+<span class="sd">    Globs all input tecplot files (e.g. tecplot*.plt)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">tecplot_filename</span><span class="p">:</span>
+        <span class="n">tecplot_filenames</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tecplot_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">tecplot_filename</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tecplot_filenames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tecplot_filename</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.tecplot.utils</span> <span class="kn">import</span> <span class="n">merge_tecplot_files</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.tecplot.tecplot_to_nastran</span> <span class="kn">import</span> <span class="n">tecplot_to_nastran_filename</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.tecplot.tecplot_to_cart3d</span> <span class="kn">import</span> <span class="n">tecplot_to_cart3d_filename</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">merge_tecplot_files</span><span class="p">(</span><span class="n">tecplot_filenames</span><span class="p">,</span> <span class="n">tecplot_filename_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="c1">#if fmt2 == &#39;cart3d&#39;:</span>
+        <span class="c1">#tecplot_to_cart3d(model, fname2)</span>
+    <span class="c1">#elif fmt2 == &#39;stl&#39;:</span>
+        <span class="c1">#tecplot_to_stl(model, fname2)</span>
+    <span class="c1"># elif fmt2 == &#39;ugrid&#39;:</span>
+        <span class="c1"># tecplot_to_ugrid(model, fname2)</span>
+    <span class="n">res_types</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;RESTYPE&#39;</span><span class="p">]</span>
+    <span class="n">unused_is_points</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--block&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">element_slice</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># this is a good way to merge files</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_tecplot</span><span class="p">(</span><span class="n">fname2</span><span class="p">,</span> <span class="n">res_types</span><span class="o">=</span><span class="n">res_types</span><span class="p">)</span> <span class="c1"># is_points=is_points</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="n">tecplot_to_nastran_filename</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">cart3d_filename</span> <span class="o">=</span> <span class="n">fname2</span> <span class="o">+</span> <span class="s1">&#39;.tri&#39;</span>
+        <span class="n">tecplot_to_cart3d_filename</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cart3d_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">process_cart3d</span><span class="p">(</span><span class="n">cart3d_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cart3d_filename</span><span class="p">)</span>
+        <span class="c1">#tecplot_to_nastran_filename(model, fname2 + &#39;.bdf&#39;)</span>
+        <span class="c1">#process_nastran(fname2 + &#39;.bdf&#39;, fmt2, fname2, log, data=data, quiet=quiet)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="c1"># supports tris/quads, not loads</span>
+        <span class="c1">#tecplot_to_nastran_filename(model, fname2 + &#39;.bdf&#39;)</span>
+        <span class="c1">#process_nastran(fname2 + &#39;.bdf&#39;, fmt2, fname2, log, data=data, quiet=quiet)</span>
+
+        <span class="c1"># supports quads/loads, not tris</span>
+        <span class="n">tecplot_to_cart3d_filename</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_tecplot&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_ugrid"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_ugrid">[docs]</a><span class="k">def</span> <span class="nf">process_ugrid</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts UGRID to Nastran/Cart3d/STL/Tecplot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="n">read_shells</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">read_solids</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">]:</span>
+        <span class="n">read_shells</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">read_solids</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.aflr.ugrid.ugrid_reader</span> <span class="kn">import</span> <span class="n">UGRID</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">UGRID</span><span class="p">(</span><span class="n">read_shells</span><span class="o">=</span><span class="n">read_shells</span><span class="p">,</span> <span class="n">read_solids</span><span class="o">=</span><span class="n">read_solids</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_ugrid</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="c1"># ugrid_to_nastran(model, fname2</span>
+        <span class="n">include_shells</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">include_solids</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">fname2</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">include_shells</span><span class="o">=</span><span class="n">include_shells</span><span class="p">,</span> <span class="n">include_solids</span><span class="o">=</span><span class="n">include_solids</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="n">include_shells</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">include_solids</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">fname2</span> <span class="o">+</span> <span class="s1">&#39;.bdf&#39;</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">include_shells</span><span class="o">=</span><span class="n">include_shells</span><span class="p">,</span> <span class="n">include_solids</span><span class="o">=</span><span class="n">include_solids</span><span class="p">)</span>
+        <span class="c1"># ugrid_to_cart3d(model, fname2)</span>
+        <span class="n">process_nastran</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">include_shells</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">include_solids</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">fname2</span> <span class="o">+</span> <span class="s1">&#39;.bdf&#39;</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">include_shells</span><span class="o">=</span><span class="n">include_shells</span><span class="p">,</span> <span class="n">include_solids</span><span class="o">=</span><span class="n">include_solids</span><span class="p">)</span>
+        <span class="n">process_nastran</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># ugrid_to_stl(model, fname2)</span>
+    <span class="k">elif</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.converters.aflr.ugrid.ugrid3d_to_tecplot</span> <span class="kn">import</span> <span class="n">ugrid_to_tecplot</span>
+        <span class="c1"># ugrid_to_tecplot(model, fname2)</span>
+        <span class="n">tecplot</span><span class="p">,</span> <span class="n">unused_zone</span> <span class="o">=</span> <span class="n">ugrid_to_tecplot</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">element_slice</span><span class="p">(</span><span class="n">tecplot</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">tecplot_filename</span> <span class="o">=</span> <span class="n">fname2</span>
+        <span class="n">tecplot</span><span class="o">.</span><span class="n">write_tecplot</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_ugrid&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="run_format_converter"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.run_format_converter">[docs]</a><span class="k">def</span> <span class="nf">run_format_converter</span><span class="p">(</span><span class="n">fmt1</span><span class="p">,</span> <span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs the format converter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="n">process_nastran</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">:</span>
+        <span class="n">process_cart3d</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">process_stl</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">:</span>
+        <span class="n">process_tecplot</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">:</span>
+        <span class="n">process_ugrid</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fmt1</span> <span class="o">==</span> <span class="s1">&#39;vrml&#39;</span><span class="p">:</span>
+        <span class="n">process_vrml</span><span class="p">(</span><span class="n">fname1</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">format1s</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;cart3d&#39;</span><span class="p">,</span> <span class="s1">&#39;stl&#39;</span><span class="p">,</span> <span class="s1">&#39;tecplot&#39;</span><span class="p">,</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">,</span> <span class="s1">&#39;vrml&#39;</span><span class="p">]</span>
+        <span class="c1">#format2s = [&#39;nastran&#39;, &#39;cart3d&#39;, &#39;stl&#39;, &#39;ugrid&#39;, &#39;tecplot&#39;]</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;fmt1=</span><span class="si">{</span><span class="n">fmt1</span><span class="si">}</span><span class="s1"> is not supported by run; &#39;</span>
+                                  <span class="sa">f</span><span class="s1">&#39;use </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format1s</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_format_converter"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.cmd_line_format_converter">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_format_converter</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for format_converter&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="c1">#format1s = [&#39;nastran&#39;, &#39;cart3d&#39;, &#39;stl&#39;, &#39;ugrid&#39;, &#39;tecplot&#39;, &#39;vrml&#39;]</span>
+    <span class="c1">#format2s = [&#39;nastran&#39;, &#39;cart3d&#39;, &#39;stl&#39;, &#39;ugrid&#39;, &#39;tecplot&#39;]</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format_converter nastran   &lt;INPUT&gt; &lt;format2&gt; &lt;OUTPUT&gt; [-o &lt;OP2&gt;] --no_xref</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format_converter &lt;format1&gt; &lt;INPUT&gt; tecplot   &lt;OUTPUT&gt; [-r RESTYPE...] [-b] [--block] [-x &lt;X&gt;] [-y &lt;Y&gt;] [-z &lt;Z&gt;] [--scale SCALE]</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format_converter &lt;format1&gt; &lt;INPUT&gt; stl       &lt;OUTPUT&gt; [-b]  [--scale SCALE]</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format_converter cart3d    &lt;INPUT&gt; &lt;format2&gt; &lt;OUTPUT&gt; [-b]  [--scale SCALE]</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format_converter &lt;format1&gt; &lt;INPUT&gt; &lt;format2&gt; &lt;OUTPUT&gt; [--scale SCALE]</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="c1">#msg += &quot;  format_converter nastran  &lt;INPUT&gt; &lt;format2&gt; &lt;OUTPUT&gt;\n&quot;</span>
+    <span class="c1">#msg += &quot;  format_converter cart3d   &lt;INPUT&gt; &lt;format2&gt; &lt;OUTPUT&gt;\n&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  format_converter -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  format_converter -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Required Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format1        format type (nastran, cart3d, stl, ugrid, tecplot, vrml)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  format2        format type (nastran, cart3d, stl, ugrid, tecplot, abaqus)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  INPUT          path to input file</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  OUTPUT         path to output file</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Nastran Options:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -o OP2, --op2 OP2  path to results file (nastran-specific)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;                 only used for Tecplot (not supported)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  --no_xref      Don&#39;t cross-reference (nastran-specific)</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Tecplot Options:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -x X, --xx X   Creates a constant x slice; keeps points &lt; X</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -y Y, --yy Y   Creates a constant y slice; keeps points &lt; Y</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -z Z, --zz Z   Creates a constant z slice; keeps points &lt; Z</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  --block        Writes the data in BLOCK (vs. POINT) format</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -r, --results  Specifies the results to write to limit output</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Tecplot/Cart3d/STL Options:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  --scale SCALE  Apply a scale factor to the XYZ locations (default=1.0)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -b, --binary   writes the STL in binary (not supported for Tecplot)</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Info:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -h, --help     show this help message and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -v, --version  show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;Notes:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  Nastran-&gt;Tecplot assumes sequential nodes and consistent types (shell/solid)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  STL/Tecplot supports globbing as the input filename</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  Tecplot slicing doesn&#39;t support multiple slice values and will give bad results (not crash)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  UGRID outfiles must be of the form model.b8.ugrid, where</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;    b8, b4, lb8, lb4 are valid choices and periods are important</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  Scale has only been tested on STL -&gt; STL</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="c1"># because we have special blocks for tecplot/stl/cart3d</span>
+    <span class="n">is_nastran</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nastran&#39;</span><span class="p">]</span>
+    <span class="n">format1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format1&gt;&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">is_nastran</span><span class="p">:</span>
+        <span class="n">format1</span> <span class="o">=</span> <span class="s1">&#39;nastran&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format1&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format1</span>
+
+    <span class="n">format2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format2&gt;&#39;</span><span class="p">]</span>
+    <span class="n">is_stl</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stl&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">is_stl</span><span class="p">:</span>
+        <span class="n">format2</span> <span class="o">=</span> <span class="s1">&#39;stl&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format2&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format2</span>
+
+    <span class="n">is_tecplot</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tecplot&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">is_tecplot</span><span class="p">:</span>
+        <span class="n">format2</span> <span class="o">=</span> <span class="s1">&#39;tecplot&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format2&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format2</span>
+
+    <span class="n">is_cart3d</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;cart3d&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">is_cart3d</span><span class="p">:</span>
+        <span class="n">format1</span> <span class="o">=</span> <span class="s1">&#39;cart3d&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;format1&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format1</span>
+
+    <span class="c1"># common options</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">input_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;INPUT&gt;&#39;</span><span class="p">]</span>
+    <span class="n">output_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;OUTPUT&gt;&#39;</span><span class="p">]</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;warning&#39;</span> <span class="k">if</span>  <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;debug&#39;</span>
+    <span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">SimpleLogger</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+
+    <span class="n">run_format_converter</span><span class="p">(</span><span class="n">format1</span><span class="p">,</span> <span class="n">input_filename</span><span class="p">,</span> <span class="n">format2</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_vrml"><a class="viewcode-back" href="../../../reference/converters/pyNastran.converters.html#pyNastran.converters.format_converter.process_vrml">[docs]</a><span class="k">def</span> <span class="nf">process_vrml</span><span class="p">(</span><span class="n">vrml_filename</span><span class="p">,</span> <span class="n">fmt2</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts VRML to Nastran</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">fmt2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;nastran&#39;</span><span class="p">,</span> <span class="s1">&#39;stl&#39;</span><span class="p">],</span> <span class="s1">&#39;format2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fmt2</span>
+    <span class="c1">#if data[&#39;--scale&#39;] != 1.0:</span>
+        <span class="c1">#model.points *= data[&#39;--scale&#39;]</span>
+        <span class="c1">#data[&#39;--scale&#39;] = 1.0</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.converters.dev.vrml.vrml</span> <span class="kn">import</span> <span class="n">vrml_to_nastran</span><span class="p">,</span> <span class="n">vrml_to_stl</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;nastran&#39;</span><span class="p">:</span>
+        <span class="n">vrml_to_nastran</span><span class="p">(</span><span class="n">vrml_filename</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fmt2</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">vrml_to_stl</span><span class="p">(</span><span class="n">vrml_filename</span><span class="p">,</span> <span class="n">fname2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;fmt2=</span><span class="si">%s</span><span class="s1"> is not supported by process_vrml&#39;</span> <span class="o">%</span> <span class="n">fmt2</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">cmd_line_format_converter</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

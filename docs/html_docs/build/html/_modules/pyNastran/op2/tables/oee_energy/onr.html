@@ -1,0 +1,924 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.oee_energy.onr &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.oee_energy.onr</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.oee_energy.onr</h1><div class="highlight"><pre>
+<span></span><span class="c1">#pylint: disable=C0326,C0301</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.oee_energy.oee_objects</span> <span class="kn">import</span> <span class="n">RealStrainEnergyArray</span><span class="p">,</span> <span class="n">ComplexStrainEnergyArray</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_common</span> <span class="kn">import</span> <span class="n">OP2Common</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_reader</span> <span class="kn">import</span> <span class="n">mapfmt</span><span class="p">,</span> <span class="n">reshape_bytes_block</span>
+
+<span class="n">RESULT_NAME_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;BAR&#39;</span> <span class="p">:</span> <span class="s1">&#39;cbar_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BEAM&#39;</span> <span class="p">:</span> <span class="s1">&#39;cbeam_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BEND&#39;</span> <span class="p">:</span> <span class="s1">&#39;cbend_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;ROD&#39;</span> <span class="p">:</span> <span class="s1">&#39;crod_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TUBE&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctube_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CONROD&#39;</span> <span class="p">:</span> <span class="s1">&#39;conrod_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;TRIA3&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctria3_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIAFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctria3_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIA3FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctria3_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIA6&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctria6_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIAX6&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctriax6_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIAR&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctriar_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIAX3FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctriax_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TRIAXFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctriax_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;QUAD4&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquad4_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;QUADFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquad4_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;QUAD4FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquad4_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;QUAD8&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquad8_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;QUADR&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquadr_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;QUADXFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquadx_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;QUADX4FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cquadx_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SHEAR&#39;</span> <span class="p">:</span> <span class="s1">&#39;cshear_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;TETRA&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctetra_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TETRAFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctetra_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TETRA4FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;ctetra_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PENTA&#39;</span> <span class="p">:</span> <span class="s1">&#39;cpenta_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PENTAFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cpenta_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PENTA6FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cpenta_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HEXA&#39;</span> <span class="p">:</span> <span class="s1">&#39;chexa_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HEXAFD&#39;</span> <span class="p">:</span> <span class="s1">&#39;chexa_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HEXA8FD&#39;</span> <span class="p">:</span> <span class="s1">&#39;chexa_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PYRAM&#39;</span> <span class="p">:</span> <span class="s1">&#39;cpyram_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;GAP&#39;</span> <span class="p">:</span> <span class="s1">&#39;cgap_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BUSH&#39;</span> <span class="p">:</span> <span class="s1">&#39;cbush_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ELAS1&#39;</span> <span class="p">:</span> <span class="s1">&#39;celas1_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ELAS2&#39;</span> <span class="p">:</span> <span class="s1">&#39;celas2_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ELAS3&#39;</span> <span class="p">:</span> <span class="s1">&#39;celas3_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ELAS4&#39;</span> <span class="p">:</span> <span class="s1">&#39;celas4_strain_energy&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;DUM8&#39;</span> <span class="p">:</span> <span class="s1">&#39;cdum8_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DMIG&#39;</span> <span class="p">:</span> <span class="s1">&#39;dmig_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GENEL&#39;</span> <span class="p">:</span> <span class="s1">&#39;genel_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CONM2&#39;</span> <span class="p">:</span> <span class="s1">&#39;conm2_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;RBE1&#39;</span> <span class="p">:</span> <span class="s1">&#39;rbe1_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;RBE3&#39;</span> <span class="p">:</span> <span class="s1">&#39;rbe3_strain_energy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;WELDC&#39;</span> <span class="p">:</span> <span class="s1">&#39;weldc_strain_energy&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="ONR"><a class="viewcode-back" href="../../../../../reference/op2/tables/pyNastran.op2.tables.oee_energy.html#pyNastran.op2.tables.oee_energy.onr.ONR">[docs]</a><span class="k">class</span> <span class="nc">ONR</span><span class="p">(</span><span class="n">OP2Common</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">OP2Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">words</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ONR.get_onr_prefix_postfix"><a class="viewcode-back" href="../../../../../reference/op2/tables/pyNastran.op2.tables.oee_energy.html#pyNastran.op2.tables.oee_energy.onr.ONR.get_onr_prefix_postfix">[docs]</a>    <span class="k">def</span> <span class="nf">get_onr_prefix_postfix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the prefix/postfix that splits off ATO, CRM, PSD, nonlinear,</span>
+<span class="sd">        etc. results.  We also fix some of the sort bits as typing:</span>
+
+<span class="sd">            STRESS(PLOT,SORT1,RALL) = ALL</span>
+
+<span class="sd">        will actually create the OESRMS2 table (depending on what else</span>
+<span class="sd">        is in your case control).  However, it&#39;s in an OESATO2 table, so</span>
+<span class="sd">        we know it&#39;s really SORT2.</span>
+
+<span class="sd">        Also, if you&#39;re validating the sort_bit flags, *RMS2 and *NO2 are</span>
+<span class="sd">        actually SORT1 tables.</span>
+
+<span class="sd">        NX Case Control  Block         Description</span>
+<span class="sd">        ===============  ==========    ===========</span>
+<span class="sd">        NLSTRESS         OESNLXR       Nonlinear static stresses</span>
+<span class="sd">        BOUTPUT          OESNLBR       Slideline stresses</span>
+<span class="sd">        STRESS           OESNLXD       Nonlinear Transient Stresses</span>
+<span class="sd">        STRESS           OES1C/OSTR1C  Ply stresses/strains</span>
+<span class="sd">        STRESS           OES1X         Element stresses with intermediate (CBAR and CBEAM)</span>
+<span class="sd">                                       station stresses and stresses on nonlinear elements</span>
+<span class="sd">        STRESS           OES/OESVM     Element stresses (linear elements only)</span>
+<span class="sd">        STRAIN           OSTR1         Element strains</span>
+<span class="sd">        STRESS/STRAIN    DOES1/DOSTR1  Scaled Response Spectra</span>
+<span class="sd">        MODCON           OSTRMC        Modal contributions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">postfix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;ONRGY1&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;ONRGY2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;ONRGY&#39;</span><span class="p">]:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;strain_energy.&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;RANEATC&#39;</span><span class="p">]:</span> <span class="c1">#, b&#39;OSTRMS1C&#39;]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_bits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># real</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;RANEATC.&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;RANCONS&#39;</span><span class="p">]:</span> <span class="c1">#, b&#39;OSTRMS1C&#39;]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_bits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># real</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;RANCONS.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;sort_bits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_bits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;nonlinear_factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span>
+        <span class="k">return</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">postfix</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_onr1_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads ONRGY1 subtable 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">words</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;aCode&#39;</span><span class="p">,</span>       <span class="s1">&#39;tCode&#39;</span><span class="p">,</span>    <span class="s1">&#39;eTotal&#39;</span><span class="p">,</span>       <span class="s1">&#39;isubcase&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span>         <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;element_name&#39;</span><span class="p">,</span> <span class="s1">&#39;load_set&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;format_code&#39;</span><span class="p">,</span> <span class="s1">&#39;num_wide&#39;</span><span class="p">,</span> <span class="s1">&#39;cvalres&#39;</span><span class="p">,</span>      <span class="s1">&#39;setID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;setID&#39;</span><span class="p">,</span>       <span class="s1">&#39;eigenReal&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenImag&#39;</span><span class="p">,</span>   <span class="s1">&#39;rmssf&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;etotpos&#39;</span><span class="p">,</span>     <span class="s1">&#39;etotneg&#39;</span><span class="p">,</span>  <span class="s1">&#39;thresh&#39;</span><span class="p">,</span>       <span class="s1">&#39;???&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span>         <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;???&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span> <span class="s1">&#39;Title&#39;</span><span class="p">,</span> <span class="s1">&#39;subtitle&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+        <span class="c1">#aCode = self.get_block_int_entry(data, 1)</span>
+
+        <span class="c1">## total energy of all elements in isubcase/mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etotal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_approach_code</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_onr_element_name</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1">#: Load set or zero</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;load_set&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: format code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;format_code&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: number of words per entry in record</span>
+        <span class="c1">#: .. note:: is this needed for this table ???</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;num_wide&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="c1">## C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;cvalres&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Set identification number Number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;set_id&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural eigenvalue - real part</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigen_real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigen_real&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural eigenvalue - imaginary part</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigen_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigen_imag&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: RMS and CRMS scale factor - NX</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rmssf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;rmssf&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+        <span class="c1">#: Total positive energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etotpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;etotpos&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+
+        <span class="c1">#: Total negative energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etotneg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;etotneg&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Energy Threshold - NX</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;thresh&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sort1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;sort2...&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>   <span class="c1"># statics / displacement / heat flux</span>
+            <span class="c1">#del self.data_code[&#39;nonlinear_factor&#39;]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lsdvmn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;lsdvmn&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;lsdvmn&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setNullNonlinearFactor</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># real eigenvalues</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## mode number</span>
+            <span class="c1">#self.mode_cycle1 = self.add_data_parameter(data, &#39;mode&#39;, b&#39;i&#39;, 7)</span>
+            <span class="c1">#self.mode_cycle2 = self.add_data_parameter(data, &#39;mode&#39;, b&#39;f&#39;, 7)</span>
+            <span class="c1">#print(&#39;mode = &#39;, self.mode)</span>
+            <span class="c1">#print(&#39;mode_cycle1 = &#39;, self.mode_cycle1)</span>
+            <span class="c1">#print(&#39;mode_cycle2 = &#39;, self.mode_cycle2)</span>
+            <span class="c1">#self.show_data(data)</span>
+            <span class="c1">#self.cycle = 0.</span>
+            <span class="c1">#self.update_mode_cycle(&#39;cycle&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+            <span class="c1">#print(&quot;mode(5)=%s eign(6)=%s mode_cycle(7)=%s&quot; % (</span>
+                <span class="c1">#self.mode, self.eign, self.mode_cycle))</span>
+        <span class="c1">#elif self.analysis_code == 3: # differential stiffness</span>
+            <span class="c1">#self.lsdvmn = self.get_values(data,&#39;i&#39;,5) ## load set number</span>
+            <span class="c1">#self.data_code[&#39;lsdvmn&#39;] = self.lsdvmn</span>
+        <span class="c1">#elif self.analysis_code == 4: # differential stiffness</span>
+            <span class="c1">#self.lsdvmn = self.get_values(data,&#39;i&#39;,5) ## load set number</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>   <span class="c1"># frequency</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">freq2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;freq2&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## frequency</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;freq2&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># transient</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## time step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+        <span class="c1">#elif self.analysis_code == 7: # pre-buckling</span>
+            <span class="c1">#self.data_names = self.apply_data_code_value(&#39;data_names&#39;,[&#39;lsdvmn&#39;])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>  <span class="c1"># post-buckling</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## mode number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>  <span class="c1"># complex eigenvalues</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## mode number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eigr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigen_real</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eigi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigen_imag</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">,</span> <span class="s1">&#39;eign&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>  <span class="c1"># nonlinear statics</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFactor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;loadFactor&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## load factor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;loadFactor&#39;</span><span class="p">])</span>
+        <span class="c1">#elif self.analysis_code == 11: # old geometric nonlinear statics</span>
+            <span class="c1">#self.data_names = self.apply_data_code_value(&#39;data_names&#39;,[&#39;lsdvmn&#39;])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>  <span class="c1"># contran ? (may appear as aCode=6)  --&gt; straight from DMAP...grrr...</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1">## time step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;invalid analysis_code...analysis_code=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_format_code</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  approach_code  = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  tCode          = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tCode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  isubcase       = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_title</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_debug_bits</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_onr_element_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1">#field_num = 6</span>
+        <span class="c1">#datai = data[4 * (field_num - 1) : 4 * (field_num + 1)]</span>
+        <span class="c1">#assert len(datai) == 8, len(datai)</span>
+        <span class="c1">#print(4 * (field_num - 1), 4 * (field_num + 1))</span>
+        <span class="c1">#element_name, = self.struct_8s.unpack(data[24:32])  # changed on 11/30/2015; was this for a long time...</span>
+
+        <span class="c1">#self.show_data(data[:28])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">element_name</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_8s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element_name</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_16s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">56</span><span class="p">])</span>
+            <span class="n">element_name</span> <span class="o">=</span> <span class="n">reshape_bytes_block</span><span class="p">(</span><span class="n">element_name</span><span class="p">)</span>
+
+        <span class="c1">#print(&quot;element_name = %s&quot; % (element_name))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">element_name</span> <span class="o">=</span> <span class="n">element_name</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># element name</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="c1">#self.log.warning(&quot;element_name = %s&quot; % str(element_name))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;element_name - UnicodeDecodeError&quot;</span><span class="p">)</span>
+            <span class="c1">#self.show_data(data)</span>
+            <span class="k">raise</span>
+        <span class="k">if</span> <span class="n">element_name</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;element_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#print(&quot;element_name = %r&quot; % (element_name))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;element_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;UnicodeDecodeError???&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;data[20:28]=</span><span class="si">%r</span><span class="s1"> instead of data[24:32]&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">28</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_read_onr2_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads the SORT2 version of table 4 (the data table)&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_table_1</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_table_2</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">unused_three</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_approach_code</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">words</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;aCode&#39;</span><span class="p">,</span>       <span class="s1">&#39;tCode&#39;</span><span class="p">,</span>    <span class="s1">&#39;eTotal&#39;</span><span class="p">,</span>       <span class="s1">&#39;isubcase&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span>         <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;element_name&#39;</span><span class="p">,</span> <span class="s1">&#39;load_set&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;format_code&#39;</span><span class="p">,</span> <span class="s1">&#39;num_wide&#39;</span><span class="p">,</span> <span class="s1">&#39;cvalres&#39;</span><span class="p">,</span>      <span class="s1">&#39;setID&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;setID&#39;</span><span class="p">,</span>       <span class="s1">&#39;eigenReal&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenImag&#39;</span><span class="p">,</span>   <span class="s1">&#39;rmssf&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;etotpos&#39;</span><span class="p">,</span>     <span class="s1">&#39;etotneg&#39;</span><span class="p">,</span>  <span class="s1">&#39;thresh&#39;</span><span class="p">,</span>       <span class="s1">&#39;???&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span>         <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;???&#39;</span><span class="p">,</span>      <span class="s1">&#39;???&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;???&#39;</span><span class="p">,</span> <span class="s1">&#39;Title&#39;</span><span class="p">,</span> <span class="s1">&#39;subtitle&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_onr_element_name</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1">#: Load set or zero</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;load_set&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: format code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;format_code&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: number of words per entry in record</span>
+        <span class="c1">#: .. note:: is this needed for this table ???</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;num_wide&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="c1">## C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;cvalres&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Set identification number Number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;set_id&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural eigenvalue - real part</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigen_real</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigen_real&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural eigenvalue - imaginary part</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigen_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigen_imag&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Natural frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: RMS and CRMS scale factor - NX</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rmssf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;rmssf&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+        <span class="c1">#: Total positive energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etotpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;etotpos&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+
+        <span class="c1">#: Total negative energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etotneg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;etotneg&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#: Energy Threshold - NX</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;thresh&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;node_id&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">fix_device_code</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#if self.analysis_code == 1:  # statics / displacement / heat flux</span>
+            <span class="c1">## load set number</span>
+            <span class="c1">#self.lsdvmn = self.add_data_parameter(data, &#39;lsdvmn&#39;, b&#39;i&#39;, 5, False)</span>
+            <span class="c1">#self.data_names = self.apply_data_code_value(&#39;data_names&#39;, [&#39;node_id&#39;])</span>
+            <span class="c1">#self.setNullNonlinearFactor()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># static...because reasons.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># real eigenvalues</span>
+            <span class="c1">## mode number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="c1">## real eigenvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eigr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="c1">## mode or cycle .. todo:: confused on the type - F1???</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode_cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode_cycle&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span>
+                                                         <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">,</span> <span class="s1">&#39;mode_cycle&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">)</span>
+        <span class="c1">#elif self.analysis_code == 3: # differential stiffness</span>
+            <span class="c1">#self.lsdvmn = self.get_values(data, b&#39;i&#39;, 5) ## load set number</span>
+            <span class="c1">#self.data_names = self.data_code[&#39;lsdvmn&#39;] = self.lsdvmn</span>
+        <span class="c1">#elif self.analysis_code == 4: # differential stiffness</span>
+            <span class="c1">#self.lsdvmn = self.get_values(data, b&#39;i&#39;, 5) ## load set number</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>   <span class="c1"># frequency</span>
+            <span class="c1">## frequency</span>
+            <span class="c1">#self.freq = self.add_data_parameter(data, &#39;freq&#39;, b&#39;f&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;freq&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># transient</span>
+            <span class="c1">## time step</span>
+            <span class="c1">#self.dt = self.add_data_parameter(data, &#39;dt&#39;, b&#39;f&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>  <span class="c1"># pre-buckling</span>
+            <span class="c1">## load set number</span>
+            <span class="c1">#self.lsdvmn = self.add_data_parameter(data, &#39;lsdvmn&#39;, b&#39;i&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;lsdvmn&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>  <span class="c1"># post-buckling</span>
+            <span class="c1">## load set number</span>
+            <span class="c1">#self.lsdvmn = self.add_data_parameter(data, &#39;lsdvmn&#39;, b&#39;i&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="c1">## real eigenvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eigr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>  <span class="c1"># complex eigenvalues</span>
+            <span class="c1">## mode number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="c1">## real eigenvalue</span>
+            <span class="c1">#self.eigr = self.add_data_parameter(data, &#39;eigr&#39;, b&#39;f&#39;, 6, False)</span>
+            <span class="c1">## imaginary eigenvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eigi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_data_parameter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;eigi&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">,</span> <span class="s1">&#39;eigr&#39;</span><span class="p">,</span> <span class="s1">&#39;eigi&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>  <span class="c1"># nonlinear statics</span>
+            <span class="c1">## load step</span>
+            <span class="c1">#self.lftsfq = self.add_data_parameter(data, &#39;lftsfq&#39;, b&#39;f&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;lftsfq&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>  <span class="c1"># old geometric nonlinear statics</span>
+            <span class="c1">## load set number</span>
+            <span class="c1">#self.lsdvmn = self.add_data_parameter(data, &#39;lsdvmn&#39;, b&#39;i&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="c1"># contran ? (may appear as aCode=6)  --&gt; straight from DMAP...grrr...</span>
+            <span class="c1">## load set number</span>
+            <span class="c1">#self.lsdvmn = self.add_data_parameter(data, &#39;lsdvmn&#39;, b&#39;i&#39;, 5)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;i&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;data_names&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;node_id&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code_value</span><span class="p">(</span><span class="s1">&#39;analysis_method&#39;</span><span class="p">,</span> <span class="s1">&#39;lsdvmn&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid analysis_code...analysis_code=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_format_code</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;format_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#self.fix_format_code()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;format_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  approach_code  = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  tCode          = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tCode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  isubcase       = </span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_title</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_debug_bits</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_read_onr1_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads ONRGY1 subtable 4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_code</span> <span class="o">==</span> <span class="mi">18</span><span class="p">:</span>  <span class="c1"># element strain energy</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;ONRGY&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;ONRGY1&#39;</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;table_name=</span><span class="si">%s</span><span class="s1"> table_code=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_code</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_element_strain_energy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_code</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_element_strain_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        table_code = 19</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">element_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;element_name&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result_name</span> <span class="o">=</span> <span class="n">RESULT_NAME_MAP</span><span class="p">[</span><span class="n">element_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;element_name=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;element_name&#39;</span><span class="p">]))</span>
+        <span class="n">prefix</span><span class="p">,</span> <span class="n">postfix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_onr_prefix_postfix</span><span class="p">()</span>
+        <span class="n">result_name</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">result_name</span> <span class="o">+</span> <span class="n">postfix</span>
+        <span class="c1">#result_name = &#39;strain_energy&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">is_not_saved</span><span class="p">(</span><span class="n">result_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ndata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">_found_result</span><span class="p">(</span><span class="n">result_name</span><span class="p">)</span>
+
+        <span class="n">slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">result_name</span><span class="p">)</span>
+
+        <span class="c1">#auto_return = False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;cvalares = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span>
+
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">4</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 4*4=16</span>
+            <span class="n">nelements</span> <span class="o">=</span> <span class="n">ndata</span> <span class="o">//</span> <span class="n">ntotal</span>
+            <span class="n">auto_return</span><span class="p">,</span> <span class="n">is_vectorized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_oes_object4</span><span class="p">(</span>
+                <span class="n">nelements</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">RealStrainEnergyArray</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">auto_return</span><span class="p">:</span>
+                <span class="c1">#if obj.dt_temp is None or obj.itime is None and obj.dt_temp == dt:</span>
+                    <span class="c1">#element_name = self.data_code[&#39;element_name&#39;]</span>
+                    <span class="c1">#if element_name in obj.element_name_count:</span>
+                        <span class="c1">#obj.element_name_count[element_name] += nelements</span>
+                    <span class="c1">#else:</span>
+                        <span class="c1">#obj.element_name_count[element_name] = nelements</span>
+                    <span class="c1">#obj.dt_temp = dt</span>
+                <span class="k">return</span> <span class="n">nelements</span> <span class="o">*</span> <span class="n">ntotal</span>
+            <span class="c1">#itime = obj.itime #// obj.nelement_types</span>
+
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span>
+            <span class="n">itime</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itime</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  [cap, element1, element2, ..., cap]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  cap = </span><span class="si">%i</span><span class="s1">  # assume 1 cap when there could have been multiple</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ndata</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  #elementi = [eid_device, energy, percent, density]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  nelements=</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nelements</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_vector</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_method</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># and self.is_sort1:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">nelements</span> <span class="o">*</span> <span class="n">ntotal</span>
+                <span class="n">ielement</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span>
+                <span class="n">ielement2</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span> <span class="o">+</span> <span class="n">nelements</span>
+                <span class="n">itotal</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span>
+                <span class="n">itotal2</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+</span> <span class="n">nelements</span> <span class="o">*</span> <span class="mi">4</span>
+
+                <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fdtype8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+                <span class="c1">#if obj.itime == 0:</span>
+                <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idtype8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">eids</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span>
+                <span class="k">assert</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;etype=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="si">}</span><span class="s1"> isubtable=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isubtable</span><span class="si">}</span><span class="s1"> eids.min()=</span><span class="si">{</span><span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ielement</span><span class="p">:</span><span class="n">ielement2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eids</span>
+
+                <span class="c1">#[energy, percent, density]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">ielement</span><span class="p">:</span><span class="n">ielement2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">itotal2</span> <span class="o">=</span> <span class="n">itotal2</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="n">ielement2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_code_fmt</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;3f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelements</span><span class="p">):</span>
+                    <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">struct1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">eid_device</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_method</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">eid</span> <span class="o">=</span> <span class="n">eid_device</span> <span class="o">//</span> <span class="mi">10</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span>
+                        <span class="n">dt</span> <span class="o">=</span> <span class="n">eid_device</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  eid=</span><span class="si">%i</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">add_sort1</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvalres</span> <span class="c1"># 0??</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">ndata</span> <span class="o">//</span> <span class="n">ntotal</span>
+            <span class="n">nelements</span> <span class="o">=</span> <span class="n">nnodes</span>
+
+            <span class="n">auto_return</span><span class="p">,</span> <span class="n">is_vectorized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_oes_object4</span><span class="p">(</span>
+                <span class="n">nelements</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">RealStrainEnergyArray</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">auto_return</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">nelements</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_vector</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">nelements</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span>
+                <span class="n">itotal</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span>
+                <span class="n">ielement2</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+</span> <span class="n">nelements</span>
+                <span class="n">itotal2</span> <span class="o">=</span> <span class="n">ielement2</span>
+
+                <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fdtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+
+                <span class="n">strings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_uendian</span> <span class="o">+</span> <span class="s1">&#39;S4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">itime</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">element_name</span> <span class="o">==</span> <span class="s1">&#39;DMIG&#39;</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">s1</span><span class="o">+</span><span class="n">s2</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                                      <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">strings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">strings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|U8&#39;</span><span class="p">)</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">eids</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span>
+                        <span class="k">assert</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s1</span><span class="o">+</span><span class="n">s2</span> <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">strings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">strings</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])])</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eids</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">element_type</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">s</span>
+
+                <span class="c1">#[energy, percent, density]</span>
+                <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">element_name</span> <span class="o">==</span> <span class="s1">&#39;DMIG&#39;</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="n">itotal2</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="n">ielement2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;8s3f&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                    <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">20</span><span class="p">]</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                    <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  eid/word=</span><span class="si">%r</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)))</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">add_sort1</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="c1">#ELEMENT-ID   STRAIN-ENERGY (MAG/PHASE)  PERCENT OF TOTAL  STRAIN-ENERGY-DENSITY</span>
+            <span class="c1">#    5         2.027844E-10 /   0.0            1.2581            2.027844E-09</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>
+            <span class="n">nelements</span> <span class="o">=</span> <span class="n">ndata</span> <span class="o">//</span> <span class="n">ntotal</span>
+            <span class="n">auto_return</span><span class="p">,</span> <span class="n">is_vectorized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_oes_object4</span><span class="p">(</span>
+                <span class="n">nelements</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">ComplexStrainEnergyArray</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">auto_return</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">nelements</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_vector</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">nelements</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span>
+                <span class="n">itotal</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span>
+                <span class="n">ielement2</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+</span> <span class="n">nelements</span>
+                <span class="n">itotal2</span> <span class="o">=</span> <span class="n">ielement2</span>
+
+                <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fdtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+
+                <span class="c1">#if obj.itime == 0:</span>
+                <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">eids</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span>
+                <span class="k">assert</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eids</span>
+                <span class="c1">#obj.element_type[obj.itime, itotal:itotal2, :] = s</span>
+
+                <span class="c1">#[energyr, energyi, percent, density]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eids</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="n">itotal2</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="n">ielement2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i4f&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelements</span><span class="p">):</span>
+                    <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">20</span><span class="p">]</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">eid_device</span><span class="p">,</span> <span class="n">energyr</span><span class="p">,</span> <span class="n">energyi</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                    <span class="n">eid</span> <span class="o">=</span> <span class="n">eid_device</span> <span class="o">//</span> <span class="mi">10</span>
+                    <span class="c1">#if is_magnitude_phase:</span>
+                        <span class="c1">#energy = polar_to_real_imag(energyr, energyi)</span>
+                    <span class="c1">#else:</span>
+                        <span class="c1">#energy = complex(energyr, energyi)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  eid=</span><span class="si">%i</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)))</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">add_sort1</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">energyr</span><span class="p">,</span> <span class="n">energyi</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1">## TODO: figure this out...</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">ndata</span> <span class="o">//</span> <span class="n">ntotal</span>
+            <span class="n">auto_return</span><span class="p">,</span> <span class="n">is_vectorized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_oes_object4</span><span class="p">(</span>
+                <span class="n">nelements</span><span class="p">,</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">RealStrainEnergyArray</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">auto_return</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">nelements</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_vector</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">nelements</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span>
+                <span class="n">itotal</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span>
+                <span class="n">ielement2</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">+</span> <span class="n">nelements</span>
+                <span class="n">itotal2</span> <span class="o">=</span> <span class="n">ielement2</span>
+
+                <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fdtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
+
+                <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">itime</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">strings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_uendian</span> <span class="o">+</span> <span class="s1">&#39;S4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s1</span><span class="o">+</span><span class="n">s2</span> <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">strings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">strings</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])])</span>
+
+                    <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                    <span class="n">eids</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span>
+                    <span class="k">assert</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eids</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">element</span><span class="p">[</span><span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">]</span> <span class="o">=</span> <span class="n">eids</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">element_type</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">s</span>
+
+                <span class="c1">#[energy, percent, density]</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">itime</span><span class="p">,</span> <span class="n">itotal</span><span class="p">:</span><span class="n">itotal2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">itotal</span> <span class="o">=</span> <span class="n">itotal2</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">ielement</span> <span class="o">=</span> <span class="n">ielement2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i8s3f&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                    <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">24</span><span class="p">]</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">struct1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>  <span class="c1"># TODO: this has to be wrong...</span>
+                    <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="c1">#print &quot;eType=%s&quot; % (eType)</span>
+                    <span class="c1">#print &quot;%s&quot; %(self.get_element_type(self.element_type)), data_in</span>
+                    <span class="c1">#eid = self.obj.add_new_eid_sort1(out)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  eid=</span><span class="si">%i</span><span class="s1">; </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">)))</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">add_sort1</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="c1">#  FREQUENCY =  1.000000E+01</span>
+            <span class="c1">#                           E L E M E N T   S T R A I N   E N E R G I E S   ( A V E R A G E )</span>
+            <span class="c1">#</span>
+            <span class="c1">#            ELEMENT-TYPE = QUADR               * TOTAL ENERGY OF ALL ELEMENTS IN PROBLEM     =   3.662188E+06</span>
+            <span class="c1">#            SUBCASE               1            * TOTAL ENERGY OF ALL ELEMENTS IN SET       9 =   1.853189E+05</span>
+            <span class="c1">#</span>
+            <span class="c1">#                                ELEMENT-ID          STRAIN-ENERGY           PERCENT OF TOTAL    STRAIN-ENERGY-DENSITY</span>
+            <span class="c1">#                                         9          8.723258E+03                 0.2382              5.815505E+00</span>
+            <span class="c1">#                                        10          7.815898E+03                 0.2134              5.210599E+00</span>
+            <span class="c1">#                                        11          8.512115E+04                 2.3243              5.674743E+01</span>
+            <span class="c1">#                                        12          5.200864E+04                 1.4202              3.467243E+01</span>
+            <span class="c1">#</span>
+            <span class="c1">#                    TYPE = QUADR    SUBTOTAL        1.536690E+05                 4.1961</span>
+            <span class="c1">#</span>
+            <span class="c1">#device_code   = 1   Print</span>
+            <span class="c1">#analysis_code = 5   Frequency</span>
+            <span class="c1">#table_code    = 18  ONRGY1-OEE - Element strain energy</span>
+            <span class="c1">#format_code   = 2   Real/Imaginary</span>
+            <span class="c1">#sort_method   = 1</span>
+            <span class="c1">#sort_code     = 0</span>
+                <span class="c1">#sort_bits   = (0, 0, 0)</span>
+                <span class="c1">#data_format = 0   Real</span>
+                <span class="c1">#sort_type   = 0   Sort1</span>
+                <span class="c1">#is_random   = 0   Sorted Responses</span>
+            <span class="c1">#random_code   = 0</span>
+            <span class="c1">#s_code        = None ???</span>
+            <span class="c1">#num_wide      = 4</span>
+            <span class="c1">#isubcase      = 1</span>
+            <span class="c1">#MSC Nastran</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;onr&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_not_implemented_or_skip</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="c1">#raise NotImplementedError(self.code_information())</span>
+        <span class="k">return</span> <span class="n">n</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

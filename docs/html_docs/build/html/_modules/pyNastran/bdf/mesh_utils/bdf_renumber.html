@@ -1,0 +1,1490 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.bdf_renumber &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.bdf_renumber</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.bdf_renumber</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd">    bdf_renumber(bdf_filename, bdf_filename_out, size=8, is_double=False,</span>
+<span class="sd">                 starting_id_dict=None, round_ids=False, cards_to_skip=None,</span>
+<span class="sd">                 log=None, debug=False)</span>
+<span class="sd">    superelement_renumber(bdf_filename, bdf_filename_out=None, size=8, is_double=False,</span>
+<span class="sd">                          starting_id_dict=None, cards_to_skip=None,</span>
+<span class="sd">                          log=None, debug=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="n">IOBase</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.mathematics</span> <span class="kn">import</span> <span class="n">roundup</span>
+
+
+<div class="viewcode-block" id="bdf_renumber"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber.bdf_renumber">[docs]</a><span class="k">def</span> <span class="nf">bdf_renumber</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">StringIO</span><span class="p">],</span>
+                 <span class="n">bdf_filename_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">starting_id_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">round_ids</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">cards_to_skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BDF</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renumbers a BDF</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF</span>
+<span class="sd">        str : a bdf_filename (string; supported)</span>
+<span class="sd">        BDF : a BDF model that has been cross referenced and is</span>
+<span class="sd">        fully valid (an equivalenced deck is not valid)</span>
+<span class="sd">    bdf_filename_out : str / None</span>
+<span class="sd">        str : a bdf_filename to write</span>
+<span class="sd">        None : don&#39;t write the BDF</span>
+<span class="sd">    size : int; {8, 16}; default=8</span>
+<span class="sd">        the bdf write precision</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        the field precision to write</span>
+<span class="sd">    starting_id_dict : dict, None (default=None)</span>
+<span class="sd">        None : renumber everything starting from 1</span>
+<span class="sd">        dict : {key : starting_id}</span>
+<span class="sd">            key : str</span>
+<span class="sd">                the key (e.g. eid, nid, cid, ...)</span>
+<span class="sd">            starting_id : int, None</span>
+<span class="sd">                int : the value to start from</span>
+<span class="sd">                None : don&#39;t renumber this key</span>
+<span class="sd">    round_ids : bool; default=False</span>
+<span class="sd">        Should a rounding up be applied for each variable?</span>
+<span class="sd">        This makes it easier to read a deck and verify that it&#39;s been</span>
+<span class="sd">        renumbered properly.</span>
+<span class="sd">        This only really applies when starting_id_dict is None</span>
+<span class="sd">    cards_to_skip : List[str]; (default=None -&gt; don&#39;t skip any cards)</span>
+<span class="sd">        There are edge cases (e.g. FLUTTER analysis) where things can</span>
+<span class="sd">        break due to uncross-referenced cards.  You need to disable</span>
+<span class="sd">        entire classes of cards in that case (e.g. all aero cards).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        a renumbered BDF object corresponding to bdf_filename_out</span>
+<span class="sd">    mapper : Dict[bdf_attribute] : old_id_to_new_id_dict</span>
+<span class="sd">        List of mapper dictionaries of original ids to merged</span>
+<span class="sd">        bdf_attribute : str</span>
+<span class="sd">            a BDF attribute (e.g., &#39;nodes&#39;, &#39;elements&#39;)</span>
+<span class="sd">        old_id_to_new_id_dict : dict[id_old] : id_new</span>
+<span class="sd">            a sub dictionary that is used to map the node/element/etc. ids</span>
+<span class="sd">        mapper = {</span>
+<span class="sd">            &#39;elements&#39; : eid_map,</span>
+<span class="sd">            &#39;nodes&#39; : nid_map,</span>
+<span class="sd">            &#39;coords&#39; : cid_map,</span>
+<span class="sd">            ...</span>
+<span class="sd">        }</span>
+
+
+<span class="sd">    .. todo:: bdf_model option for bdf_filename hasn&#39;t been tested</span>
+<span class="sd">    .. todo:: add support for subsets (e.g. renumber only a subset of nodes/elements)</span>
+<span class="sd">    .. todo:: doesn&#39;t support partial renumbering</span>
+<span class="sd">    .. todo:: doesn&#39;t support element material coordinate systems</span>
+
+<span class="sd">    ..warning :: spoints might be problematic...check</span>
+<span class="sd">    ..warning :: still in development, but it usually brutally crashes</span>
+<span class="sd">                 if it&#39;s not supported</span>
+<span class="sd">    ..warning :: be careful of card unsupported cards (e.g. ones not read in)</span>
+
+<span class="sd">    Supports</span>
+<span class="sd">     - GRIDs</span>
+<span class="sd">       - no superelements</span>
+<span class="sd">     - COORDx</span>
+<span class="sd">     - elements</span>
+<span class="sd">        - CELASx/CONROD/CBAR/CBEAM/CQUAD4/CTRIA3/CTETRA/CPENTA/CHEXA</span>
+<span class="sd">        - RBAR/RBAR1/RBE1/RBE2/RBE3/RSPLINE/RSSCON</span>
+<span class="sd">     - properties</span>
+<span class="sd">        - PSHELL/PCOMP/PCOMPG/PSOLID/PSHEAR/PBAR/PBARL</span>
+<span class="sd">          PROD/PTUBE/PBEAM</span>
+<span class="sd">     - mass</span>
+<span class="sd">        - CMASSx/CONMx/PMASS</span>
+<span class="sd">     - aero</span>
+<span class="sd">       - FLFACT</span>
+<span class="sd">       - SPLINEx</span>
+<span class="sd">       - FLUTTER</span>
+<span class="sd">     - partial case control</span>
+<span class="sd">       - METHOD/CMETHOD/FREQENCY</span>
+<span class="sd">       - LOAD/DLOAD/LSEQ/LOADSET...LOADSET/LSEQ is iffy</span>
+<span class="sd">       - SET cards</span>
+<span class="sd">         - nodes</span>
+<span class="sd">         - elements</span>
+<span class="sd">       - SPC/MPC/FLUTTER/FLFACT</span>
+<span class="sd">    - constraints</span>
+<span class="sd">       - SPC/SPCADD/SPCAX/SPCD</span>
+<span class="sd">       - MPC/MPCADD</span>
+<span class="sd">       - SUPORT/SUPORT1</span>
+<span class="sd">    - solution control/methods</span>
+<span class="sd">       - TSTEP/TSTEPNL</span>
+<span class="sd">       - NLPARM</span>
+<span class="sd">       - EIGB/EIGC/EIGRL/EIGR</span>
+<span class="sd">    - sets</span>
+<span class="sd">       - USET</span>
+<span class="sd">    - other</span>
+<span class="sd">      - tables</span>
+<span class="sd">      - materials</span>
+<span class="sd">      - loads/dloads</span>
+
+<span class="sd">    Not Done</span>
+
+<span class="sd">     - SPOINT</span>
+<span class="sd">     - any cards with SPOINTs</span>
+<span class="sd">       - DMIG/DMI/DMIJ/DMIJI/DMIK/etc.</span>
+<span class="sd">       - CELASx</span>
+<span class="sd">       - CDAMPx</span>
+<span class="sd">     - superelements</span>
+<span class="sd">     - aero cards</span>
+<span class="sd">       - CAEROx</span>
+<span class="sd">       - PAEROx</span>
+<span class="sd">     - thermal cards?</span>
+<span class="sd">     - optimization cards</span>
+<span class="sd">     - SETx</span>
+<span class="sd">     - PARAM,GRDPNT,x; where x&gt;0</span>
+<span class="sd">     - GRID SEID</span>
+<span class="sd">     - case control</span>
+<span class="sd">       - STATSUB</span>
+<span class="sd">       - SUBCASE</span>
+<span class="sd">       - global SET cards won&#39;t be renumbered properly</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    **Renumber Everything; Start from 1**</span>
+
+<span class="sd">    &gt;&gt;&gt; bdf_renumber(bdf_filename, bdf_filename_out, size=8, is_double=False,</span>
+<span class="sd">                     round_ids=False)</span>
+
+<span class="sd">    **Renumber Everything; Start Material IDs from 100**</span>
+
+<span class="sd">    &gt;&gt;&gt; starting_id_dict = {</span>
+<span class="sd">        &#39;mid&#39; : 100,</span>
+<span class="sd">    }</span>
+<span class="sd">    &gt;&gt;&gt; bdf_renumber(bdf_filename, bdf_filename_out, size=8, is_double=False,</span>
+<span class="sd">                     starting_ids_dict=starting_ids_dict, round_ids=False)</span>
+
+<span class="sd">    **Only Renumber Material IDs**</span>
+
+<span class="sd">    &gt;&gt;&gt; starting_id_dict = {</span>
+<span class="sd">        &#39;cid&#39; : None,</span>
+<span class="sd">        &#39;nid&#39; : None,</span>
+<span class="sd">        &#39;eid&#39; : None,</span>
+<span class="sd">        &#39;pid&#39; : None,</span>
+<span class="sd">        &#39;mid&#39; : 1,</span>
+<span class="sd">        &#39;spc_id&#39; : None,</span>
+<span class="sd">        &#39;mpc_id&#39; : None,</span>
+<span class="sd">        &#39;load_id&#39; : None,</span>
+<span class="sd">        &#39;dload_id&#39; : None,</span>
+
+<span class="sd">        &#39;method_id&#39; : None,</span>
+<span class="sd">        &#39;cmethod_id&#39; : None,</span>
+<span class="sd">        &#39;spline_id&#39; : None,</span>
+<span class="sd">        &#39;table_id&#39; : None,</span>
+<span class="sd">        &#39;flfact_id&#39; : None,</span>
+<span class="sd">        &#39;flutter_id&#39; : None,</span>
+<span class="sd">        &#39;freq_id&#39; : None,</span>
+<span class="sd">        &#39;tstep_id&#39; : None,</span>
+<span class="sd">        &#39;tstepnl_id&#39; : None,</span>
+<span class="sd">        &#39;suport_id&#39; : None,</span>
+<span class="sd">        &#39;suport1_id&#39; : None,</span>
+<span class="sd">        &#39;tf_id&#39; : None,</span>
+<span class="sd">        &#39;set_id&#39; : None,</span>
+<span class="sd">    }</span>
+<span class="sd">    &gt;&gt;&gt; bdf_renumber(bdf_filename, bdf_filename_out, size=8, is_double=False,</span>
+<span class="sd">                     starting_ids_dict=starting_ids_dict, round_ids=False)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span> <span class="n">size</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">is_double</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="n">is_double</span>
+    <span class="n">starting_id_dict_default</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;cid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;nid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;eid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;pid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;mid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;spc_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;mpc_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;load_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;set_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;dload_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+
+        <span class="s1">&#39;method_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;cmethod_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;spline_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;caero_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;table_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;flfact_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;flutter_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;freq_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;tstep_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;tstepnl_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;suport_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;suport1_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;tf_id&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># fill up starting_id_dict</span>
+    <span class="k">if</span> <span class="n">starting_id_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">starting_id_dict</span> <span class="o">=</span> <span class="n">starting_id_dict_default</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">starting_id_dict_default</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">starting_id_dict</span><span class="p">:</span>
+                <span class="n">starting_id_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">nid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">eid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nsm_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">spc_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mpc_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">load_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dload_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">method_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cmethod_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">spline_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">table_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">flfact_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">flutter_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">freq_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">##tstep_id = None</span>
+    <span class="n">tstepnl_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">set_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">suport_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">suport1_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tf_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># turn them into variables</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">starting_id_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="c1">#assert isinstance(key, str), key</span>
+        <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">starting_id_dict_default</span><span class="p">,</span> <span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1"> is invalid&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1">#assert isidentifier(key), &#39;key=%s is invalid&#39; % key</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1"> value=</span><span class="si">%r</span><span class="s1"> must be an integer; type(value)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;nid&#39;</span><span class="p">:</span>
+            <span class="n">nid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;cid&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;set_id&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">set_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">set_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;eid&#39;</span><span class="p">:</span>
+            <span class="n">eid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;pid&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;mid&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;spc_id&#39;</span><span class="p">:</span>
+            <span class="n">spc_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;mpc_id&#39;</span><span class="p">:</span>
+            <span class="n">mpc_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;load_id&#39;</span><span class="p">:</span>
+            <span class="n">load_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;dload_id&#39;</span><span class="p">:</span>
+            <span class="n">dload_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;method_id&#39;</span><span class="p">:</span>
+            <span class="n">method_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;cmethod_id&#39;</span><span class="p">:</span>
+            <span class="n">cmethod_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;spline_id&#39;</span><span class="p">:</span>
+            <span class="n">spline_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;caero_id&#39;</span><span class="p">:</span>
+            <span class="n">caero_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;table_id&#39;</span><span class="p">:</span>
+            <span class="n">table_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;flfact_id&#39;</span><span class="p">:</span>
+            <span class="n">flfact_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;flutter_id&#39;</span><span class="p">:</span>
+            <span class="n">flutter_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;freq_id&#39;</span><span class="p">:</span>
+            <span class="n">freq_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;tstep_id&#39;</span><span class="p">:</span>
+            <span class="n">tstep_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;tstepnl_id&#39;</span><span class="p">:</span>
+            <span class="n">tstepnl_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;set_id&#39;</span><span class="p">:</span>
+            <span class="n">set_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;suport_id&#39;</span><span class="p">:</span>
+            <span class="n">suport_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;suport1_id&#39;</span><span class="p">:</span>
+            <span class="n">suport1_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;tf_id&#39;</span><span class="p">:</span>
+            <span class="n">tf_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># just to make pylint be quiet</span>
+    <span class="nb">str</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">nsm_id</span><span class="p">,</span> <span class="n">method_id</span><span class="p">,</span> <span class="n">cmethod_id</span><span class="p">,</span> <span class="n">flfact_id</span><span class="p">,</span> <span class="n">flutter_id</span><span class="p">,</span>
+         <span class="n">tstep_id</span><span class="p">,</span> <span class="n">tstepnl_id</span><span class="p">,</span>
+         <span class="n">suport_id</span><span class="p">,</span> <span class="n">suport1_id</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># build the maps</span>
+    <span class="n">mass_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">properties_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">properties_mass_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">eid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">rigid_elements_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#nsm_map = {}</span>
+    <span class="n">cid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">mpc_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">spc_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dload_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">load_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">cmethod_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">method_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">flfact_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">flutter_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">freq_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tstep_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tstepnl_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#suport_map = {}</span>
+    <span class="n">suport1_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="n">nid_map</span><span class="p">,</span> <span class="n">unused_reverse_nid_map</span> <span class="o">=</span> <span class="n">_create_nid_maps</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">nid</span><span class="p">)</span>
+    <span class="n">mid_map</span><span class="p">,</span> <span class="n">all_materials</span> <span class="o">=</span> <span class="n">_create_mid_map</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mid</span><span class="p">)</span>
+
+    <span class="n">_update_nodes</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span>
+        <span class="n">nid_map</span><span class="p">)</span>
+
+    <span class="n">_update_properties</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span>
+        <span class="n">properties_map</span><span class="p">,</span> <span class="n">properties_mass_map</span><span class="p">)</span>
+
+    <span class="n">_update_elements</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span>
+        <span class="n">eid_map</span><span class="p">,</span> <span class="n">mass_id_map</span><span class="p">,</span> <span class="n">rigid_elements_map</span><span class="p">)</span>
+
+    <span class="n">_update_materials</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span>
+        <span class="n">mid_map</span><span class="p">,</span> <span class="n">all_materials</span><span class="p">)</span>
+
+    <span class="n">_update_spcs</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">spc_id</span><span class="p">,</span>
+        <span class="n">spc_map</span><span class="p">)</span>
+
+    <span class="n">_update_mpcs</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">mpc_id</span><span class="p">,</span>
+        <span class="n">mpc_map</span><span class="p">)</span>
+
+    <span class="n">_update_coords</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span>
+        <span class="n">cid_map</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;freq_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">freq_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># frequencies</span>
+        <span class="k">for</span> <span class="n">freqi</span><span class="p">,</span> <span class="n">freqs</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">frequencies</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">freq_map</span><span class="p">[</span><span class="n">freqi</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq_id</span>
+            <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">freqs</span><span class="p">:</span>
+                <span class="n">freq</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">freqi</span>
+            <span class="n">freq_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">set_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s1">&#39;set_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">set_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># sets</span>
+        <span class="k">for</span> <span class="n">sidi</span><span class="p">,</span> <span class="n">set_</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">set_</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">set_id</span>
+            <span class="n">set_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">set_id</span>
+            <span class="n">set_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="s1">&#39;spline_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">spline_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># set up spline1 box mapping</span>
+        <span class="n">delta_box1_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">delta_box2_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">sidi</span><span class="p">,</span> <span class="n">spline</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">spline</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SPLINE1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE2&#39;</span><span class="p">]:</span>
+                <span class="n">delta_box1_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">box1</span> <span class="o">-</span> <span class="n">spline</span><span class="o">.</span><span class="n">caero</span>
+                <span class="n">delta_box2_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">box2</span> <span class="o">-</span> <span class="n">spline</span><span class="o">.</span><span class="n">caero</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># should be handled by the xref?</span>
+                <span class="k">pass</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#raise NotImplementedError(spline)</span>
+
+    <span class="n">caero_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s1">&#39;caero_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">caero_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># caeros</span>
+        <span class="k">for</span> <span class="n">caero_idi</span><span class="p">,</span> <span class="n">caero</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CAERO1&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO3&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO4&#39;</span><span class="p">]:</span> <span class="c1"># not CAERO5</span>
+                <span class="n">caero</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">caero_id</span>
+                <span class="n">caero_id_map</span><span class="p">[</span><span class="n">caero_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">caero_id</span>
+                <span class="n">caero_id</span> <span class="o">+=</span> <span class="n">caero</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">caero</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">:</span>
+                <span class="n">caero</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">caero_id</span>
+                <span class="n">caero_id_map</span><span class="p">[</span><span class="n">caero_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">caero_id</span>
+                <span class="n">caero_id</span> <span class="o">+=</span> <span class="n">caero</span><span class="o">.</span><span class="n">nboxes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">caero</span><span class="p">)</span>
+
+    <span class="n">spline_id_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s1">&#39;spline_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">spline_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># splines</span>
+        <span class="k">for</span> <span class="n">sidi</span><span class="p">,</span> <span class="n">spline</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">spline</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">spline_id</span>
+            <span class="c1">#spline.cross_reference(model)</span>
+            <span class="k">if</span> <span class="n">spline</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SPLINE1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPLINE2&#39;</span><span class="p">]:</span>
+                <span class="n">spline</span><span class="o">.</span><span class="n">box1</span> <span class="o">=</span> <span class="n">caero_id_map</span><span class="p">[</span><span class="n">spline</span><span class="o">.</span><span class="n">caero</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_box1_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span>
+                <span class="n">spline</span><span class="o">.</span><span class="n">box2</span> <span class="o">=</span> <span class="n">caero_id_map</span><span class="p">[</span><span class="n">spline</span><span class="o">.</span><span class="n">caero</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_box2_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># should be handled by the xref?</span>
+                <span class="k">pass</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#raise NotImplementedError(spline)</span>
+            <span class="n">spline_id_map</span><span class="p">[</span><span class="n">sidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">spline_id</span>
+            <span class="n">spline_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">nlparm_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nlpci_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">table_sdamping_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dconstr_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dconadd_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dresp_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">gust_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">trim_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tic_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">csschd_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tranfer_function_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">methods</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">method_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cMethods</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">cmethod_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">flfacts</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">flfact_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">flutters</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">flutter_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tsteps</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">tstep_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tstepnls</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">tstepnl_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">suport1</span><span class="p">,</span> <span class="s1">&#39;conid&#39;</span><span class="p">,</span> <span class="n">suport1_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nlparms</span><span class="p">,</span> <span class="s1">&#39;nlparm_id&#39;</span><span class="p">,</span> <span class="n">nlparm_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nlpcis</span><span class="p">,</span> <span class="s1">&#39;nlpci_id&#39;</span><span class="p">,</span> <span class="n">nlpci_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tables_sdamping</span><span class="p">,</span> <span class="s1">&#39;tid&#39;</span><span class="p">,</span> <span class="n">table_sdamping_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dconadds</span><span class="p">,</span> <span class="s1">&#39;dcid&#39;</span><span class="p">,</span> <span class="n">dconadd_map</span><span class="p">),</span>
+        <span class="c1">#(model.dconstrs, &#39;oid&#39;, dconstr_map),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dresps</span><span class="p">,</span> <span class="s1">&#39;dresp_id&#39;</span><span class="p">,</span> <span class="n">dresp_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">gusts</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">gust_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">trims</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">trim_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tics</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">tic_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">csschds</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">csschd_map</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aefacts</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aelinks</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aelists</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">paeros</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+
+        <span class="c1">#(model.asets, &#39;sid&#39;, None),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dareas</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">transfer_functions</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">,</span> <span class="n">tranfer_function_map</span><span class="p">),</span>
+        <span class="c1">#(model.bsets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.csets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.qsets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.usets, &#39;sid&#39;, None),</span>
+
+        <span class="c1">#(model.se_sets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.se_asets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.se_bsets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.se_csets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.se_qsets, &#39;sid&#39;, None),</span>
+        <span class="c1">#(model.se_usets, &#39;sid&#39;, None),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># apply the simple to update parameters</span>
+    <span class="n">param_id</span> <span class="o">=</span> <span class="mi">9999</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">dict_obj</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">mmap</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">round_ids</span><span class="p">:</span>
+            <span class="n">param_id</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">param_id</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param_id</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idi</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict_obj</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1">#print(&#39;working on id=%s param=%s&#39; % (str(idi), str(param)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has no </span><span class="si">%r</span><span class="s1">; use </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">object_attributes</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;param = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">param</span><span class="p">)</span>
+                <span class="k">raise</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">param_name</span><span class="p">),</span> <span class="n">msg</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">mmap</span><span class="p">[</span><span class="n">idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_id</span>
+            <span class="n">param_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># start the complicated set</span>
+    <span class="c1"># dconstr</span>
+    <span class="n">dessub_map</span> <span class="o">=</span> <span class="n">dconadd_map</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dconstr_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dessub_map</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="n">dessub_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># tables</span>
+    <span class="k">for</span> <span class="n">unused_table_idi</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s1">&#39;tid&#39;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">tid</span> <span class="o">=</span> <span class="n">table_id</span>
+        <span class="n">table_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">unused_table_idi</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_tables</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s1">&#39;tid&#39;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">tid</span> <span class="o">=</span> <span class="n">table_id</span>
+        <span class="n">table_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># dloads</span>
+    <span class="k">for</span> <span class="n">dload_idi</span><span class="p">,</span> <span class="n">dloads</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dloads</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">dload</span> <span class="ow">in</span> <span class="n">dloads</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dload</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+            <span class="n">dload</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">dload_id</span>
+        <span class="n">dload_map</span><span class="p">[</span><span class="n">dload_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">dload_id</span>
+        <span class="n">dload_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">dload_idi</span><span class="p">,</span> <span class="n">dloads</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dload_entries</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">dload</span> <span class="ow">in</span> <span class="n">dloads</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dload</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+            <span class="n">dload</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">dload_id</span>
+        <span class="n">dload_map</span><span class="p">[</span><span class="n">dload_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">dload_id</span>
+        <span class="n">dload_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># loads</span>
+    <span class="k">for</span> <span class="n">load_idi</span><span class="p">,</span> <span class="n">load_combinations</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">load_combinations</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">load_combination</span> <span class="ow">in</span> <span class="n">load_combinations</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">load_combination</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+            <span class="n">load_combination</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">load_id</span>
+        <span class="n">load_map</span><span class="p">[</span><span class="n">load_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_id</span>
+        <span class="n">load_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">load_idi</span><span class="p">,</span> <span class="n">loads</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">load</span> <span class="ow">in</span> <span class="n">loads</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">load</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+            <span class="n">load</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">load_id</span>
+        <span class="n">load_map</span><span class="p">[</span><span class="n">load_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_id</span>
+        <span class="n">load_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># transfer_functions</span>
+    <span class="k">for</span> <span class="n">tf_idi</span><span class="p">,</span> <span class="n">transfer_functions</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">transfer_functions</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">transfer_function</span> <span class="ow">in</span> <span class="n">transfer_functions</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">transfer_function</span><span class="p">,</span> <span class="s1">&#39;sid&#39;</span><span class="p">)</span>
+            <span class="n">transfer_function</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="n">tf_id</span>
+        <span class="n">tranfer_function_map</span><span class="p">[</span><span class="n">tf_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf_id</span>
+        <span class="n">load_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">lseq_map</span> <span class="o">=</span> <span class="n">load_map</span> <span class="c1"># wrong???</span>
+    <span class="n">temp_map</span> <span class="o">=</span> <span class="n">load_map</span> <span class="c1"># wrong???</span>
+
+    <span class="n">mapper</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;elements&#39;</span> <span class="p">:</span> <span class="n">eid_map</span><span class="p">,</span>
+        <span class="s1">&#39;masses&#39;</span> <span class="p">:</span> <span class="n">mass_id_map</span><span class="p">,</span>
+        <span class="s1">&#39;rigid_elements&#39;</span> <span class="p">:</span> <span class="n">rigid_elements_map</span><span class="p">,</span>
+        <span class="s1">&#39;nodes&#39;</span> <span class="p">:</span> <span class="n">nid_map</span><span class="p">,</span>
+        <span class="s1">&#39;coords&#39;</span> <span class="p">:</span> <span class="n">cid_map</span><span class="p">,</span>
+        <span class="s1">&#39;materials&#39;</span> <span class="p">:</span> <span class="n">mid_map</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span> <span class="p">:</span> <span class="n">properties_map</span><span class="p">,</span>
+        <span class="s1">&#39;properties_mass&#39;</span> <span class="p">:</span> <span class="n">properties_mass_map</span><span class="p">,</span>
+        <span class="s1">&#39;spcs&#39;</span> <span class="p">:</span> <span class="n">spc_map</span><span class="p">,</span>
+        <span class="s1">&#39;mpcs&#39;</span> <span class="p">:</span> <span class="n">mpc_map</span><span class="p">,</span>
+        <span class="s1">&#39;METHOD&#39;</span> <span class="p">:</span> <span class="n">method_map</span><span class="p">,</span>
+        <span class="s1">&#39;CMETHOD&#39;</span> <span class="p">:</span> <span class="n">cmethod_map</span><span class="p">,</span>
+        <span class="s1">&#39;FLFACT&#39;</span> <span class="p">:</span> <span class="n">flfact_map</span><span class="p">,</span>
+        <span class="s1">&#39;FMETHOD&#39;</span> <span class="p">:</span> <span class="n">flutter_map</span><span class="p">,</span>
+        <span class="s1">&#39;FREQUENCY&#39;</span> <span class="p">:</span> <span class="n">freq_map</span><span class="p">,</span>
+        <span class="s1">&#39;sets&#39;</span> <span class="p">:</span> <span class="n">set_map</span><span class="p">,</span>
+        <span class="s1">&#39;splines&#39;</span> <span class="p">:</span> <span class="n">spline_id_map</span><span class="p">,</span>
+        <span class="s1">&#39;caeros&#39;</span> <span class="p">:</span> <span class="n">caero_id_map</span><span class="p">,</span>
+
+        <span class="s1">&#39;DLOAD&#39;</span> <span class="p">:</span> <span class="n">dload_map</span><span class="p">,</span>
+        <span class="s1">&#39;RANDOM&#39;</span> <span class="p">:</span> <span class="n">dload_map</span><span class="p">,</span> <span class="c1"># RANDPS, RANDT1</span>
+        <span class="s1">&#39;LOAD&#39;</span> <span class="p">:</span> <span class="n">load_map</span><span class="p">,</span>
+        <span class="s1">&#39;LOADSET&#39;</span> <span class="p">:</span> <span class="n">lseq_map</span><span class="p">,</span>
+        <span class="s1">&#39;CLOAD&#39;</span> <span class="p">:</span> <span class="n">lseq_map</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEP&#39;</span> <span class="p">:</span> <span class="n">tstep_map</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEPNL&#39;</span> <span class="p">:</span> <span class="n">tstepnl_map</span><span class="p">,</span>
+        <span class="s1">&#39;SUPORT1&#39;</span> <span class="p">:</span> <span class="n">suport1_map</span><span class="p">,</span>
+        <span class="s1">&#39;NLPARM&#39;</span> <span class="p">:</span> <span class="n">nlparm_map</span><span class="p">,</span>
+        <span class="s1">&#39;SDAMPING&#39;</span> <span class="p">:</span> <span class="n">table_sdamping_map</span><span class="p">,</span>
+        <span class="s1">&#39;DESSUB&#39;</span> <span class="p">:</span> <span class="n">dessub_map</span><span class="p">,</span>
+        <span class="s1">&#39;DESOBJ&#39;</span> <span class="p">:</span> <span class="n">dresp_map</span><span class="p">,</span>
+        <span class="s1">&#39;GUST&#39;</span> <span class="p">:</span> <span class="n">gust_map</span><span class="p">,</span>
+        <span class="s1">&#39;TRIM&#39;</span> <span class="p">:</span> <span class="n">trim_map</span><span class="p">,</span>
+        <span class="s1">&#39;IC&#39;</span> <span class="p">:</span> <span class="n">tic_map</span><span class="p">,</span>
+        <span class="s1">&#39;CSSCHD&#39;</span> <span class="p">:</span> <span class="n">csschd_map</span><span class="p">,</span>
+        <span class="s1">&#39;TFL&#39;</span> <span class="p">:</span> <span class="n">tranfer_function_map</span><span class="p">,</span>
+        <span class="c1">#&#39;DESSUB&#39; : dessub_map,</span>
+        <span class="c1"># bad...</span>
+        <span class="s1">&#39;TEMPERATURE(LOAD)&#39;</span> <span class="p">:</span> <span class="n">temp_map</span><span class="p">,</span>
+        <span class="s1">&#39;TEMPERATURE(INITIAL)&#39;</span> <span class="p">:</span> <span class="n">temp_map</span><span class="p">,</span>
+        <span class="c1">#&#39;DATAREC&#39; : datarec_map,</span>
+        <span class="c1">#&#39;ADAPT&#39; : adapt_map,</span>
+        <span class="c1">#&#39;SUPER&#39; : super_map,</span>
+        <span class="c1">#&#39;BOUTPUT&#39; : boutput_map,</span>
+        <span class="c1">#&#39;OUTRCV&#39; : outrcv_map,</span>
+    <span class="p">}</span>
+    <span class="c1">#print(&#39;****suport1_map&#39;, suport1_map)</span>
+    <span class="c1">#print(&#39;****dessub_map&#39;, dessub_map)</span>
+    <span class="c1">#print(&#39;****dresp_map&#39;, dresp_map)</span>
+    <span class="n">_update_case_control</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mapper</span><span class="p">)</span>
+
+    <span class="n">_write_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">mapper</span></div>
+
+
+<div class="viewcode-block" id="_write_bdf"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._write_bdf">[docs]</a><span class="k">def</span> <span class="nf">_write_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">close</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">):</span>
+            <span class="n">close</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span>
+                        <span class="n">interspersed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="n">close</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_renumber_starting_ids_from_model"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber.get_renumber_starting_ids_from_model">[docs]</a><span class="k">def</span> <span class="nf">get_renumber_starting_ids_from_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the starting ids dictionary used for renumbering with ids greater</span>
+<span class="sd">    than those in model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF</span>
+<span class="sd">        BDF object to get maximum ids from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    starting_id_dict : dict {str : int, ...}</span>
+<span class="sd">        Dictionary from id type to starting id.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eid_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">),</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">])</span>
+    <span class="n">pid_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">])</span>
+    <span class="n">mids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material_ids</span>
+    <span class="n">starting_id_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;cid&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;nid&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">point_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;eid&#39;</span> <span class="p">:</span> <span class="n">eid_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;pid&#39;</span> <span class="p">:</span> <span class="n">pid_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;mid&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">mids</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;set_id&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">sets</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;spline_id&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">splines</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;caero_id&#39;</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">caero</span><span class="o">.</span><span class="n">box_ids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                         <span class="k">for</span> <span class="n">caero</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">starting_id_dict</span></div>
+
+
+<div class="viewcode-block" id="get_starting_ids_dict_from_mapper"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber.get_starting_ids_dict_from_mapper">[docs]</a><span class="k">def</span> <span class="nf">get_starting_ids_dict_from_mapper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mapper</span><span class="p">):</span>
+    <span class="n">starting_id_dict2</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">missed_keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">name_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;nodes&#39;</span> <span class="p">:</span> <span class="s1">&#39;nid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;elements&#39;</span> <span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span> <span class="p">:</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;materials&#39;</span> <span class="p">:</span> <span class="s1">&#39;mid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;coords&#39;</span> <span class="p">:</span> <span class="s1">&#39;cid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TFL&#39;</span> <span class="p">:</span> <span class="s1">&#39;tf_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FREQUENCY&#39;</span> <span class="p">:</span> <span class="s1">&#39;freq_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;splines&#39;</span> <span class="p">:</span> <span class="s1">&#39;spline_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;METHOD&#39;</span> <span class="p">:</span> <span class="s1">&#39;method_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CMETHOD&#39;</span> <span class="p">:</span> <span class="s1">&#39;cmethod_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;caeros&#39;</span> <span class="p">:</span> <span class="s1">&#39;caero_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEP&#39;</span> <span class="p">:</span> <span class="s1">&#39;tstep_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEPNL&#39;</span> <span class="p">:</span> <span class="s1">&#39;tstepnl_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FLFACT&#39;</span> <span class="p">:</span> <span class="s1">&#39;flfact_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FMETHOD&#39;</span> <span class="p">:</span> <span class="s1">&#39;flutter_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;spcs&#39;</span> <span class="p">:</span> <span class="s1">&#39;spc_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mpcs&#39;</span> <span class="p">:</span> <span class="s1">&#39;mpc_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LOAD&#39;</span> <span class="p">:</span> <span class="s1">&#39;load_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DLOAD&#39;</span> <span class="p">:</span> <span class="s1">&#39;dload_id&#39;</span><span class="p">,</span> <span class="s1">&#39;RANDOM&#39;</span> <span class="p">:</span> <span class="s1">&#39;dload_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SUPORT&#39;</span> <span class="p">:</span> <span class="s1">&#39;suport_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SUPORT1&#39;</span> <span class="p">:</span> <span class="s1">&#39;suport1_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sets&#39;</span> <span class="p">:</span> <span class="s1">&#39;set_id&#39;</span><span class="p">,</span>
+
+        <span class="c1"># other valid names in starting_id_dict</span>
+        <span class="c1">#&#39;table_id&#39; : 1,</span>
+    <span class="p">}</span>
+    <span class="c1">#print(&#39;------------------------------------&#39;)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">old_new_map</span> <span class="ow">in</span> <span class="n">mapper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">name_map</span><span class="p">:</span>
+            <span class="n">key2</span> <span class="o">=</span> <span class="n">name_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">old_new_map</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1">#print(&quot;%s map = %s&quot; % (key, old_new_map))</span>
+            <span class="c1">#nold_mapper = 0</span>
+            <span class="c1">#if key2 in old_mapper:</span>
+                <span class="c1">#nold_mapper = len(old_mapper[key2].keys())</span>
+
+            <span class="c1">#offset = 1</span>
+            <span class="c1">#if key2 in starting_id_dict:</span>
+                <span class="c1">#offset = max(old_new_map.keys())</span>
+                <span class="c1">#offset = starting_id_dict[key2] + nold_mapper</span>
+                <span class="c1">#offset = 1</span>
+
+            <span class="c1">#if key2 == &#39;nid&#39;:</span>
+                <span class="c1">#print(&quot;  nid_offset = %s&quot; % offset)</span>
+                <span class="c1">#print(&quot;  nid map = %s&quot; % old_new_map)</span>
+            <span class="n">starting_id_dict2</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">old_new_map</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># offset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_new_map</span><span class="p">):</span>
+                <span class="n">missed_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">missed_keys</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;bdf_renumber: missed_keys = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">missed_keys</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">starting_id_dict2</span></div>
+
+
+<div class="viewcode-block" id="superelement_renumber"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber.superelement_renumber">[docs]</a><span class="k">def</span> <span class="nf">superelement_renumber</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">starting_id_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renumbers a superelement</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF</span>
+<span class="sd">        str : a bdf_filename (string; supported)</span>
+<span class="sd">        BDF : a BDF model that has been cross referenced and is</span>
+<span class="sd">        fully valid (an equivalenced deck is not valid)</span>
+<span class="sd">    bdf_filename_out : str / None</span>
+<span class="sd">        str : a bdf_filename to write</span>
+<span class="sd">        None : don&#39;t write the BDF</span>
+<span class="sd">    size : int; {8, 16}; default=8</span>
+<span class="sd">        the bdf write precision</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        the field precision to write</span>
+<span class="sd">    starting_id_dict : dict, None (default=None)</span>
+<span class="sd">        None : renumber everything starting from 1</span>
+<span class="sd">        dict : {key : starting_id}</span>
+<span class="sd">            key : str</span>
+<span class="sd">                the key (e.g. eid, nid, cid, ...)</span>
+<span class="sd">            starting_id : int, None</span>
+<span class="sd">                int : the value to start from</span>
+<span class="sd">                None : don&#39;t renumber this key</span>
+<span class="sd">    cards_to_skip : List[str]; (default=None -&gt; don&#39;t skip any cards)</span>
+<span class="sd">        There are edge cases (e.g. FLUTTER analysis) where things can</span>
+<span class="sd">        break due to uncross-referenced cards.  You need to disable</span>
+<span class="sd">        entire classes of cards in that case (e.g. all aero cards).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        a renumbered BDF object corresponding to bdf_filename_out</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">starting_id_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">starting_id_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;cid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;nid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;eid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;pid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;mid&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="n">_bdf_filename_out</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_model</span><span class="p">,</span> <span class="n">mapper</span> <span class="o">=</span> <span class="n">bdf_renumber</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">_bdf_filename_out</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="o">=</span><span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">round_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">cards_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">starting_id_dict_new</span> <span class="o">=</span> <span class="n">get_starting_ids_dict_from_mapper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mapper</span><span class="p">)</span>
+    <span class="c1">#mapper_short = {key : value for key, value in mapper.items() if len(value)}</span>
+    <span class="c1">#print(&#39;mapper_short =&#39;, mapper_short)</span>
+
+    <span class="k">for</span> <span class="n">unused_super_id</span><span class="p">,</span> <span class="n">superelement</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">superelement_models</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">_smodel</span><span class="p">,</span> <span class="n">superelement_mapper</span> <span class="o">=</span> <span class="n">bdf_renumber</span><span class="p">(</span>
+            <span class="n">superelement</span><span class="p">,</span> <span class="n">_bdf_filename_out</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="o">=</span><span class="n">starting_id_dict_new</span><span class="p">,</span> <span class="n">round_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">cards_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#mapper2 = {key : value for key, value in superelement_mapper.items() if len(value)}</span>
+        <span class="n">starting_id_dict_new</span> <span class="o">=</span> <span class="n">get_starting_ids_dict_from_mapper</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">superelement_mapper</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span>
+
+    <span class="n">_write_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span> <span class="c1">#, mapper</span></div>
+
+
+<div class="viewcode-block" id="_create_nid_maps"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._create_nid_maps">[docs]</a><span class="k">def</span> <span class="nf">_create_nid_maps</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">nid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;builds the nid_maps&quot;&quot;&quot;</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">reverse_nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">spoints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">epoints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">nids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="n">nids_spoints_epoints</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">spoints</span><span class="p">,</span> <span class="n">epoints</span><span class="p">))</span>
+
+    <span class="c1">#spoints_nids.sort()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#nnodes = len(spoints_nids)</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#j = 1</span>
+    <span class="c1">#print(spoints_nids)</span>
+    <span class="c1">#k = 0</span>
+    <span class="c1">#model.log.debug(starting_id_dict)</span>
+    <span class="k">if</span> <span class="s1">&#39;nid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">nid</span>
+        <span class="c1">#banned_nodes = spoints</span>
+        <span class="k">for</span> <span class="n">nidi</span> <span class="ow">in</span> <span class="n">nids_spoints_epoints</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nidi</span> <span class="ow">in</span> <span class="n">spoints</span> <span class="ow">or</span> <span class="n">nidi</span> <span class="ow">in</span> <span class="n">epoints</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1">#print(&#39;sid=%s -&gt; %s&#39; % (nid, i))</span>
+                <span class="c1">#i += 1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">spoints</span> <span class="ow">or</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">epoints</span><span class="p">:</span>
+                    <span class="c1">#print(&#39;*bump&#39;)</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1">#print(&#39;nid=%s -&gt; %s&#39; % (nid, i))</span>
+                <span class="n">nid_map</span><span class="p">[</span><span class="n">nidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">reverse_nid_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nidi</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#for nid in sorted(nids):</span>
+            <span class="c1">#nid_map[nid] = i</span>
+            <span class="c1">#reverse_nid_map[i] = nid</span>
+            <span class="c1">#i += 1</span>
+        <span class="c1">#print(nid_map)</span>
+        <span class="c1">#print(reverse_nid_map)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids_spoints_epoints</span><span class="p">:</span>
+            <span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">nid</span>
+        <span class="n">reverse_nid_map</span> <span class="o">=</span> <span class="n">nid_map</span>
+    <span class="k">return</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">reverse_nid_map</span></div>
+
+
+<div class="viewcode-block" id="_create_mid_map"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._create_mid_map">[docs]</a><span class="k">def</span> <span class="nf">_create_mid_map</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;builds the mid_map&quot;&quot;&quot;</span>
+    <span class="n">mid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_materials</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">creep_materials</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">thermal_materials</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">hyperelastic_materials</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT1</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT2</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT3</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT4</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT5</span><span class="p">,</span>
+        <span class="c1">#model.MATT6,</span>
+        <span class="c1">#model.MATT7,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT8</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATT9</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATS1</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATS3</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">MATS8</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">materials</span> <span class="ow">in</span> <span class="n">all_materials</span><span class="p">:</span>
+            <span class="n">mids</span> <span class="o">+=</span> <span class="n">materials</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+        <span class="n">mids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">nmaterials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mids</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmaterials</span><span class="p">):</span>
+            <span class="n">midi</span> <span class="o">=</span> <span class="n">mids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">mid_map</span><span class="p">[</span><span class="n">midi</span><span class="p">]</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">mid_map</span><span class="p">,</span> <span class="n">all_materials</span></div>
+
+
+<div class="viewcode-block" id="_get_bdf_model"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._get_bdf_model">[docs]</a><span class="k">def</span> <span class="nf">_get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">BDF</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">bdf_filename</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">disable_cards</span><span class="p">(</span><span class="n">cards_to_skip</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="_update_nodes"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_nodes">[docs]</a><span class="k">def</span> <span class="nf">_update_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the nodes&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;nid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#spoints2 = arange(1, len(spoints) + 1)</span>
+        <span class="c1">#nid = _create_dict_mapper(model.nodes, nid_map, &#39;nid&#39;, nid)</span>
+
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">nid_new</span> <span class="o">=</span> <span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+            <span class="c1">#print(&#39;nid=%s -&gt; %s&#39; % (nid, nid_new))</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">nid</span> <span class="o">=</span> <span class="n">nid_new</span></div>
+
+
+<div class="viewcode-block" id="_update_properties"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_properties">[docs]</a><span class="k">def</span> <span class="nf">_update_properties</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span>
+                       <span class="n">properties_map</span><span class="p">,</span> <span class="n">properties_mass_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the properties&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;pid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># properties</span>
+        <span class="c1">#pid = _create_dict_mapper(model.properties, properties_map, &#39;pid&#39;, pid)</span>
+        <span class="c1">#pid = _create_dict_mapper(model.properties_mass, properties_mass_map, &#39;pid&#39;, pid)</span>
+        <span class="c1">#pid = _update(model.convection_properties, properties_mass_map, pid)</span>
+
+        <span class="k">for</span> <span class="n">pidi</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">properties_map</span><span class="p">[</span><span class="n">pidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">pid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">pidi</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties_mass</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># PMASS</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">properties_mass_map</span><span class="p">[</span><span class="n">pidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">pid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">pidi</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">convection_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># PCONV</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">pid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">pidi</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">phbdys</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># PHBDY</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">pid</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="_update_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_elements">[docs]</a><span class="k">def</span> <span class="nf">_update_elements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span>
+                     <span class="n">eid_map</span><span class="p">,</span> <span class="n">mass_id_map</span><span class="p">,</span> <span class="n">rigid_elements_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the elements&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;eid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">eid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># elements</span>
+        <span class="c1">#eid = _create_dict_mapper(model.elements, eid_map, &#39;eid&#39;, eid)</span>
+
+        <span class="k">for</span> <span class="n">eidi</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">eidi</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># CONM1, CONM2, CMASSx</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">mass_id_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">eidi</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># RBAR/RBAR1/RBE1/RBE2/RBE3/RSPLINE/RSSCON</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">rigid_elements_map</span><span class="p">[</span><span class="n">eidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="c1">#for eidi, elem in model.caeros.items():</span>
+            <span class="c1">#pass</span>
+
+
+<div class="viewcode-block" id="_update_materials"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_materials">[docs]</a><span class="k">def</span> <span class="nf">_update_materials</span><span class="p">(</span><span class="n">unused_model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span>
+                      <span class="n">mid_map</span><span class="p">,</span> <span class="n">all_materials</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;mid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">mid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#mid = 1</span>
+        <span class="k">for</span> <span class="n">materials</span> <span class="ow">in</span> <span class="n">all_materials</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">midi</span><span class="p">,</span> <span class="n">material</span> <span class="ow">in</span> <span class="n">materials</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">mid_map</span><span class="p">[</span><span class="n">midi</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">material</span><span class="p">,</span> <span class="s1">&#39;mid&#39;</span><span class="p">)</span>
+                <span class="n">material</span><span class="o">.</span><span class="n">mid</span> <span class="o">=</span> <span class="n">mid</span></div>
+
+
+<div class="viewcode-block" id="_update_spcs"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_spcs">[docs]</a><span class="k">def</span> <span class="nf">_update_spcs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">spc_id</span><span class="p">,</span>
+                 <span class="n">spc_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the spcs&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;spc_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">spc_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># spc</span>
+        <span class="k">for</span> <span class="n">spc_idi</span><span class="p">,</span> <span class="n">spc_group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spcadds</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">unused_i</span><span class="p">,</span> <span class="n">spc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spc_group</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spc</span><span class="p">,</span> <span class="s1">&#39;conid&#39;</span><span class="p">)</span>
+                <span class="n">spc</span><span class="o">.</span><span class="n">conid</span> <span class="o">=</span> <span class="n">spc_id</span>
+            <span class="n">spc_map</span><span class="p">[</span><span class="n">spc_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">spc_id</span>
+            <span class="n">spc_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">spc_idi</span><span class="p">,</span> <span class="n">spc_group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">unused_i</span><span class="p">,</span> <span class="n">spc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spc_group</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spc</span><span class="p">,</span> <span class="s1">&#39;conid&#39;</span><span class="p">)</span>
+                <span class="n">spc</span><span class="o">.</span><span class="n">conid</span> <span class="o">=</span> <span class="n">spc_id</span>
+            <span class="n">spc_map</span><span class="p">[</span><span class="n">spc_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">spc_id</span>
+            <span class="n">spc_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># TODO: why are we doing this?</span>
+        <span class="k">for</span> <span class="n">spc_id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">spcadds</span><span class="p">:</span>
+            <span class="n">spc_map</span><span class="p">[</span><span class="n">spc_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">spc_id</span>
+        <span class="k">for</span> <span class="n">spc_id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">spcs</span><span class="p">:</span>
+            <span class="n">spc_map</span><span class="p">[</span><span class="n">spc_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">spc_id</span></div>
+
+
+<div class="viewcode-block" id="_update_mpcs"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_mpcs">[docs]</a><span class="k">def</span> <span class="nf">_update_mpcs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">mpc_id</span><span class="p">,</span>
+                 <span class="n">mpc_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the mpcs&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;mpc_id&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">mpc_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># mpc</span>
+        <span class="k">for</span> <span class="n">mpc_idi</span><span class="p">,</span> <span class="n">mpc_group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mpcadds</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">unused_i</span><span class="p">,</span> <span class="n">mpc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mpc_group</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mpc</span><span class="p">,</span> <span class="s1">&#39;conid&#39;</span><span class="p">)</span>
+                <span class="n">mpc</span><span class="o">.</span><span class="n">conid</span> <span class="o">=</span> <span class="n">mpc_id</span>
+            <span class="n">mpc_map</span><span class="p">[</span><span class="n">mpc_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">mpc_id</span>
+            <span class="n">mpc_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">mpc_idi</span><span class="p">,</span> <span class="n">mpc_group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">unused_i</span><span class="p">,</span> <span class="n">mpc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mpc_group</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mpc</span><span class="p">,</span> <span class="s1">&#39;conid&#39;</span><span class="p">)</span>
+                <span class="n">mpc</span><span class="o">.</span><span class="n">conid</span> <span class="o">=</span> <span class="n">mpc_id</span>
+            <span class="n">mpc_map</span><span class="p">[</span><span class="n">mpc_idi</span><span class="p">]</span> <span class="o">=</span> <span class="n">mpc_id</span>
+            <span class="n">mpc_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># TODO: why are we doing this?</span>
+        <span class="k">for</span> <span class="n">mpc_id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcadds</span><span class="p">:</span>
+            <span class="n">mpc_map</span><span class="p">[</span><span class="n">mpc_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mpc_id</span>
+        <span class="k">for</span> <span class="n">mpc_id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">mpcs</span><span class="p">:</span>
+            <span class="n">mpc_map</span><span class="p">[</span><span class="n">mpc_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mpc_id</span></div>
+
+
+<div class="viewcode-block" id="_update_coords"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_coords">[docs]</a><span class="k">def</span> <span class="nf">_update_coords</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">starting_id_dict</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span>
+                   <span class="n">cid_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;updates the coords&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;cid&#39;</span> <span class="ow">in</span> <span class="n">starting_id_dict</span> <span class="ow">and</span> <span class="n">cid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># coords</span>
+        <span class="k">for</span> <span class="n">cidi</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">cidi</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cid_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">continue</span>
+            <span class="n">coord</span><span class="o">.</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span>
+            <span class="n">cid_map</span><span class="p">[</span><span class="n">cidi</span><span class="p">]</span> <span class="o">=</span> <span class="n">cid</span>
+            <span class="n">cid</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="_update_case_control"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_case_control">[docs]</a><span class="k">def</span> <span class="nf">_update_case_control</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates the case control deck; helper method for ``bdf_renumber``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the BDF object</span>
+<span class="sd">    mapper : dict[str] = List[int]</span>
+<span class="sd">        Defines the possible case control header values for each entry (e.g. `LOAD`)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># unified system that uses the same key</span>
+    <span class="c1"># for bdf_merge and _update_case_control</span>
+    <span class="n">case_control_card_to_pynastran_key</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;MPC&#39;</span> <span class="p">:</span> <span class="s1">&#39;mpcs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SPC&#39;</span> <span class="p">:</span> <span class="s1">&#39;spcs&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">elemental_quantities</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;STRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;STRAIN&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;ESE&#39;</span><span class="p">,</span> <span class="s1">&#39;EKE&#39;</span><span class="p">]</span>
+    <span class="n">nodal_quantities</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;DISPLACEMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;VELOCITY&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCELERATION&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCFORCES&#39;</span><span class="p">,</span> <span class="s1">&#39;MPCFORCES&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GPFORCES&#39;</span><span class="p">,</span> <span class="s1">&#39;SDISPLACEMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;OLOAD&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">mapper_quantities</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;FREQUENCY&#39;</span><span class="p">,</span> <span class="s1">&#39;DLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;LOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;LOADSET&#39;</span><span class="p">,</span> <span class="s1">&#39;SPC&#39;</span><span class="p">,</span> <span class="s1">&#39;MPC&#39;</span><span class="p">,</span> <span class="s1">&#39;METHOD&#39;</span><span class="p">,</span> <span class="s1">&#39;CMETHOD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TSTEP&#39;</span><span class="p">,</span> <span class="s1">&#39;TSTEPNL&#39;</span><span class="p">,</span> <span class="s1">&#39;NLPARM&#39;</span><span class="p">,</span> <span class="s1">&#39;SDAMPING&#39;</span><span class="p">,</span> <span class="s1">&#39;DESSUB&#39;</span><span class="p">,</span> <span class="s1">&#39;DESOBJ&#39;</span><span class="p">,</span> <span class="s1">&#39;GUST&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SUPORT1&#39;</span><span class="p">,</span> <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;BOUTPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;IC&#39;</span><span class="p">,</span> <span class="s1">&#39;CSSCHD&#39;</span><span class="p">,</span> <span class="s1">&#39;FMETHOD&#39;</span><span class="p">,</span> <span class="s1">&#39;TFL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOAD&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># TODO: remove this...</span>
+    <span class="n">skip_keys_temp</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;DESSUB&#39;</span><span class="p">,</span> <span class="s1">&#39;ADAPT&#39;</span><span class="p">,</span> <span class="s1">&#39;DATAREC&#39;</span><span class="p">,</span> <span class="s1">&#39;DSAPRT(END=SENS)=ALL&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPERATURE(LOAD)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CURVELINESYMBOL&#39;</span><span class="p">,</span> <span class="s1">&#39;DSAPRT=(END=SENS)&#39;</span><span class="p">,</span> <span class="s1">&#39;SUPER&#39;</span><span class="p">,</span> <span class="s1">&#39;BOUTPUT&#39;</span><span class="p">,</span> <span class="s1">&#39;IC&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OUTRCV&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPERATURE(INITIAL)&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span>
+    <span class="n">eid_map</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">]</span>
+    <span class="n">skip_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;TITLE&#39;</span><span class="p">,</span> <span class="s1">&#39;ECHO&#39;</span><span class="p">,</span> <span class="s1">&#39;ANALYSIS&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBTITLE&#39;</span><span class="p">,</span> <span class="s1">&#39;LABEL&#39;</span><span class="p">,</span> <span class="s1">&#39;SUBSEQ&#39;</span><span class="p">,</span> <span class="s1">&#39;OUTPUT&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TCURVE&#39;</span><span class="p">,</span> <span class="s1">&#39;XTITLE&#39;</span><span class="p">,</span> <span class="s1">&#39;YTITLE&#39;</span><span class="p">,</span> <span class="s1">&#39;AECONFIG&#39;</span><span class="p">,</span> <span class="s1">&#39;AESYMXZ&#39;</span><span class="p">,</span> <span class="s1">&#39;MAXLINES&#39;</span><span class="p">,</span> <span class="s1">&#39;PARAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CONTOUR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PTITLE&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOTTER&#39;</span><span class="p">,</span> <span class="s1">&#39;K2PP&#39;</span><span class="p">,</span> <span class="s1">&#39;CSCALE&#39;</span><span class="p">,</span> <span class="s1">&#39;XGRID LINES&#39;</span><span class="p">,</span> <span class="s1">&#39;YGRID LINES&#39;</span><span class="p">,</span> <span class="s1">&#39;YMIN&#39;</span><span class="p">,</span> <span class="s1">&#39;YMAX&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LINE&#39;</span><span class="p">,</span> <span class="s1">&#39;XAXIS&#39;</span><span class="p">,</span> <span class="s1">&#39;YAXIS&#39;</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="n">skip_keys_temp</span>
+    <span class="n">warn_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RANDOM&#39;</span><span class="p">]</span>
+
+    <span class="n">sets_analyzed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c1"># sets in the global don&#39;t get updated....</span>
+    <span class="c1"># so we&#39;re going to find all the sets and</span>
+    <span class="c1"># map them</span>
+    <span class="c1"># TODO: renumber the sets</span>
+    <span class="n">set_locations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">case_control</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">case_control_deck</span>
+    <span class="k">if</span> <span class="n">case_control</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">subcase</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">case_control</span><span class="o">.</span><span class="n">subcases</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subcase</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span> <span class="o">=</span> <span class="n">values</span>
+            <span class="k">if</span> <span class="s1">&#39;SET &#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="c1">#print(isubcase, key, value, options, param_type)</span>
+                <span class="c1">#assert isubcase != 0, isubcase</span>
+                <span class="k">if</span> <span class="n">isubcase</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">set_locations</span><span class="p">:</span>
+                    <span class="n">set_locations</span><span class="p">[</span><span class="n">isubcase</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">set_locations</span><span class="p">[</span><span class="n">isubcase</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="c1">#print(&#39;set_locations =&#39;, set_locations)</span>
+    <span class="c1">#iset = 1</span>
+    <span class="n">global_subcase</span> <span class="o">=</span> <span class="n">case_control</span><span class="o">.</span><span class="n">subcases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">subcase</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">case_control</span><span class="o">.</span><span class="n">subcases</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="c1">#print(&#39;-----------------------&#39;)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subcase</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">mapper_key</span> <span class="o">=</span> <span class="n">case_control_card_to_pynastran_key</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">skip_keys</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">warn_keys</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="s1">&#39;SET &#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="c1"># does this need to be updated...I don&#39;t think so...</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="s1">&#39;SET &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span> <span class="o">=</span> <span class="n">values</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+                    <span class="n">seti</span> <span class="o">=</span> <span class="s1">&#39;SET </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is needed by </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mapper_quantities</span><span class="p">:</span>
+                        <span class="c1">#print(&#39;mapper = %s, value=%s&#39; % (key, value))</span>
+                        <span class="n">kmap</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="n">mapper_key</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">value2</span> <span class="o">=</span> <span class="n">kmap</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Could not find id=</span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1"> dictionary</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                            <span class="n">msg</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">kmap</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">subcase</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="n">key</span><span class="p">,</span> <span class="n">value2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">elemental_quantities</span> <span class="o">+</span> <span class="n">nodal_quantities</span><span class="p">:</span>
+                        <span class="c1">#msg += &#39;  allowed_keys=%s&#39; % sorted(kmap.keys())</span>
+                        <span class="k">if</span> <span class="n">seti</span> <span class="ow">in</span> <span class="n">subcase</span><span class="p">:</span>
+                            <span class="n">seti2</span><span class="p">,</span> <span class="n">seti_key</span> <span class="o">=</span> <span class="n">subcase</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">seti</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">seti_key</span> <span class="ow">in</span> <span class="n">sets_analyzed</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                            <span class="n">sets_analyzed</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">seti_key</span><span class="p">)</span>
+                            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;seti_key=</span><span class="si">%s</span><span class="s1"> must be an integer; type(seti_key)=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>  <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">seti_key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">seti_key</span><span class="p">))</span>
+                            <span class="n">msgi</span> <span class="o">+=</span> <span class="s1">&#39;  key=</span><span class="si">%r</span><span class="s1"> value=</span><span class="si">%r</span><span class="s1"> options=</span><span class="si">%r</span><span class="s1"> param_type=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span><span class="p">)</span>
+                            <span class="n">msgi</span> <span class="o">+=</span> <span class="s1">&#39;  seti=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">seti</span>
+                            <span class="c1">#print(msgi)</span>
+                            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seti_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">msgi</span>
+
+                            <span class="c1">#print(&#39;key=%s options=%s param_type=%s value=%s&#39; % (</span>
+                                <span class="c1">#key, options, param_type, value))</span>
+                            <span class="c1">#print(seti2)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">seti2</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+                            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;key=</span><span class="si">%s</span><span class="s1"> options=</span><span class="si">%s</span><span class="s1"> param_type=</span><span class="si">%s</span><span class="s1"> value=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">key</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+                        <span class="n">eids_missing</span><span class="p">,</span> <span class="n">nids_missing</span><span class="p">,</span> <span class="n">values2</span> <span class="o">=</span> <span class="n">_update_case_key</span><span class="p">(</span>
+                            <span class="n">key</span><span class="p">,</span> <span class="n">elemental_quantities</span><span class="p">,</span> <span class="n">seti2</span><span class="p">,</span> <span class="n">eid_map</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">eids_missing</span><span class="p">:</span>
+                            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  couldn&#39;t find eids=</span><span class="si">{</span><span class="n">eids_missing</span><span class="si">}</span><span class="s2">...dropping&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">nids_missing</span><span class="p">:</span>
+                            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  couldn&#39;t find nids=</span><span class="si">{</span><span class="n">nids_missing</span><span class="si">}</span><span class="s2">...dropping&quot;</span><span class="p">)</span>
+
+
+                        <span class="n">param_type</span> <span class="o">=</span> <span class="s1">&#39;SET-type&#39;</span>
+                        <span class="c1">#print(&#39;adding seti=%r values2=%r seti_key=%r param_type=%r&#39;  % (</span>
+                            <span class="c1">#seti, values2, seti_key, param_type))</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">values2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1"> values2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values2</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">isubcase</span> <span class="ow">in</span> <span class="n">set_locations</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">set_locations</span><span class="p">[</span><span class="n">isubcase</span><span class="p">]:</span>
+                            <span class="c1"># or not key in global_subcase</span>
+                            <span class="n">gset</span> <span class="o">=</span> <span class="n">subcase</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">seti</span><span class="p">)</span>
+                            <span class="n">lset</span> <span class="o">=</span> <span class="n">subcase</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">seti</span><span class="p">)</span>
+                            <span class="c1">#print(&#39;gset&#39;, gset)</span>
+                            <span class="c1">#print(&#39;lset&#39;, lset)</span>
+                            <span class="k">if</span> <span class="n">gset</span> <span class="o">!=</span> <span class="n">lset</span><span class="p">:</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;gset=</span><span class="si">%s</span><span class="s1"> lset=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">gset</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">lset</span><span class="p">))</span>
+                                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                                <span class="c1">#subcase.update(</span>
+                                    <span class="c1">#seti, values2, seti_key, param_type)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">global_subcase</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                    <span class="n">seti</span><span class="p">,</span> <span class="n">values2</span><span class="p">,</span> <span class="n">seti_key</span><span class="p">,</span> <span class="n">param_type</span><span class="p">)</span>
+                            <span class="c1">#subcase.update(</span>
+                                <span class="c1">#seti, values2, seti_key, param_type)</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">global_subcase</span><span class="p">:</span>
+                            <span class="n">subcase</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                <span class="n">seti</span><span class="p">,</span> <span class="n">values2</span><span class="p">,</span> <span class="n">seti_key</span><span class="p">,</span> <span class="n">param_type</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">global_subcase</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                <span class="n">seti</span><span class="p">,</span> <span class="n">values2</span><span class="p">,</span> <span class="n">seti_key</span><span class="p">,</span> <span class="n">param_type</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1">#print(&#39;key=%s seti2=%s&#39; % (key, seti2))</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1"> options=</span><span class="si">%r</span><span class="s1"> param_type=</span><span class="si">%r</span><span class="s1"> value=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">key</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span> <span class="s1">&#39;ALL&#39;</span><span class="p">]:</span>
+                    <span class="c1">#print(&#39;*ALL -&gt; key=%s options=%s param_type=%s value=%s&#39; % (</span>
+                        <span class="c1">#key, options, param_type, value))</span>
+                    <span class="c1">#print(&#39;*all&#39;)</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;key=</span><span class="si">%s</span><span class="s1"> options=</span><span class="si">%s</span><span class="s1"> param_type=</span><span class="si">%s</span><span class="s1"> value=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+                    <span class="c1">#if value ==</span>
+        <span class="c1">#print()</span>
+
+<div class="viewcode-block" id="_update_case_key"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_renumber._update_case_key">[docs]</a><span class="k">def</span> <span class="nf">_update_case_key</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">elemental_quantities</span><span class="p">,</span> <span class="n">seti2</span><span class="p">,</span> <span class="n">eid_map</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updates a Case Control SET card.  A set may have an elemental result</span>
+<span class="sd">    or a nodal result.&quot;&quot;&quot;</span>
+    <span class="n">values2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">eids_missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nids_missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">elemental_quantities</span><span class="p">:</span>
+        <span class="c1"># renumber eids</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">seti2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">eid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">eid_map</span><span class="p">:</span>
+                <span class="n">eids_missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">eid_new</span> <span class="o">=</span> <span class="n">eid_map</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="n">values2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid_new</span><span class="p">)</span>
+        <span class="c1">#print(&#39;updating element SET %r&#39; % options)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># renumber nids</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">seti2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nid_map</span><span class="p">:</span>
+                <span class="n">nids_missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">nid_new</span> <span class="o">=</span> <span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+            <span class="n">values2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid_new</span><span class="p">)</span>
+        <span class="c1">#print(&#39;updating node SET %r&#39; % options)</span>
+    <span class="k">return</span> <span class="n">eids_missing</span><span class="p">,</span> <span class="n">nids_missing</span><span class="p">,</span> <span class="n">values2</span></div>
+
+<span class="c1">#def _create_dict_mapper(properties, properties_map, pid_name, pid):</span>
+    <span class="c1">#for pidi, prop in sorted(mydict.items()):</span>
+        <span class="c1">#setattr(prop, pid_name, pid)</span>
+        <span class="c1">#properties_map[pidi] = pid</span>
+        <span class="c1">#pid += 1</span>
+    <span class="c1">#return pid</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

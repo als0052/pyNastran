@@ -1,0 +1,536 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.export_to_vtk &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.export_to_vtk</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.export_to_vtk</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">searchsorted</span><span class="p">,</span> <span class="n">arange</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2</span> <span class="kn">import</span> <span class="n">OP2</span>
+
+<span class="c1">#def pack_nodes(fmt, data):</span>
+    <span class="c1">#return &#39;&#39;</span>
+
+
+<span class="n">ETYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># line</span>
+    <span class="s1">&#39;CDAMP1&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CDAMP2&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CDAMP3&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CDAMP4&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CELAS1&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CELAS2&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CELAS3&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CELAS4&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CBAR&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CBEAM&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CROD&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CONROD&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;CTUBE&#39;</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+
+    <span class="s1">&#39;CTRIA3&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1"># triangle</span>
+    <span class="s1">&#39;CQUAD4&#39;</span> <span class="p">:</span> <span class="mi">9</span><span class="p">,</span>  <span class="c1"># quad</span>
+    <span class="s1">&#39;CSHEAR&#39;</span> <span class="p">:</span> <span class="mi">9</span><span class="p">,</span>  <span class="c1"># quad</span>
+
+    <span class="c1"># quadratic</span>
+    <span class="s1">&#39;CTRIA6&#39;</span> <span class="p">:</span> <span class="mi">22</span><span class="p">,</span>  <span class="c1"># quadratic triangle</span>
+    <span class="c1">#&#39;CQUAD8&#39; : 23/28/30,</span>
+
+    <span class="s1">&#39;CTETRA&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;CPENTA&#39;</span> <span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="c1"># wedge</span>
+    <span class="s1">&#39;CPYRAM&#39;</span> <span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+    <span class="s1">&#39;CHEXA&#39;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="c1"># hex</span>
+
+    <span class="c1"># quadratic solids</span>
+    <span class="c1">#&#39;CTETRA&#39; : 64,</span>
+    <span class="c1">#&#39;CPENTA&#39; : 65, # wedge</span>
+    <span class="c1">#&#39;CPYRAM&#39; : 66,</span>
+    <span class="c1">#&#39;CHEXA&#39; : 67, # hex</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="pack_int_array"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.pack_int_array">[docs]</a><span class="k">def</span> <span class="nf">pack_int_array</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="pack_float_1d_array"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.pack_float_1d_array">[docs]</a><span class="k">def</span> <span class="nf">pack_float_1d_array</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="pack_float_3d_array"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.pack_float_3d_array">[docs]</a><span class="k">def</span> <span class="nf">pack_float_3d_array</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]:</span>
+        <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">dataii</span> <span class="ow">in</span> <span class="n">datai</span><span class="p">:</span>
+            <span class="n">msgi</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">dataii</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">msgi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">msg</span> <span class="c1">#+ &#39;\n\n&#39;</span></div>
+
+<div class="viewcode-block" id="pack_float_2d_array"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.pack_float_2d_array">[docs]</a><span class="k">def</span> <span class="nf">pack_float_2d_array</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">dataii</span> <span class="ow">in</span> <span class="n">datai</span><span class="p">:</span>
+            <span class="n">msgi</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">dataii</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">msgi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">msg</span> <span class="c1">#+ &#39;\n&#39;</span></div>
+
+<span class="c1">#def pack(fmt, data):</span>
+<span class="c1">#    return &#39;&#39;</span>
+
+<div class="viewcode-block" id="export_to_vtk"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.export_to_vtk">[docs]</a><span class="k">def</span> <span class="nf">export_to_vtk</span><span class="p">(</span><span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.bdf&#39;</span>
+    <span class="n">op2_filename</span> <span class="o">=</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.op2&#39;</span>
+    <span class="n">vtk_filename</span> <span class="o">=</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.vtk&#39;</span>
+    <span class="n">bdf_model</span><span class="p">,</span> <span class="n">op2_model</span> <span class="o">=</span> <span class="n">export_to_vtk_filename</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">op2_filename</span><span class="p">,</span> <span class="n">vtk_filename</span><span class="p">)</span>
+    <span class="n">bdf_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;finished exporting </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vtk_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bdf_model</span><span class="p">,</span> <span class="n">op2_model</span></div>
+
+<div class="viewcode-block" id="export_to_vtk_filename"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.export_to_vtk.html#pyNastran.op2.export_to_vtk.export_to_vtk_filename">[docs]</a><span class="k">def</span> <span class="nf">export_to_vtk_filename</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">op2_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vtk_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;exports a BDF/OP2 to VTK&quot;&quot;&quot;</span>
+    <span class="n">bdf_model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">bdf_model</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">)</span>
+    <span class="n">op2_model</span> <span class="o">=</span> <span class="n">OP2</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">op2_model</span><span class="o">.</span><span class="n">read_op2</span><span class="p">(</span><span class="n">op2_filename</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">get_card_ids_by_card_types</span><span class="p">()</span>
+    <span class="c1">#print(&#39;cards = [&#39;, &#39;, &#39;.join(sorted(out.keys())), &#39;]&#39;)</span>
+    <span class="n">grids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">])</span>
+    <span class="n">spoint</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;SPOINT&#39;</span><span class="p">])</span>
+    <span class="n">epoint</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;EPOINT&#39;</span><span class="p">])</span>
+    <span class="n">ngrid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grids</span><span class="p">)</span>
+    <span class="n">nspoint</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spoint</span><span class="p">)</span>
+    <span class="n">nepoint</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">epoint</span><span class="p">)</span>
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">ngrid</span> <span class="o">+</span> <span class="n">nspoint</span> <span class="o">+</span> <span class="n">nepoint</span>
+
+    <span class="n">ncrod</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CROD&#39;</span><span class="p">])</span>
+    <span class="n">nconrod</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CONROD&#39;</span><span class="p">])</span>
+    <span class="n">nctube</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CTUBE&#39;</span><span class="p">])</span>
+    <span class="n">ncbeam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CBEAM&#39;</span><span class="p">])</span>
+    <span class="n">ncbar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">])</span>
+    <span class="n">nline</span> <span class="o">=</span> <span class="n">ncrod</span> <span class="o">+</span> <span class="n">nconrod</span> <span class="o">+</span> <span class="n">nctube</span> <span class="o">+</span> <span class="n">ncbeam</span> <span class="o">+</span> <span class="n">ncbar</span>
+
+    <span class="n">ncelas1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CELAS1&#39;</span><span class="p">])</span>
+    <span class="n">ncelas2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CELAS2&#39;</span><span class="p">])</span>
+    <span class="n">ncelas3</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CELAS3&#39;</span><span class="p">])</span>
+    <span class="n">ncelas4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CELAS4&#39;</span><span class="p">])</span>
+
+    <span class="n">ncdamp1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CDAMP1&#39;</span><span class="p">])</span>
+    <span class="n">ncdamp2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CDAMP2&#39;</span><span class="p">])</span>
+    <span class="n">ncdamp3</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CDAMP3&#39;</span><span class="p">])</span>
+    <span class="n">ncdamp4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CDAMP4&#39;</span><span class="p">])</span>
+    <span class="n">n0d</span> <span class="o">=</span> <span class="p">(</span><span class="n">ncelas1</span> <span class="o">+</span> <span class="n">ncelas2</span> <span class="o">+</span> <span class="n">ncelas3</span> <span class="o">+</span> <span class="n">ncelas4</span> <span class="o">+</span>
+           <span class="n">ncdamp1</span> <span class="o">+</span> <span class="n">ncdamp2</span> <span class="o">+</span> <span class="n">ncdamp3</span> <span class="o">+</span> <span class="n">ncdamp4</span><span class="p">)</span>
+
+    <span class="n">nctria3</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">])</span>
+    <span class="n">ncquad4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">])</span>
+    <span class="n">nctria6</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CTRIA6&#39;</span><span class="p">])</span>
+    <span class="n">ncquad8</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CQUAD8&#39;</span><span class="p">])</span>
+    <span class="n">ncshear</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CSHEAR&#39;</span><span class="p">])</span>
+    <span class="n">nshell</span> <span class="o">=</span> <span class="n">nctria3</span> <span class="o">+</span> <span class="n">ncquad4</span> <span class="o">+</span> <span class="n">nctria6</span> <span class="o">+</span> <span class="n">ncquad8</span> <span class="o">+</span> <span class="n">ncshear</span>
+
+    <span class="n">nctetra4</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">])</span>
+    <span class="n">ncpyram5</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CPYRAM&#39;</span><span class="p">])</span>
+    <span class="n">ncpenta6</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CPENTA&#39;</span><span class="p">])</span>
+    <span class="n">nchexa8</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">])</span>
+    <span class="n">nctetra10</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ncpyram8</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ncpenta15</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nchexa20</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nsolid</span> <span class="o">=</span> <span class="p">(</span><span class="n">nctetra4</span> <span class="o">+</span> <span class="n">ncpyram5</span> <span class="o">+</span> <span class="n">ncpenta6</span> <span class="o">+</span> <span class="n">nchexa8</span> <span class="o">+</span>
+              <span class="n">nctetra10</span> <span class="o">+</span> <span class="n">ncpyram8</span> <span class="o">+</span> <span class="n">ncpenta15</span> <span class="o">+</span> <span class="n">nchexa20</span><span class="p">)</span>
+
+    <span class="c1">#nelements = n0d + nline + nshell + nsolid</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">etypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CFAST&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH2D&#39;</span><span class="p">,</span>
+
+        <span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CSHEAR&#39;</span><span class="p">,</span>
+
+        <span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">etypes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">etypes</span><span class="p">)),</span> <span class="s1">&#39;there are duplicate etypes&#39;</span>
+    <span class="k">for</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">etypes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+            <span class="n">nelementsi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">etype</span><span class="p">])</span>
+            <span class="n">nelements</span> <span class="o">+=</span> <span class="n">nelementsi</span>
+    <span class="n">nproperties</span> <span class="o">=</span> <span class="n">nelements</span>
+
+    <span class="n">bdf_nelements</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">nelements</span>
+
+    <span class="c1"># SPOINT &amp; EPOINT are implicitly defined</span>
+    <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">nids</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grids</span><span class="p">):</span>
+        <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+    <span class="n">nids</span><span class="p">[:</span><span class="n">ngrid</span><span class="p">]</span> <span class="o">=</span> <span class="n">grids</span>
+    <span class="k">if</span> <span class="n">nspoint</span><span class="p">:</span>
+        <span class="n">nids</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">nspoint</span><span class="p">]</span> <span class="o">=</span> <span class="n">spoint</span>
+    <span class="k">if</span> <span class="n">nepoint</span><span class="p">:</span>
+        <span class="n">nids</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">nspoint</span><span class="p">:]</span> <span class="o">=</span> <span class="n">epoint</span>
+
+    <span class="n">nelements</span> <span class="o">=</span> <span class="n">n0d</span> <span class="o">+</span> <span class="n">nline</span> <span class="o">+</span> <span class="n">nshell</span> <span class="o">+</span> <span class="n">nsolid</span>
+    <span class="n">nmaterials</span> <span class="o">=</span> <span class="n">nelements</span>
+
+    <span class="n">eids</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">cell_types</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">mids</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">vtk_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">vtk_file</span><span class="p">:</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# vtk DataFile Version 3.1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;created by pyNastran</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#vtk_file.write(&#39;BINARY\n&#39;)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ASCII</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;DATASET UNSTRUCTURED_GRID</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">nid_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">nnodes</span>
+        <span class="n">xyz_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;POINTS </span><span class="si">%i</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_float_2d_array</span><span class="p">(</span><span class="n">xyz_fmt</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">))</span>
+
+        <span class="n">eid_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">nelements</span>
+
+        <span class="c1"># we&#39;ll add 1 to the slot count of each</span>
+        <span class="c1"># so for a single CROD, it has 2 nodes and 1 extra value (to indicate it&#39;s a line)</span>
+        <span class="c1"># for a total of 3</span>
+        <span class="n">nline_slots</span> <span class="o">=</span> <span class="n">nline</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="n">nshell_slots</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">nctria3</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">ncquad4</span> <span class="o">+</span> <span class="n">ncshear</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">nctria6</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">*</span> <span class="n">ncquad8</span>
+        <span class="n">nsolid_slots</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">nctetra4</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">ncpyram5</span> <span class="o">+</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">ncpenta6</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">*</span> <span class="n">nchexa8</span>
+        <span class="n">bdf_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nline=</span><span class="si">%s</span><span class="s1"> nshell=</span><span class="si">%s</span><span class="s1"> nsolid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nline</span><span class="p">,</span> <span class="n">nshell</span><span class="p">,</span> <span class="n">nsolid</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">nelements</span> <span class="o">==</span> <span class="n">bdf_nelements</span><span class="p">,</span> <span class="s1">&#39;nelements=</span><span class="si">%s</span><span class="s1"> bdf_model.nelements=</span><span class="si">%s</span><span class="s1"> card_count=</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">nelements</span><span class="p">,</span> <span class="n">bdf_nelements</span><span class="p">,</span> <span class="n">bdf_model</span><span class="o">.</span><span class="n">card_count</span><span class="p">)</span>
+        <span class="n">nelements_slots</span> <span class="o">=</span> <span class="n">nline_slots</span> <span class="o">+</span> <span class="n">nshell_slots</span> <span class="o">+</span> <span class="n">nsolid_slots</span>
+
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CELLS </span><span class="si">%i</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">nelements_slots</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bdf_model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="n">ETYPE_MAP</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+            <span class="n">nids2</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+
+            <span class="n">nnodesi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids2</span><span class="p">)</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodesi</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nids2</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CBAR&#39;</span><span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;CFAST&#39;</span><span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span> <span class="s1">&#39;CSHEAR&#39;</span><span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">pid_ref</span>
+                <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMPG&#39;</span><span class="p">]:</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PSHELL&#39;</span><span class="p">]:</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid1</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PSHEAR&#39;</span><span class="p">]:</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CONROD&#39;</span><span class="p">]:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+
+            <span class="n">eids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+            <span class="n">pids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid</span>
+            <span class="n">mids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mid</span>
+            <span class="n">cell_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">etype</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">nelements</span> <span class="o">==</span> <span class="n">bdf_nelements</span><span class="p">,</span> <span class="s1">&#39;i=</span><span class="si">%s</span><span class="s1"> nelements=</span><span class="si">%s</span><span class="s1"> bdf.nelements=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">nelements</span><span class="p">,</span> <span class="n">bdf_nelements</span><span class="p">)</span>
+
+        <span class="c1">#vtk_file.write(&#39;\n&#39;)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CELL_TYPES </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nelements</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_int_array</span><span class="p">(</span><span class="n">eid_fmt</span><span class="p">,</span> <span class="n">cell_types</span><span class="p">))</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;POINT_DATA </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NodeID </span><span class="si">%i</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_int_array</span><span class="p">(</span><span class="n">nid_fmt</span><span class="p">,</span> <span class="n">nids</span><span class="p">))</span>
+
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">nelements</span>
+        <span class="k">if</span> <span class="n">nelements</span><span class="p">:</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ElementID </span><span class="si">%i</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nelements</span><span class="p">)</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_int_array</span><span class="p">(</span><span class="n">eid_fmt</span><span class="p">,</span> <span class="n">eids</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nproperties</span><span class="p">:</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PropertyID </span><span class="si">%i</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nproperties</span><span class="p">)</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_int_array</span><span class="p">(</span><span class="n">eid_fmt</span><span class="p">,</span> <span class="n">pids</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nmaterials</span><span class="p">:</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MaterialID </span><span class="si">%i</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmaterials</span><span class="p">)</span>
+            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_int_array</span><span class="p">(</span><span class="n">eid_fmt</span><span class="p">,</span> <span class="n">mids</span><span class="p">))</span>
+
+        <span class="n">nodal_cases</span> <span class="o">=</span> <span class="p">[</span><span class="n">op2_model</span><span class="o">.</span><span class="n">eigenvectors</span><span class="p">,</span> <span class="n">op2_model</span><span class="o">.</span><span class="n">displacements</span><span class="p">,</span>
+                       <span class="n">op2_model</span><span class="o">.</span><span class="n">velocities</span><span class="p">,</span> <span class="n">op2_model</span><span class="o">.</span><span class="n">accelerations</span><span class="p">]</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cases</span> <span class="ow">in</span> <span class="n">nodal_cases</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cases</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">key0</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1">#print(key0)</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="n">cases</span><span class="p">[</span><span class="n">key0</span><span class="p">]</span><span class="o">.</span><span class="n">node_gridtype</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">nnodes</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">):</span>
+                <span class="c1"># every node exists</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>
+                <span class="n">ni</span> <span class="o">=</span> <span class="n">nnodes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># node_ids is a subset of nids</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">)</span>
+                <span class="n">ni</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T1&#39;</span><span class="p">,</span> <span class="s1">&#39;T2&#39;</span><span class="p">,</span> <span class="s1">&#39;T3&#39;</span><span class="p">,</span> <span class="s1">&#39;R1&#39;</span><span class="p">,</span> <span class="s1">&#39;R2&#39;</span><span class="p">,</span> <span class="s1">&#39;R3&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">case</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cases</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="n">case</span><span class="o">.</span><span class="n">is_real</span><span class="p">:</span>
+                    <span class="c1">#if i is None:</span>
+                        <span class="c1">#data = case.data</span>
+                        <span class="c1">#ni = nnodes</span>
+                    <span class="c1">#else:</span>
+                        <span class="c1">#data = zeros((nnodes, 6), dtype=&#39;float32&#39;)</span>
+                        <span class="c1">#data[:, i, :] = case.data</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">ntimes</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">case_type</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                    <span class="k">for</span> <span class="n">itime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntimes</span><span class="p">):</span>
+                        <span class="c1">#if 0:</span>
+                            <span class="c1">#for icol, name in enumerate(names):</span>
+                                <span class="c1">#title = &#39;%s_%s_isubcase=%s_itime=%s&#39; % (case_type, name, isubcase, itime)</span>
+                                <span class="c1">#vtk_file.write(&#39;SCALARS %s float\n&#39; % title)</span>
+                                <span class="c1">#vtk_file.write(&#39;LOOKUP_TABLE default\n&#39;)</span>
+                                <span class="c1">##datai = data[itime, i, icol]</span>
+                                <span class="c1">#vtk_file.write(pack_float_1d_array(fmt, data[itime, i, icol]))</span>
+                        <span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_isubcase=</span><span class="si">%s</span><span class="s1">_itime=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">case_type</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">itime</span><span class="p">)</span>
+                            <span class="c1">#FIELD RealDisplacementArray_FIELD_isubcase=1_itime=0 6</span>
+                            <span class="c1">#t1 1 72 float</span>
+                            <span class="c1">#0.00764469 0.00762899 ...</span>
+                            <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;FIELD </span><span class="si">%s</span><span class="s1"> 6</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">title</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">icol</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
+                                <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> 1 </span><span class="si">%s</span><span class="s1"> float</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ni</span><span class="p">))</span>
+                                <span class="c1">#datai = case.data[itime, i, icol]</span>
+                                <span class="n">vtk_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack_float_1d_array</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">itime</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">icol</span><span class="p">]))</span>
+
+                            <span class="c1">#if 0:</span>
+                                <span class="c1">#title = &#39;%s_FIELD_isubcase=%s_itime=%s&#39; % (case_type, isubcase, itime)</span>
+                                <span class="c1">#vtk_file.write(&#39;FIELD %s 6 %i float\n&#39; % (title, ni))</span>
+                                <span class="c1">#vtk_file.write(&#39;LOOKUP_TABLE default\n&#39;)</span>
+                                <span class="c1">#vtk_file.write(pack_float_2d_array(fmt, data[itime, i, :]))</span>
+
+        <span class="c1">#CELLS 217 1039</span>
+    <span class="k">return</span> <span class="n">bdf_model</span><span class="p">,</span> <span class="n">op2_model</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

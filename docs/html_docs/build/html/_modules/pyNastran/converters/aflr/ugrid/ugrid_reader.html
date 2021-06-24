@@ -1,0 +1,1017 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.aflr.ugrid.ugrid_reader &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.aflr.ugrid.ugrid_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.aflr.ugrid.ugrid_reader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines the following classes:</span>
+<span class="sd">    - UGRID</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span><span class="p">,</span> <span class="n">unpack</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">arange</span><span class="p">,</span> <span class="n">hstack</span><span class="p">,</span> <span class="n">setdiff1d</span><span class="p">,</span> <span class="n">union1d</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger</span>
+
+<span class="c1">#from pyNastran.bdf.field_writer_double import print_card_double</span>
+<span class="c1">#from pyNastran.bdf.field_writer_16 import print_card_16</span>
+<span class="c1">#from pyNastran.bdf.field_writer_8 import print_card_8</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_float_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_float_16</span>
+
+
+<div class="viewcode-block" id="read_ugrid"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.read_ugrid">[docs]</a><span class="k">def</span> <span class="nf">read_ugrid</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">read_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates the UGRID object</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ugrid_filename : str (default=None -&gt; popup)</span>
+<span class="sd">        the ugrid filename</span>
+<span class="sd">    debug : bool/None</span>
+<span class="sd">        used to set the logger if no logger is passed in</span>
+<span class="sd">            True:  logs debug/info/error messages</span>
+<span class="sd">            False: logs info/error messages</span>
+<span class="sd">            None:  logs error messages</span>
+<span class="sd">    log : logging module object / None</span>
+<span class="sd">        if log is set, debug is ignored and uses the</span>
+<span class="sd">        settings the logging object has</span>
+<span class="sd">    encoding : str; default=None</span>
+<span class="sd">        is this used?</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : UGRID()</span>
+<span class="sd">        an UGRID object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ugrid_model</span> <span class="o">=</span> <span class="n">UGRID</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+                        <span class="n">read_shells</span><span class="o">=</span><span class="n">read_shells</span><span class="p">,</span> <span class="n">read_solids</span><span class="o">=</span><span class="n">read_solids</span><span class="p">)</span>
+    <span class="n">ugrid_model</span><span class="o">.</span><span class="n">read_ugrid</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="n">check</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ugrid_model</span></div>
+
+
+<div class="viewcode-block" id="UGRID"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID">[docs]</a><span class="k">class</span> <span class="nc">UGRID</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface to the AFLR UGrid format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="s1">&#39;info&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pids</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tets</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_shells</span> <span class="o">=</span> <span class="n">read_shells</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_solids</span> <span class="o">=</span> <span class="n">read_solids</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">isort</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="UGRID.read_ugrid"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID.read_ugrid">[docs]</a>    <span class="k">def</span> <span class="nf">read_ugrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ugrid_filename</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        $</span>
+<span class="sd">        $       NASTRAN INPUT DECK GENERATED BY UG_IO</span>
+<span class="sd">        $</span>
+<span class="sd">        BEGIN BULK</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_BL_Vol_Tets 2426</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Bnd_Nodes 34350</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Nodes 399036</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Surf_Quads 20665</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Surf_Trias 27870</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Vol_Hexs 163670</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Vol_Pents_5 27875</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Vol_Pents_6 67892</span>
+<span class="sd">        $UG_IO_ Data</span>
+<span class="sd">        $Number_of_Vol_Tets 1036480</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">determine_dytpe_nfloat_endian_from_ugrid_filename</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">)</span>
+        <span class="n">ndarray_float</span><span class="p">,</span> <span class="n">float_fmt</span><span class="p">,</span> <span class="n">nfloat</span><span class="p">,</span> <span class="n">endian</span><span class="p">,</span> <span class="n">ugrid_filename</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="c1"># more for documentation than anything else</span>
+        <span class="k">assert</span> <span class="n">ndarray_float</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;float32&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">],</span> <span class="n">ndarray_float</span>
+        <span class="k">assert</span> <span class="n">float_fmt</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">],</span> <span class="n">float_fmt</span>
+        <span class="k">assert</span> <span class="n">nfloat</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">nfloat</span>
+        <span class="k">assert</span> <span class="n">endian</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">],</span> <span class="n">ndarray_float</span>
+
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ugrid_file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">7</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="mi">7</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="n">nnodes</span><span class="p">,</span> <span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">,</span> <span class="n">ntets</span><span class="p">,</span> <span class="n">npenta5s</span><span class="p">,</span> <span class="n">npenta6s</span><span class="p">,</span> <span class="n">nhexas</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;7i&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="n">npids</span> <span class="o">=</span> <span class="n">nquads</span> <span class="o">+</span> <span class="n">ntris</span>
+            <span class="n">nvol_elements</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">+</span> <span class="n">npenta5s</span> <span class="o">+</span> <span class="n">npenta6s</span> <span class="o">+</span> <span class="n">nhexas</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nnodes=</span><span class="si">%.3f</span><span class="s1">m ntris=</span><span class="si">%s</span><span class="s1"> nquads=</span><span class="si">%s</span><span class="s1"> ntets=</span><span class="si">%.3f</span><span class="s1">m&#39;</span>
+                          <span class="s1">&#39; npenta5s=</span><span class="si">%.3f</span><span class="s1">m npenta6s=</span><span class="si">%.3f</span><span class="s1">m nhexas=</span><span class="si">%.3f</span><span class="s1">m&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                              <span class="n">nnodes</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">,</span>
+                              <span class="n">ntets</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">npenta5s</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">npenta6s</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">nhexas</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">))</span>
+
+            <span class="n">nvolume_elements</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">+</span> <span class="n">npenta5s</span> <span class="o">+</span> <span class="n">npenta6s</span> <span class="o">+</span> <span class="n">nhexas</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nsurface_elements=</span><span class="si">%s</span><span class="s1"> nvolume_elements=</span><span class="si">%.3f</span><span class="s1"> Million&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">npids</span><span class="p">,</span> <span class="n">nvolume_elements</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">))</span>
+
+            <span class="c1"># we know the shapes of nodes (e.g. Nx3), but we want to directly</span>
+            <span class="c1"># unpack the data into the array, so we shape it as N*3, load the</span>
+            <span class="c1"># data and and then do a reshape</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ndarray_float=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ndarray_float</span><span class="p">))</span>
+            <span class="c1">#nodes = zeros(nnodes * 3, dtype=ndarray_float)</span>
+            <span class="n">tris</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">quads</span> <span class="o">=</span> <span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="c1">#pids = zeros(npids, dtype=&#39;int32&#39;)</span>
+            <span class="c1">#nodes = array([], dtype=&#39;float32&#39;)</span>
+
+            <span class="c1">## NODES</span>
+            <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">nnodes</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nfloat</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="n">float_fmt</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1">#print(&#39;min xyz value = &#39; , nodes.min())</span>
+            <span class="c1">#print(&#39;max xyz value = &#39; , nodes.max())</span>
+
+            <span class="c1">## CTRIA3</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;i&#39;</span>
+            <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">ntris</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">ntris</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="c1">#print(&#39;min tris value = &#39; , tris.min())</span>
+                <span class="c1">#print(&#39;max tris value = &#39; , tris.max())</span>
+
+
+            <span class="c1">## CQUAD4</span>
+            <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">nquads</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">nbytes_expected</span><span class="p">,</span> <span class="s1">&#39;ndata=</span><span class="si">%s</span><span class="s1"> nbytes_expected=</span><span class="si">%s</span><span class="s1"> nquads_actual=</span><span class="si">%g</span><span class="s1"> nquads=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">nbytes_expected</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">/</span><span class="mf">16.</span><span class="p">,</span> <span class="n">nquads</span><span class="p">)</span>
+                <span class="n">quads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nquads</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="c1">#print(&#39;min quads value = &#39; , quads.min())</span>
+                <span class="c1">#print(&#39;max quads value = &#39; , quads.max())</span>
+
+            <span class="k">if</span> <span class="n">npids</span><span class="p">:</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">npids</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">nbytes_expected</span><span class="p">,</span> <span class="s1">&#39;len(data)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+                <span class="n">pids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pids</span> <span class="o">=</span> <span class="n">pids</span>
+                <span class="c1">#print(&#39;min pids value = &#39; , pids.min())</span>
+                <span class="c1">#print(&#39;max pids value = &#39; , pids.max())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="n">tris</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="n">quads</span>
+
+            <span class="c1">#==========================================</span>
+            <span class="c1"># solids</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_solids</span><span class="p">:</span>
+                <span class="c1">#nids = np.unique(np.hstack([self.quads.ravel(), self.tris.ravel()]))</span>
+                <span class="c1">#inid = np.searchsorted(np.arange(self.nodes.size), nids)</span>
+                <span class="c1">#self.nodes = self.nodes[inid]</span>
+                <span class="k">return</span>
+
+            <span class="n">tets</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">penta5s</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">npenta5s</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">penta6s</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">npenta6s</span> <span class="o">*</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">hexas</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nhexas</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+                <span class="c1">## CTETRA</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="n">tets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+                <span class="c1">#print(&#39;min tets value = &#39; , tets.min())</span>
+                <span class="c1">#print(&#39;max tets value = &#39; , tets.max())</span>
+
+            <span class="k">if</span> <span class="n">npenta5s</span><span class="p">:</span>
+                <span class="c1">## CPYRAM</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">npenta5s</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="n">penta5s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">npenta5s</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+                <span class="c1">#print(&#39;min penta5s value = &#39; , penta5s.min())</span>
+                <span class="c1">#print(&#39;max penta5s value = &#39; , penta5s.max())</span>
+
+            <span class="k">if</span> <span class="n">npenta6s</span><span class="p">:</span>
+                <span class="c1">## CPENTA</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">npenta6s</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="n">penta6s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">npenta6s</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nbytes_expected</span>
+                <span class="c1">#print(&#39;min penta6s value = &#39; , penta6s.min())</span>
+                <span class="c1">#print(&#39;max penta6s value = &#39; , penta6s.max())</span>
+
+            <span class="k">if</span> <span class="n">nhexas</span><span class="p">:</span>
+                <span class="c1">## CHEXA</span>
+                <span class="n">nbytes_expected</span> <span class="o">=</span> <span class="n">nhexas</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">ugrid_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes_expected</span><span class="p">)</span>
+                <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">ndata</span> <span class="o">==</span> <span class="n">nbytes_expected</span><span class="p">,</span> <span class="s1">&#39;ndata=</span><span class="si">%s</span><span class="s1"> nbytes_expected=</span><span class="si">%s</span><span class="s1"> nhexas_actual=</span><span class="si">%g</span><span class="s1"> nhexas=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">ndata</span><span class="p">,</span> <span class="n">nbytes_expected</span><span class="p">,</span> <span class="n">ndata</span><span class="o">/</span><span class="mf">32.</span><span class="p">,</span> <span class="n">nhexas</span><span class="p">)</span>
+                <span class="n">hexas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nhexas</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">nhexas</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">4</span>
+                <span class="c1">#print(&#39;min hexas value = &#39; , hexas.min())</span>
+                <span class="c1">#print(&#39;max hexas value = &#39; , hexas.max())</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">tets</span> <span class="o">=</span> <span class="n">tets</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span> <span class="o">=</span> <span class="n">penta5s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span> <span class="o">=</span> <span class="n">penta6s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span> <span class="o">=</span> <span class="n">hexas</span>
+
+        <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_hanging_nodes</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UGRID.write_bdf"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID.write_bdf">[docs]</a>    <span class="k">def</span> <span class="nf">write_bdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bdf_filename</span><span class="p">,</span> <span class="n">include_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">include_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">convert_pyram_to_penta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">write_grids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        writes a Nastran BDF</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int; {8, 16}; default=16</span>
+<span class="sd">            the bdf write precision</span>
+<span class="sd">        is_double : bool; default=False</span>
+<span class="sd">            the field precision to write</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_node_ids</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">encoding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+        <span class="c1">#assert encoding.lower() in [&#39;ascii&#39;, &#39;latin1&#39;, &#39;utf8&#39;], encoding</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">bdf_file</span><span class="p">:</span>
+            <span class="c1">#bdf_file.write(&#39;CEND\n&#39;)</span>
+            <span class="c1">#bdf_file.write(&#39;BEGIN BULK\n&#39;)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ pyNastran: punch=True</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ pyNastran: encoding=utf-8</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MAT1, </span><span class="si">%i</span><span class="s1">, 1.0e7,, 0.3</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mid</span><span class="p">)</span>
+
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing GRIDs&#39;</span><span class="p">)</span>
+            <span class="n">write_grids</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">write_grids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_solids</span><span class="p">:</span>
+                    <span class="n">nids_to_write</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]))</span>
+                    <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">all_nids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+                    <span class="n">inid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids_to_write</span><span class="p">)</span>
+                    <span class="n">unused_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">inid</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nids_to_write</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">200000</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  i = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GRID    </span><span class="si">%8i%8s%s%s%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">nid</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nids_to_write</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">200000</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  i = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GRID*   </span><span class="si">%16i%16s%16s%16s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                           <span class="s1">&#39;*       </span><span class="si">%16s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                               <span class="n">nid</span><span class="p">,</span>
+                                               <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">check_hanging_nodes</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GRID    </span><span class="si">%8i%8s%s%s%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                <span class="n">print_float_8</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;GRID*   </span><span class="si">%16i%16s%16s%16s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                           <span class="s1">&#39;*       </span><span class="si">%16s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                               <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                               <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                               <span class="n">print_float_16</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;finished writing GRIDs&#39;</span><span class="p">)</span>
+
+            <span class="n">eid</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pids</span> <span class="c1">#+ 1</span>
+            <span class="k">if</span> <span class="n">include_shells</span><span class="p">:</span>
+                <span class="n">upids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span>  <span class="c1"># auto-sorts</span>
+                <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">upids</span><span class="p">:</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSHELL,</span><span class="si">%i</span><span class="s1">,</span><span class="si">%i</span><span class="s1">, 0.1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CTRIA3&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">element</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">element</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CTRIA3  </span><span class="si">%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">eid</span><span class="p">,</span> <span class="n">pids</span><span class="p">[</span><span class="n">eid</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                    <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CQUAD4&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">element</span><span class="p">))</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">element</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CQUAD4  </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">eid</span><span class="p">,</span> <span class="n">pids</span><span class="p">[</span><span class="n">eid</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                    <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ntris</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nquads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">eid</span> <span class="o">+=</span> <span class="n">ntris</span> <span class="o">+</span> <span class="n">nquads</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">max_pid</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_pid</span> <span class="o">=</span> <span class="n">pids</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="c1">#==========================================</span>
+            <span class="c1"># solids</span>
+            <span class="k">if</span> <span class="n">include_solids</span><span class="p">:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">max_pid</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_bdf_solids</span><span class="p">(</span>
+                    <span class="n">bdf_file</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">convert_pyram_to_penta</span><span class="o">=</span><span class="n">convert_pyram_to_penta</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDDATA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UGRID.check_hanging_nodes"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID.check_hanging_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">check_hanging_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_on_diff</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;verifies that all nodes are used&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;checking hanging nodes&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_node_ids</span><span class="p">()</span>
+
+        <span class="n">tris</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span>
+        <span class="n">unused_pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pids</span>
+
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ntris</span> <span class="o">=</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nquads</span> <span class="o">=</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_solids</span><span class="p">:</span>
+            <span class="n">tets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span>
+            <span class="n">pyrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span>
+            <span class="n">pentas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span>
+            <span class="n">hexas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span>
+
+            <span class="n">ntets</span> <span class="o">=</span> <span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">npyramids</span> <span class="o">=</span> <span class="n">pyrams</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">npentas</span> <span class="o">=</span> <span class="n">pentas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nhexas</span> <span class="o">=</span> <span class="n">hexas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ntets</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">npyramids</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">npentas</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nhexas</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">nids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">tris</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">quads</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">tets</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">npyramids</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">pyrams</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">npentas</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">pentas</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">nhexas</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">hexas</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;there are no solid nodes; nids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">hstack</span><span class="p">(</span><span class="n">nids</span><span class="p">))</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">nnodes</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">):</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;expected = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">expected</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;actual   = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nids</span><span class="p">)</span>
+
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">setdiff1d</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">diff2</span> <span class="o">=</span> <span class="n">setdiff1d</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">expected</span><span class="p">)</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">union1d</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">diff2</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nnodes=</span><span class="si">%i</span><span class="s1"> len(actual)=</span><span class="si">%s</span><span class="s1"> expected-actual=</span><span class="si">%s</span><span class="s1"> (n=</span><span class="si">%s</span><span class="s1">) actual-expected=</span><span class="si">%s</span><span class="s1"> (n=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">nnodes</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">),</span>
+                <span class="n">diff</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span>
+                <span class="n">diff2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nids = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">stop_on_diff</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># check unique node ids</span>
+        <span class="k">for</span> <span class="n">tri</span> <span class="ow">in</span> <span class="n">tris</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">tri</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tri</span>
+        <span class="k">for</span> <span class="n">quad</span> <span class="ow">in</span> <span class="n">quads</span><span class="p">:</span>
+            <span class="c1"># assert len(unique(quad)) == 4, quad</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">quad</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">quad</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tet</span> <span class="ow">in</span> <span class="n">tets</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">tet</span><span class="p">))</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">tet</span>
+        <span class="k">for</span> <span class="n">pyram</span> <span class="ow">in</span> <span class="n">pyrams</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">pyram</span><span class="p">))</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="n">pyram</span>
+        <span class="k">for</span> <span class="n">penta</span> <span class="ow">in</span> <span class="n">pentas</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">penta</span><span class="p">))</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="n">penta</span>
+        <span class="k">for</span> <span class="n">hexa</span> <span class="ow">in</span> <span class="n">hexas</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">hexa</span><span class="p">))</span> <span class="o">==</span> <span class="mi">8</span><span class="p">,</span> <span class="n">hexa</span>
+        <span class="k">return</span> <span class="n">diff</span></div>
+
+<div class="viewcode-block" id="UGRID._check_node_ids"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID._check_node_ids">[docs]</a>    <span class="k">def</span> <span class="nf">_check_node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pids</span>
+        <span class="n">tets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span>
+        <span class="n">pyrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span>
+        <span class="n">pentas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span>
+        <span class="n">hexas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tris</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">tris</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tris</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">quads</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">quads</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tets</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">tets</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tets</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pyrams</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">pyrams</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pyrams</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pentas</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">pentas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pentas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hexas</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">hexas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hexas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UGRID.write_ugrid"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID.write_ugrid">[docs]</a>    <span class="k">def</span> <span class="nf">write_ugrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ugrid_filename_out</span><span class="p">,</span> <span class="n">check_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check_solids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a UGrid model&quot;&quot;&quot;</span>
+        <span class="n">outi</span> <span class="o">=</span> <span class="n">determine_dytpe_nfloat_endian_from_ugrid_filename</span><span class="p">(</span><span class="n">ugrid_filename_out</span><span class="p">)</span>
+        <span class="n">unused_ndarray_float</span><span class="p">,</span> <span class="n">float_fmt</span><span class="p">,</span> <span class="n">unused_nfloat</span><span class="p">,</span> <span class="n">endian</span><span class="p">,</span> <span class="n">ugrid_filename</span> <span class="o">=</span> <span class="n">outi</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">tris</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pids</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nupids=</span><span class="si">%s</span><span class="s1"> min=</span><span class="si">%s</span><span class="s1"> max=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">pids</span><span class="p">),</span> <span class="n">pids</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">pids</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no surface_ids were found&#39;</span><span class="p">)</span>
+        <span class="n">tets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span>
+        <span class="n">pyrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span>
+        <span class="n">pentas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span>
+        <span class="n">hexas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_node_ids</span><span class="p">()</span>
+
+        <span class="n">ntris</span> <span class="o">=</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nquads</span> <span class="o">=</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npids</span> <span class="o">=</span> <span class="n">pids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#print(&#39;ntris=%s nquads=%s&#39; % (ntris, nquads))</span>
+        <span class="n">ntets</span> <span class="o">=</span> <span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npyramids</span> <span class="o">=</span> <span class="n">pyrams</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npentas</span> <span class="o">=</span> <span class="n">pentas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nhexas</span> <span class="o">=</span> <span class="n">hexas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">nshells</span> <span class="o">=</span> <span class="n">ntris</span> <span class="o">+</span> <span class="n">nquads</span>
+        <span class="k">assert</span> <span class="n">nshells</span> <span class="o">==</span> <span class="n">npids</span><span class="p">,</span> <span class="s1">&#39;ntris=</span><span class="si">%s</span><span class="s1"> nquads=</span><span class="si">%s</span><span class="s1"> nshells=</span><span class="si">%s</span><span class="s1"> npids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">,</span> <span class="n">nshells</span><span class="p">,</span> <span class="n">npids</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">nsolids</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">+</span> <span class="n">npyramids</span> <span class="o">+</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span>
+        <span class="k">if</span> <span class="n">check_shells</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">nshells</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nquads=</span><span class="si">%s</span><span class="s1"> ntris=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nquads</span><span class="p">,</span> <span class="n">ntris</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nsolids</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">check_solids</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;ntets=</span><span class="si">%s</span><span class="s1"> npyramids=</span><span class="si">%s</span><span class="s1"> npentas=</span><span class="si">%s</span><span class="s1"> nhexas=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">ntets</span><span class="p">,</span> <span class="n">npyramids</span><span class="p">,</span> <span class="n">npentas</span><span class="p">,</span> <span class="n">nhexas</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing ugrid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ugrid_filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_ugrid</span><span class="p">:</span>
+            <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;7i&#39;</span><span class="p">)</span>
+            <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">,</span> <span class="n">ntets</span><span class="p">,</span> <span class="n">npyramids</span><span class="p">,</span> <span class="n">npentas</span><span class="p">,</span> <span class="n">nhexas</span><span class="p">))</span>
+
+            <span class="c1">#def _write(f_ugrid, nodes_array, endian):</span>
+                <span class="c1">#if endian == &#39;&lt;&#39;:</span>
+                    <span class="c1">#f_ugrid.write(nodes_array.ravel().tobytes())</span>
+                <span class="c1">#else:</span>
+                    <span class="c1">#nodes_array = nodes_array.byteswap()</span>
+                    <span class="c1">#f_ugrid.write(nodes_array.ravel().tobytes())</span>
+
+            <span class="c1">#_write(f_ugrid, nodes, endian)</span>
+            <span class="c1">#_write(f_ugrid, nodes, endian)</span>
+            <span class="c1">#_write(f_ugrid, tris, endian)</span>
+            <span class="c1">#_write(f_ugrid, quads, endian)</span>
+            <span class="c1">#_write(f_ugrid, pids, endian)</span>
+            <span class="c1">#_write(f_ugrid, tets, endian)</span>
+            <span class="c1">#_write(f_ugrid, pyrams, endian)</span>
+            <span class="c1">#_write(f_ugrid, pentas, endian)</span>
+            <span class="c1">#_write(f_ugrid, hexas, endian)</span>
+
+            <span class="c1"># %3f or %3d</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">float_fmt</span><span class="p">)</span> <span class="c1"># len(x,y,z) = 3</span>
+            <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+            <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">nodes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="c1"># TODO: speed up with numpy</span>
+            <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+                <span class="c1"># CTRIA3</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntris</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">tris</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+                <span class="c1"># QUAD4</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nquads</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">quads</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="c1"># PSHELL</span>
+            <span class="k">if</span> <span class="n">nshells</span><span class="p">:</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nshells</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">pids</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+                <span class="c1"># CTETRA</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">tets</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">npyramids</span><span class="p">:</span>
+                <span class="c1"># CPYRAM</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">npyramids</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">pyrams</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">npentas</span><span class="p">:</span>
+                <span class="c1"># CPENTA</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">npentas</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">pentas</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">nhexas</span><span class="p">:</span>
+                <span class="c1"># CHEXA</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="n">endian</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nhexas</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+                <span class="n">sfmt</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+                <span class="n">f_ugrid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sfmt</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">hexas</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_hanging_nodes</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="UGRID._write_bdf_solids"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID._write_bdf_solids">[docs]</a>    <span class="k">def</span> <span class="nf">_write_bdf_solids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bdf_file</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">convert_pyram_to_penta</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes the Nastran BDF solid elements&quot;&quot;&quot;</span>
+        <span class="c1">#pid = 0</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSOLID,</span><span class="si">%i</span><span class="s1">,1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CTETRA&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ CTETRA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="p">:</span>
+            <span class="c1">#card = [&#39;CTETRA&#39;, eid, pid] + list(element)</span>
+            <span class="c1">#f.write(print_int_card(card))</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CTETRA  </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">convert_pyram_to_penta</span><span class="p">:</span>
+            <span class="c1"># skipping the penta5s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CPYRAM as CPENTA with node6=node5&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ CPYRAM - CPENTA5</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">:</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CPENTA  </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="n">element</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+                <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CPYRAM&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ CPYRAM - CPENTA5</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">:</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CPYRAM  </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+                <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CPENTA&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ CPENTA6</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span><span class="p">:</span>
+            <span class="c1">#card = [&#39;CPENTA&#39;, eid, pid] + list(element)</span>
+            <span class="c1">#f.write(print_int_card(card))</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CPENTA  </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;writing CHEXA&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ CHEXA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">:</span>
+            <span class="c1">#card = [&#39;CHEXA&#39;, eid, pid] + list(element)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CHEXA   </span><span class="si">%-8i%-8i%-8i%-8i%-8i%-8i%-8i%-8i</span><span class="se">\n</span><span class="s1">        </span><span class="si">%-8i%-8i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="n">element</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">element</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
+            <span class="c1">#f.write(print_int_card(card))</span>
+            <span class="n">eid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span></div>
+
+<div class="viewcode-block" id="UGRID.skin_solids"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.UGRID.skin_solids">[docs]</a>    <span class="k">def</span> <span class="nf">skin_solids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finds the CTRIA3s and CQUAD4 elements on the surface of the solid&quot;&quot;&quot;</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nhexas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npenta6s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta6s</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npenta5s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ntets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">nquads</span> <span class="o">=</span> <span class="n">nhexas</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">npenta5s</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">npenta6s</span>
+        <span class="n">ntris</span> <span class="o">=</span> <span class="n">npenta5s</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">npenta6s</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ntris=</span><span class="si">%s</span><span class="s1"> nquads=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+            <span class="n">tris</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+            <span class="n">quads</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nquads</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="n">ntri_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nquad_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+            <span class="n">faces1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+            <span class="n">faces2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+            <span class="n">faces3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+            <span class="n">faces4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+            <span class="n">tris</span><span class="p">[:</span><span class="n">ntets</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces1</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntets</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntets</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces2</span>
+            <span class="n">tris</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">ntets</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">ntets</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces3</span>
+            <span class="n">tris</span><span class="p">[</span><span class="mi">3</span><span class="o">*</span><span class="n">ntets</span><span class="p">:</span><span class="mi">4</span><span class="o">*</span><span class="n">ntets</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces4</span>
+            <span class="n">ntri_start</span> <span class="o">+=</span> <span class="mi">4</span><span class="o">*</span><span class="n">ntets</span>
+
+        <span class="k">if</span> <span class="n">nhexas</span><span class="p">:</span>
+            <span class="c1"># btm (1-2-3-4)</span>
+            <span class="c1"># top (5-6-7-8)</span>
+            <span class="c1"># left (1-4-8-5</span>
+            <span class="c1"># right (2-3-7-6)</span>
+            <span class="c1"># front (1-2-6-5)</span>
+            <span class="c1"># back (4-3-7-8)</span>
+            <span class="n">faces1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span> <span class="c1"># 1,2,3,4</span>
+            <span class="n">faces2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span> <span class="c1"># 5,6,7,8</span>
+            <span class="n">faces3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">faces4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
+            <span class="n">faces5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">faces6</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>
+            <span class="n">quads</span><span class="p">[:</span> <span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces1</span>
+            <span class="n">quads</span><span class="p">[</span><span class="n">nhexas</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces2</span>
+            <span class="n">quads</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">nhexas</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces3</span>
+            <span class="n">quads</span><span class="p">[</span><span class="mi">3</span><span class="o">*</span><span class="n">nhexas</span><span class="p">:</span><span class="mi">4</span><span class="o">*</span><span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces4</span>
+            <span class="n">quads</span><span class="p">[</span><span class="mi">4</span><span class="o">*</span><span class="n">nhexas</span><span class="p">:</span><span class="mi">5</span><span class="o">*</span><span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces5</span>
+            <span class="n">quads</span><span class="p">[</span><span class="mi">5</span><span class="o">*</span><span class="n">nhexas</span><span class="p">:</span><span class="mi">6</span><span class="o">*</span><span class="n">nhexas</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces6</span>
+            <span class="n">nquad_start</span> <span class="o">+=</span> <span class="mi">6</span><span class="o">*</span><span class="n">nhexas</span>
+
+        <span class="k">if</span> <span class="n">npenta5s</span><span class="p">:</span>
+            <span class="n">faces1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span> <span class="c1"># 1,2,3,4</span>
+            <span class="n">quads</span><span class="p">[</span><span class="n">nquad_start</span><span class="p">:</span><span class="n">nquad_start</span><span class="o">+</span><span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces1</span>
+
+            <span class="n">faces2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">faces3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">faces4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">faces5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span>           <span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span>  <span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces2</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span><span class="o">+</span>  <span class="n">npenta5s</span><span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces3</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces4</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">4</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces5</span>
+            <span class="n">ntri_start</span> <span class="o">+=</span> <span class="mi">4</span><span class="o">*</span><span class="n">npenta5s</span>
+
+        <span class="k">if</span> <span class="n">npenta6s</span><span class="p">:</span>
+            <span class="n">faces1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+            <span class="n">faces2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
+            <span class="n">quads</span><span class="p">[</span><span class="n">nquad_start</span>         <span class="p">:</span><span class="n">nquad_start</span><span class="o">+</span>  <span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces1</span>
+            <span class="n">quads</span><span class="p">[</span><span class="n">nquad_start</span><span class="o">+</span><span class="n">npenta5s</span><span class="p">:</span><span class="n">nquad_start</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">npenta5s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces2</span>
+
+            <span class="n">faces3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+            <span class="n">faces4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+            <span class="n">faces5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">penta5s</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span>           <span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span>  <span class="n">npenta6s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces3</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span><span class="o">+</span>  <span class="n">npenta6s</span><span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">npenta6s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces4</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">npenta6s</span><span class="p">:</span><span class="n">ntri_start</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">npenta6s</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces5</span>
+        <span class="c1">#from numpy.lib.arraysetops import unique</span>
+        <span class="c1">#from numpy import lexsort</span>
+
+        <span class="c1">#-----------------------------------------</span>
+        <span class="c1"># we have two merged triangle faces of two neighboring TETRAs</span>
+        <span class="c1"># and we need to merge them</span>
+        <span class="c1">#</span>
+        <span class="c1"># this could likely be much, much more efficient</span>
+
+        <span class="n">tri_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tris</span><span class="p">)</span>
+        <span class="n">quad_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ntris</span><span class="p">:</span>
+                <span class="c1">#print(tris)</span>
+                <span class="c1">#tris = tris.sort()</span>
+                <span class="c1">#print(tris)</span>
+                <span class="n">tri_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="c1">#tris = tris.sort()</span>
+                <span class="k">for</span> <span class="n">tri</span> <span class="ow">in</span> <span class="n">tris</span><span class="p">:</span>
+                    <span class="n">tri_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tri</span><span class="p">))</span>
+                <span class="n">tri_array</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tri_set</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tri_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+            <span class="k">if</span> <span class="n">nquads</span><span class="p">:</span>
+                <span class="n">quads</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="n">unused_quad_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="c1"># if tris:</span>
+                    <span class="c1"># tris = vstack(tris)</span>
+                    <span class="c1"># tris.sort(axis=0)</span>
+                    <span class="c1"># tris = unique_rows(tris)</span>
+                <span class="c1"># if quads:</span>
+                    <span class="c1"># quads = vstack(quads)</span>
+                    <span class="c1"># quads.sort(axis=0)</span>
+                    <span class="c1"># quads = unique_rows(tris)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">quad_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
+
+        <span class="c1">#print(tris)</span>
+        <span class="c1">#print(quads)</span>
+        <span class="k">return</span> <span class="n">tris</span><span class="p">,</span> <span class="n">quad_array</span></div></div>
+
+
+<div class="viewcode-block" id="determine_dytpe_nfloat_endian_from_ugrid_filename"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.ugrid.ugrid_reader.determine_dytpe_nfloat_endian_from_ugrid_filename">[docs]</a><span class="k">def</span> <span class="nf">determine_dytpe_nfloat_endian_from_ugrid_filename</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;figures out what the format of the binary data is based on the filename&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ugrid_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pyNastran.utils.gui_io</span> <span class="kn">import</span> <span class="n">load_file_dialog</span>
+        <span class="n">wildcard_wx</span> <span class="o">=</span> <span class="s2">&quot;AFLR3 UGRID (*.ugrid)|&quot;</span> \
+            <span class="s2">&quot;*.ugrid|&quot;</span> \
+            <span class="s2">&quot;All files (*.*)|*.*&quot;</span>
+        <span class="n">wildcard_qt</span> <span class="o">=</span> <span class="s2">&quot;AFLR3 UGRID (*.ugrid);;All files (*)&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Please select an AFLR3 UGRID to load&#39;</span>
+        <span class="n">ugrid_filename</span> <span class="o">=</span> <span class="n">load_file_dialog</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">wildcard_wx</span><span class="p">,</span> <span class="n">wildcard_qt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">ugrid_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ugrid_filename</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">unused_base</span><span class="p">,</span> <span class="n">file_format</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">ugrid_filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;expected file of the form &quot;model.b8.ugrid&quot; &#39;</span>
+               <span class="s1">&#39;or &quot;model.lb4.ugrid&quot;; actual=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ugrid_filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;ugrid&#39;</span><span class="p">,</span> <span class="s1">&#39;extension=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ext</span>
+
+    <span class="k">if</span> <span class="s1">&#39;8&#39;</span> <span class="ow">in</span> <span class="n">file_format</span><span class="p">:</span>
+        <span class="n">ndarray_float</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
+        <span class="n">float_fmt</span> <span class="o">=</span> <span class="s1">&#39;d&#39;</span>
+        <span class="n">nfloat</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="k">elif</span> <span class="s1">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">file_format</span><span class="p">:</span>
+        <span class="n">ndarray_float</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>
+        <span class="n">float_fmt</span> <span class="o">=</span> <span class="s1">&#39;f&#39;</span>
+        <span class="n">nfloat</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># ???</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;file_format=</span><span class="si">%r</span><span class="s1"> ugrid_filename=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file_format</span><span class="p">,</span> <span class="n">ugrid_filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;lb&#39;</span> <span class="ow">in</span> <span class="n">file_format</span><span class="p">:</span>  <span class="c1"># C binary, little endian</span>
+        <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&lt;&#39;</span>
+    <span class="k">elif</span> <span class="s1">&#39;b&#39;</span> <span class="ow">in</span> <span class="n">file_format</span><span class="p">:</span> <span class="c1"># C binary, big endian</span>
+        <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span>
+    <span class="c1">#elif &#39;lr&#39; in file_format: # Fortran unformatted binary, little endian</span>
+        <span class="c1">#endian = &#39;&gt;&#39;</span>
+    <span class="c1">#elif &#39;r&#39; in file_format:  # Fortran unformatted binary, big endian</span>
+        <span class="c1">#endian = &#39;&gt;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># fortran unformatted</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;file_format=</span><span class="si">%r</span><span class="s1"> ugrid_filename=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file_format</span><span class="p">,</span> <span class="n">ugrid_filename</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ndarray_float</span><span class="p">,</span> <span class="n">float_fmt</span><span class="p">,</span> <span class="n">nfloat</span><span class="p">,</span> <span class="n">endian</span><span class="p">,</span> <span class="n">ugrid_filename</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

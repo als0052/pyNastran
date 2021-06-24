@@ -1,0 +1,671 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.geom.dit &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.geom.dit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.geom.dit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines readers for BDF objects in the OP2 DIT/DITS table</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span><span class="p">,</span> <span class="n">error</span> <span class="k">as</span> <span class="n">struct_error</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.aero.dynamic_loads</span> <span class="kn">import</span> <span class="n">GUST</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.bdf_tables</span> <span class="kn">import</span> <span class="p">(</span><span class="n">TABLED1</span><span class="p">,</span> <span class="n">TABLED2</span><span class="p">,</span> <span class="n">TABLED3</span><span class="p">,</span> <span class="n">TABLED4</span><span class="p">,</span>
+                                            <span class="n">TABLEM1</span><span class="p">,</span> <span class="n">TABLEM2</span><span class="p">,</span> <span class="n">TABLEM3</span><span class="p">,</span> <span class="n">TABLEM4</span><span class="p">,</span>
+                                            <span class="n">TABRND1</span><span class="p">,</span> <span class="n">TABDMP1</span><span class="p">,</span> <span class="n">TABLES1</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom_common</span> <span class="kn">import</span> <span class="n">GeomCommon</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_reader</span> <span class="kn">import</span> <span class="n">mapfmt</span><span class="p">,</span> <span class="n">reshape_bytes_block</span>
+
+
+<div class="viewcode-block" id="DIT"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.dit.html#pyNastran.op2.tables.geom.dit.DIT">[docs]</a><span class="k">class</span> <span class="nc">DIT</span><span class="p">(</span><span class="n">GeomCommon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines methods for reading op2 tables&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_read_dit_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dit_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GeomCommon</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dit_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">1005</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">174</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GUST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_gust</span><span class="p">],</span>     <span class="c1"># record 1</span>
+            <span class="p">(</span><span class="mi">1105</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">133</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLED1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabled1</span><span class="p">],</span>  <span class="c1"># record 4</span>
+            <span class="p">(</span><span class="mi">1205</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">134</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLED2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabled2</span><span class="p">],</span>  <span class="c1"># record 5</span>
+            <span class="p">(</span><span class="mi">1305</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">140</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLED3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabled3</span><span class="p">],</span>  <span class="c1"># record 6</span>
+            <span class="p">(</span><span class="mi">1405</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">141</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABLED4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabled4</span><span class="p">],</span>  <span class="c1"># record 7-MSC</span>
+            <span class="c1">#(4201, 42, 648) : [&#39;TABLEDR&#39;, self._read_tabledr], # record 8-MSC</span>
+
+            <span class="p">(</span><span class="mi">105</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">93</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLEM1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tablem1</span><span class="p">],</span> <span class="c1"># record 9</span>
+            <span class="p">(</span><span class="mi">205</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">94</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLEM2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tablem2</span><span class="p">],</span>  <span class="c1"># record 10</span>
+            <span class="p">(</span><span class="mi">305</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">95</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLEM3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tablem3</span><span class="p">],</span>  <span class="c1"># record 11</span>
+            <span class="p">(</span><span class="mi">405</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">96</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLEM4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tablem4</span><span class="p">],</span> <span class="c1"># record 12</span>
+
+            <span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">191</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABRND1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabrnd1</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">162</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABDMP1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabdmp1</span><span class="p">],</span>   <span class="c1"># NX</span>
+            <span class="p">(</span><span class="mi">56</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">303</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABRNDG&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tabrndg</span><span class="p">],</span>   <span class="c1"># NX</span>
+            <span class="p">(</span><span class="mi">3105</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">97</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TABLES1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tables1</span><span class="p">],</span>  <span class="c1"># record 13 - TABLES1 (NX)</span>
+            <span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">460</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABLE3D&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+
+            <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\htab11.op2</span>
+            <span class="p">(</span><span class="mi">14705</span><span class="p">,</span> <span class="mi">147</span><span class="p">,</span> <span class="mi">618</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABLEHT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">14605</span><span class="p">,</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">617</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABLEH1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+
+            <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\n10640b.op2</span>
+            <span class="p">(</span><span class="mi">1905</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">178</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TABLEST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabdmp1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABDMP1(15, 21, 162)</span>
+
+<span class="sd">        1 ID    I  Table identification number</span>
+<span class="sd">        9 F     RS Natural frequency</span>
+<span class="sd">        10 G    RS Damping</span>
+<span class="sd">        Words 9 through 10 repeat until (-1,-1) occurs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#nfields = (ndata - n) // 4</span>
+
+        <span class="n">datan</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span>
+        <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">datan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idtype8</span><span class="p">)</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">datan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdtype8</span><span class="p">)</span>
+        <span class="n">iminus1_delta</span> <span class="o">=</span> <span class="n">get_iend_from_ints</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span>
+        <span class="n">istart</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">iend</span> <span class="ow">in</span> <span class="n">iminus1_delta</span><span class="p">:</span>
+            <span class="c1">#datai = data[n+istart*4 : n+iend*4]</span>
+            <span class="n">tid</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">istart</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">deltai</span> <span class="o">=</span> <span class="n">iend</span> <span class="o">-</span> <span class="n">istart</span> <span class="o">-</span> <span class="mi">8</span> <span class="c1"># subtract 2 for sid, global scale</span>
+            <span class="k">assert</span> <span class="n">deltai</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="n">istart</span><span class="o">*</span><span class="mi">4</span> <span class="p">:</span> <span class="n">n</span><span class="o">+</span><span class="n">iend</span><span class="o">*</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;if&#39;</span><span class="p">))</span>
+
+            <span class="n">xy</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">istart</span><span class="o">+</span><span class="mi">8</span><span class="p">:</span><span class="n">iend</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">deltai</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">TABDMP1</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Type</span><span class="o">=</span><span class="s1">&#39;G&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_sdamping</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">table</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_sdamping</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_table_sdamping_object</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">istart</span> <span class="o">=</span> <span class="n">iend</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;TABDMP1&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabrndg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABRNDG(56, 26, 303)</span>
+<span class="sd">        Power spectral density for gust loads in aeroelastic analysis.</span>
+
+<span class="sd">        1 ID        I   Table identification number</span>
+<span class="sd">        2 TYPE      I   Power spectral density type</span>
+<span class="sd">        3 LU        RS  Scale of turbulence divided by velocity</span>
+<span class="sd">        4 WG        RS  Root-mean-square gust velocity</span>
+<span class="sd">        5 UNDEF(4) none Not used</span>
+<span class="sd">        Words 1 through 8 repeat until (-1,-1) occurs</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="c1"># - n</span>
+        <span class="k">assert</span> <span class="n">ndata</span> <span class="o">==</span> <span class="mi">52</span><span class="p">,</span> <span class="n">ndata</span>
+        <span class="n">struct_2i2f4i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;2i2f4i&#39;</span><span class="p">)</span>
+        <span class="c1">#struct_ff = Struct(&#39;ff&#39;)</span>
+        <span class="c1">#struct_2i = self.struct_2i</span>
+        <span class="k">while</span> <span class="n">ndata</span> <span class="o">-</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">32</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_2i2f4i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">table_type</span><span class="p">,</span> <span class="n">lu</span><span class="p">,</span> <span class="n">wg</span><span class="p">,</span> <span class="n">unused_dunno_a</span><span class="p">,</span>
+             <span class="n">unused_dunno_b</span><span class="p">,</span> <span class="n">unused_dunno_c</span><span class="p">,</span> <span class="n">unused_dunno_d</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="n">tid</span> <span class="o">&gt;</span> <span class="mi">100000000</span><span class="p">:</span>
+                <span class="n">tid</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">tid</span> <span class="o">-</span> <span class="mi">100000000</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">32</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_tabrndg</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">table_type</span><span class="p">,</span> <span class="n">lu</span><span class="p">,</span> <span class="n">wg</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1">#nentries += 1</span>
+        <span class="c1">#self.increase_card_count(&#39;TABRNDG&#39;, nentries)</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">8</span>  <span class="c1">#  for the (-1,-1)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tables1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;TABLES1(3105, 31, 97)&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table1</span><span class="p">(</span><span class="n">TABLES1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_table_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLES1&#39;</span><span class="p">,</span>
+                              <span class="n">add_codes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_gust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GUST(1005,10,174) - the marker for Record 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">20</span>  <span class="c1"># 5*4</span>
+        <span class="n">struct_2i3f</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;ii3f&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">20</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_2i3f</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1"># (sid, dload, wg, x0, V) = out</span>
+            <span class="n">gust</span> <span class="o">=</span> <span class="n">GUST</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_gust_object</span><span class="p">(</span><span class="n">gust</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">20</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1">#TABDMP1</span>
+<span class="c1">#TABLE3D</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabled1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLED1(1105,11,133) - the marker for Record 4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table1</span><span class="p">(</span><span class="n">TABLED1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tabled_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLED1&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_table1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">add_method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">add_codes</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">struct_8i2f</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;8iff&#39;</span><span class="p">)</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2i</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">struct_8i2f</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;8qdd&#39;</span><span class="p">)</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;dd&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2q</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">16</span>
+
+        <span class="k">while</span> <span class="n">ndata</span> <span class="o">-</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="n">ntotal1</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal1</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_8i2f</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">code_x</span><span class="p">,</span> <span class="n">code_y</span><span class="p">,</span> <span class="n">unused_a</span><span class="p">,</span> <span class="n">unused_b</span><span class="p">,</span> <span class="n">unused_c</span><span class="p">,</span> <span class="n">unused_d</span><span class="p">,</span> <span class="n">unused_e</span><span class="p">,</span>
+             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="n">tid</span> <span class="o">&gt;</span> <span class="mi">100000000</span><span class="p">:</span>
+                <span class="n">tid</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">tid</span> <span class="o">-</span> <span class="mi">100000000</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">add_codes</span><span class="p">:</span>
+                <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span><span class="p">,</span> <span class="n">code_x</span><span class="p">,</span> <span class="n">code_y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal1</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_ff</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="k">if</span> <span class="p">[</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_in</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+
+            <span class="c1">#print(&#39;data_in =&#39;, data_in)</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">slot</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">table</span> <span class="o">==</span> <span class="n">slot</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">add_method</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabled2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLED2(1205,12,134) - the marker for Record 5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table2</span><span class="p">(</span><span class="n">TABLED2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tabled_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLED2&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_table2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">add_method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1 ID    I  Table identification number</span>
+<span class="sd">        2 X1    RS X-axis shift</span>
+<span class="sd">        3 FLAG  I  Extrapolation on/off flag</span>
+<span class="sd">        4 UNDEF I  None</span>
+<span class="sd">        9  X RS X  value</span>
+<span class="sd">        10 Y RS Y  value</span>
+<span class="sd">        Words 9 through 10 repeat until (-1,-1) occurs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;ifiiiiiiff&#39;</span><span class="p">)</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2i</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;qdqqqqqqdd&#39;</span><span class="p">)</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;dd&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2q</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">ndata</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal1</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">unused_a</span><span class="p">,</span> <span class="n">unused_b</span><span class="p">,</span> <span class="n">unused_c</span><span class="p">,</span> <span class="n">unused_d</span><span class="p">,</span> <span class="n">unused_e</span><span class="p">,</span> <span class="n">unused_f</span><span class="p">,</span>
+             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal1</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_ff</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="k">if</span> <span class="p">[</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_in</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="n">add_method</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabled3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLED3(1305,13,140) - the marker for Record 6</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table3</span><span class="p">(</span><span class="n">TABLED3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tabled_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLED3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tabled4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLED4 - the marker for Record 7</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table4</span><span class="p">(</span><span class="n">TABLED4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tabled_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLED4&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1">#TABLEDR</span>
+
+    <span class="k">def</span> <span class="nf">_read_tablem1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLEM1(105,1,93) - the marker for Record 9</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table1</span><span class="p">(</span><span class="n">TABLEM1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tablem_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLEM1&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tablem2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLEM2(205,2,94) - the marker for Record 10</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table2</span><span class="p">(</span><span class="n">TABLEM2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tablem_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLEM2&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tablem3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLEM3(305,3,95) - the marker for Record 11</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table3</span><span class="p">(</span><span class="n">TABLEM3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tablem_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLEM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tablem4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABLEM4(405,4,96) - the marker for Record 12</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_table4</span><span class="p">(</span><span class="n">TABLEM4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_tablem_object</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;TABLEM4&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_table3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">add_method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">8</span>
+            <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;iffiiiiiff&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2i</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">16</span>
+            <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;qddqqqqqdd&#39;</span><span class="p">)</span>
+            <span class="n">struct_2i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_2q</span>
+            <span class="n">struct_ff</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;dd&#39;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">ndata</span> <span class="o">-</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="n">ntotal1</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal1</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">unused_a</span><span class="p">,</span> <span class="n">unused_b</span><span class="p">,</span> <span class="n">unused_c</span><span class="p">,</span> <span class="n">unused_d</span><span class="p">,</span> <span class="n">unused_e</span><span class="p">,</span>
+             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal1</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_ff</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal2</span><span class="p">])</span>
+
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="k">if</span> <span class="p">[</span><span class="n">xint</span><span class="p">,</span> <span class="n">yint</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_in</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+            <span class="n">add_method</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_table4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">add_method</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        1 ID I Table identification number</span>
+<span class="sd">        2 X1 RS X-axis shift</span>
+<span class="sd">        3 X2 RS X-axis normalization</span>
+<span class="sd">        4 X3 RS X value when x is less than X3</span>
+<span class="sd">        5 X4 RS X value when x is greater than X4</span>
+<span class="sd">        6 UNDEF(3 ) None</span>
+<span class="sd">        9 A RS</span>
+<span class="sd">        Word 9 repeats until End of Record (-1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">struct1</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i 4f 3i f i&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
+        <span class="n">struct_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_i</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_q</span>
+        <span class="n">struct_f</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;f&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">ntotal1</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">36</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">ndata</span> <span class="o">-</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="n">ntotal1</span><span class="p">:</span>
+                <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal1</span><span class="p">]</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">struct1</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">x4</span><span class="p">,</span> <span class="n">unused_a</span><span class="p">,</span> <span class="n">unused_b</span><span class="p">,</span> <span class="n">unused_c</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">test_minus1</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="n">data_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">tid</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">x4</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="k">if</span> <span class="n">test_minus1</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">n</span> <span class="o">+=</span> <span class="n">size</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">xint</span><span class="p">,</span> <span class="o">=</span> <span class="n">struct_i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">size</span><span class="p">])</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="o">=</span> <span class="n">struct_f</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">size</span><span class="p">])</span>
+
+                        <span class="n">n</span> <span class="o">+=</span> <span class="n">size</span>
+                        <span class="k">if</span> <span class="n">xint</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">data_in</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+                <span class="n">add_method</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+                <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="n">struct_error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed parsing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">table_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n0</span><span class="p">:],</span> <span class="s1">&#39;if&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">edata</span><span class="p">,</span> <span class="s1">&#39;if&#39;</span><span class="p">)</span>
+            <span class="c1">#n = n0 + ndata</span>
+            <span class="k">raise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1">#TABLEST</span>
+    <span class="k">def</span> <span class="nf">_read_tabrnd1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TABRND1(55,25,191)</span>
+
+<span class="sd">        1 ID    I Table identification number</span>
+<span class="sd">        2 CODEX I Type of interpolation for the x-axis</span>
+<span class="sd">        3 CODEY I Type of interpolation for the y-axis</span>
+<span class="sd">        4 UNDEF(5) None</span>
+<span class="sd">        9 F    RS Frequency</span>
+<span class="sd">        10 G   RS Power spectral density</span>
+<span class="sd">        Words 9 through 10 repeat until (-1,-1) occurs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#nfields = (ndata - n) // 4</span>
+
+        <span class="n">datan</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span>
+        <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">datan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idtype</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">datan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdtype</span><span class="p">)</span>
+        <span class="n">iminus1_delta</span> <span class="o">=</span> <span class="n">get_iend_from_ints</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span>
+        <span class="n">istart</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">iend</span> <span class="ow">in</span> <span class="n">iminus1_delta</span><span class="p">:</span>
+            <span class="c1">#datai = data[n+istart*4 : n+iend*4]</span>
+            <span class="n">tid</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">istart</span><span class="p">]</span>
+            <span class="n">codex</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">istart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">codey</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">istart</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="c1">#print(&#39;  sid=%s global_scale=%s&#39; % (sid, global_scale))</span>
+            <span class="n">deltai</span> <span class="o">=</span> <span class="n">iend</span> <span class="o">-</span> <span class="n">istart</span> <span class="o">-</span> <span class="mi">8</span> <span class="c1"># subtract 2 for sid, global scale</span>
+            <span class="k">assert</span> <span class="n">deltai</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="n">istart</span><span class="o">*</span><span class="mi">4</span> <span class="p">:</span> <span class="n">n</span><span class="o">+</span><span class="n">iend</span><span class="o">*</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;if&#39;</span><span class="p">))</span>
+
+            <span class="n">xy</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">istart</span><span class="o">+</span><span class="mi">8</span><span class="p">:</span><span class="n">iend</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">deltai</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">codex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
+            <span class="k">elif</span> <span class="n">codex</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="s1">&#39;LOG&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">codex</span><span class="p">)</span> <span class="c1"># LOG</span>
+            <span class="k">if</span> <span class="n">codey</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">yaxis</span> <span class="o">=</span> <span class="s1">&#39;LINEAR&#39;</span>
+            <span class="k">elif</span> <span class="n">codey</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">yaxis</span> <span class="o">=</span> <span class="s1">&#39;LOG&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">codey</span><span class="p">)</span> <span class="c1"># LOG</span>
+
+            <span class="n">table</span> <span class="o">=</span> <span class="n">TABRND1</span><span class="p">(</span><span class="n">tid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xaxis</span><span class="o">=</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="n">yaxis</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_random_table_object</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">istart</span> <span class="o">=</span> <span class="n">iend</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;TABRND1&#39;</span><span class="p">,</span> <span class="n">nentries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_iend_from_ints"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.dit.html#pyNastran.op2.tables.geom.dit.get_iend_from_ints">[docs]</a><span class="k">def</span> <span class="nf">get_iend_from_ints</span><span class="p">(</span><span class="n">ints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    istart = iend + 2</span>
+<span class="sd">    for (-1, -1) flag to end a table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#debug = True</span>
+    <span class="n">iminus1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ints</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">iminus1</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">iminus1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#if debug:</span>
+        <span class="c1">#print(&quot;ints =&quot;, ints)</span>
+        <span class="c1">#print(&quot;iminus1 =&quot;, iminus1)</span>
+        <span class="c1">#print(&quot;delta =&quot;, delta)</span>
+    <span class="n">idelta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">delta</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1">#if debug:</span>
+        <span class="c1">#print(&quot;idelta =&quot;, idelta)</span>
+        <span class="c1">#print(&#39;delta[idelta] =&#39;, delta[idelta])</span>
+    <span class="n">iminus1_delta</span> <span class="o">=</span> <span class="n">iminus1</span><span class="p">[</span><span class="n">idelta</span><span class="p">]</span>
+    <span class="c1">#if debug:</span>
+        <span class="c1">#print(&quot;iminus1_delta =&quot;, iminus1_delta)</span>
+    <span class="k">return</span> <span class="n">iminus1_delta</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.elements.springs &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.elements.springs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.elements.springs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103,R0902,R0904,R0914</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All spring elements are defined in this file.  This includes:</span>
+
+<span class="sd"> * CELAS1</span>
+<span class="sd"> * CELAS2</span>
+<span class="sd"> * CELAS3</span>
+<span class="sd"> * CELAS4</span>
+
+<span class="sd">All spring elements are SpringElement and Element objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">Element</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">integer_or_blank</span><span class="p">,</span> <span class="n">double</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_card_16</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="SpringElement"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.SpringElement">[docs]</a><span class="k">class</span> <span class="nc">SpringElement</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Element</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SpringElement.Mass"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.SpringElement.Mass">[docs]</a>    <span class="k">def</span> <span class="nf">Mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+<div class="viewcode-block" id="SpringElement.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.SpringElement.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SpringElement.write_card_16"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.SpringElement.write_card_16">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="CELAS1"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1">[docs]</a><span class="k">class</span> <span class="nc">CELAS1</span><span class="p">(</span><span class="n">SpringElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+-----+----+----+----+----+</span>
+<span class="sd">    |    1   |  2  |  3  |  4 |  5 |  6 |  7 |</span>
+<span class="sd">    +========+=====+=====+====+====+====+====+</span>
+<span class="sd">    | CELAS1 | EID | PID | G1 | C1 | G2 | C2 |</span>
+<span class="sd">    +--------+-----+-----+----+----+----+----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CELAS1&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;c1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="s1">&#39;c2&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">def</span> <span class="nf">_update_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1">=</span><span class="si">%r</span><span class="s1"> is an invalid </span><span class="si">%s</span><span class="s1"> entry.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a CELAS1 card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        eid : int</span>
+<span class="sd">            element id</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id (PELAS)</span>
+<span class="sd">        nids : List[int, int]</span>
+<span class="sd">            node ids</span>
+<span class="sd">        c1 / c2 : int; default=0</span>
+<span class="sd">            DOF for nid1 / nid2</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SpringElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="c1">#: property ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="c1">#: component number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="n">c1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_node_ids</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CELAS1.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the elements in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="c1">#comments.append(element.comment)</span>
+            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nid</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+            <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">element</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">c2</span><span class="p">])</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">eids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;components&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">components</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS1.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS1 card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;eid&#39;</span><span class="p">)</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;g1&#39;</span><span class="p">),</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;g2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+
+        <span class="c1">#: component number</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;c1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;c2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;len(CELAS1 card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CELAS1</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS1 card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">CELAS1</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS1.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;on</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s1"> is invalid validComponents=[0,1,2,3,4,5,6]&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;c1=</span><span class="si">%r</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;c2=</span><span class="si">%r</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS1 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS1.get_edge_ids"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.get_edge_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_edge_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">))]</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span>
+        <span class="c1">#ge = self.ge</span>
+        <span class="c1">#s = self.s</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;c1=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">c1</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;c2=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">c2</span>
+        <span class="c1">#assert isinstance(ge, float), &#39;ge=%r&#39; % ge</span>
+        <span class="c1">#assert isinstance(s, float), &#39;ge=%r&#39; % s</span>
+        <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PELAS&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;k=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="c1">#for nodeID, node in zip(node_ids, self.nodes):</span>
+                <span class="c1">#assert node.node.nid</span>
+
+<div class="viewcode-block" id="CELAS1.K"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.K">[docs]</a>    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">k</span></div>
+
+<div class="viewcode-block" id="CELAS1.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS1 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS1.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS1 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS1.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CELAS1.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CELAS1.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS1.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CELAS2"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2">[docs]</a><span class="k">class</span> <span class="nc">CELAS2</span><span class="p">(</span><span class="n">SpringElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+-----+----+----+----+----+----+----+</span>
+<span class="sd">    |    1   |  2  |  3  |  4 |  5 |  6 |  7 |  8 |  9 |</span>
+<span class="sd">    +========+=====+=====+====+====+====+====+====+====+</span>
+<span class="sd">    | CELAS2 | EID |  K  | G1 | C1 | G2 | C2 | GE | S  |</span>
+<span class="sd">    +--------+-----+-----+----+----+----+----+----+----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CELAS2&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;c1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="s1">&#39;c2&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">cp_name_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;K&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;GE&#39;</span> <span class="p">:</span> <span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span> <span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">}</span>
+    <span class="k">def</span> <span class="nf">_update_field_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Field </span><span class="si">%r</span><span class="s1">=</span><span class="si">%r</span><span class="s1"> is an invalid </span><span class="si">%s</span><span class="s1"> entry.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a CELAS2 card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        eid : int</span>
+<span class="sd">            element id</span>
+<span class="sd">        k : float</span>
+<span class="sd">            spring stiffness</span>
+<span class="sd">        nids : List[int, int]</span>
+<span class="sd">            SPOINT ids</span>
+<span class="sd">            node ids</span>
+<span class="sd">        c1 / c2 : int; default=0</span>
+<span class="sd">            DOF for nid1 / nid2</span>
+<span class="sd">        ge : int; default=0.0</span>
+<span class="sd">            damping coefficient</span>
+<span class="sd">        s : float; default=0.0</span>
+<span class="sd">            stress coefficient</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SpringElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="c1">#: stiffness of the scalar spring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="c1">#: component number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="n">c1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span>
+        <span class="c1">#: damping coefficient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="n">ge</span>
+        <span class="c1">#: stress coefficient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_node_ids</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CELAS2.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the elements in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="c1">#comments.append(element.comment)</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">ge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ge</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nid</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+            <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">element</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">c2</span><span class="p">])</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">eids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">ge</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;components&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">components</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS2.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS2 card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;eid&#39;</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;g1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;g2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;c1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;c2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;len(CELAS2 card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CELAS2</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS2 card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">CELAS2</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS2.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;on</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s1"> is invalid validComponents=[0,1,2,3,4,5,6]&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;c1=</span><span class="si">%r</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;c2=</span><span class="si">%r</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;Thee nodes=</span><span class="si">%s</span><span class="s1"> must be unique or dofs=[</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] must not be &#39;</span>
+                <span class="s1">&#39;the same; CELAS2 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS2 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS2.get_edge_ids"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.get_edge_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_edge_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">))]</span></div>
+
+<div class="viewcode-block" id="CELAS2.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS2 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS2.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS2 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS2.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">()</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ge</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;c1=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">c1</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;c2=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">c2</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;k=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ge</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;ge=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ge</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;ge=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">s</span>
+        <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="c1">#for node_id, node in zip(node_id, self.nodes):</span>
+                <span class="c1">#assert node.node.nid</span>
+
+<div class="viewcode-block" id="CELAS2.K"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.K">[docs]</a>    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span></div>
+
+<div class="viewcode-block" id="CELAS2.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span>
+                       <span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CELAS2.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span>
+                       <span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CELAS2.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS2.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CELAS3"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3">[docs]</a><span class="k">class</span> <span class="nc">CELAS3</span><span class="p">(</span><span class="n">SpringElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+-----+----+----+</span>
+<span class="sd">    |    1   |  2  |  3  |  4 |  5 |</span>
+<span class="sd">    +========+=====+=====+====+====+</span>
+<span class="sd">    | CELAS3 | EID | PID | S1 | S2 |</span>
+<span class="sd">    +--------+-----+-----+----+----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CELAS3&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="c1">#4:&#39;s1&#39;, 6:&#39;s2&#39;,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a CELAS3 card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        eid : int</span>
+<span class="sd">            element id</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id (PELAS)</span>
+<span class="sd">        nids : List[int, int]</span>
+<span class="sd">            SPOINT ids</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SpringElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="c1">#: property ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="c1">#: Scalar point identification numbers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CELAS3.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the elements in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="c1">#comments.append(element.comment)</span>
+            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">eids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS3.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS3 card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;eid&#39;</span><span class="p">)</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;s1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;s2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;len(CELAS3 card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CELAS3</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS3 card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">CELAS3</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS3.K"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.K">[docs]</a>    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">k</span></div>
+
+<div class="viewcode-block" id="CELAS3.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS3 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS3.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS3 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="c1">#self.nodes_ref = model.safe_empty_nodes(self.node_ids, msg=msg)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS3.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS3 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS3.get_edge_ids"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.get_edge_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_edge_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1">#ge = self.ge</span>
+        <span class="c1">#s = self.s</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;eid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">eid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;s1=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">s1</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;s2=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">s2</span>
+        <span class="c1">#assert isinstance(ge, float), &#39;ge=%r&#39; % ge</span>
+        <span class="c1">#assert isinstance(s, float), &#39;ge=%r&#39; % s</span>
+        <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PELAS&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;k=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="c1">#for nid, node in zip(node_ids, self.nodes):</span>
+                <span class="c1">#assert node.node.nid</span>
+
+<div class="viewcode-block" id="CELAS3.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+    <span class="c1">#def repr_fields(self):</span>
+        <span class="c1">#s1 = set_blank_if_default(self.s1,0)</span>
+        <span class="c1">#s2 = set_blank_if_default(self.s2,0)</span>
+        <span class="c1">#list_fields = [&#39;CELAS3&#39;, self.eid, self.Pid(), s1, s2]</span>
+        <span class="c1">#return list_fields</span>
+
+<div class="viewcode-block" id="CELAS3.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS3.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CELAS4"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4">[docs]</a><span class="k">class</span> <span class="nc">CELAS4</span><span class="p">(</span><span class="n">SpringElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +--------+-----+-----+----+----+</span>
+<span class="sd">    |    1   |  2  |  3  |  4 |  5 |</span>
+<span class="sd">    +========+=====+=====+====+====+</span>
+<span class="sd">    | CELAS4 | EID |  K  | S1 | S2 |</span>
+<span class="sd">    +--------+-----+-----+----+----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;CELAS4&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="c1">#4:&#39;s1&#39;, 6:&#39;s2&#39;,</span>
+    <span class="p">}</span>
+    <span class="n">cp_name_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a CELAS4 card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        eid : int</span>
+<span class="sd">            element id</span>
+<span class="sd">        k : float</span>
+<span class="sd">            spring stiffness</span>
+<span class="sd">        nids : List[int, int]</span>
+<span class="sd">            SPOINT ids</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SpringElement</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="c1">#: stiffness of the scalar spring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="c1">#: Scalar point identification numbers</span>
+        <span class="c1">#self.nodes = nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_node_ids</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CELAS4.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the elements in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="c1">#comments.append(element.comment)</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">nid</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;eid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">eids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nodes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS4.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;s1=</span><span class="si">%s</span><span class="s1"> s2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="CELAS4.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS4 card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;eid&#39;</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;s1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;s2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;len(CELAS4 card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CELAS4</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a CELAS4 card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">CELAS4</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">],</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS4.K"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.K">[docs]</a>    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS4 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span><span class="p">,</span> <span class="n">allow_empty_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CELAS4.get_edge_ids"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.get_edge_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_edge_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="CELAS4.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS4 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CELAS4.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by CELAS4 eid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmptyNodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="c1">#self.nodes_ref = model.safe_empty_nodes(self.node_ids, msg=msg)</span>
+
+<div class="viewcode-block" id="CELAS4.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CELAS4.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="CELAS4.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.springs.html#pyNastran.bdf.cards.elements.springs.CELAS4.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

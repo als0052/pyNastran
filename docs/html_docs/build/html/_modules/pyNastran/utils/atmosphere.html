@@ -1,0 +1,1253 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.utils.atmosphere &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.utils.atmosphere</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.utils.atmosphere</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the following atmospheric functions:</span>
+
+<span class="sd"> - density = atm_density(alt, mach)</span>
+<span class="sd"> - mach = atm_mach(alt, velocity)</span>
+<span class="sd"> - velocity = atm_velocity(alt, mach)</span>
+<span class="sd"> - pressure = atm_pressure(alt)</span>
+<span class="sd"> - temperature = atm_temperature(alt)</span>
+<span class="sd"> - sos = atm_speed_of_sound(alt)</span>
+<span class="sd"> - mu = atm_dynamic_viscosity_mu(alt)</span>
+<span class="sd"> - nu = atm_kinematic_viscosity_nu(alt)</span>
+<span class="sd"> - eas = atm_equivalent_airspeed(alt, mach)</span>
+<span class="sd"> - rho, machs, velocity = make_flfacts_alt_sweep(</span>
+<span class="sd">       mach, alts, eas_limit=1000.,</span>
+<span class="sd">       alt_units=&#39;m&#39;, velocity_units=&#39;m/s&#39;, density_units=&#39;kg/m^3&#39;,</span>
+<span class="sd">       eas_units=&#39;m/s&#39;)</span>
+<span class="sd"> - rho, machs, velocity = make_flfacts_mach_sweep(</span>
+<span class="sd">       alt, machs, eas_limit=1000.,</span>
+<span class="sd">       alt_units=&#39;m&#39;, velocity_units=&#39;m/s&#39;, density_units=&#39;kg/m^3&#39;,</span>
+<span class="sd">       eas_units=&#39;m/s&#39;)</span>
+
+<span class="sd">All the default units are in English units because the source equations</span>
+<span class="sd">are in English units.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">exp</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.nptyping</span> <span class="kn">import</span> <span class="n">NDArrayNfloat</span>
+
+
+<div class="viewcode-block" id="get_alt_for_density"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.get_alt_for_density">[docs]</a><span class="k">def</span> <span class="nf">get_alt_for_density</span><span class="p">(</span><span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;slug/ft^3&#39;</span><span class="p">,</span>
+                        <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">nmax</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the altitude associated with a given air density.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    density : float</span>
+<span class="sd">        the air density in slug/ft^3</span>
+<span class="sd">    density_units : str; default=&#39;slug/ft^3&#39;</span>
+<span class="sd">        the density units; slug/ft^3, slinch/in^3, kg/m^3</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        sets the units for the output altitude; ft, m, kft</span>
+<span class="sd">    nmax : int; default=20</span>
+<span class="sd">        max number of iterations for convergence</span>
+<span class="sd">    tol : float; default=5.</span>
+<span class="sd">        tolerance in alt_units</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        the altitude in feet</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">dalt</span> <span class="o">=</span> <span class="mf">500.</span> <span class="c1"># ft</span>
+    <span class="n">alt_old</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">alt_final</span> <span class="o">=</span> <span class="mf">5000.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#density_scale = _density_factor(density_units, &quot;slug/ft^3&quot;)</span>
+
+    <span class="c1"># Newton&#39;s method</span>
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt_final</span> <span class="o">-</span> <span class="n">alt_old</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">nmax</span><span class="p">:</span>
+        <span class="n">alt_old</span> <span class="o">=</span> <span class="n">alt_final</span>
+        <span class="n">alt1</span> <span class="o">=</span> <span class="n">alt_old</span>
+        <span class="n">alt2</span> <span class="o">=</span> <span class="n">alt_old</span> <span class="o">+</span> <span class="n">dalt</span>
+        <span class="n">rho1</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">alt1</span><span class="p">,</span> <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+        <span class="n">rho2</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">alt2</span><span class="p">,</span> <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">dalt</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho2</span> <span class="o">-</span> <span class="n">rho1</span><span class="p">)</span>
+        <span class="n">alt_final</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">density</span> <span class="o">-</span> <span class="n">rho1</span><span class="p">)</span> <span class="o">+</span> <span class="n">alt1</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt_final</span> <span class="o">-</span> <span class="n">alt_old</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Did not converge; Check your units; n=nmax=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;target alt=</span><span class="si">%s</span><span class="s1"> alt_current=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmax</span><span class="p">,</span> <span class="n">alt_final</span><span class="p">,</span> <span class="n">alt1</span><span class="p">))</span>
+    <span class="n">alt_out</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt_final</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alt_out</span></div>
+
+
+<div class="viewcode-block" id="get_alt_for_eas_with_constant_mach"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.get_alt_for_eas_with_constant_mach">[docs]</a><span class="k">def</span> <span class="nf">get_alt_for_eas_with_constant_mach</span><span class="p">(</span><span class="n">equivalent_airspeed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                       <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft/s&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                                       <span class="n">nmax</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the altitude associated with a equivalent airspeed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    equivalent_airspeed : float</span>
+<span class="sd">        the equivalent airspeed in velocity_units</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        the mach to hold constant</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    nmax : int; default=20</span>
+<span class="sd">        max number of iterations for convergence</span>
+<span class="sd">    tol : float; default=5.</span>
+<span class="sd">        tolerance in alt_units</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        the altitude in alt units</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">equivalent_airspeed</span> <span class="o">=</span> <span class="n">convert_velocity</span><span class="p">(</span><span class="n">equivalent_airspeed</span><span class="p">,</span> <span class="n">velocity_units</span><span class="p">,</span> <span class="s1">&#39;ft/s&#39;</span><span class="p">)</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">dalt</span> <span class="o">=</span> <span class="mf">500.</span>
+    <span class="n">alt_old</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">alt_final</span> <span class="o">=</span> <span class="mf">5000.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">R</span> <span class="o">=</span> <span class="mf">1716.</span>
+    <span class="n">z0</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">T0</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T0</span> <span class="o">/</span> <span class="n">p0</span><span class="p">)</span>
+    <span class="c1">#eas = a * mach * sqrt((p * T0) / (T * p0)) = a * mach * sqrt(p / T) * k</span>
+
+    <span class="c1"># Newton&#39;s method</span>
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt_final</span> <span class="o">-</span> <span class="n">alt_old</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">nmax</span><span class="p">:</span>
+        <span class="n">alt_old</span> <span class="o">=</span> <span class="n">alt_final</span>
+        <span class="n">alt1</span> <span class="o">=</span> <span class="n">alt_old</span>
+        <span class="n">alt2</span> <span class="o">=</span> <span class="n">alt_old</span> <span class="o">+</span> <span class="n">dalt</span>
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">alt1</span><span class="p">)</span>
+        <span class="n">T2</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">alt2</span><span class="p">)</span>
+        <span class="n">press1</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">alt1</span><span class="p">)</span>
+        <span class="n">press2</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">alt2</span><span class="p">)</span>
+        <span class="n">sos1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.4</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T1</span><span class="p">)</span>
+        <span class="n">sos2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.4</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T2</span><span class="p">)</span>
+        <span class="n">eas1</span> <span class="o">=</span> <span class="n">sos1</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">press1</span> <span class="o">/</span> <span class="n">T1</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span>
+        <span class="n">eas2</span> <span class="o">=</span> <span class="n">sos2</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">press2</span> <span class="o">/</span> <span class="n">T2</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">dalt</span> <span class="o">/</span> <span class="p">(</span><span class="n">eas2</span> <span class="o">-</span> <span class="n">eas1</span><span class="p">)</span>
+        <span class="n">alt_final</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">equivalent_airspeed</span> <span class="o">-</span> <span class="n">eas1</span><span class="p">)</span> <span class="o">+</span> <span class="n">alt1</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">nmax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;n = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">alt_final</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt_final</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alt_final</span></div>
+
+<div class="viewcode-block" id="get_alt_for_q_with_constant_mach"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.get_alt_for_q_with_constant_mach">[docs]</a><span class="k">def</span> <span class="nf">get_alt_for_q_with_constant_mach</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                     <span class="n">pressure_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;psf&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                                     <span class="n">nmax</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the altitude associated with a dynamic pressure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q : float</span>
+<span class="sd">        the dynamic pressure lb/ft^2 (SI=Pa)</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        the mach to hold constant</span>
+<span class="sd">    pressure_units : str; default=&#39;psf&#39;</span>
+<span class="sd">        the pressure units; psf, psi, Pa, kPa, MPa</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    nmax : int; default=20</span>
+<span class="sd">        max number of iterations for convergence</span>
+<span class="sd">    tol : float; default=5.</span>
+<span class="sd">        tolerance in alt_units</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        the altitude in alt_units</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">q</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.4</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># gamma = 1.4</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">get_alt_for_pressure</span><span class="p">(</span>
+        <span class="n">pressure</span><span class="p">,</span> <span class="n">pressure_units</span><span class="o">=</span><span class="n">pressure_units</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="n">nmax</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alt</span></div>
+
+<div class="viewcode-block" id="get_alt_for_pressure"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.get_alt_for_pressure">[docs]</a><span class="k">def</span> <span class="nf">get_alt_for_pressure</span><span class="p">(</span><span class="n">pressure</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">pressure_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;psf&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                         <span class="n">nmax</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">5.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the altitude associated with a pressure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pressure : float</span>
+<span class="sd">        the pressure lb/ft^2 (SI=Pa)</span>
+<span class="sd">    pressure_units : str; default=&#39;psf&#39;</span>
+<span class="sd">        the pressure units; psf, psi, Pa, kPa, MPa</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    nmax : int; default=20</span>
+<span class="sd">        max number of iterations for convergence</span>
+<span class="sd">    tol : float; default=5.</span>
+<span class="sd">        tolerance in alt_units</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        the altitude in alt_units</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="n">convert_pressure</span><span class="p">(</span><span class="n">pressure</span><span class="p">,</span> <span class="n">pressure_units</span><span class="p">,</span> <span class="s1">&#39;psf&#39;</span><span class="p">)</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">dalt</span> <span class="o">=</span> <span class="mf">500.</span>
+    <span class="n">alt_old</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">alt_final</span> <span class="o">=</span> <span class="mf">5000.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Newton&#39;s method</span>
+    <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt_final</span> <span class="o">-</span> <span class="n">alt_old</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">nmax</span><span class="p">:</span>
+        <span class="n">alt_old</span> <span class="o">=</span> <span class="n">alt_final</span>
+        <span class="n">alt1</span> <span class="o">=</span> <span class="n">alt_old</span>
+        <span class="n">alt2</span> <span class="o">=</span> <span class="n">alt_old</span> <span class="o">+</span> <span class="n">dalt</span>
+        <span class="n">press1</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">alt1</span><span class="p">)</span>
+        <span class="n">press2</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">alt2</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">dalt</span> <span class="o">/</span> <span class="p">(</span><span class="n">press2</span> <span class="o">-</span> <span class="n">press1</span><span class="p">)</span>
+        <span class="n">alt_final</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">pressure</span> <span class="o">-</span> <span class="n">press1</span><span class="p">)</span> <span class="o">+</span> <span class="n">alt1</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">nmax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;n = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+    <span class="c1">#if abs(alt_final - alt_old) &gt; tol:</span>
+        <span class="c1">#raise RuntimeError(&#39;Did not converge; Check your units; n=nmax=%s\n&#39;</span>
+                           <span class="c1">#&#39;target alt=%s alt_current=%s&#39; % (nmax, alt_final, alt1))</span>
+
+    <span class="n">alt_final</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt_final</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alt_final</span></div>
+
+<span class="k">def</span> <span class="nf">_feet_to_alt_units</span><span class="p">(</span><span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">alt_units</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">alt_units</span> <span class="o">==</span> <span class="s1">&#39;ft&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;alt_units=</span><span class="si">%r</span><span class="s1"> is not valid; use [ft, m]&#39;</span> <span class="o">%</span> <span class="n">alt_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<div class="viewcode-block" id="convert_altitude"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.convert_altitude">[docs]</a><span class="k">def</span> <span class="nf">convert_altitude</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alt_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;nominal unit is ft&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">alt_units_in</span> <span class="o">==</span> <span class="n">alt_units_out</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">alt</span>
+    <span class="k">return</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units_in</span><span class="p">,</span> <span class="n">alt_units_out</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_altitude_factor</span><span class="p">(</span><span class="n">alt_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alt_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for convert_altitude&quot;&quot;&quot;</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># units to feet</span>
+    <span class="k">if</span> <span class="n">alt_units_in</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">alt_units_in</span> <span class="o">==</span> <span class="s1">&#39;ft&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">alt_units_in</span> <span class="o">==</span> <span class="s1">&#39;kft&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">1000.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;alt_units_in=</span><span class="si">%r</span><span class="s1"> is not valid; use [ft, m, kft]&#39;</span> <span class="o">%</span> <span class="n">alt_units_in</span><span class="p">)</span>
+
+    <span class="c1"># ft to m</span>
+    <span class="k">if</span> <span class="n">alt_units_out</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">alt_units_out</span> <span class="o">==</span> <span class="s1">&#39;ft&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">alt_units_out</span> <span class="o">==</span> <span class="s1">&#39;kft&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">1000.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;alt_units_out=</span><span class="si">%r</span><span class="s1"> is not valid; use [ft, m, kft]&#39;</span> <span class="o">%</span> <span class="n">alt_units_out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<span class="k">def</span> <span class="nf">_reynolds_factor</span><span class="p">(</span><span class="n">reynolds_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reynolds_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method&quot;&quot;&quot;</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># units to 1/feet</span>
+    <span class="k">if</span> <span class="n">reynolds_units_in</span> <span class="o">==</span> <span class="s1">&#39;1/m&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">reynolds_units_in</span> <span class="o">==</span> <span class="s1">&#39;1/ft&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">reynolds_units_in</span> <span class="o">==</span> <span class="s1">&#39;1/in&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">12.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;reynolds_units_in=</span><span class="si">%r</span><span class="s1"> is not valid; use [1/ft, 1/m, 1/in]&#39;</span> <span class="o">%</span> <span class="n">reynolds_units_in</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># 1/ft to 1/m</span>
+    <span class="k">if</span> <span class="n">reynolds_units_out</span> <span class="o">==</span> <span class="s1">&#39;1/m&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">reynolds_units_out</span> <span class="o">==</span> <span class="s1">&#39;1/ft&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">reynolds_units_out</span> <span class="o">==</span> <span class="s1">&#39;1/in&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">12.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;reynolds_units_out=</span><span class="si">%r</span><span class="s1"> is not valid; use [1/ft, 1/m, 1/in]&#39;</span> <span class="o">%</span> <span class="n">reynolds_units_out</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<div class="viewcode-block" id="convert_velocity"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.convert_velocity">[docs]</a><span class="k">def</span> <span class="nf">convert_velocity</span><span class="p">(</span><span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">velocity_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;nominal unit is ft/s&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">velocity_units_in</span> <span class="o">==</span> <span class="n">velocity_units_out</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">velocity</span>
+    <span class="k">return</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">_velocity_factor</span><span class="p">(</span><span class="n">velocity_units_in</span><span class="p">,</span> <span class="n">velocity_units_out</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_velocity_factor</span><span class="p">(</span><span class="n">velocity_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">velocity_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for convert_velocity&quot;&quot;&quot;</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">velocity_units_in</span> <span class="o">==</span> <span class="s1">&#39;m/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">velocity_units_in</span> <span class="o">==</span> <span class="s1">&#39;ft/s&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">velocity_units_in</span> <span class="o">==</span> <span class="s1">&#39;in/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">12.</span>
+    <span class="k">elif</span> <span class="n">velocity_units_in</span> <span class="o">==</span> <span class="s1">&#39;knots&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">1.68781</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;velocity_units_in=</span><span class="si">%r</span><span class="s1"> is not valid; use [ft/s, m/s, knots]&#39;</span> <span class="o">%</span> <span class="n">velocity_units_in</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">velocity_units_out</span> <span class="o">==</span> <span class="s1">&#39;m/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">0.3048</span>
+    <span class="k">elif</span> <span class="n">velocity_units_out</span> <span class="o">==</span> <span class="s1">&#39;ft/s&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">velocity_units_out</span> <span class="o">==</span> <span class="s1">&#39;in/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">12.</span>
+    <span class="k">elif</span> <span class="n">velocity_units_out</span> <span class="o">==</span> <span class="s1">&#39;knots&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">1.68781</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;velocity_units_out=</span><span class="si">%r</span><span class="s1"> is not valid; use [ft/s, m/s, in/s, knots]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">velocity_units_out</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<div class="viewcode-block" id="convert_pressure"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.convert_pressure">[docs]</a><span class="k">def</span> <span class="nf">convert_pressure</span><span class="p">(</span><span class="n">pressure</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pressure_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pressure_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;nominal unit is psf&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="n">pressure_units_out</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pressure</span>
+    <span class="k">return</span> <span class="n">pressure</span> <span class="o">*</span> <span class="n">_pressure_factor</span><span class="p">(</span><span class="n">pressure_units_in</span><span class="p">,</span> <span class="n">pressure_units_out</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_pressure_factor</span><span class="p">(</span><span class="n">pressure_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pressure_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for convert_pressure&quot;&quot;&quot;</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="s1">&#39;psf&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="s1">&#39;psi&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mi">144</span>
+    <span class="k">elif</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="s1">&#39;Pa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">47.880172</span>
+    <span class="k">elif</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="s1">&#39;kPa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">20.88543815038</span>
+    <span class="k">elif</span> <span class="n">pressure_units_in</span> <span class="o">==</span> <span class="s1">&#39;MPa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">20885.43815038</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;pressure_units_in=</span><span class="si">%r</span><span class="s1"> is not valid; use [psf, psi, Pa, kPa, MPa]&#39;</span> <span class="o">%</span> <span class="n">pressure_units_in</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pressure_units_out</span> <span class="o">==</span> <span class="s1">&#39;psf&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">pressure_units_out</span> <span class="o">==</span> <span class="s1">&#39;psi&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mi">144</span>
+    <span class="k">elif</span> <span class="n">pressure_units_out</span> <span class="o">==</span> <span class="s1">&#39;Pa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">47.880172</span>
+    <span class="k">elif</span> <span class="n">pressure_units_out</span> <span class="o">==</span> <span class="s1">&#39;kPa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">20.88543815038</span>
+    <span class="k">elif</span> <span class="n">pressure_units_out</span> <span class="o">==</span> <span class="s1">&#39;MPa&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">20885.43815038</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;pressure_units_out=</span><span class="si">%r</span><span class="s1"> is not valid; use [psf, psi, Pa, kPa, MPa]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">pressure_units_out</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<div class="viewcode-block" id="convert_density"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.convert_density">[docs]</a><span class="k">def</span> <span class="nf">convert_density</span><span class="p">(</span><span class="n">density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">density_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;nominal unit is slug/ft^3&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">density_units_in</span> <span class="o">==</span> <span class="n">density_units_out</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">density</span>
+    <span class="k">return</span> <span class="n">density</span> <span class="o">*</span> <span class="n">_density_factor</span><span class="p">(</span><span class="n">density_units_in</span><span class="p">,</span> <span class="n">density_units_out</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_density_factor</span><span class="p">(</span><span class="n">density_units_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density_units_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper method for convert_density&quot;&quot;&quot;</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">density_units_in</span> <span class="o">==</span> <span class="s1">&#39;slug/ft^3&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">density_units_in</span> <span class="o">==</span> <span class="s1">&#39;slinch/in^3&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mi">12</span><span class="o">**</span><span class="mi">4</span>
+    <span class="k">elif</span> <span class="n">density_units_in</span> <span class="o">==</span> <span class="s1">&#39;kg/m^3&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mf">515.378818</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;density_units_in=</span><span class="si">%r</span><span class="s1"> is not valid; use [slug/ft^3]&#39;</span> <span class="o">%</span> <span class="n">density_units_in</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># data is now in slug/ft^3</span>
+    <span class="k">if</span> <span class="n">density_units_out</span> <span class="o">==</span> <span class="s1">&#39;slug/ft^3&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">density_units_out</span> <span class="o">==</span> <span class="s1">&#39;slinch/in^3&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">/=</span> <span class="mi">12</span><span class="o">**</span><span class="mi">4</span>
+    <span class="k">elif</span> <span class="n">density_units_out</span> <span class="o">==</span> <span class="s1">&#39;kg/m^3&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">*=</span> <span class="mf">515.378818</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;density_units_out=</span><span class="si">%r</span><span class="s1"> is not valid; use [slug/ft^3, slinch/in^3]&#39;</span> <span class="o">%</span> <span class="n">density_units_out</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factor</span>
+
+<div class="viewcode-block" id="atm_temperature"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_temperature">[docs]</a><span class="k">def</span> <span class="nf">atm_temperature</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                    <span class="n">temperature_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Temperature \f$ T_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    temperature_units : str; default=&#39;R&#39;</span>
+<span class="sd">        the altitude units; R, K</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    T : float</span>
+<span class="sd">        temperature in degrees Rankine or Kelvin (SI)</span>
+
+<span class="sd">    .. note ::</span>
+<span class="sd">        from BAC-7006-3352-001-V1.pdf  # Bell Handbook of Aerodynamic Heating\n</span>
+<span class="sd">        page ~236 - Table C.1\n</span>
+<span class="sd">        These equations were used because they are valid to 300k ft.\n</span>
+<span class="sd">        Extrapolation is performed above that.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">36151.725</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">518.0</span> <span class="o">-</span> <span class="mf">0.003559996</span> <span class="o">*</span> <span class="n">z</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">82344.678</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">389.988</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">155347.756</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">389.988</span> <span class="o">+</span> <span class="mf">.0016273286</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">82344.678</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">175346.171</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">508.788</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">249000.304</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">508.788</span> <span class="o">-</span> <span class="mf">.0020968273</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">175346.171</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">299515.564</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">354.348</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#print(&quot;alt=%i kft &gt; 299.5 kft&quot; % (z / 1000.))</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="mf">354.348</span>
+        <span class="c1">#raise AtmosphereError(&quot;altitude is too high&quot;)</span>
+
+    <span class="k">if</span> <span class="n">temperature_units</span> <span class="o">==</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">temperature_units</span> <span class="o">==</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">5.</span> <span class="o">/</span> <span class="mf">9.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;temperature_units=</span><span class="si">%r</span><span class="s1"> is not valid; use [R, K]&#39;</span> <span class="o">%</span> <span class="n">temperature_units</span><span class="p">)</span>
+
+    <span class="n">T2</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="k">return</span> <span class="n">T2</span></div>
+
+<div class="viewcode-block" id="atm_pressure"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_pressure">[docs]</a><span class="k">def</span> <span class="nf">atm_pressure</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                 <span class="n">pressure_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;psf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Pressure \f$ p_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    pressure_units : str; default=&#39;psf&#39;</span>
+<span class="sd">        the pressure units; psf, psi, Pa, kPa, MPa</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pressure : float</span>
+<span class="sd">        Returns pressure in pressure_units</span>
+
+<span class="sd">    .. note ::</span>
+<span class="sd">        from BAC-7006-3352-001-V1.pdf  # Bell Handbook of Aerodynamic Heating\n</span>
+<span class="sd">        page ~236 - Table C.1\n</span>
+<span class="sd">        These equations were used b/c they are valid to 300k ft.\n</span>
+<span class="sd">        Extrapolation is performed above that.\n</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">36151.725</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="mf">7.657389</span> <span class="o">+</span> <span class="mf">5.2561258</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">6.8634634E-6</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">82344.678</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="mf">6.158411</span> <span class="o">-</span> <span class="mf">4.77916918E-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">36151.725</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">155347.756</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="mf">3.950775</span> <span class="o">-</span> <span class="mf">11.3882724</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">4.17276598E-6</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">82344.678</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">175346.171</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="mf">0.922461</span> <span class="o">-</span> <span class="mf">3.62635373E-5</span><span class="o">*</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">155347.756</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">249000.304</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="mf">0.197235</span> <span class="o">+</span> <span class="mf">8.7602095</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">4.12122002E-6</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">175346.171</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mf">299515.564</span><span class="p">:</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.971785</span> <span class="o">-</span> <span class="mf">5.1533546650E-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">249000.304</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#print(&quot;alt=%i kft &gt; 299.5 kft&quot; % (z / 1000.))</span>
+        <span class="n">ln_pressure</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.971785</span> <span class="o">-</span> <span class="mf">5.1533546650E-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">249000.304</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="n">ln_pressure</span><span class="p">)</span>
+
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">_pressure_factor</span><span class="p">(</span><span class="s1">&#39;psf&#39;</span><span class="p">,</span> <span class="n">pressure_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span> <span class="o">*</span> <span class="n">factor</span></div>
+
+<div class="viewcode-block" id="atm_dynamic_pressure"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_dynamic_pressure">[docs]</a><span class="k">def</span> <span class="nf">atm_dynamic_pressure</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">pressure_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;psf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Dynamic Pressure  \f$ q_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    pressure_units : str; default=&#39;psf&#39;</span>
+<span class="sd">        the pressure units; psf, psi, Pa, kPa, MPa</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dynamic_pressure : float</span>
+<span class="sd">        Returns dynamic pressure in pressure_units</span>
+
+<span class="sd">    The common method that requires many calculations...</span>
+<span class="sd">    \f[  \large q = \frac{1}{2} \rho V^2  \f]</span>
+<span class="sd">    \f[  \large p = \rho R T  \f]</span>
+<span class="sd">    \f[  \large M = \frac{V}{a}  \f]</span>
+<span class="sd">    \f[  \large a = \sqrt{\gamma R T}  \f]</span>
+<span class="sd">    so...</span>
+<span class="sd">    \f[  \large q = \frac{\gamma}{2} p M^2  \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">_pressure_factor</span><span class="p">(</span><span class="s1">&#39;psf&#39;</span><span class="p">,</span> <span class="n">pressure_units</span><span class="p">)</span>
+    <span class="n">q2</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="k">return</span> <span class="n">q2</span></div>
+
+<div class="viewcode-block" id="atm_speed_of_sound"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_speed_of_sound">[docs]</a><span class="k">def</span> <span class="nf">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">velocity_units</span><span class="o">=</span><span class="s1">&#39;ft/s&#39;</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">1.4</span><span class="p">):</span>
+    <span class="c1"># type : (float, str, str, float) -&gt; float</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Speed of Sound  \f$ a_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;ft/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    speed_of_sound, a : float</span>
+<span class="sd">        Returns speed of sound in velocity_units</span>
+
+<span class="sd">    \f[  \large a = \sqrt{\gamma R T}  \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># converts everything to English units first</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="mf">1716.</span> <span class="c1"># 1716.59, dir air, R=287.04 J/kg*K</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">_velocity_factor</span><span class="p">(</span><span class="s1">&#39;ft/s&#39;</span><span class="p">,</span> <span class="n">velocity_units</span><span class="p">)</span> <span class="c1"># ft/s to m/s</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="k">return</span> <span class="n">a2</span></div>
+
+<div class="viewcode-block" id="atm_velocity"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_velocity">[docs]</a><span class="k">def</span> <span class="nf">atm_velocity</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Velocity  \f$ V_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        altitude in alt_units</span>
+<span class="sd">    Mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;ft/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    velocity : float</span>
+<span class="sd">        Returns velocity in velocity_units</span>
+
+<span class="sd">    \f[ \large V = M a \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span> <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">mach</span> <span class="o">*</span> <span class="n">a</span> <span class="c1"># units=ft/s or m/s</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+
+<div class="viewcode-block" id="atm_equivalent_airspeed"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_equivalent_airspeed">[docs]</a><span class="k">def</span> <span class="nf">atm_equivalent_airspeed</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                            <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                            <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                            <span class="n">eas_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream equivalent airspeed</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        altitude in alt_units</span>
+<span class="sd">    Mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    eas_units : str; default=&#39;ft/s&#39;</span>
+<span class="sd">        the equivalent airspeed units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eas : float</span>
+<span class="sd">        equivalent airspeed in eas_units</span>
+
+<span class="sd">    EAS = TAS * sqrt(rho/rho0)</span>
+<span class="sd">    p = rho * R * T</span>
+<span class="sd">    rho = p/(RT)</span>
+<span class="sd">    rho/rho0 = p/T * T0/p0</span>
+<span class="sd">    TAS = a * M</span>
+<span class="sd">    EAS = a * M * sqrt(p/T * T0/p0)</span>
+<span class="sd">    EAS = a * M * sqrt(p*T0 / (T*p0))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="c1">#V = mach * a # units=ft/s or m/s</span>
+
+    <span class="n">z0</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">T0</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="n">eas</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">p</span> <span class="o">*</span> <span class="n">T0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">p0</span><span class="p">))</span>
+    <span class="n">eas2</span> <span class="o">=</span> <span class="n">convert_velocity</span><span class="p">(</span><span class="n">eas</span><span class="p">,</span> <span class="s1">&#39;ft/s&#39;</span><span class="p">,</span> <span class="n">eas_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">eas2</span></div>
+
+<div class="viewcode-block" id="atm_mach"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_mach">[docs]</a><span class="k">def</span> <span class="nf">atm_mach</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">V</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+             <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Mach Number</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        altitude in alt_units</span>
+<span class="sd">    V : float</span>
+<span class="sd">        Velocity in velocity_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;ft/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+
+<span class="sd">    \f[ \large M = \frac{V}{a} \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span> <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">)</span>
+    <span class="n">mach</span> <span class="o">=</span> <span class="n">V</span> <span class="o">/</span> <span class="n">a</span>
+    <span class="k">return</span> <span class="n">mach</span></div>
+
+<div class="viewcode-block" id="atm_density"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_density">[docs]</a><span class="k">def</span> <span class="nf">atm_density</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">R</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1716.</span><span class="p">,</span>
+                <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span>
+                <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;slug/ft^3&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Density   \f$ \rho_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        altitude in feet or meters</span>
+<span class="sd">    R : float; default=1716.</span>
+<span class="sd">        gas constant for air in english units (???)</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    density_units : str; default=&#39;slug/ft^3&#39;</span>
+<span class="sd">        the density units; slug/ft^3, slinch/in^3, kg/m^3</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rho : float</span>
+<span class="sd">        density \f$ \rho \f$ in density_units</span>
+
+<span class="sd">    Based on the formula P=pRT</span>
+<span class="sd">    \f[ \large \rho=\frac{p}{R T} \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">convert_altitude</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="c1">#z = alt * _altitude_factor(alt_units, &#39;ft&#39;)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">P</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span>
+    <span class="n">rho2</span> <span class="o">=</span> <span class="n">convert_density</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="s1">&#39;slug/ft^3&#39;</span><span class="p">,</span> <span class="n">density_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rho2</span></div>
+
+<div class="viewcode-block" id="atm_kinematic_viscosity_nu"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_kinematic_viscosity_nu">[docs]</a><span class="k">def</span> <span class="nf">atm_kinematic_viscosity_nu</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">visc_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft^2/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Kinematic Viscosity \f$ \nu_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    visc_units : str; default=&#39;slug/ft^3&#39;</span>
+<span class="sd">        the kinematic viscosity units; ft^2/s, m^2/s</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nu : float</span>
+<span class="sd">        kinematic viscosity \f$ \nu_{\infty} \f$ in visc_units</span>
+
+<span class="sd">    \f[ \large \nu = \frac{\mu}{\rho} \f]</span>
+
+<span class="sd">    .. seealso::  sutherland_viscoscity</span>
+<span class="sd">    .. todo:: better debug</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">atm_dynamic_viscosity_mu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">nu</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">/</span> <span class="n">rho</span>
+
+    <span class="k">if</span> <span class="n">visc_units</span> <span class="o">==</span> <span class="s1">&#39;ft^2/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">visc_units</span> <span class="o">==</span> <span class="s1">&#39;m^2/s&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="n">_feet_to_alt_units</span><span class="p">(</span><span class="n">alt_units</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;visc_units=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">visc_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nu</span> <span class="o">*</span> <span class="n">factor</span></div>
+
+<div class="viewcode-block" id="atm_dynamic_viscosity_mu"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_dynamic_viscosity_mu">[docs]</a><span class="k">def</span> <span class="nf">atm_dynamic_viscosity_mu</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">visc_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;(lbf*s)/ft^2&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Freestream Dynamic Viscosity  \f$ \mu_{\infty} \f$</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    visc_units : str; default=&#39;(lbf*s)/ft^2&#39;</span>
+<span class="sd">        the viscosity units; (lbf*s)/ft^2, (N*s)/m^2, Pa*s</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        dynamic viscosity  \f$ \mu_{\infty} \f$ in (lbf*s)/ft^2 or (N*s)/m^2 (SI)</span>
+
+<span class="sd">    .. seealso::  sutherland_viscoscity</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland_viscoscity</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>  <span class="c1"># (lbf*s)/ft^2</span>
+
+    <span class="c1"># same units as pressure, except multiplied by seconds</span>
+    <span class="k">if</span> <span class="n">visc_units</span> <span class="o">==</span> <span class="s1">&#39;(lbf*s)/ft^2&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">visc_units</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;(N*s)/m^2&#39;</span><span class="p">,</span> <span class="s1">&#39;Pa*s&#39;</span><span class="p">]:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">47.88026</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;visc_units=</span><span class="si">%r</span><span class="s1">; not in (lbf*s)/ft^2 or (N*s)/m^2 or Pa*s&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">factor</span></div>
+
+<div class="viewcode-block" id="atm_unit_reynolds_number2"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_unit_reynolds_number2">[docs]</a><span class="k">def</span> <span class="nf">atm_unit_reynolds_number2</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                              <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">reynolds_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;1/ft&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the Reynolds Number per unit length.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    reynolds_units : str; default=&#39;1/ft&#39;</span>
+<span class="sd">        the altitude units; 1/ft, 1/m, 1/in</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ReynoldsNumber/L : float</span>
+<span class="sd">        the Reynolds Number per unit length</span>
+
+<span class="sd">    \f[ \large Re_L = \frac{ \rho V}{\mu} = \frac{p M a}{\mu R T} \f]</span>
+
+<span class="sd">    .. note ::</span>
+<span class="sd">        this version of Reynolds number directly caculates the base quantities, so multiple</span>
+<span class="sd">        calls to atm_press and atm_temp are not made</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="mf">1.4</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="mf">1716.</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">atm_pressure</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">atm_temperature</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="c1">#p = rhoRT</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland_viscoscity</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">ReL</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">mach</span> <span class="o">/</span> <span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span>
+
+    <span class="n">ReL</span> <span class="o">*=</span> <span class="n">_reynolds_factor</span><span class="p">(</span><span class="s1">&#39;1/ft&#39;</span><span class="p">,</span> <span class="n">reynolds_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ReL</span></div>
+
+<div class="viewcode-block" id="atm_unit_reynolds_number"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.atm_unit_reynolds_number">[docs]</a><span class="k">def</span> <span class="nf">atm_unit_reynolds_number</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                             <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ft&#39;</span><span class="p">,</span> <span class="n">reynolds_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;1/ft&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the Reynolds Number per unit length.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    alt_units : str; default=&#39;ft&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    reynolds_units : str; default=&#39;1/ft&#39;</span>
+<span class="sd">        the altitude units; 1/ft, 1/m, 1/in</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ReynoldsNumber/L : float</span>
+<span class="sd">        Reynolds number per unit length in reynolds_units</span>
+
+<span class="sd">    \f[ \large Re   = \frac{ \rho V L}{\mu} \f]</span>
+<span class="sd">    \f[ \large Re_L = \frac{ \rho V  }{\mu} \f]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">alt</span> <span class="o">*</span> <span class="n">_altitude_factor</span><span class="p">(</span><span class="n">alt_units</span><span class="p">,</span> <span class="s1">&#39;ft&#39;</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">atm_velocity</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">mach</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">atm_dynamic_viscosity_mu</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="n">ReL</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">mu</span>
+
+    <span class="n">ReL</span> <span class="o">*=</span> <span class="n">_reynolds_factor</span><span class="p">(</span><span class="s1">&#39;1/ft&#39;</span><span class="p">,</span> <span class="n">reynolds_units</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ReL</span></div>
+
+<div class="viewcode-block" id="sutherland_viscoscity"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.sutherland_viscoscity">[docs]</a><span class="k">def</span> <span class="nf">sutherland_viscoscity</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function that calculates the dynamic viscosity \f$ \mu \f$ of air at</span>
+<span class="sd">    a given temperature.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T : float</span>
+<span class="sd">        Temperature T is in Rankine</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mu : float</span>
+<span class="sd">       dynamic viscosity  \f$ \mu \f$ of air in (lbf*s)/ft^2</span>
+
+<span class="sd">    .. note ::</span>
+<span class="sd">        prints a warning if T&gt;5400 deg R</span>
+
+<span class="sd">    Sutherland&#39;s Equation\n</span>
+<span class="sd">    From Aerodynamics for Engineers 4th Edition\n</span>
+<span class="sd">    John J. Bertin 2002\n</span>
+<span class="sd">    page 6 eq 1.5b\n</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">T</span> <span class="o">&lt;</span> <span class="mf">225.</span><span class="p">:</span> <span class="c1"># Rankine</span>
+        <span class="n">viscosity</span> <span class="o">=</span> <span class="mf">8.0382436E-10</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="mf">5400.</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;WARNING:  viscosity - Temperature is too large (T&gt;5400 R) T=</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">T</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">viscosity</span> <span class="o">=</span> <span class="mf">2.27E-8</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">**</span> <span class="mf">1.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">T</span> <span class="o">+</span> <span class="mf">198.6</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">viscosity</span></div>
+
+<div class="viewcode-block" id="make_flfacts_alt_sweep"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.make_flfacts_alt_sweep">[docs]</a><span class="k">def</span> <span class="nf">make_flfacts_alt_sweep</span><span class="p">(</span><span class="n">mach</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                           <span class="n">eas_limit</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1000.</span><span class="p">,</span>
+                           <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
+                           <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">,</span>
+                           <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;kg/m^3&#39;</span><span class="p">,</span>
+                           <span class="n">eas_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a sweep across altitude for a constant Mach number.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : List[float]</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    Mach : float</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    eas_limit : float</span>
+<span class="sd">        Equivalent airspeed limiter in eas_units</span>
+<span class="sd">    alt_units : str; default=&#39;m&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+<span class="sd">    density_units : str; default=&#39;kg/m^3&#39;</span>
+<span class="sd">        the density units; slug/ft^3, slinch/in^3, kg/m^3</span>
+<span class="sd">    eas_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the equivalent airspeed units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atm_density</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1716.</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">alts</span><span class="p">])</span>
+    <span class="n">machs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alts</span><span class="p">))</span> <span class="o">*</span> <span class="n">mach</span>
+    <span class="n">sos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                       <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">alts</span><span class="p">])</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">sos</span> <span class="o">*</span> <span class="n">machs</span>
+    <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span> <span class="o">=</span> <span class="n">_limit_eas</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">eas_limit</span><span class="p">,</span>
+                                      <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                      <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">,</span>
+                                      <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">,</span>
+                                      <span class="n">eas_units</span><span class="o">=</span><span class="n">eas_units</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span></div>
+
+<div class="viewcode-block" id="make_flfacts_mach_sweep"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.make_flfacts_mach_sweep">[docs]</a><span class="k">def</span> <span class="nf">make_flfacts_mach_sweep</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">machs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">eas_limit</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1000.</span><span class="p">,</span>
+                            <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
+                            <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">,</span>
+                            <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;kg/m^3&#39;</span><span class="p">,</span>
+                            <span class="n">eas_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a sweep across Mach number for a constant altitude.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    Machs : List[float]</span>
+<span class="sd">        Mach Number \f$ M \f$</span>
+<span class="sd">    eas_limit : float</span>
+<span class="sd">        Equivalent airspeed limiter in eas_units</span>
+<span class="sd">    alt_units : str; default=&#39;m&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+<span class="sd">    density_units : str; default=&#39;kg/m^3&#39;</span>
+<span class="sd">        the density units; slug/ft^3, slinch/in^3, kg/m^3</span>
+<span class="sd">    eas_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the equivalent airspeed units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">machs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">machs</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">machs</span><span class="p">))</span> <span class="o">*</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1716.</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                            <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+    <span class="n">sos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">machs</span><span class="p">))</span> <span class="o">*</span> <span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                                   <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">)</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">sos</span> <span class="o">*</span> <span class="n">machs</span>
+    <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span> <span class="o">=</span> <span class="n">_limit_eas</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">eas_limit</span><span class="p">,</span>
+                                      <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                                      <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">,</span>
+                                      <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">,</span>
+                                      <span class="n">eas_units</span><span class="o">=</span><span class="n">eas_units</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span></div>
+
+<div class="viewcode-block" id="make_flfacts_eas_sweep"><a class="viewcode-back" href="../../../reference/utils/pyNastran.utils.atmosphere.html#pyNastran.utils.atmosphere.make_flfacts_eas_sweep">[docs]</a><span class="k">def</span> <span class="nf">make_flfacts_eas_sweep</span><span class="p">(</span><span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">eass</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                           <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
+                           <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">,</span>
+                           <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;kg/m^3&#39;</span><span class="p">,</span>
+                           <span class="n">eas_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes a sweep across equivalent airspeed for a constant altitude.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Altitude in alt_units</span>
+<span class="sd">    eass : List[float]</span>
+<span class="sd">        Equivalent airspeed in eas_units</span>
+<span class="sd">    alt_units : str; default=&#39;m&#39;</span>
+<span class="sd">        the altitude units; ft, kft, m</span>
+<span class="sd">    velocity_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the velocity units; ft/s, m/s, in/s, knots</span>
+<span class="sd">    density_units : str; default=&#39;kg/m^3&#39;</span>
+<span class="sd">        the density units; slug/ft^3, slinch/in^3, kg/m^3</span>
+<span class="sd">    eas_units : str; default=&#39;m/s&#39;</span>
+<span class="sd">        the equivalent airspeed units; ft/s, m/s, in/s, knots</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert eas to output units</span>
+    <span class="n">eass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">eass</span><span class="p">)</span> <span class="o">*</span> <span class="n">_velocity_factor</span><span class="p">(</span><span class="n">eas_units</span><span class="p">,</span> <span class="n">velocity_units</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">1716.</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                      <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+    <span class="n">sos</span> <span class="o">=</span> <span class="n">atm_speed_of_sound</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span>
+                             <span class="n">velocity_units</span><span class="o">=</span><span class="n">velocity_units</span><span class="p">)</span>
+    <span class="n">rho0</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span> <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">eass</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho0</span> <span class="o">/</span> <span class="n">rho</span><span class="p">)</span>
+    <span class="n">machs</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">/</span> <span class="n">sos</span>
+    <span class="k">return</span> <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span></div>
+
+<span class="k">def</span> <span class="nf">_limit_eas</span><span class="p">(</span><span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">machs</span><span class="p">:</span> <span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="n">NDArrayNfloat</span><span class="p">,</span>
+               <span class="n">eas_limit</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1000.</span><span class="p">,</span>
+               <span class="n">alt_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
+               <span class="n">velocity_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">,</span>
+               <span class="n">density_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;kg/m^3&#39;</span><span class="p">,</span>
+               <span class="n">eas_units</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;m/s&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">,</span> <span class="n">NDArrayNfloat</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;limits the equivalent airspeed&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">eas_limit</span><span class="p">:</span>
+        <span class="n">rho0</span> <span class="o">=</span> <span class="n">atm_density</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">alt_units</span><span class="o">=</span><span class="n">alt_units</span><span class="p">,</span> <span class="n">density_units</span><span class="o">=</span><span class="n">density_units</span><span class="p">)</span>
+
+        <span class="c1"># eas in velocity units</span>
+        <span class="n">eas</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho</span> <span class="o">/</span> <span class="n">rho0</span><span class="p">)</span>
+        <span class="n">kvel</span> <span class="o">=</span> <span class="n">_velocity_factor</span><span class="p">(</span><span class="n">eas_units</span><span class="p">,</span> <span class="n">velocity_units</span><span class="p">)</span>
+        <span class="n">eas_limit_in_velocity_units</span> <span class="o">=</span> <span class="n">eas_limit</span> <span class="o">*</span> <span class="n">kvel</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">eas</span> <span class="o">&lt;</span> <span class="n">eas_limit_in_velocity_units</span><span class="p">)</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">machs</span> <span class="o">=</span> <span class="n">machs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">velocity</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1">#print(&#39;machs min: %.0f max: %.0f&#39; % (machs.min(), machs.max()))</span>
+        <span class="c1">#print(&#39;vel min: %.0f max: %.0f in/s&#39; % (velocity.min(), velocity.max()))</span>
+        <span class="c1">#print(&#39;EAS min: %.0f max: %.0f in/s&#39; % (eas.min(), eas.max()))</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;EAS limit is too struct and has removed all the conditions.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;Increase eas_limit or change the mach/altude range</span><span class="se">\n</span><span class="s1">&#39;</span>
+                           <span class="s1">&#39;  EAS: min=</span><span class="si">%.3f</span><span class="s1"> max=</span><span class="si">%.3f</span><span class="s1"> limit=</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                               <span class="n">eas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="n">kvel</span><span class="p">,</span>
+                               <span class="n">eas</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">kvel</span><span class="p">,</span>
+                               <span class="n">eas_limit</span><span class="p">,</span> <span class="n">eas_units</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rho</span><span class="p">,</span> <span class="n">machs</span><span class="p">,</span> <span class="n">velocity</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

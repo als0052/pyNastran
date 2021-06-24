@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.abaqus.abaqus_cards &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.abaqus.abaqus_cards</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.abaqus.abaqus_cards</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - SolidSection</span>
+<span class="sd"> - Material</span>
+<span class="sd"> - Part</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">SimpleLogger</span>
+
+<span class="n">allowed_element_types</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;r2d2&#39;</span><span class="p">,</span> <span class="s1">&#39;conn2d2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cpe3&#39;</span><span class="p">,</span> <span class="s1">&#39;cpe4&#39;</span><span class="p">,</span> <span class="s1">&#39;cpe4r&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cps3&#39;</span><span class="p">,</span> <span class="s1">&#39;cps4&#39;</span><span class="p">,</span> <span class="s1">&#39;cps4r&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;coh2d4&#39;</span><span class="p">,</span> <span class="s1">&#39;c3d10h&#39;</span><span class="p">,</span> <span class="s1">&#39;cohax4&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cax3&#39;</span><span class="p">,</span> <span class="s1">&#39;cax4r&#39;</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">,</span> <span class="s1">&#39;rotaryi&#39;</span><span class="p">,</span> <span class="s1">&#39;t2d2&#39;</span><span class="p">,</span> <span class="s1">&#39;c3d8r&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<div class="viewcode-block" id="SolidSection"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.SolidSection">[docs]</a><span class="k">class</span> <span class="nc">SolidSection</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;a SolidSection defines depth and a material&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_map</span><span class="p">,</span> <span class="n">data_lines</span><span class="p">,</span>
+                 <span class="n">log</span><span class="p">:</span> <span class="n">SimpleLogger</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_map</span> <span class="o">=</span> <span class="n">param_map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">=</span> <span class="n">data_lines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">material</span> <span class="o">=</span> <span class="n">param_map</span><span class="p">[</span><span class="s1">&#39;material&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data_lines</span>
+            <span class="n">line0</span> <span class="o">=</span> <span class="n">data_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">line0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data_lines</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">thickness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data_lines</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;solid - </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;prints a summary for the solid section&quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;SolidSection(</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;    param_map = </span><span class="si">%r</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_map</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;    thickness = </span><span class="si">%s</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">thickness</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+
+<div class="viewcode-block" id="Material"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Material">[docs]</a><span class="k">class</span> <span class="nc">Material</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;a Material object is a series of nodes &amp; elements (of various types)&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">sections</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">density</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ndepvars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ndelete</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">density</span>
+
+        <span class="c1">#self.depvar = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndelete</span> <span class="o">=</span> <span class="n">ndelete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndepvars</span> <span class="o">=</span> <span class="n">ndepvars</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_material</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#print(sections)</span>
+        <span class="c1">#if &#39;density&#39; in sections:</span>
+            <span class="c1">#self.density = sections[&#39;density&#39;]</span>
+        <span class="c1">#if &#39;depvar&#39; in sections:</span>
+            <span class="c1">#self.depvar = sections[&#39;depvar&#39;]</span>
+        <span class="c1">#if &#39;user_material&#39; in sections:</span>
+            <span class="c1">#self.user_material = sections[&#39;user_material&#39;]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sections</span> <span class="o">=</span> <span class="n">sections</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;prints a summary for the material&quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Material(</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  name=</span><span class="si">%r</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  </span><span class="si">%r</span><span class="s1"> : </span><span class="si">%r</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+<div class="viewcode-block" id="Material.write"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Material.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abq_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        *Material, name=Glassy828DEA</span>
+<span class="sd">        *Density</span>
+<span class="sd">        1180.,</span>
+<span class="sd">        *Elastic</span>
+<span class="sd">            2.14078e+09, 0.42718</span>
+<span class="sd">        *Material, name=MAT1_828DEA_Dam</span>
+<span class="sd">        *Density</span>
+<span class="sd">        1180.,</span>
+<span class="sd">        *Depvar, delete=4</span>
+<span class="sd">            20,</span>
+<span class="sd">        *User Material, constants=16</span>
+<span class="sd">        ** K      CTELIN      C10          C01       DAM_FORM   FUNC_FORM     EVOLF         EVMF</span>
+<span class="sd">            3.2e+09, 5.667e-05,  3.75e+08,        0.,        2.,        1.,    50000.,      0.05</span>
+<span class="sd">            **EVM0ISO    EVM0VOL      EVM0VM DAM_METHOD      ALPHA         A          B          C</span>
+<span class="sd">                0.,       0.5,       0.5,        1.,        0.,        0.,       0.5,       0.6</span>
+<span class="sd">        *Material, name=Steel</span>
+<span class="sd">        *Density</span>
+<span class="sd">        7800.,</span>
+<span class="sd">        *Elastic</span>
+<span class="sd">            2e+11, 0.3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Material, name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">write_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*Density</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndepvars</span><span class="p">:</span>
+            <span class="n">ndelete</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndelete</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;, delete=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndelete</span>
+            <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*Depvar</span><span class="si">{</span><span class="n">ndelete</span><span class="si">}</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ndepvars</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_material</span><span class="p">:</span>
+            <span class="n">nconstants</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*User Material</span><span class="si">%s</span><span class="se">\n</span><span class="s1">  </span><span class="si">%s</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nconstants</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_material</span><span class="p">))</span></div></div>
+        <span class="c1">#abq_file.write(&#39;** skipping Material %s\n&#39; % self.name)</span>
+
+<div class="viewcode-block" id="Assembly"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Assembly">[docs]</a><span class="k">class</span> <span class="nc">Assembly</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_types</span><span class="p">,</span> <span class="n">node_sets</span><span class="p">,</span> <span class="n">element_sets</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span> <span class="o">=</span> <span class="n">element_types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_sets</span> <span class="o">=</span> <span class="n">node_sets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_sets</span> <span class="o">=</span> <span class="n">element_sets</span>
+
+<div class="viewcode-block" id="Assembly.write"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Assembly.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abq_file</span><span class="p">):</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;** skipping Assembly</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;summary for the Assembly&quot;&quot;&quot;</span>
+        <span class="n">etypes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">nsets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">esets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;Assembly:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;  element_types = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;  node_sets = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;  element_sets = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">etypes</span><span class="p">,</span> <span class="n">nsets</span><span class="p">,</span> <span class="n">esets</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="Part"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part">[docs]</a><span class="k">class</span> <span class="nc">Part</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;a Part object is a series of nodes &amp; elements (of various types)&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">nids</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">nodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">element_types</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                 <span class="n">node_sets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                 <span class="n">element_sets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                 <span class="n">solid_sections</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SolidSection</span><span class="p">],</span>
+                 <span class="n">log</span><span class="p">:</span> <span class="n">SimpleLogger</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates a Part object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            the name</span>
+<span class="sd">        element_types : Dict[element_type] : node_ids</span>
+<span class="sd">            element_type : str</span>
+<span class="sd">                the element type</span>
+<span class="sd">            bars:</span>
+<span class="sd">                r2d2 : (nelements, 2) int ndarray</span>
+<span class="sd">            shells:</span>
+<span class="sd">                cpe3 : (nelements, 3) int ndarray</span>
+<span class="sd">                cpe4 : (nelements, 4) int ndarray</span>
+<span class="sd">                cpe4r : (nelements, 4) int ndarray</span>
+<span class="sd">                cps3 : (nelements, 3) int ndarray</span>
+<span class="sd">                cps4 : (nelements, 4) int ndarray</span>
+<span class="sd">                cps4r : (nelements, 4) int ndarray</span>
+<span class="sd">                coh2d4 : (nelements, 4) int ndarray</span>
+<span class="sd">                cohax4 : (nelements, 4) int ndarray</span>
+<span class="sd">                cax3 : (nelements, 3) int ndarray</span>
+<span class="sd">                cax4r : (nelements, 4) int ndarray</span>
+<span class="sd">            solids:</span>
+<span class="sd">                c3d10h : (nelements, 10) int ndarray</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_sets</span> <span class="o">=</span> <span class="n">node_sets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_sets</span> <span class="o">=</span> <span class="n">element_sets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solid_sections</span> <span class="o">=</span> <span class="n">solid_sections</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nids=</span><span class="si">%s</span><span class="s1"> is not integers&#39;</span> <span class="o">%</span> <span class="n">nids</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nids</span><span class="p">)</span>
+
+        <span class="n">node0</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">node_shape</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">node_shape</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">node_shape</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># abaqus can have only x/y coordinates, so we fake the z coordinate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+            <span class="c1">#print(nodes2.shape, self.nodes.shape)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">node0</span><span class="p">)</span>
+
+        <span class="c1"># bars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># ---shells---</span>
+        <span class="c1"># plane strain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe3</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># plane stress</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># other</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cax4r</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># solids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#-----------------------------------</span>
+        <span class="c1"># eids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2d2_eids</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe3_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe4_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r_eids</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps3_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps4_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cps4r_eids</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cohax4_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cax3_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cax4r_eids</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># rigid elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r_eids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store_elements</span><span class="p">(</span><span class="n">element_types</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Part._etypes_nnodes"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part._etypes_nnodes">[docs]</a>    <span class="k">def</span> <span class="nf">_etypes_nnodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;internal helper method&quot;&quot;&quot;</span>
+        <span class="n">etypes_nnodes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;r2d2&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>  <span class="c1">#  similar to a CBAR</span>
+
+            <span class="c1">#  shells</span>
+            <span class="p">(</span><span class="s1">&#39;cpe3&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;cpe4&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;cpe4r&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+
+            <span class="p">(</span><span class="s1">&#39;cps3&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;cps4&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;cps4r&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1"># quad, plane stress, reduced</span>
+
+            <span class="p">(</span><span class="s1">&#39;coh2d4&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1">#  cohesive zone</span>
+            <span class="p">(</span><span class="s1">&#39;cohax4&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1">#  cohesive zone</span>
+            <span class="p">(</span><span class="s1">&#39;cax3&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;cax4r&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+
+            <span class="c1">#  solids</span>
+            <span class="p">(</span><span class="s1">&#39;c3d10h&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>  <span class="c1">#  tet10</span>
+            <span class="p">(</span><span class="s1">&#39;c3d8r&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>  <span class="c1">#  hexa8</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">etypes_nnodes</span></div>
+
+<div class="viewcode-block" id="Part._store_elements"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part._store_elements">[docs]</a>    <span class="k">def</span> <span class="nf">_store_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_types</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;helper method for the init&quot;&quot;&quot;</span>
+        <span class="n">etypes_nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_etypes_nnodes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">nnodes</span> <span class="ow">in</span> <span class="n">etypes_nnodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">element_types</span><span class="p">:</span>
+                <span class="n">etype_eids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_eids&#39;</span> <span class="o">%</span> <span class="n">etype</span>
+                <span class="n">elements</span> <span class="o">=</span> <span class="n">element_types</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span>
+                <span class="n">eids_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="n">eids_elements</span><span class="p">)</span>  <span class="c1"># r2d2</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etype_eids</span><span class="p">,</span> <span class="n">eids_elements</span><span class="p">[:,</span>  <span class="mi">0</span><span class="p">])</span> <span class="c1">#  r2d2_eids</span>
+                <span class="k">assert</span> <span class="n">eids_elements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">eids_elements</span><span class="o">.</span><span class="n">shape</span></div>
+
+
+<div class="viewcode-block" id="Part.element"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part.element">[docs]</a>    <span class="k">def</span> <span class="nf">element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets a specific element of the part&quot;&quot;&quot;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">etypes_nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_etypes_nnodes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">nnodes</span> <span class="ow">in</span> <span class="n">etypes_nnodes</span><span class="p">:</span>
+            <span class="n">etype_eids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_eids&#39;</span> <span class="o">%</span> <span class="n">etype</span>
+            <span class="n">eids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etype_eids</span><span class="p">)</span>  <span class="c1"># r2d2_eids</span>
+            <span class="k">if</span> <span class="n">eids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ieid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">eid</span> <span class="o">==</span> <span class="n">eids</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ieid</span><span class="p">):</span>
+                    <span class="n">ieidi</span> <span class="o">=</span> <span class="n">ieid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">elems</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etype</span><span class="p">)</span>  <span class="c1"># r2d2</span>
+                    <span class="n">elem</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="n">ieid</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">return</span> <span class="n">etype</span><span class="p">,</span> <span class="n">ieid</span><span class="p">,</span> <span class="n">elem</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Part.check_materials"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part.check_materials">[docs]</a>    <span class="k">def</span> <span class="nf">check_materials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">materials</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;validates the materials&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solid_sections</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">material</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">materials</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;material=</span><span class="si">%r</span><span class="s1"> for part=</span><span class="si">%r</span><span class="s1"> exists&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;key=</span><span class="si">%r</span><span class="s1"> is an invalid material&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nelements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the total number of elements&quot;&quot;&quot;</span>
+        <span class="n">n_r2d2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># plane strain</span>
+        <span class="n">n_cpe3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cpe4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cpe4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># plane stress</span>
+        <span class="n">n_cps3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cps4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cps4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_coh2d4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_c3d10h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_cohax4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cax3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cax4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax4r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_c3d8r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">neids</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_r2d2</span> <span class="o">+</span>
+                 <span class="n">n_cpe3</span> <span class="o">+</span> <span class="n">n_cpe4</span> <span class="o">+</span> <span class="n">n_cpe4r</span> <span class="o">+</span>  <span class="c1"># plane strain</span>
+                 <span class="n">n_cps3</span> <span class="o">+</span> <span class="n">n_cps4</span> <span class="o">+</span> <span class="n">n_cps4r</span> <span class="o">+</span>  <span class="c1"># plane stress</span>
+                 <span class="n">n_coh2d4</span> <span class="o">+</span>
+                 <span class="n">n_c3d10h</span> <span class="o">+</span> <span class="n">n_cohax4</span> <span class="o">+</span> <span class="n">n_cax3</span> <span class="o">+</span> <span class="n">n_cax4r</span> <span class="o">+</span>
+                 <span class="n">n_c3d8r</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">neids</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">neids</span>
+        <span class="k">return</span> <span class="n">neids</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;prints a summary for the part&quot;&quot;&quot;</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_r2d2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># plane strain</span>
+        <span class="n">n_cpe3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cpe4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cpe4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># plane stress</span>
+        <span class="n">n_cps3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cps4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cps4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_coh2d4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_c3d10h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_cohax4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cax3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">n_cax4r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax4r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">n_c3d8r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d8r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">neids</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_r2d2</span> <span class="o">+</span>
+                 <span class="n">n_cpe3</span> <span class="o">+</span> <span class="n">n_cpe4</span> <span class="o">+</span> <span class="n">n_cpe4r</span> <span class="o">+</span>  <span class="c1"># plane strain</span>
+                 <span class="n">n_cps3</span> <span class="o">+</span> <span class="n">n_cps4</span> <span class="o">+</span> <span class="n">n_cps4r</span> <span class="o">+</span>  <span class="c1"># plane stress</span>
+                 <span class="n">n_coh2d4</span> <span class="o">+</span>
+                 <span class="n">n_c3d10h</span> <span class="o">+</span> <span class="n">n_cohax4</span> <span class="o">+</span> <span class="n">n_cax3</span> <span class="o">+</span> <span class="n">n_cax4r</span> <span class="o">+</span>
+                 <span class="n">n_c3d8r</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">neids</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;something is out of date...&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Part(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, nnodes=</span><span class="si">{</span><span class="n">nnodes</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">, neids=</span><span class="si">{</span><span class="n">neids</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;     n_r2d2=</span><span class="si">{</span><span class="n">n_r2d2</span><span class="si">}</span><span class="s1">, n_cps3=</span><span class="si">{</span><span class="n">n_cps3</span><span class="si">}</span><span class="s1">, n_cpe3=</span><span class="si">{</span><span class="n">n_cpe3</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;n_cpe4=</span><span class="si">{</span><span class="n">n_cpe4</span><span class="si">}</span><span class="s1">, n_cpe4r=</span><span class="si">{</span><span class="n">n_cpe4r</span><span class="si">}</span><span class="s1">, n_coh2d4=</span><span class="si">{</span><span class="n">n_coh2d4</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;     n_cohax4=</span><span class="si">{</span><span class="n">n_cohax4</span><span class="si">}</span><span class="s1">, n_cax3=</span><span class="si">{</span><span class="n">n_cax3</span><span class="si">}</span><span class="s1">, n_cax4r=</span><span class="si">{</span><span class="n">n_cax4r</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; n_cps4r=</span><span class="si">{</span><span class="n">n_cps4r</span><span class="si">}</span><span class="s1">,</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;     n_c3d10h=</span><span class="si">{</span><span class="n">n_c3d10h</span><span class="si">}</span><span class="s1">, n_c3d8r=n_c3d8r)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="n">nsets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">esets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  Node Sets: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsets</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  Element Sets: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">esets</span>
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solid_sections</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;simplified way to access all the elements as a dictionary&quot;&quot;&quot;</span>
+        <span class="n">element_types</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;r2d2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2d2_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2d2</span><span class="p">)</span>
+
+        <span class="c1"># plane strain        element_types[&#39;cpe3&#39;] = (self.cpe3_eids, self.cpe3)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cpe4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpe4_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cpe4r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpe4r_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpe4r</span><span class="p">)</span>
+
+        <span class="c1"># plane stress</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cps3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cps3_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps3</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cps4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cps4_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cps4r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cps4r_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cps4r</span><span class="p">)</span>
+
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cohax4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cohax4_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cohax4</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;coh2d4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coh2d4_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coh2d4</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cax3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cax3_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax3</span><span class="p">)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;cax4r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cax4r_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cax4r</span><span class="p">)</span>
+        <span class="c1">#element_types[&#39;cps4r&#39;] = (self.cps4r_eids, self.cps4r)</span>
+        <span class="n">element_types</span><span class="p">[</span><span class="s1">&#39;c3d10h&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c3d10h_eids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c3d10h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">element_types</span>
+
+<div class="viewcode-block" id="Part.write"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.Part.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abq_file</span><span class="p">,</span> <span class="n">is_2d</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a Part&quot;&quot;&quot;</span>
+        <span class="c1">#name, nids, nodes, element_types, node_sets, element_sets,</span>
+         <span class="c1">#                solid_sections, log</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Part,name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">write_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Node</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_2d</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">,</span><span class="se">\t</span><span class="si">%s</span><span class="s1">,</span><span class="se">\t</span><span class="si">%s</span><span class="s1">,</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">,</span><span class="se">\t</span><span class="si">%s</span><span class="s1">,</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_sets</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">write_node_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">elem_type</span><span class="p">,</span> <span class="p">(</span><span class="n">eids</span><span class="p">,</span> <span class="n">elems</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">eids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Element,type=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elem_type</span><span class="p">)</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">elems</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">eids</span><span class="p">,</span> <span class="n">elems</span><span class="p">):</span>
+                <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_sets</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">write_element_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*endpart</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="write_name"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.write_name">[docs]</a><span class="k">def</span> <span class="nf">write_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abaqus has odd rules for writing words without spaces vs. with spaces&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span> <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="write_element_set_to_file"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.write_element_set_to_file">[docs]</a><span class="k">def</span> <span class="nf">write_element_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes an element set&quot;&quot;&quot;</span>
+    <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Elset, elset=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">write_name</span><span class="p">(</span><span class="n">set_name</span><span class="p">))</span>
+    <span class="n">write_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">values_array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="write_node_set_to_file"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.write_node_set_to_file">[docs]</a><span class="k">def</span> <span class="nf">write_node_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">set_name</span><span class="p">,</span> <span class="n">values_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes a node set&quot;&quot;&quot;</span>
+    <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*Nset, nset=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">write_name</span><span class="p">(</span><span class="n">set_name</span><span class="p">))</span>
+    <span class="n">write_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">values_array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="write_set_to_file"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.abaqus.html#pyNastran.converters.abaqus.abaqus_cards.write_set_to_file">[docs]</a><span class="k">def</span> <span class="nf">write_set_to_file</span><span class="p">(</span><span class="n">abq_file</span><span class="p">,</span> <span class="n">values_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes 16 integer values per line to a set card&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">values_array</span><span class="p">)</span>
+    <span class="n">nvalues</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values_array</span><span class="p">)</span>
+    <span class="n">nrows</span> <span class="o">=</span> <span class="n">nvalues</span> <span class="o">//</span> <span class="mi">16</span>
+    <span class="n">nleftover</span> <span class="o">=</span> <span class="n">nvalues</span> <span class="o">%</span> <span class="mi">16</span>
+    <span class="k">if</span> <span class="n">nrows</span><span class="p">:</span>
+        <span class="n">values_array_square</span> <span class="o">=</span> <span class="n">values_array</span><span class="p">[:</span><span class="n">nrows</span><span class="o">*</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">,</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">fmt2</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">,</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">15</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">values_array_square</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]:</span>
+            <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt2</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">values_array_square</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]))</span>
+
+    <span class="k">if</span> <span class="n">nleftover</span><span class="p">:</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1">,</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">nleftover</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>  <span class="s1">&#39;</span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">leftover</span> <span class="o">=</span> <span class="n">values_array</span><span class="p">[</span><span class="n">nrows</span><span class="o">*</span><span class="mi">16</span><span class="p">:]</span>
+        <span class="n">abq_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">leftover</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

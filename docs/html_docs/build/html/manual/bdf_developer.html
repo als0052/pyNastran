@@ -1,0 +1,536 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Developer: BDF Reading &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="docs" href="docs_doc.html" />
+    <link rel="prev" title="Developer: Getting Started" href="developer_introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">pyNastran Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Brief Project Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nomenclature.html">Nonmenclature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer_introduction.html">Developer: Getting Started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Developer: BDF Reading</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bdf-introduction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code>:   Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bdf-card-formatting"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code>: Card Formatting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bdf-parsing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code> : Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bdf-card-object"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code> : Card Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shell-cquad4-object"><code class="xref py py-mod docutils literal notranslate"><span class="pre">shell</span></code>: CQUAD4 Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shell-cross-referencing-the-cquad4-object"><code class="xref py py-mod docutils literal notranslate"><span class="pre">shell</span></code>: Cross-Referencing the CQUAD4 Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-reference-cross-referencing-process"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cross_reference</span></code>: Cross-Referencing Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#write-mesh-py-writing-the-bdf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">write_mesh.py</span></code>: Writing the BDF</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="docs_doc.html">docs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui_plans.html">GUI Plans</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">pyNastran Manual</a> &raquo;</li>
+        
+      <li>Developer: BDF Reading</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/bdf_developer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="developer-bdf-reading">
+<h1>Developer: BDF Reading<a class="headerlink" href="#developer-bdf-reading" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>This document is a reference for developers of pyNastran, but are not necessarily</dt><dd>people that are familiar with Nastran or even Finite Element Analysis (FEA).</dd>
+</dl>
+<div class="section" id="bdf-introduction">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code>:   Introduction<a class="headerlink" href="#bdf-introduction" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code> module controls the model object that is instantiated with
+<code class="docutils literal notranslate"><span class="pre">model</span> <span class="pre">=</span> <span class="pre">BDF()</span></code> the <code class="docutils literal notranslate"><span class="pre">BDF.__init__</span></code> method
+is called when <code class="docutils literal notranslate"><span class="pre">model</span> <span class="pre">=</span> <span class="pre">BDF()</span></code> is run.  The <a class="reference internal" href="../reference/bdf/pyNastran.bdf.bdf.html#pyNastran.bdf.bdf.BDF" title="pyNastran.bdf.bdf.BDF"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF</span></code></a>
+used to be very large and was split (in a non-standard way) into multiple files
+that allowed for simpler development.  The classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf_Methods.BDFMethods</span></code>,</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdfInterface.get_card.GetMethods</span></code>,</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdfInterface.add_card.AddMethods</span></code>,</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdfInterface.write_mesh.WriteMesh</span></code>,</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdfInterface.cross_reference.XrefMesh</span></code></li>
+</ul>
+</div></blockquote>
+<p>are basically bags of functions for the “model” object.</p>
+<p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF.cards_to_read</span></code> attribute limits the cards that
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pyNastran</span></code> processes and can be modified by the user in order to fix bugs
+or make their code run faster.</p>
+<p>Moving onto <code class="xref py py-attr docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF._init_solution</span></code> sets a series of
+alternate names for Nastran solution types.  For example, a solution 101 is
+a static solution (no acceleration) and will calculate the displacements of
+the system <span class="math notranslate nohighlight">\([K]\{x\} = \{F\}\)</span>.  You can then extract stresses and strains.
+Other solution numbers solve different equations.</p>
+<p>In methods <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF._init_structural_defaults()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF._init_aero_defaults()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF._init_thermal_defaults()</span></code>
+the structural, aerodyanmic, and thermal card holders (e.g. model.materials)
+are defined as dictionaries.</p>
+<p>Finally, the <a class="reference internal" href="../reference/bdf/pyNastran.bdf.bdf.html#pyNastran.bdf.bdf.BDF.read_bdf" title="pyNastran.bdf.bdf.BDF.read_bdf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF.read_bdf()</span></code></a> method is defined.
+There are three sections to a BDF/DAT/NAS file. The BDF (Bulk Data File) is the
+file format used by MSC Nastran and NX Nastran.</p>
+<p>The first section is the “Executive Control Deck” and contains a “SOL 101” or
+“SOL 103” or “SOL STATIC” depending on the solution type. It ends when the “CEND”
+marker is found. Then the “Case Control Deck” is read. Here, general solution
+information is listed, such  as what outputs do you want and what loads are applied
+(not all loads in the file are necessarily applied).  Finally this section defines
+one or more subcases, which are different load combinations. The last section
+is the “Bulk Data Deck”.  This section stores 99% of the file and this section
+introduces very specific formatting restrictions for “cards”.</p>
+<p>A basic model will be made of nodes, elements, properties, and materials.
+For example, for a square plate made of steel model GRID cards are used for
+the nodes, CQUAD4 or CTRIA3 cards are used for the elements (the C generally
+indicates the card is an element so quadrilateral element and triangular element).
+The element has a property (PSHELL) that defines the thickness.  Similarly,
+properties generally start with P.  Finally,  the property references a material
+(MAT1) that defines the material as steel.  INCLUDE cards may also be used to
+add additional files into the BDF.</p>
+</div>
+<div class="section" id="bdf-card-formatting">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code>: Card Formatting<a class="headerlink" href="#bdf-card-formatting" title="Permalink to this headline">¶</a></h2>
+<p>A “card” is at most 72-characters wide.  Comments may follow the card if a
+$ sign is used.</p>
+<p>The standard card is called small field format (single precision) and has 9 fields
+defined per line, each with 8-characters and are fixed width.  Multiline cards are
+implied by leaving 8 spaces at the beginning of the following line.
+Alternatively, a + sign may be used in the first 8 spaces.</p>
+<p>The large field format (double precision) card uses a <span class="math notranslate nohighlight">\(1 * 8 + 4 * 16\)</span>
+to reach the 72-character width instead of <span class="math notranslate nohighlight">\(1 * 8 + 8 * 8\)</span> characters.
+If the first line of a card is double precision, a * follows the card name,
+so all card  names are 7-characters or less.  If the second line of a card is
+double precision, a * begins the line.  A single line of a small field formatted
+takes exactly two lines to write if large field format is used.</p>
+<p>The CSV (comma separated value) format is similar to small field format.
+It’s less picky then the 8-character format, but much harder to read.
+It is still subject to the 9 fields per line restriction.  If a CSV card has
+a * on it, the card becomes a large field CSV formatted card and may have only
+5 fields on the line (including the blank field).</p>
+<p>Although introduced as separate types of cards, small field format and large
+field format may be mixed and matched. However, this only occurs for hand-edited
+BDFs.  There’s also a difficult to understand format known as a “continuation card”.
+This uses values from previous cards and is basically a <em>for</em> loop.
+Hundreds of cards may be defined in just a few lines.</p>
+</div>
+<div class="section" id="bdf-parsing">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code> : Parsing<a class="headerlink" href="#bdf-parsing" title="Permalink to this headline">¶</a></h2>
+<p>A basic card is a GRID card.  Once parsed, a standard grid card will have fields
+of <code class="docutils literal notranslate"><span class="pre">['GRID',</span> <span class="pre">nodeID,</span> <span class="pre">coord,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z]</span></code>. This section will discuss how a card is
+parsed.</p>
+<p>The <a class="reference internal" href="../reference/bdf/pyNastran.bdf.bdf.html#pyNastran.bdf.bdf.BDF.read_bdf" title="pyNastran.bdf.bdf.BDF.read_bdf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF.read_bdf()</span></code></a> method must generalize the way
+files are opened because INCLUDE files may be used. Once the Executive and Case
+Control Decks are read (using simple while loops), the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.bdf.BDF._read_bulk_data_deck()</span></code> method is called.</p>
+<p>This method (<code class="xref py py-meth docutils literal notranslate"><span class="pre">BDF._read_bulk_data_deck()</span></code>) keeps looping over the file as
+long as there are files opened (an INCLUDE file side effect) and calls:
+<code class="docutils literal notranslate"><span class="pre">(raw_card,</span> <span class="pre">card,</span> <span class="pre">card_name)</span> <span class="pre">=</span> <span class="pre">self._get_card(debug=False)</span></code>. <code class="docutils literal notranslate"><span class="pre">card_name</span></code> is
+just the card’s name, while <code class="docutils literal notranslate"><span class="pre">rawCard</span></code> is the full, unparsed card. <code class="docutils literal notranslate"><span class="pre">card</span></code> is
+the card  parsed into fields as a <code class="docutils literal notranslate"><span class="pre">card</span></code> object, which is basically a list
+of fields <code class="docutils literal notranslate"><span class="pre">['GRID',</span> <span class="pre">nodeID,</span> <span class="pre">coord,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z]</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self.read_bdf(bdf_filename)</span></code> works by:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">Load the geometry into memory, while considering INCLUDE files</p>
+</li>
+<li><p class="first">Split off the Executive Control and Case Control Decks</p>
+</li>
+<li><p class="first">Convert the Bulk Data Deck into a series of Nastran “cards”, where a <code class="docutils literal notranslate"><span class="pre">BDFCard()</span></code>
+is a <code class="docutils literal notranslate"><span class="pre">list</span></code> object that returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if you try to access a value outside
+the valid range.  This conversion step supports:</p>
+<blockquote>
+<div><ul class="simple">
+<li>small field (8 characters wide)</li>
+<li>small field CSV</li>
+<li>large field (16 characters wide)</li>
+<li>large field CSV</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Run the <code class="docutils literal notranslate"><span class="pre">BDF.add_card(...)</span></code> method for each card</p>
+</li>
+<li><p class="first">Run cross-referencing to make it easier to access data members</p>
+</li>
+</ol>
+</div></blockquote>
+<p>During the <code class="docutils literal notranslate"><span class="pre">BDF.add_card(...)</span></code> method, a new object (e.g. <code class="docutils literal notranslate"><span class="pre">GRID()</span></code>, <code class="docutils literal notranslate"><span class="pre">CQUAD4()</span></code>)
+object is created.  Then the <code class="docutils literal notranslate"><span class="pre">GRID.add_card(card,</span> <span class="pre">comment='')</span></code> method is called.
+In the <code class="docutils literal notranslate"><span class="pre">GRID.add_card(card,</span> <span class="pre">comment='')</span></code>, each card field begins as a string
+and then is casted appropriately.  Incorrect card fields are not allowed.</p>
+<p>As Nastran is very specific in putting a decimal on float values, it’s
+easy to parse field values into their proper type dynamically.  This is
+especially important when a field may be defined as an integer, float, a string,
+or be left blank and the variable is different depending on variable type.
+Strings, must being with alphabetical characters (A, B, C) and are case
+insensitive.  Note that card names (e.g. <code class="docutils literal notranslate"><span class="pre">GRID</span></code>, <code class="docutils literal notranslate"><span class="pre">CQUAD4</span></code>) are special
+markers and must start at the beginning of the line.</p>
+</div>
+<div class="section" id="bdf-card-object">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">bdf</span></code> : Card Object<a class="headerlink" href="#bdf-card-object" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.bdfInterface.bdf_card.BDFCard</span></code> object is basically a
+list of fields of <code class="docutils literal notranslate"><span class="pre">['GRID',</span> <span class="pre">node_id,</span> <span class="pre">coord,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z]</span></code> with methods to get the
+1st entry (<code class="docutils literal notranslate"><span class="pre">node_id</span></code>) as <code class="docutils literal notranslate"><span class="pre">card.field(1)</span></code> instead of <code class="docutils literal notranslate"><span class="pre">fields[1]</span></code> for a list.
+A card object is useful for setting defaults.  The <code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y</span></code>, and <code class="docutils literal notranslate"><span class="pre">z</span></code> values
+on the GRID card have defaults of 0.0, so <code class="docutils literal notranslate"><span class="pre">card.field(3,0.0)</span></code> may be used to
+get the <code class="docutils literal notranslate"><span class="pre">x</span></code> coordinate. Finally, <code class="docutils literal notranslate"><span class="pre">card.fields(3,5,[0.,0.,0.])</span></code> may be used
+to get <code class="docutils literal notranslate"><span class="pre">xyz</span></code> and set the defaults in a single step.  Additionally, the
+<code class="docutils literal notranslate"><span class="pre">card</span></code> object is useful when parsing “continuation cards”, but is typically
+disabled.</p>
+<p>After an excessively long branch of <code class="docutils literal notranslate"><span class="pre">card_names</span></code> in
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pyNastran.bdf.BDF.read_bdf()</span></code>, the card object is turned into a GRID,
+CTRIA3, CQUAD4, PSHELL, MAT1 or any of 200 other card types.  There are roughly
+as many nodes as there are elements, which make up roughly 95% of the cards in
+large models.  The difference in a large model and a small model, is the
+discretization and will change nodes, elements, loads, and constraints.  Loads
+and constraints are applied to only small portions of the model and (generally)
+only the boundary of a model.  The number of propertie and materials is very
+likely the same.</p>
+<p>Most cards are stored in a dictionary based on their integer ID.  IDs may be
+used only once, but if a card is exactly duplicated, it is still valid.</p>
+</div>
+<div class="section" id="shell-cquad4-object">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">shell</span></code>: CQUAD4 Object<a class="headerlink" href="#shell-cquad4-object" title="Permalink to this headline">¶</a></h2>
+<p>In <code class="docutils literal notranslate"><span class="pre">bdf/cards/elements/shell.py</span></code>, the
+<a class="reference internal" href="../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.shell.html#pyNastran.bdf.cards.elements.shell.CQUAD4" title="pyNastran.bdf.cards.elements.shell.CQUAD4"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.elements.shell.CQUAD4</span></code></a> is defined.</p>
+<p>The <a class="reference internal" href="../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.shell.html#pyNastran.bdf.cards.elements.shell.CQUAD4" title="pyNastran.bdf.cards.elements.shell.CQUAD4"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.elements.shell.CQUAD4</span></code></a> is a shell-type
+element and must reference a PSHELL (isotropic property) or a PCOMP (composite
+property) card.  An example of an isotropic material is steel or aluminum and a
+composite material would be fiberglass or layers of carbon fiber/epoxy resin at
+layed up at different angles.</p>
+<p>The PSHELL may reference MAT1 (isotropic material) cards, while the PCOMP card
+may reference MAT1 or MAT8 (orthotropic material) cards.  An orthotropic
+material is stronger in longitudinally than laterally (e.g. fibers are oriented
+unidirectionally in a carbon fiber composite).</p>
+<p>The <a class="reference internal" href="../reference/bdf/cards/elements/pyNastran.bdf.cards.elements.shell.html#pyNastran.bdf.cards.elements.shell.CQUAD4" title="pyNastran.bdf.cards.elements.shell.CQUAD4"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.elements.shell.CQUAD4</span></code></a> class inherits from
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.elements.shell.QuadShell</span></code> class which defines
+common methods to the various QUAD-type cards.  There are additional QUAD
+element with different numbers of nodes (8-CQUAD8, 9-CQUAD) and the CQUADR and
+CQUADX are axi-symmetric versions of the CQUAD4, and CQUAD8 respectively.
+However, the <code class="docutils literal notranslate"><span class="pre">Area()</span></code>, <code class="docutils literal notranslate"><span class="pre">Mass()</span></code>, <code class="docutils literal notranslate"><span class="pre">Density()</span></code>, etc. methods are calculated
+in the the same way for each card (although the axi-symmetric cards return mass
+per unit theta).  The last thing to note is <code class="docutils literal notranslate"><span class="pre">raw_fields</span></code> and <code class="docutils literal notranslate"><span class="pre">repr_fields</span></code> are
+very important to how the code integrates.</p>
+<p><code class="docutils literal notranslate"><span class="pre">raw_fields</span></code> is used to check if a duplicated card is the same as another card
+and is also used for testing.  After reading and writing, reading back in,
+writing back out, reading back in, if the fields are the  same, then there’s
+likely no error in reading a card (fields can still be missed while reading, so
+it’s not perfect). <code class="docutils literal notranslate"><span class="pre">raw_fields</span></code> returns a list of the fields (similar to the
+list-esque card object from before).</p>
+<p><code class="docutils literal notranslate"><span class="pre">repr_fields</span></code> is analogous to the <code class="docutils literal notranslate"><span class="pre">__repr__()</span></code> method, and is an abbreviated
+way to write the card. For example, the <code class="docutils literal notranslate"><span class="pre">T1,</span> <span class="pre">T2,</span> <span class="pre">T3</span></code>, and <code class="docutils literal notranslate"><span class="pre">T4</span></code> values
+(thickness at nodes 1, 2, 3, 4) are generally 0.0 and instead are set at an
+elemental level using the PSHELL card.  If these fields were printed, the CQUAD4
+card would be a two line card instead of a one line card.  <code class="docutils literal notranslate"><span class="pre">repr_fields</span></code> is
+used instead of <code class="docutils literal notranslate"><span class="pre">__repr__()</span></code> in order to be able to write the card in large
+field or small field format.  Defaults are generally not written by the
+<code class="docutils literal notranslate"><span class="pre">__repr__()</span></code> method, but are written for certain fields (e.g. the <code class="docutils literal notranslate"><span class="pre">xyz</span></code>
+fields on the GRID card).</p>
+<p>To get the CQUAD4, with an element ID of 1000, you would type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">1000</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to use the function.</p>
+<p>Then to print the card, type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to see the Nastran formatted card.  The <code class="docutils literal notranslate"><span class="pre">__repr__()</span></code> method is defined in
+<code class="docutils literal notranslate"><span class="pre">bdf/cards/base_card.py</span></code> the <a class="reference internal" href="../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.BaseCard" title="pyNastran.bdf.cards.base_card.BaseCard"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.base_card.BaseCard</span></code></a> class
+(which is used by the <a class="reference internal" href="../reference/bdf/cards/pyNastran.bdf.cards.base_card.html#pyNastran.bdf.cards.base_card.Element" title="pyNastran.bdf.cards.base_card.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyNastran.bdf.cards.base_card.Element</span></code></a> class
+also defined in <code class="docutils literal notranslate"><span class="pre">base_card.py</span></code>).</p>
+</div>
+<div class="section" id="shell-cross-referencing-the-cquad4-object">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">shell</span></code>: Cross-Referencing the CQUAD4 Object<a class="headerlink" href="#shell-cross-referencing-the-cquad4-object" title="Permalink to this headline">¶</a></h2>
+<p>Previously, it was mentioned that the square plate model built with quads and
+triangles had a thickness and a material. The nodes of the elements also have
+positions.  The nodes further be defined in a rectangular, cylindrical,
+or spherical coordinate system, so to get the mass of an element is actually
+quite involved.  Creating a function to access the mass becomes possible without
+passing the entire model object around to every function through the use of
+cross-referencing.</p>
+<p>Cross Referencing takes a CQUAD4 card and replaces the GRID references with actual
+GRID cards.  The GRID cards in turn reference two COORDx (CORD1R, CORD2R, CORD1C,
+COR2DC, CORD1S, CORD2S) cards, which also may reference two CORDx cards.
+The CQUAD4 references a PSHELL or PCOMP card.  The PSHELL references a single
+MAT1 card, and as mentioned before the PCOMP card may reference one or more
+MAT1/MAT8 cards.  In order to calculate something simple like the mass of the
+CQUAD4 requires the formula:</p>
+<div class="math notranslate nohighlight">
+\[m = A \left( t \rho + \frac{nsm}{A} \right)\]</div>
+<p>for a PSHELL or:</p>
+<div class="math notranslate nohighlight">
+\[m = A \left( \sum_{i=0}^{i=1}{t\rho} + \frac{nsm}{A} \right)\]</div>
+<p>for a PCOMP.</p>
+<p>By using classes and functions, it’s easy to just call the <code class="docutils literal notranslate"><span class="pre">element.MassPerArea()</span></code>
+method and get the proper data to apply the formula.  Similarly, the
+<code class="docutils literal notranslate"><span class="pre">element.Area()</span></code> method calls the <code class="docutils literal notranslate"><span class="pre">node.get_position()</span></code> method to get the node
+in the global XYZ coordinate frame and can then find the area using vectors
+in a 3D space:</p>
+<div class="math notranslate nohighlight">
+\[A=\frac{1}{2} | (n_1-n_3) \times (n_2-n_4) |\]</div>
+<p>(see <a class="reference external" href="http://en.wikipedia.org/wiki/Quadrilateral">http://en.wikipedia.org/wiki/Quadrilateral</a>).</p>
+</div>
+<div class="section" id="cross-reference-cross-referencing-process">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">cross_reference</span></code>: Cross-Referencing Process<a class="headerlink" href="#cross-reference-cross-referencing-process" title="Permalink to this headline">¶</a></h2>
+<p>Cross referencing must first be done on the coordinate cards.  Then, once they’re
+done, the nodes are cross referenced. Once this is done, the coordinate systems
+may be resolved (CORD1x cards reference GRID cards).  Then elements, properties,
+materials, loads, boundary conditions, aerodynamic cards, thermal, dynamic,
+etc. cards are mapped. The order doesn’t matter, but CORD1x cards and GRID cards
+must be mapped first.</p>
+<p>Cross Referencing is performed by looping over the card objects and calling the
+<code class="docutils literal notranslate"><span class="pre">card.cross_reference()</span></code> method.  This will setup all cross-referencing and
+a full list of the status of various cards is listed in <code class="docutils literal notranslate"><span class="pre">bdf_crossReferencing.txt</span></code>.</p>
+</div>
+<div class="section" id="write-mesh-py-writing-the-bdf">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">write_mesh.py</span></code>: Writing the BDF<a class="headerlink" href="#write-mesh-py-writing-the-bdf" title="Permalink to this headline">¶</a></h2>
+<p>The BDF is written by looping through all the objects and calling the
+<code class="docutils literal notranslate"><span class="pre">card.write_bdf(size=8/16,</span> <span class="pre">is_double=True/False)</span></code> method.
+Cards may also be written by typing <code class="docutils literal notranslate"><span class="pre">str(card)</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">card.write_bdf()</span></code> method dynamically figures out how to write the card
+based on the data type.</p>
+<p>For float values, the highest precision 8/16-character width field will be used
+even if it uses Nastran’s strange syntax of “1.2345+8” to represent
+a more standard “1.2345e+08”.</p>
+<p>Note that not all cards support double precision (e.g. <code class="docutils literal notranslate"><span class="pre">1.8000D+08</span></code> vs.
+<code class="docutils literal notranslate"><span class="pre">1.8000E+08</span></code>).  Nastran will crash if you write the card with double
+precision.  As such, the <code class="docutils literal notranslate"><span class="pre">write_bdf</span></code> method won’t always write with double
+precision.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="docs_doc.html" class="btn btn-neutral float-right" title="docs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="developer_introduction.html" class="btn btn-neutral float-left" title="Developer: Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

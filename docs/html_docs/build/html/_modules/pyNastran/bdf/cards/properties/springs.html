@@ -1,0 +1,530 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.properties.springs &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.properties.springs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.properties.springs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All spring properties are defined in this file.  This includes:</span>
+
+<span class="sd"> * PELAS</span>
+<span class="sd"> * PELAST</span>
+
+<span class="sd">All spring properties are SpringProperty and Property objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">Property</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">integer_or_blank</span><span class="p">,</span> <span class="n">double</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+
+<div class="viewcode-block" id="SpringProperty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.SpringProperty">[docs]</a><span class="k">class</span> <span class="nc">SpringProperty</span><span class="p">(</span><span class="n">Property</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Property</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpringProperty.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.SpringProperty.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PELAS"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS">[docs]</a><span class="k">class</span> <span class="nc">PELAS</span><span class="p">(</span><span class="n">SpringProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specifies the stiffness, damping coefficient, and stress coefficient of a</span>
+<span class="sd">    scalar elastic (spring) element (CELAS1 or CELAS3 entry).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;PELAS&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;s&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">pname_fid_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1">#2 : &#39;k&#39;, &#39;K&#39; : &#39;k&#39;,</span>
+        <span class="c1">#3 : &#39;ge&#39;, &#39;GE&#39; : &#39;ge&#39;,</span>
+        <span class="c1">#4 : &#39;s&#39;, &#39;S&#39; : &#39;s&#39;,</span>
+        <span class="s1">&#39;K1&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GE1&#39;</span> <span class="p">:</span> <span class="s1">&#39;ge&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="PELAS._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">return</span> <span class="n">PELAS</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a PELAS card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id</span>
+<span class="sd">        k : float</span>
+<span class="sd">            spring stiffness</span>
+<span class="sd">        ge : int; default=0.0</span>
+<span class="sd">            damping coefficient</span>
+<span class="sd">        s : float; default=0.0</span>
+<span class="sd">            stress coefficient</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="n">SpringProperty</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># 2 PELAS properties can be defined on 1 PELAS card</span>
+        <span class="c1"># these are split into 2 separate cards</span>
+
+        <span class="c1">#: Property identification number. (Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="c1">#: Ki Elastic property value. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="c1">#: Damping coefficient, . See Remarks 5. and 6. (Real)</span>
+        <span class="c1">#: To obtain the damping coefficient GE, multiply the</span>
+        <span class="c1">#: critical damping ratio c/c0 by 2.0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="n">ge</span>
+        <span class="c1">#: Stress coefficient. (Real)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">s</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pelast_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PELAS.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">icard</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PELAS card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        icard : int; default=0</span>
+<span class="sd">            the index of the PELAS card that&#39;s being parsed</span>
+<span class="sd">            must be 0 or 1</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">noffset</span> <span class="o">=</span> <span class="n">icard</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">noffset</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">noffset</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">noffset</span><span class="p">,</span> <span class="s1">&#39;ge&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">noffset</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PELAS</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PELAS card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">PELAS</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PELAS.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#if model.sol in [108, 129]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pelast</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pelast_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pelast</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="PELAS.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pelast_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PELAS.K"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.K">[docs]</a>    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span></div>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">()</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ge</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;pid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;k=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ge</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;ge=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ge</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;ge=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="PELAS.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PELAS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="PELAS.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAS.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ge</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PELAS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">ge</span><span class="p">,</span> <span class="n">s</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div></div>
+
+
+<div class="viewcode-block" id="PELAST"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST">[docs]</a><span class="k">class</span> <span class="nc">PELAST</span><span class="p">(</span><span class="n">SpringProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Frequency Dependent Elastic Property</span>
+<span class="sd">    Defines the frequency dependent properties for a PELAS Bulk Data entry.</span>
+
+<span class="sd">    The PELAST entry is ignored in all solution sequences except frequency</span>
+<span class="sd">    response (108) or nonlinear analyses (129).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;PELAST&#39;</span>
+    <span class="n">_field_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s1">&#39;tkid&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s1">&#39;tgeid&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s1">&#39;tknid&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">pname_fid_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;TKID&#39;</span> <span class="p">:</span> <span class="s1">&#39;tknid&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="PELAST._init_from_empty"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST._init_from_empty">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_init_from_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">PELAST</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">tkid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tgeid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tknid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">tkid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tgeid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tknid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a PELAST card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id</span>
+<span class="sd">        tkid : float</span>
+<span class="sd">            TABLEDx that defines k vs. frequency</span>
+<span class="sd">        tgeid : int; default=0</span>
+<span class="sd">            TABLEDx that defines ge vs. frequency</span>
+<span class="sd">        s : float; default=0.</span>
+<span class="sd">            TABLEDx that defines force vs. displacement</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SpringProperty</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+
+        <span class="c1">#: Property identification number. (Integer &gt; 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="c1">#: Identification number of a TABLEDi entry that defines the</span>
+        <span class="c1">#: force per unit displacement vs. frequency relationship.</span>
+        <span class="c1">#: (Integer &gt; 0; Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tkid</span> <span class="o">=</span> <span class="n">tkid</span>
+        <span class="c1">#: Identification number of a TABLEDi entry that defines the</span>
+        <span class="c1">#: nondimensional structural damping coefficient vs. frequency</span>
+        <span class="c1">#: relationship. (Integer &gt; 0; Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tgeid</span> <span class="o">=</span> <span class="n">tgeid</span>
+        <span class="c1">#: Identification number of a TABELDi entry that defines the nonlinear</span>
+        <span class="c1">#: force vs. displacement relationship. (Integer &gt; 0; Default = 0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tknid</span> <span class="o">=</span> <span class="n">tknid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tkid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tgeid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tknid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PELAST.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PELAST card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">)</span>
+        <span class="n">tkid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;tkid&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">tgeid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;tgeid&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">tknid</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;tknid&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;len(PELAST card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PELAST</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">tkid</span><span class="p">,</span> <span class="n">tgeid</span><span class="p">,</span> <span class="n">tknid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PELAST card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">tkid</span><span class="p">,</span> <span class="n">tgeid</span><span class="p">,</span> <span class="n">tknid</span><span class="p">)</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">PELAST</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">tkid</span><span class="p">,</span> <span class="n">tgeid</span><span class="p">,</span> <span class="n">tknid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PELAST.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tkid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tkid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">TableD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tkid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgeid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tgeid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">TableD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tgeid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tknid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tknid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">TableD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tknid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PELAST.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tkid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tkid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tgeid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tgeid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tknid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tknid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tkid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tgeid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tknid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PELAST.Pid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.Pid">[docs]</a>    <span class="k">def</span> <span class="nf">Pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid_ref</span><span class="o">.</span><span class="n">pid</span></div>
+
+<div class="viewcode-block" id="PELAST.Tkid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.Tkid">[docs]</a>    <span class="k">def</span> <span class="nf">Tkid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the table ID for force per unit displacement vs frequency</span>
+<span class="sd">        (k=F/d vs freq)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tkid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tkid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tkid_ref</span><span class="o">.</span><span class="n">tid</span></div>
+
+<div class="viewcode-block" id="PELAST.Tknid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.Tknid">[docs]</a>    <span class="k">def</span> <span class="nf">Tknid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the table ID for nondimensional force vs. displacement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tknid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tknid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tknid_ref</span><span class="o">.</span><span class="n">tid</span></div>
+
+<div class="viewcode-block" id="PELAST.Tgeid"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.Tgeid">[docs]</a>    <span class="k">def</span> <span class="nf">Tgeid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the table ID for nondimensional structural damping</span>
+<span class="sd">        coefficient vs. frequency (c/c0 vs freq)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgeid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgeid</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgeid_ref</span><span class="o">.</span><span class="n">tid</span></div>
+
+<div class="viewcode-block" id="PELAST.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.springs.html#pyNastran.bdf.cards.properties.springs.PELAST.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;PELAST&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tkid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tgeid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tknid</span><span class="p">()]</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

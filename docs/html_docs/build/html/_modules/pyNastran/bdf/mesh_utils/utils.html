@@ -1,0 +1,1383 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.utils &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd">    bdf merge        (IN_BDF_FILENAMES)... [-o OUT_BDF_FILENAME]\n&#39;</span>
+<span class="sd">    bdf equivalence  IN_BDF_FILENAME EQ_TOL\n&#39;</span>
+<span class="sd">    bdf renumber     IN_BDF_FILENAME [-o OUT_BDF_FILENAME]\n&#39;</span>
+<span class="sd">    bdf mirror       IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--plane PLANE] [--tol TOL]\n&#39;</span>
+<span class="sd">    bdf export_mcids IN_BDF_FILENAME [-o OUT_GEOM_FILENAME]\n&#39;</span>
+<span class="sd">    bdf split_cbars_by_pin_flags IN_BDF_FILENAME [-o OUT_BDF_FILENAME]\n&#39;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">SimpleLogger</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_renumber</span> <span class="kn">import</span> <span class="n">bdf_renumber</span><span class="p">,</span> <span class="n">superelement_renumber</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_merge</span> <span class="kn">import</span> <span class="n">bdf_merge</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.export_mcids</span> <span class="kn">import</span> <span class="n">export_mcids</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.pierce_shells</span> <span class="kn">import</span> <span class="n">pierce_shell_model</span>
+
+<span class="c1"># testing these imports are up to date</span>
+<span class="c1"># if something is imported and tested, it should be removed from here</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.shift</span> <span class="kn">import</span> <span class="n">update_nodes</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.mirror_mesh</span> <span class="kn">import</span> <span class="n">write_bdf_symmetric</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.collapse_bad_quads</span> <span class="kn">import</span> <span class="n">convert_bad_quads_to_tris</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.delete_bad_elements</span> <span class="kn">import</span> <span class="n">delete_bad_shells</span><span class="p">,</span> <span class="n">get_bad_shells</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.split_cbars_by_pin_flag</span> <span class="kn">import</span> <span class="n">split_cbars_by_pin_flag</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.remove_unused</span> <span class="kn">import</span> <span class="n">remove_unused</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.free_faces</span> <span class="kn">import</span> <span class="n">write_skin_solid_faces</span>
+
+
+<div class="viewcode-block" id="cmd_line_equivalence"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_equivalence">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_equivalence</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf_equivalence_nodes&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf equivalence IN_BDF_FILENAME EQ_TOL [-o OUT_BDF_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf equivalence -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf equivalence -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s2">&quot;Positional Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  IN_BDF_FILENAME   path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  EQ_TOL            the spherical equivalence tolerance</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="c1">#&quot;  OUT_BDF_FILENAME  path to output BDF/DAT/NAS file\n&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -o OUT, --output OUT_BDF_FILENAME  path to output BDF/DAT/NAS file</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;merged.bdf&#39;</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;EQ_TOL&#39;</span><span class="p">]</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_equivalence</span> <span class="kn">import</span> <span class="n">bdf_equivalence_nodes</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">bdf_equivalence_nodes</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span>
+                          <span class="n">renumber_nodes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">neq_max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                          <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">remove_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">avoid_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">crash_on_collapse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_bin"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_bin">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_bin</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;bins the model into nbins&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="c1">#&quot;  bdf bin IN_BDF_FILENAME AXIS1 AXIS2 [--cid CID] [--step SIZE]\n&quot;</span>
+        <span class="s2">&quot;  bdf bin IN_BDF_FILENAME AXIS1 AXIS2 [--cid CID] [--nbins NBINS]</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  bdf bin -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf bin -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s2">&quot;Positional Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  AXIS1              axis to loop over</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  AXIS2              axis to bin</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  --cid CID   the coordinate system to bin (default:0)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  --step SIZE   the step size for binning</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  --nbins NBINS the number of bins</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+        <span class="s1">&#39;Plot z (2) as a function of y (1) in y-stepsizes of 0.1:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf bin fem.bdf 1 2 --cid 0 --step 0.1</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Plot z (2) as a function of y (1) with 50 bins:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf bin fem.bdf 1 2 --cid 0 --nbins 50&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">axis1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;AXIS1&#39;</span><span class="p">])</span>
+    <span class="n">axis2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;AXIS2&#39;</span><span class="p">])</span>
+    <span class="n">cid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--cid&#39;</span><span class="p">]:</span>
+        <span class="n">cid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--cid&#39;</span><span class="p">])</span>
+
+    <span class="c1">#stepsize = 0.1</span>
+    <span class="c1">#if data[&#39;--step&#39;]:</span>
+        <span class="c1">#stepsize = float(data[&#39;--step&#39;])</span>
+
+    <span class="n">nbins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--nbins&#39;</span><span class="p">]:</span>
+        <span class="n">nbins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--nbins&#39;</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">nbins</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nbins</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">xyz_cid</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_xyz_in_coord</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">xyz_cid</span><span class="p">[:,</span> <span class="n">axis1</span><span class="p">]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">xyz_cid</span><span class="p">[:,</span> <span class="n">axis2</span><span class="p">]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#n, bins, patches = plt.hist( [x0,x1,x2], 10, weights=[w0, w1, w2], histtype=&#39;bar&#39;)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#zs = []</span>
+    <span class="n">zs_min</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">zs_max</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">/</span> <span class="n">nbins</span>
+    <span class="n">y0i</span> <span class="o">=</span> <span class="n">y0</span>
+    <span class="n">y1i</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">dy</span>
+    <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbins</span><span class="p">):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">y0i</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">y1i</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">zs_min</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">zs_max</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">y0i</span> <span class="o">+=</span> <span class="n">dy</span>
+        <span class="n">y1i</span> <span class="o">+=</span> <span class="n">dy</span>
+    <span class="n">zs_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">zs_max</span><span class="p">)</span>
+    <span class="n">zs_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">zs_min</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ys = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ys</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;zs_max = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">zs_max</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;zs_min = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">zs_min</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">zs_max</span><span class="p">,</span> <span class="s1">&#39;r-o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">zs_min</span><span class="p">,</span> <span class="s1">&#39;b-o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">zs_max</span> <span class="o">-</span> <span class="n">zs_min</span><span class="p">,</span> <span class="s1">&#39;g-o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;delta&#39;</span><span class="p">)</span>
+    <span class="c1">#plt.xlim([y0, y1])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Axis </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">axis1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Axis </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">axis2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="cmd_line_renumber"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_renumber">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_renumber</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf_renumber&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  bdf renumber IN_BDF_FILENAME OUT_BDF_FILENAME [--superelement] [--size SIZE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf renumber IN_BDF_FILENAME                  [--superelement] [--size SIZE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf renumber -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf renumber -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  OUT_BDF_FILENAME   path to output BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;--superelement  calls superelement_renumber</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;--size SIZE     set the field size (default=16)</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;OUT_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;renumber.bdf&#39;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--size&#39;</span><span class="p">]:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;SIZE&#39;</span><span class="p">])</span>
+
+    <span class="k">assert</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;size=</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1"> args=</span><span class="si">{</span><span class="n">argv</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="c1">#cards_to_skip = [</span>
+        <span class="c1">#&#39;AEFACT&#39;, &#39;CAERO1&#39;, &#39;CAERO2&#39;, &#39;SPLINE1&#39;, &#39;SPLINE2&#39;,</span>
+        <span class="c1">#&#39;AERO&#39;, &#39;AEROS&#39;, &#39;PAERO1&#39;, &#39;PAERO2&#39;, &#39;MKAERO1&#39;]</span>
+    <span class="n">cards_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--superelement&#39;</span><span class="p">]:</span>
+        <span class="n">superelement_renumber</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">starting_id_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1">#round_ids=False,</span>
+                              <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bdf_renumber</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">starting_id_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">round_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_mirror"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_mirror">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_mirror</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to write_bdf_symmetric&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  bdf mirror IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--plane PLANE] [--tol TOL]</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  bdf mirror IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--plane PLANE] [--noeq]</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  bdf mirror -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf mirror -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s2">&quot;Positional Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="c1">#&quot;  OUT_BDF_FILENAME   path to output BDF/DAT/NAS file\n&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -o OUT, --output  OUT_BDF_FILENAME  path to output BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  --plane PLANE                       the symmetry plane (xz, yz, xy); default=xz</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  --tol   TOL                         the spherical equivalence tolerance; default=1e-6</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --noeq                              disable equivalencing</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="c1">#  (default=0.000001)</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--tol&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;TOL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.000001</span>
+
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;TOL&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--noeq&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+
+    <span class="n">plane</span> <span class="o">=</span> <span class="s1">&#39;xz&#39;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--plane&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plane</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--plane&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;mirrored.bdf&#39;</span>
+
+    <span class="c1">#from io import StringIO</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_equivalence</span> <span class="kn">import</span> <span class="n">bdf_equivalence_nodes</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">bdf_filename_temp</span> <span class="o">=</span> <span class="s1">&#39;__temp__.bdf&#39;</span>
+    <span class="n">write_bdf_symmetric</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_filename_temp</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                        <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">enddata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="n">bdf_equivalence_nodes</span><span class="p">(</span><span class="n">bdf_filename_temp</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span>
+                          <span class="n">renumber_nodes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">neq_max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                          <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">remove_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">avoid_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">crash_on_collapse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">bdf_filename_temp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_merge"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_merge">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_merge</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf_merge&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  bdf merge (IN_BDF_FILENAMES)... [-o OUT_BDF_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf merge -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf merge -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAMES   path to input BDF/DAT/NAS files</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -o OUT, --output  OUT_BDF_FILENAME  path to output BDF/DAT/NAS file</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">bdf_filenames</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAMES&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;merged.bdf&#39;</span>
+
+    <span class="c1">#cards_to_skip = [</span>
+        <span class="c1">#&#39;AEFACT&#39;, &#39;CAERO1&#39;, &#39;CAERO2&#39;, &#39;SPLINE1&#39;, &#39;SPLINE2&#39;,</span>
+        <span class="c1">#&#39;AERO&#39;, &#39;AEROS&#39;, &#39;PAERO1&#39;, &#39;PAERO2&#39;, &#39;MKAERO1&#39;]</span>
+    <span class="n">cards_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bdf_merge</span><span class="p">(</span><span class="n">bdf_filenames</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">renumber</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cards_to_skip</span><span class="o">=</span><span class="n">cards_to_skip</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_convert"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_convert">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_convert</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf_merge&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Usage:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  bdf convert IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--in_units IN_UNITS] [--out_units OUT_UNITS]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf convert -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf convert -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -o OUT, --output  OUT_BDF_FILENAME  path to output BDF/DAT/NAS file</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --in_units  IN_UNITS                length,mass</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --out_units  OUT_UNITS              length,mass</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#bdf_filename_out = &#39;merged.bdf&#39;</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">bdf_filename</span> <span class="o">+</span> <span class="s1">&#39;.convert.bdf&#39;</span>
+
+    <span class="n">in_units</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_UNITS&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">in_units</span> <span class="o">=</span> <span class="s1">&#39;m,kg&#39;</span>
+
+    <span class="n">out_units</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;OUT_UNITS&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">out_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_units</span> <span class="o">=</span> <span class="s1">&#39;m,kg&#39;</span>
+
+    <span class="n">length_in</span><span class="p">,</span> <span class="n">mass_in</span> <span class="o">=</span> <span class="n">in_units</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">length_out</span><span class="p">,</span> <span class="n">mass_out</span> <span class="o">=</span> <span class="n">out_units</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">units_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">length_out</span><span class="p">,</span> <span class="n">mass_out</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">]</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="n">length_in</span><span class="p">,</span> <span class="n">mass_in</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">]</span>
+    <span class="c1">#cards_to_skip = [</span>
+        <span class="c1">#&#39;AEFACT&#39;, &#39;CAERO1&#39;, &#39;CAERO2&#39;, &#39;SPLINE1&#39;, &#39;SPLINE2&#39;,</span>
+        <span class="c1">#&#39;AERO&#39;, &#39;AEROS&#39;, &#39;PAERO1&#39;, &#39;PAERO2&#39;, &#39;MKAERO1&#39;]</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.convert</span> <span class="kn">import</span> <span class="n">convert</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">punch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_file_structure</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">skip_cards</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_cards</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">)</span>
+    <span class="n">convert</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">units_to</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">prop</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_scale"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_scale">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_scale</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="c1">#import textwrap</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">parent_parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="c1">#prog = &#39;pyNastranGUI&#39;,</span>
+        <span class="c1">#usage = usage,</span>
+        <span class="c1">#description=&#39;A foo that bars&#39;,</span>
+        <span class="c1">#epilog=&quot;And that&#39;s how you&#39;d foo a bar&quot;,</span>
+        <span class="c1">#formatter_class=argparse.RawDescriptionHelpFormatter,</span>
+        <span class="c1">#description=textwrap.dedent(text),</span>
+        <span class="c1">#version=pyNastran.__version__,</span>
+        <span class="c1">#add_help=False,</span>
+    <span class="p">)</span>
+    <span class="c1"># positional arguments</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;INPUT&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;path to output BDF/DAT/NAS file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;path to output file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="c1">#&#39;  --l  LENGTH_SF                    length scale factor\n&#39;</span>
+    <span class="c1">#&#39;  --m  MASS_SF                      mass scale factor\n&#39;</span>
+    <span class="c1">#&#39;  --f  FORCE_SF                     force scale factor\n&#39;</span>
+    <span class="c1">#&#39;  --p  PRESSURE_SF                  pressure scale factor\n&#39;</span>
+    <span class="c1">#&#39;  --t  TIME_SF                      time scale factor\n&#39;</span>
+    <span class="c1">#&#39;  --v  VEL_SF                       velocity scale factor\n&#39;</span>
+
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="s1">&#39;--length&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;length scale factor&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--mass&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;mass scale factor&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--force&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;force scale factor&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--pressure&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;pressure scale factor&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;--time&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;time scale factor&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-V&#39;</span><span class="p">,</span> <span class="s1">&#39;--velocity&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;velocity scale factor&#39;</span><span class="p">)</span>
+    <span class="c1">#parent_parser.add_argument(&#39;--user_geom&#39;, type=str, help=&#39;log msg&#39;)</span>
+
+
+    <span class="c1">#parent_parser.add_argument(&#39;-q&#39;, &#39;--quiet&#39;, help=&#39;prints debug messages (default=True)&#39;, action=&#39;store_true&#39;)</span>
+    <span class="c1">#parent_parser.add_argument(&#39;-h&#39;, &#39;--help&#39;, help=&#39;show this help message and exits&#39;, action=&#39;store_true&#39;)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span>
+                               <span class="n">version</span><span class="o">=</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">scales</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">INPUT</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">OUTPUT</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">)</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.scaled</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bdf_filename_base</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+
+    <span class="c1">#assert bdf_filename_out is not None</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">mass</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">time</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">pressure</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">pressure</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">velocity</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.convert</span> <span class="kn">import</span> <span class="n">scale_by_terms</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">scale_by_terms</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="n">scales</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="o">=</span><span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_export_mcids"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_export_mcids">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_export_mcids</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to export_mcids&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_mcids IN_BDF_FILENAME [-o OUT_CSV_FILENAME] [--iplies PLIES] [--no_x | --no_y]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_mcids -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_mcids -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -o OUT, --output  OUT_CSV_FILENAME  path to output CSV file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --iplies PLIES                      the plies indices to export; comma separated (default=0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Data Suppression:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  --no_x,  don&#39;t write the x axis</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  --no_y,  don&#39;t write the y axis</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">csv_filename_in</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">csv_filename_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">csv_filename_in</span> <span class="o">=</span> <span class="s1">&#39;mcids.csv&#39;</span>
+
+    <span class="n">export_xaxis</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">export_yaxis</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--no_x&#39;</span><span class="p">]:</span>
+        <span class="n">export_xaxis</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--no_y&#39;</span><span class="p">]:</span>
+        <span class="n">export_yaxis</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">csv_filename_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">csv_filename_in</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">iplies</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--iplies&#39;</span><span class="p">]:</span>
+        <span class="n">iplies</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--iplies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">iplies</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">iply</span><span class="p">)</span> <span class="k">for</span> <span class="n">iply</span> <span class="ow">in</span> <span class="n">iplies</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;iplies = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">iplies</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">safe_cross_reference</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">iply</span> <span class="ow">in</span> <span class="n">iplies</span><span class="p">:</span>
+        <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">csv_filename_base</span> <span class="o">+</span> <span class="s1">&#39;_ply=</span><span class="si">%i</span><span class="s1">.csv&#39;</span> <span class="o">%</span> <span class="n">iply</span>
+        <span class="n">export_mcids</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">csv_filename</span><span class="p">,</span>
+                     <span class="n">export_xaxis</span><span class="o">=</span><span class="n">export_xaxis</span><span class="p">,</span> <span class="n">export_yaxis</span><span class="o">=</span><span class="n">export_yaxis</span><span class="p">,</span> <span class="n">iply</span><span class="o">=</span><span class="n">iply</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">csv_filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_free_faces"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_free_faces">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_free_faces</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf free_faces&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="n">encoding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">usage</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces BDF_FILENAME SKIN_FILENAME [-d] [-l] [-f] [--encoding ENCODE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="p">)</span>
+    <span class="n">arg_msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Positional Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  SKIN_FILENAME   path to output BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -l, --large        writes the BDF in large field, single precision format (default=False)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -d, --double       writes the BDF in large field, double precision format (default=False)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --encoding ENCODE  the encoding method (default=None -&gt; </span><span class="si">%r</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;Developer:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -f, --profile    Profiles the code (default=False)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;Info:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;  -h, --help     show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version  show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">encoding</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">arg_msg</span><span class="p">)</span>
+
+    <span class="n">arg_msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">examples</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Examples</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;--------</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces solid.bdf skin.bdf</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces solid.bdf skin.bdf --large</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parent_parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="c1"># positional arguments</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;BDF_FILENAME&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;path to input BDF/DAT/NAS file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;SKIN_FILENAME&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;path to output BDF/DAT/NAS file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="n">size_group</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+    <span class="n">size_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--double&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;writes the BDF in large field, single precision format&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+    <span class="n">size_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="s1">&#39;--large&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;writes the BDF in large field, double precision format&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+    <span class="n">size_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--encoding&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the encoding method (default=None -&gt; {repr(encoding)})&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--profile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Profiles the code&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.utils.arg_handling</span> <span class="kn">import</span> <span class="n">argparse_to_dict</span><span class="p">,</span> <span class="n">update_message</span>
+
+    <span class="n">update_message</span><span class="p">(</span><span class="n">parent_parser</span><span class="p">,</span> <span class="n">usage</span><span class="p">,</span> <span class="n">arg_msg</span><span class="p">,</span> <span class="n">examples</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">argparse_to_dict</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%-12s</span><span class="s2"> = </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">),</span> <span class="n">value</span><span class="p">))</span>
+
+    <span class="kn">import</span> <span class="nn">time</span>
+    <span class="n">time0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">is_double</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;double&#39;</span><span class="p">]:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="n">is_double</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;large&#39;</span><span class="p">]:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">skin_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;SKIN_FILENAME&#39;</span><span class="p">]</span>
+
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.bdf_equivalence</span> <span class="kn">import</span> <span class="n">bdf_equivalence_nodes</span>
+
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-005</span>
+    <span class="n">bdf_filename_merged</span> <span class="o">=</span> <span class="s1">&#39;merged.bdf&#39;</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">bdf_equivalence_nodes</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">bdf_filename_merged</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span>
+                          <span class="n">renumber_nodes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">neq_max</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span>
+                          <span class="n">remove_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">avoid_collapsed_elements</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">crash_on_collapse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;done with equivalencing&#39;</span><span class="p">)</span>
+    <span class="n">write_skin_solid_faces</span><span class="p">(</span>
+        <span class="n">bdf_filename_merged</span><span class="p">,</span> <span class="n">skin_filename</span><span class="p">,</span>
+        <span class="n">write_solids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;total time:  </span><span class="si">%.2f</span><span class="s2"> sec&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_split_cbars_by_pin_flag"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_split_cbars_by_pin_flag">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_split_cbars_by_pin_flag</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to split_cbars_by_pin_flag&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf split_cbars_by_pin_flags  IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [-p PIN_FLAGS_CSV_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf split_cbars_by_pin_flags -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf split_cbars_by_pin_flags -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s2">&quot;Positional Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot; -o OUT, --output  OUT_BDF_FILENAME         path to output BDF file</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot; -p PIN, --pin     PIN_FLAGS_CSV_FILENAME  path to pin_flags_csv file</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename_in</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;model_new.bdf&#39;</span>
+
+    <span class="n">pin_flags_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--pin&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">pin_flags_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pin_flags_filename</span> <span class="o">=</span> <span class="s1">&#39;pin_flags.csv&#39;</span>
+
+    <span class="n">split_cbars_by_pin_flag</span><span class="p">(</span><span class="n">bdf_filename_in</span><span class="p">,</span> <span class="n">pin_flags_filename</span><span class="o">=</span><span class="n">pin_flags_filename</span><span class="p">,</span>
+                            <span class="n">bdf_filename_out</span><span class="o">=</span><span class="n">bdf_filename_out</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="cmd_line_transform"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_transform">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_transform</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to export_caero_mesh&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf transform IN_BDF_FILENAME [-o OUT_CAERO_BDF_FILENAME] [--shift XYZ]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf transform -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf transform -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39; -o OUT, --output  OUT_BDF_FILENAME         path to output BDF file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;transform.bdf&#39;</span>
+
+    <span class="n">dxyz</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--shift&#39;</span><span class="p">]:</span>
+        <span class="n">dxyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;XYZ&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dxyz</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dxyz</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="n">nid_cp_cd</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">,</span> <span class="n">unused_xyz_cp</span><span class="p">,</span> <span class="n">unused_icd_transform</span><span class="p">,</span> <span class="n">unused_icp_transform</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_xyz_in_coord_array</span><span class="p">(</span>
+        <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="n">idtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="n">update_nodes_flag</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># we pretend to change the SPOINT location</span>
+    <span class="k">if</span> <span class="n">dxyz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xyz_cid0</span> <span class="o">+=</span> <span class="n">dxyz</span>
+        <span class="n">update_nodes_flag</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">update_nodes_flag</span><span class="p">:</span>
+        <span class="n">update_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nid_cp_cd</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="cmd_line_filter"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_filter">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_filter</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to bdf filter&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf filter IN_BDF_FILENAME [-o OUT_CAERO_BDF_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf filter IN_BDF_FILENAME [-o OUT_CAERO_BDF_FILENAME] [--x YSIGN_X] [--y YSIGN_Y] [--z YSIGN_Z]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf filter -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf filter -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39; -o OUT, --output  OUT_BDF_FILENAME         path to output BDF file (default=filter.bdf)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot; --x YSIGN_X                                a string (e.g., &#39;&lt; 0.&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot; --y YSIGN_Y                                a string (e.g., &#39;&lt; 0.&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot; --z YSIGN_Z                                a string (e.g., &#39;&lt; 0.&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;Examples</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;1. remove unused cards:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;   &gt;&gt;&gt; bdf filter fem.bdf&#39;</span>
+        <span class="s1">&#39;2. remove GRID points and associated cards with y value &lt; 0:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;   &gt;&gt;&gt; bdf filter fem.bdf --y &#39;&lt; 0.&#39;&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bdf_filename_out</span> <span class="o">=</span> <span class="s1">&#39;filter.bdf&#39;</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="n">func_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;&lt;&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">less</span><span class="p">,</span>
+        <span class="s1">&#39;&gt;&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">greater</span><span class="p">,</span>
+        <span class="s1">&#39;&lt;=&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">less_equal</span><span class="p">,</span>
+        <span class="s1">&#39;&gt;=&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">greater_equal</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">xsign</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ysign</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">zsign</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--x&#39;</span><span class="p">]:</span>
+        <span class="n">xsign</span><span class="p">,</span> <span class="n">xval</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">xval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xval</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">xsign</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">],</span> <span class="n">xsign</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--y&#39;</span><span class="p">]:</span> <span class="c1"># --y &lt; 0</span>
+        <span class="n">ysign</span><span class="p">,</span> <span class="n">yval</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">yval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">yval</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">ysign</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">],</span> <span class="n">ysign</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--z&#39;</span><span class="p">]:</span>
+        <span class="n">zsign</span><span class="p">,</span> <span class="n">zval</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--z&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">zval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zval</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">zsign</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">],</span> <span class="n">zsign</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="c1">#nid_cp_cd, xyz_cid0, xyz_cp, icd_transform, icp_transform = model.get_xyz_in_coord_array(</span>
+        <span class="c1">#cid=0, fdtype=&#39;float64&#39;, idtype=&#39;int32&#39;)</span>
+
+    <span class="n">eids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Centroid</span><span class="p">()</span>
+        <span class="n">xyz_cid0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+        <span class="n">eids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz_cid0</span><span class="p">)</span>
+    <span class="n">eids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+
+    <span class="c1"># we pretend to change the SPOINT location</span>
+    <span class="n">update_nodesi</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># we pretend to change the SPOINT location</span>
+    <span class="n">iunion</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">xsign</span><span class="p">:</span>
+        <span class="n">xvals</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">xfunc</span> <span class="o">=</span> <span class="n">func_map</span><span class="p">[</span><span class="n">xsign</span><span class="p">]</span>
+        <span class="n">ix</span> <span class="o">=</span> <span class="n">xfunc</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">xval</span><span class="p">)</span>
+        <span class="n">iunion</span> <span class="o">=</span> <span class="n">_union</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">ix</span><span class="p">,</span> <span class="n">iunion</span><span class="p">)</span>
+        <span class="n">update_nodesi</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">ysign</span><span class="p">:</span>
+        <span class="n">yvals</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">yfunc</span> <span class="o">=</span> <span class="n">func_map</span><span class="p">[</span><span class="n">ysign</span><span class="p">]</span>
+        <span class="n">iy</span> <span class="o">=</span> <span class="n">yfunc</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span> <span class="n">yval</span><span class="p">)</span>
+        <span class="n">iunion</span> <span class="o">=</span> <span class="n">_union</span><span class="p">(</span><span class="n">yval</span><span class="p">,</span> <span class="n">iy</span><span class="p">,</span> <span class="n">iunion</span><span class="p">)</span>
+        <span class="n">update_nodesi</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">zsign</span><span class="p">:</span>
+        <span class="n">zvals</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">zfunc</span> <span class="o">=</span> <span class="n">func_map</span><span class="p">[</span><span class="n">zsign</span><span class="p">]</span>
+        <span class="n">iz</span> <span class="o">=</span> <span class="n">zfunc</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="n">zval</span><span class="p">)</span>
+        <span class="n">iunion</span> <span class="o">=</span> <span class="n">_union</span><span class="p">(</span><span class="n">zval</span><span class="p">,</span> <span class="n">iz</span><span class="p">,</span> <span class="n">iunion</span><span class="p">)</span>
+        <span class="n">update_nodesi</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">update_nodesi</span><span class="p">:</span>
+        <span class="n">eids_to_remove</span> <span class="o">=</span> <span class="n">eids</span><span class="p">[</span><span class="n">iunion</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids_to_remove</span><span class="p">:</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_type_to_id_map</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+
+    <span class="c1">#update_nodes(model, nid_cp_cd, xyz_cid0)</span>
+    <span class="c1"># unxref&#39;d model</span>
+    <span class="n">remove_unused</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">remove_nids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_cids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">remove_pids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_mids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_union"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils._union">[docs]</a><span class="k">def</span> <span class="nf">_union</span><span class="p">(</span><span class="n">xval</span><span class="p">,</span> <span class="n">iunion</span><span class="p">,</span> <span class="n">ix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method for ``filter``&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="k">if</span> <span class="n">xval</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">iunion</span><span class="p">:</span>
+            <span class="n">iunion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">union1d</span><span class="p">(</span><span class="n">iunion</span><span class="p">,</span> <span class="n">ix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">iunion</span></div>
+
+
+<div class="viewcode-block" id="cmd_line_export_caero_mesh"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line_export_caero_mesh">[docs]</a><span class="k">def</span> <span class="nf">cmd_line_export_caero_mesh</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to export_caero_mesh&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+    <span class="kn">import</span> <span class="nn">pyNastran</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_caero_mesh IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--subpanels] [--pid PID]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_caero_mesh -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_caero_mesh -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Positional Arguments:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  IN_BDF_FILENAME    path to input BDF/DAT/NAS file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -o OUT, --output  OUT_CAERO_BDF_FILENAME  path to output BDF file</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --subpanels                               write the subpanels (default=False)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  --pid PID                                 sets the pid; {aesurf, caero, paero} [default: aesurf]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="s1">&#39;Info:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  -h, --help      show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s2">&quot;  -v, --version   show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="c1">#type_defaults = {</span>
+    <span class="c1">#    &#39;--nerrors&#39; : [int, 100],</span>
+    <span class="c1">#}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1">#size = 16</span>
+    <span class="n">bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;IN_BDF_FILENAME&#39;</span><span class="p">]</span>
+    <span class="n">caero_bdf_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--output&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">caero_bdf_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">caero_bdf_filename</span> <span class="o">=</span> <span class="s1">&#39;caero.bdf&#39;</span>
+    <span class="n">is_subpanel_model</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--subpanels&#39;</span><span class="p">]</span>
+
+    <span class="n">pid_method</span> <span class="o">=</span> <span class="s1">&#39;aesurf&#39;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--pid&#39;</span><span class="p">]:</span>
+        <span class="n">pid_method</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--pid&#39;</span><span class="p">]</span>
+
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.export_caero_mesh</span> <span class="kn">import</span> <span class="n">export_caero_mesh</span>
+    <span class="n">skip_cards</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># elements</span>
+        <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">,</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;RBE1&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">,</span> <span class="s1">&#39;RBAR&#39;</span><span class="p">,</span>
+
+        <span class="c1"># properties</span>
+        <span class="s1">&#39;PELAS&#39;</span><span class="p">,</span> <span class="s1">&#39;PDAMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PBARL&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;PBEAML&#39;</span><span class="p">,</span> <span class="s1">&#39;PBCOMP&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;PSHELL&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;PCOMPG&#39;</span><span class="p">,</span> <span class="s1">&#39;PSOLID&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MAT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT8&#39;</span><span class="p">,</span>
+
+        <span class="c1"># loads</span>
+        <span class="s1">&#39;PLOAD&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOAD2&#39;</span><span class="p">,</span> <span class="s1">&#39;PLOAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE1&#39;</span><span class="p">,</span> <span class="s1">&#39;FORCE2&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT1&#39;</span><span class="p">,</span> <span class="s1">&#39;MOMENT2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GRAV&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEL&#39;</span><span class="p">,</span> <span class="s1">&#39;ACCEL1&#39;</span><span class="p">,</span>
+        <span class="c1"># constraints</span>
+        <span class="s1">&#39;SPC&#39;</span><span class="p">,</span> <span class="s1">&#39;SPC1&#39;</span><span class="p">,</span> <span class="s1">&#39;MPC&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCADD&#39;</span><span class="p">,</span> <span class="s1">&#39;MPCADD&#39;</span><span class="p">,</span> <span class="s1">&#39;DEQATN&#39;</span><span class="p">,</span>
+
+        <span class="c1">#  optimization</span>
+        <span class="s1">&#39;DVPREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVPREL2&#39;</span><span class="p">,</span> <span class="s1">&#39;DVMREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVMREL2&#39;</span><span class="p">,</span> <span class="s1">&#39;DVCREL1&#39;</span><span class="p">,</span> <span class="s1">&#39;DVCREL2&#39;</span><span class="p">,</span> <span class="s1">&#39;DCONADD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DRESP1&#39;</span><span class="p">,</span> <span class="s1">&#39;DRESP2&#39;</span><span class="p">,</span> <span class="s1">&#39;DRESP3&#39;</span><span class="p">,</span> <span class="s1">&#39;DESVAR&#39;</span><span class="p">,</span>
+        <span class="c1">#  aero: mabye enable later</span>
+        <span class="s1">&#39;TRIM&#39;</span><span class="p">,</span> <span class="s1">&#39;AESTAT&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUTTER&#39;</span><span class="p">,</span> <span class="s1">&#39;FLFACT&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="k">else</span> <span class="s1">&#39;warning&#39;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">log_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">skip_cards</span><span class="o">=</span><span class="n">skip_cards</span><span class="p">)</span>
+    <span class="n">export_caero_mesh</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">caero_bdf_filename</span><span class="p">,</span>
+                      <span class="n">is_subpanel_model</span><span class="o">=</span><span class="n">is_subpanel_model</span><span class="p">,</span> <span class="n">pid_method</span><span class="o">=</span><span class="n">pid_method</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="cmd_line"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.utils.html#pyNastran.bdf.mesh_utils.utils.cmd_line">[docs]</a><span class="k">def</span> <span class="nf">cmd_line</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;command line interface to multiple other command line scripts&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="n">dev</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf merge                       (IN_BDF_FILENAMES)... [-o OUT_BDF_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf equivalence                 IN_BDF_FILENAME EQ_TOL</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf renumber                    IN_BDF_FILENAME [OUT_BDF_FILENAME] [--superelement] [--size SIZE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf mirror                      IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--plane PLANE] [--tol TOL]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf convert                     IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--in_units IN_UNITS] [--out_units OUT_UNITS]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf scale                       IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--lsf LENGTH_SF] [--msf MASS_SF] [--fsf FORCE_SF] [--psf PRESSURE_SF] [--tsf TIME_SF] [--vsf VEL_SF]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_mcids                IN_BDF_FILENAME [-o OUT_CSV_FILENAME] [--no_x | --no_y]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces                  BDF_FILENAME SKIN_FILENAME [-d | -l] [-f] [--encoding ENCODE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf transform                   IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--shift XYZ]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_caero_mesh           IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [--subpanels] [--pid PID]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf split_cbars_by_pin_flags    IN_BDF_FILENAME [-o OUT_BDF_FILENAME] [-p PIN_FLAGS_CSV_FILENAME]</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dev</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bdf filter                      IN_BDF_FILENAME [-o OUT_CAERO_BDF_FILENAME] [--x YSIGN X] [--y YSIGN Y] [--z YSIGN Z]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bdf bin                         IN_BDF_FILENAME AXIS1 AXIS2 [--cid CID] [--step SIZE]</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span>
+        <span class="c1">#&#39;\n&#39;</span>
+        <span class="s1">&#39;  bdf merge              -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf equivalence        -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf renumber           -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf mirror             -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf convert            -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf scale              -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_mcids       -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf free_faces         -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf transform          -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf filter             -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf export_caero_mesh  -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;  bdf split_cbars_by_pin_flags  -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dev</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bdf filter                      -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bdf bin                         -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bdf -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;Not enough arguments.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1">#assert sys.argv[0] != &#39;bdf&#39;, msg</span>
+
+    <span class="k">if</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;merge&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_merge</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;equivalence&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_equivalence</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;renumber&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_renumber</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;mirror&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_mirror</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;convert&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_convert</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_scale</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;export_mcids&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_export_mcids</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;split_cbars_by_pin_flags&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_split_cbars_by_pin_flag</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;export_caero_mesh&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_export_caero_mesh</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;transform&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_transform</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;filter&#39;</span> <span class="ow">and</span> <span class="n">dev</span><span class="p">:</span>  <span class="c1"># TODO: make better name</span>
+        <span class="n">cmd_line_filter</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;free_faces&#39;</span><span class="p">:</span>
+        <span class="n">cmd_line_free_faces</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;bin&#39;</span> <span class="ow">and</span> <span class="n">dev</span><span class="p">:</span>
+        <span class="n">cmd_line_bin</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">]:</span>
+        <span class="kn">import</span> <span class="nn">pyNastran</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="c1">#raise NotImplementedError(&#39;arg1=%r&#39; % sys.argv[1])</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="c1"># for the exe, we pass all the args, but we hack them to have the bdf prefix</span>
+    <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+    <span class="n">argv</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;bdf&#39;</span>
+    <span class="n">cmd_line</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

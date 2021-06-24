@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.stl.stl_reshape &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.stl.stl_reshape</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.stl.stl_reshape</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+
+<span class="kn">import</span> <span class="nn">pyNastran</span>
+<span class="kn">from</span> <span class="nn">pyNastran.converters.stl.stl</span> <span class="kn">import</span> <span class="n">read_stl</span>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.stl.html#pyNastran.converters.stl.stl_reshape.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># --ascii &lt;fmt&gt; doesn&#39;t work for binary properly, so we set:</span>
+    <span class="c1"># --ascii False</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;Usage:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] [--xy | --yz | --xz] [--scale S] &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] [--xscale X] [--yscale Y] [--zscale Z] &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] --delta &lt;xshift&gt; &lt;yshift&gt; &lt;zshift&gt; &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] --mirror &lt;xyz&gt; &lt;tol&gt; &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] --flip_normals &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape [--ascii &lt;fmt&gt;] --stats &lt;in_stl_filename&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="c1">#msg += &#39;  stl_reshape [--ascii &lt;fmt&gt;] &lt;in_stl_filename&gt; &lt;out_stl_filename&gt;\n&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape -h | --help</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  stl_reshape -v | --version</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;Options:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  -h, --help        show this help message and exit</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  -v, --version     show program&#39;s version number and exit</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --ascii           writes the model is ascii</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  fmt               the sscii format; False -&gt; binary</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --scale S         scale the xyz values by S</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --xy              flip the x and y axes (pick one)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --yz              flip the y and z axes (pick one)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --xz              flip the x and z axes (pick one)</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --xscale X        scale the x values by X (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --yscale Y        scale the y values by Y (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --zscale Z        scale the z values by Z (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --delta           shift the model some &lt;xshift,yshift,shift&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  xshift            shift the model by xshift (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  yshift            shift the model by yshift (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  zshift            shift the model by zshift (use </span><span class="se">\&#39;</span><span class="s1">-1.0</span><span class="se">\&#39;</span><span class="s1"> if &lt; 0)</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --mirror          create a mirror model</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  xyz               the x, y, or z direction to mirror about</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  tol               the tolerance</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --flip_normals    flip the normals of the elements</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  --stats           print the min/max locations</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  in_stl_filename   the input filename</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  out_stl_filename  the output filename</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ver</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">stl_reshape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="stl_reshape"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.stl.html#pyNastran.converters.stl.stl_reshape.stl_reshape">[docs]</a><span class="k">def</span> <span class="nf">stl_reshape</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;--xy&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s1">&#39;--yz&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s1">&#39;--xz&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xz&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s1">&#39;--scale&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;--xscale&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;--yscale&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;--zscale&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--zscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;&lt;xshift&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xshift&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;&lt;yshift&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;yshift&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;&lt;zshift&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;zshift&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;--stats&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--stats&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;--mirror&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--mirror&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;--flip_normals&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--flip_normals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">in_stl_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;in_stl_filename&gt;&#39;</span><span class="p">]</span>
+    <span class="n">out_stl_filename</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;out_stl_filename&gt;&#39;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">in_stl_filename</span> <span class="o">!=</span> <span class="n">out_stl_filename</span>
+
+    <span class="n">stl</span> <span class="o">=</span> <span class="n">read_stl</span><span class="p">(</span><span class="n">in_stl_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;fmt&gt;&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+        <span class="n">is_binary</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;fmt&gt;&#39;</span><span class="p">]</span>
+        <span class="n">is_binary</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;is_binary=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">is_binary</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xy&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yz&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xz&#39;</span><span class="p">]:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xy&#39;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yz&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xz&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+        <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yz&#39;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xz&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="s1">&#39;yz&#39;</span>
+        <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xz&#39;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xy&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yz&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="s1">&#39;xz&#39;</span>
+        <span class="c1">#print(&#39;flip_axes = %r&#39; % axes)</span>
+        <span class="c1">#print(data)</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">flip_axes</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xscale&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yscale&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--zscale&#39;</span><span class="p">]:</span>
+        <span class="n">xscale</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">yscale</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">zscale</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xscale&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xscale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--xscale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yscale&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">yscale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--yscale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--zscale&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zscale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--zscale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">xscale</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">yscale</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">zscale</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xshift&gt;&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;yshift&gt;&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;zshift&gt;&#39;</span><span class="p">]:</span>
+        <span class="n">xshift</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">yshift</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">zshift</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xshift&gt;&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xshift</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">xshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xshift&gt;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xshift&gt;&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;yshift&gt;&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xshift</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">yshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;yshift&gt;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">yshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;yshift&gt;&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;zshift&gt;&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xshift</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">zshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;zshift&gt;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zshift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;zshift&gt;&#39;</span><span class="p">])</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;delta = (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xshift</span><span class="p">,</span> <span class="n">yshift</span><span class="p">,</span> <span class="n">zshift</span><span class="p">))</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">xshift</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">yshift</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">zshift</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">]:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;--scale&#39;</span><span class="p">])</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span> <span class="o">*=</span> <span class="n">scale</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--stats&#39;</span><span class="p">]:</span>
+        <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span> <span class="o">=</span> <span class="n">stl</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;xyz_max = (</span><span class="si">%g</span><span class="s1">, </span><span class="si">%g</span><span class="s1">, </span><span class="si">%g</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;xyz_min = (</span><span class="si">%g</span><span class="s1">, </span><span class="si">%g</span><span class="s1">, </span><span class="si">%g</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--mirror&#39;</span><span class="p">]:</span>
+        <span class="c1">#plane = data[&#39;plane&#39;]</span>
+        <span class="c1">#assert plane in [&#39;xy&#39;, &#39;yz&#39;, &#39;xz&#39;], &#39;plane=%r&#39; % plane</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;xyz&gt;&#39;</span><span class="p">]</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;&lt;tol&gt;&#39;</span><span class="p">])</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">create_mirror_model</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;--flip_normals&#39;</span><span class="p">]:</span>
+        <span class="n">stl</span><span class="o">.</span><span class="n">flip_normals</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;unsupported reshape...data=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="n">stl</span><span class="o">.</span><span class="n">write_stl</span><span class="p">(</span><span class="n">out_stl_filename</span><span class="p">,</span> <span class="n">is_binary</span><span class="o">=</span><span class="n">is_binary</span><span class="p">,</span> <span class="n">float_fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

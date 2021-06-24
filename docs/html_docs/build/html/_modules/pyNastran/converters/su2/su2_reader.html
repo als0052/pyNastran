@@ -1,0 +1,568 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.su2.su2_reader &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.su2.su2_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.su2.su2_reader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="read_su2"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.read_su2">[docs]</a><span class="k">def</span> <span class="nf">read_su2</span><span class="p">(</span><span class="n">su2_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads a 2d/3d SU2 multi-zone model&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SU2Reader</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">unused_ndim</span><span class="p">,</span> <span class="n">zones</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">read_su2</span><span class="p">(</span><span class="n">su2_filename</span><span class="p">)</span>
+    <span class="c1">#model.to_cart3d()</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">zones</span></div>
+
+<div class="viewcode-block" id="SU2Reader"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader">[docs]</a><span class="k">class</span> <span class="nc">SU2Reader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;SU2 reader/writer&quot;&quot;&quot;</span>
+    <span class="n">etype_nnodes_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">3</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># line</span>
+        <span class="mi">5</span> <span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># triangle</span>
+        <span class="mi">9</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># quad</span>
+        <span class="mi">10</span> <span class="p">:</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># tetra</span>
+        <span class="mi">12</span> <span class="p">:</span> <span class="mi">8</span><span class="p">,</span>  <span class="c1"># hexa</span>
+        <span class="mi">13</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>  <span class="c1"># wedge / penta</span>
+        <span class="mi">14</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># pyramid</span>
+    <span class="p">}</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;initializes the SU2Reader object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">su2_filename</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zones</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="SU2Reader._read_2d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader._read_2d">[docs]</a>    <span class="k">def</span> <span class="nf">_read_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">nelem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads a 2d SU2 zone&quot;&quot;&quot;</span>
+        <span class="c1"># elements</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_ne</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelem</span><span class="p">):</span>
+            <span class="c1"># what&#39;s the 0th slot?</span>
+            <span class="c1">#Line           3</span>
+            <span class="c1">#Triangle       5</span>
+            <span class="c1">#Quadrilateral  9</span>
+            <span class="c1">#Tetrahedral    10</span>
+            <span class="c1">#Hexahedral     12</span>
+            <span class="c1">#Wedge          13</span>
+            <span class="c1">#Pyramid        14</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">etype</span><span class="p">,</span> <span class="o">*</span><span class="n">nodesi</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">nodesi</span>
+                <span class="n">quads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;5&#39;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nodesi</span>
+                <span class="n">tris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">quads</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="n">i</span><span class="p">,</span> <span class="n">points_dict</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">points_dict</span><span class="p">[</span><span class="s1">&#39;npoints&#39;</span><span class="p">]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">sline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sline</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">unused_z</span> <span class="o">=</span> <span class="n">sline</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># boundary conditions</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_2d_bcs</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">tris</span>
+        <span class="k">if</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">quads</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="s1">&#39;no 2d elements found&#39;</span>
+
+        <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span></div>
+
+<div class="viewcode-block" id="SU2Reader._read_2d_bcs"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader._read_2d_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_2d_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads the 1d boundary conditions for a 2d SU2 zone&quot;&quot;&quot;</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">nmark</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;nmark&#39;</span><span class="p">]</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">name_old</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">imark</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmark</span><span class="p">):</span>
+            <span class="n">nelements_mark</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;marker_elems&#39;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;marker_tag&#39;</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">name_old</span><span class="p">,</span> <span class="s1">&#39;name=</span><span class="si">{name!r}</span><span class="s1"> name_old=</span><span class="si">{name_old!r}</span><span class="s1">&#39;</span>
+
+            <span class="n">lines2d</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1">#np.zeros((nelements_mark, 2), dtype=&#39;int32&#39;)</span>
+            <span class="k">for</span> <span class="n">unused_ne</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelements_mark</span><span class="p">):</span>
+                <span class="c1"># what are the 3 slots?</span>
+                <span class="c1">#Line          (2D)     3</span>
+                <span class="c1">#Triangle      (3D)     5</span>
+                <span class="c1">#Quadrilateral (3D)     9</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">sline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+                <span class="n">etype</span><span class="p">,</span> <span class="o">*</span><span class="n">nodesi</span> <span class="o">=</span> <span class="n">sline</span>
+                <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;3&#39;</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">lines2d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">lines2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lines2d</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">imark</span> <span class="o">!=</span> <span class="n">nmark</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+            <span class="n">regionsi</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span> <span class="p">:</span> <span class="n">lines2d</span><span class="p">}</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines2d</span><span class="p">),</span> <span class="s1">&#39;no 3d bcs found&#39;</span>
+            <span class="n">regions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">regionsi</span>
+            <span class="n">name_old</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">regions</span></div>
+
+<div class="viewcode-block" id="SU2Reader._read_3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader._read_3d">[docs]</a>    <span class="k">def</span> <span class="nf">_read_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unused_ndim</span><span class="p">,</span> <span class="n">nelem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads a 3d SU2 zone&quot;&quot;&quot;</span>
+        <span class="n">tets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hexs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">wedges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">#pents = []</span>
+        <span class="n">pyramids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_ne</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelem</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">etype</span><span class="p">,</span> <span class="o">*</span><span class="n">nodesi</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1">#Tetrahedral    10</span>
+            <span class="c1">#Hexahedral     12</span>
+            <span class="c1">#Wedge          13</span>
+            <span class="c1">#Pyramid        14</span>
+            <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;10&#39;</span><span class="p">:</span>  <span class="c1"># tetra</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">tets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;12&#39;</span><span class="p">:</span>  <span class="c1"># hexa</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">hexs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;13&#39;</span><span class="p">:</span>  <span class="c1"># wedge</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">wedges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;14&#39;</span><span class="p">:</span>  <span class="c1"># pyram</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">pyramids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etype=</span><span class="si">{</span><span class="n">etype</span><span class="si">}</span><span class="s1"> data=</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">hexs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hexs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">wedges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wedges</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>  <span class="c1"># penta element</span>
+        <span class="n">pyramids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pyramids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">tets</span>
+        <span class="k">if</span> <span class="n">hexs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">hexs</span>
+        <span class="k">if</span> <span class="n">wedges</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span> <span class="o">=</span> <span class="n">wedges</span>
+        <span class="k">if</span> <span class="n">pyramids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyramids</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="s1">&#39;no 3d elements found&#39;</span>
+
+        <span class="n">i</span><span class="p">,</span> <span class="n">points_dict</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">points_dict</span><span class="p">[</span><span class="s1">&#39;npoints&#39;</span><span class="p">]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_3d_bcs</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span></div>
+
+
+<div class="viewcode-block" id="SU2Reader._read_3d_bcs"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader._read_3d_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_3d_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads the 2d boundary conditions for a 3d SU2 zone&quot;&quot;&quot;</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">nmark</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;nmark&#39;</span><span class="p">]</span>
+        <span class="n">name_old</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">imark</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmark</span><span class="p">):</span>
+            <span class="c1">#print(f&#39;imark={imark} nmark={nmark} look_ahead={imark != nmark - 1}&#39;)</span>
+            <span class="n">nelements_mark</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;marker_elems&#39;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">bcs</span><span class="p">[</span><span class="s1">&#39;marker_tag&#39;</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">name_old</span><span class="p">,</span> <span class="s1">&#39;name=</span><span class="si">%r</span><span class="s1"> name_old=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name_old</span><span class="p">)</span>
+            <span class="n">tris</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">unused_ne</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nelements_mark</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">etype</span><span class="p">,</span> <span class="o">*</span><span class="n">nodesi</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">quads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;5&#39;</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;nnodes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span><span class="si">}</span><span class="s1"> nodes=</span><span class="si">{</span><span class="n">nodesi</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">tris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodesi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">imark</span> <span class="o">!=</span> <span class="n">nmark</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">bcs</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+
+            <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">quads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+            <span class="n">regionsi</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">regionsi</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">tris</span>
+            <span class="k">if</span> <span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">regionsi</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">quads</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">regionsi</span><span class="p">),</span> <span class="s1">&#39;no 3d bcs found&#39;</span>
+            <span class="n">regions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">regionsi</span>
+            <span class="n">name_old</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">regions</span></div>
+
+<div class="viewcode-block" id="SU2Reader.read_su2"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader.read_su2">[docs]</a>    <span class="k">def</span> <span class="nf">read_su2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">su2_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads a 2d/3d SU2 single zone model&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">su2_filename</span> <span class="o">=</span> <span class="n">su2_filename</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">su2_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">su2_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">su2_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">zones</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">zone_dict</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">nzones</span> <span class="o">=</span> <span class="n">zone_dict</span><span class="p">[</span><span class="s1">&#39;nzones&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">izone</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nzones</span><span class="p">):</span>
+            <span class="n">ndim</span> <span class="o">=</span> <span class="n">zone_dict</span><span class="p">[</span><span class="s1">&#39;ndim&#39;</span><span class="p">]</span>
+            <span class="n">nelem</span> <span class="o">=</span> <span class="n">zone_dict</span><span class="p">[</span><span class="s1">&#39;nelem&#39;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_2d</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">nelem</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_3d</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">nelem</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">izone</span> <span class="o">!=</span> <span class="n">nzones</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">zone_dict</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+            <span class="n">zones</span><span class="p">[</span><span class="n">izone</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zones</span> <span class="o">=</span> <span class="n">zones</span>
+        <span class="k">return</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">zones</span></div>
+
+<div class="viewcode-block" id="SU2Reader.write_su2"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.SU2Reader.write_su2">[docs]</a>    <span class="k">def</span> <span class="nf">write_su2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">su2_filename</span><span class="p">,</span> <span class="n">zones</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a 2d/3d multizone SU2 file&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">zones</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zones</span>
+
+        <span class="n">nzones</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zones</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">su2_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">su2_file</span><span class="p">:</span>
+            <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;NZONE = </span><span class="si">{</span><span class="n">nzones</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">izone</span><span class="p">,</span> <span class="n">zone</span> <span class="ow">in</span> <span class="n">zones</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">regions</span> <span class="o">=</span> <span class="n">zone</span>
+                <span class="n">nnodes</span><span class="p">,</span> <span class="n">ndim</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IZONE = </span><span class="si">{</span><span class="n">nzones</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;NDIM = </span><span class="si">{</span><span class="n">ndim</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">nelements</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">elementsi</span> <span class="ow">in</span> <span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">nelements</span> <span class="o">+=</span> <span class="n">elementsi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;NELEM = </span><span class="si">{</span><span class="n">nelements</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">elementsi</span> <span class="ow">in</span> <span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">nnodesi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">etype_nnodes_map</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span>
+                    <span class="n">fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="n">nnodesi</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elementsi</span><span class="p">:</span>
+                        <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+
+                <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NPOINTS = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+                        <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">inode</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;NPOINTS = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+                        <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">inode</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+
+                <span class="n">nregions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>
+                <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;NMARK = </span><span class="si">{</span><span class="n">nregions</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">nmarker_elementsi</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">elementsi</span> <span class="ow">in</span> <span class="n">region</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">nmarker_elementsi</span> <span class="o">+=</span> <span class="n">elementsi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MARKER_ELEMS = </span><span class="si">{</span><span class="n">nmarker_elementsi</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MARKER_TAG = </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">etype</span><span class="p">,</span> <span class="n">elementsi</span> <span class="ow">in</span> <span class="n">region</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">nnodesi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">etype_nnodes_map</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span>
+                        <span class="n">fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">nnodesi</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elementsi</span><span class="p">:</span>
+                            <span class="n">su2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">element</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="read_header"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.su2.html#pyNastran.converters.su2.su2_reader.read_header">[docs]</a><span class="k">def</span> <span class="nf">read_header</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads the header and stores it as a dictionary&quot;&quot;&quot;</span>
+    <span class="n">i0</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">while</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">continue</span>
+        <span class="c1">#line_upper = line.upper()</span>
+        <span class="c1">#if not line.startswith((&#39;N&#39;, &#39;I&#39;, &#39;M&#39;)):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;expected a header; found=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;NDIME&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;ndim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;NELEM&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;nelem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;NZONE&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;nzones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;IZONE&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;izone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;NMARK&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;nmark&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;MARKER_TAG&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;marker_tag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;MARKER_ELEMS&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;marker_elems&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">word</span> <span class="o">==</span> <span class="s1">&#39;NPOIN&#39;</span><span class="p">:</span>
+            <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;npoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;word=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">word</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">headers</span>
+
+    <span class="c1"># if this is the first zone and nzones isn&#39;t defined, add it</span>
+    <span class="k">if</span> <span class="n">i0</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s1">&#39;nzones&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">headers</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;izone&#39;</span> <span class="ow">in</span> <span class="n">headers</span> <span class="ow">or</span><span class="s1">&#39;ndim&#39;</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">):</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;nzones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">headers</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

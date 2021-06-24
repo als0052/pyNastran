@@ -1,0 +1,497 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.aflr.surf.surf_reader &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.aflr.surf.surf_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.aflr.surf.surf_reader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">vstack</span><span class="p">,</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+
+
+<div class="viewcode-block" id="combine_surfs"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.combine_surfs">[docs]</a><span class="k">def</span> <span class="nf">combine_surfs</span><span class="p">(</span><span class="n">surf_filenames</span><span class="p">,</span> <span class="n">surf_out_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combines multiple SURFs into a single file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf_filenames : List[str]</span>
+<span class="sd">        list of surf filenames</span>
+<span class="sd">    surf_out_filename : str; default=None -&gt; no writing</span>
+<span class="sd">        string of stl output filename</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    surf : SurfReader</span>
+<span class="sd">        the surf object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tris</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tri_props</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">quad_props</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">n0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">surf_filenames</span><span class="p">:</span>
+        <span class="n">surf</span> <span class="o">=</span> <span class="n">SurfReader</span><span class="p">()</span>
+        <span class="n">surf</span><span class="o">.</span><span class="n">read_surf</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">tris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">tris</span> <span class="o">+</span> <span class="n">n0</span><span class="p">)</span>
+        <span class="n">quads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">quads</span> <span class="o">+</span> <span class="n">n0</span><span class="p">)</span>
+        <span class="n">tri_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">tri_props</span><span class="p">)</span>
+        <span class="n">quad_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">quad_props</span><span class="p">)</span>
+        <span class="n">n0</span> <span class="o">+=</span> <span class="n">nnodes</span>
+
+    <span class="n">surf</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">surf</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">tris</span><span class="p">)</span>
+    <span class="n">surf</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
+    <span class="n">surf</span><span class="o">.</span><span class="n">tri_props</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">tri_props</span><span class="p">)</span>
+    <span class="n">surf</span><span class="o">.</span><span class="n">quad_props</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">(</span><span class="n">quad_props</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">surf_out_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">surf</span><span class="o">.</span><span class="n">write_surf</span><span class="p">(</span><span class="n">surf_out_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">surf</span></div>
+
+
+<div class="viewcode-block" id="SurfReader"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.SurfReader">[docs]</a><span class="k">class</span> <span class="nc">SurfReader</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the SurfReader object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        debug : bool/None; default=True</span>
+<span class="sd">            used to set the logger if no logger is passed in</span>
+<span class="sd">                True:  logs debug/info/error messages</span>
+<span class="sd">                False: logs info/error messages</span>
+<span class="sd">                None:  logs error messages</span>
+<span class="sd">        log : logging module object / None</span>
+<span class="sd">            if log is set, debug is ignored and uses the</span>
+<span class="sd">            settings the logging object has</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_props</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#self.nodes_failed = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tri_props</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quad_props</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_failed</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SurfReader.read_surf"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.SurfReader.read_surf">[docs]</a>    <span class="k">def</span> <span class="nf">read_surf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surf_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        # AFLR3,14.18.115,28.206.154,WIN/doc/ug_io/3d_input_output_grids.html</span>
+
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        | Grid BC |                         Description                          |</span>
+<span class="sd">        +=========+==============================================================+</span>
+<span class="sd">        |    -6   | internal embedded/transparent surface that will be converted |</span>
+<span class="sd">        |         | to internal/interior/volume faces with BL volume grid        |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |    -5   | embedded/transparent surface with BL volume grid             |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |    -1   | standard surface with BL volume grid; **wall**               |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     0   | standard surface                                             |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     1   | standard surface; **farfield**                               |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     2   | standard surface that intersects the BL region;              |</span>
+<span class="sd">        |         | **boundary layer**                                           |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     3   | embedded/transparent surface or source surface that will be  |</span>
+<span class="sd">        |         | converted to source nodes; **source**                        |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     4   | embedded/transparent surface that intersects the BL region   |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     5   | embedded/transparent surface                                 |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     6   | internal embedded/transparent surface that will be converted |</span>
+<span class="sd">        |         | to internal/interior/volume faces                            |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        |     7   | fixed surface that intersects and directly connects to the   |</span>
+<span class="sd">        |         | BL region; **transparent**                                   |</span>
+<span class="sd">        +---------+--------------------------------------------------------------+</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#basename = os.path.splitext(surf_filename)[0]</span>
+        <span class="c1">#fail_surf_filename = basename +</span>
+        <span class="c1">#print(fail_surf_filename)</span>
+
+
+        <span class="n">is_failed_surf</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="s1">&#39;.FAIL.surf&#39;</span> <span class="ow">in</span> <span class="n">surf_filename</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="c1"># if &#39;.FAIL.&#39; in surf_filename:</span>
+            <span class="c1"># is_failed_surf = True</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">surf_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">surf_file</span><span class="p">:</span>
+            <span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">=</span> <span class="n">surf_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">ntris</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ntris</span><span class="p">)</span>
+            <span class="n">nquads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nquads</span><span class="p">)</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>
+
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+            <span class="n">node_props</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+            <span class="n">tris</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">quads</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nquads</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+            <span class="n">tri_props</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">quad_props</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nquads</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+
+            <span class="c1"># read nodes</span>
+            <span class="k">if</span> <span class="n">is_failed_surf</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">=</span> <span class="n">surf_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                    <span class="n">x_y_z_initalnormalspacing_blthickness</span> <span class="o">=</span> <span class="n">surf_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_y_z_initalnormalspacing_blthickness</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">initial_normal_spacing</span><span class="p">)</span> <span class="o">=</span> <span class="n">x_y_z_initalnormalspacing_blthickness</span>
+                        <span class="n">bl_thickness</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_y_z_initalnormalspacing_blthickness</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                        <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">initial_normal_spacing</span><span class="p">,</span>
+                         <span class="n">bl_thickness</span><span class="p">)</span> <span class="o">=</span> <span class="n">x_y_z_initalnormalspacing_blthickness</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">x_y_z_initalnormalspacing_blthickness</span><span class="p">)</span>
+                    <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+                    <span class="n">node_props</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_normal_spacing</span><span class="p">,</span> <span class="n">bl_thickness</span><span class="p">]</span>
+
+            <span class="c1"># read tris</span>
+            <span class="k">for</span> <span class="n">itri</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntris</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">surface_id</span><span class="p">,</span> <span class="n">reconnection_flag</span><span class="p">,</span>
+                 <span class="n">grid_bc_flag</span><span class="p">)</span> <span class="o">=</span> <span class="n">surf_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">tris</span><span class="p">[</span><span class="n">itri</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+                <span class="n">tri_props</span><span class="p">[</span><span class="n">itri</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">surface_id</span><span class="p">,</span> <span class="n">reconnection_flag</span><span class="p">,</span> <span class="n">grid_bc_flag</span><span class="p">]</span>
+
+            <span class="c1"># read quads</span>
+            <span class="k">for</span> <span class="n">iquad</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nquads</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">surface_id</span><span class="p">,</span> <span class="n">reconnection_flag</span><span class="p">,</span>
+                 <span class="n">grid_bc_flag</span><span class="p">)</span> <span class="o">=</span> <span class="n">surf_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">quads</span><span class="p">[</span><span class="n">iquad</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">]</span>
+                <span class="n">quad_props</span><span class="p">[</span><span class="n">iquad</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">surface_id</span><span class="p">,</span> <span class="n">reconnection_flag</span><span class="p">,</span> <span class="n">grid_bc_flag</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_props</span> <span class="o">=</span> <span class="n">node_props</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="n">tris</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tri_props</span> <span class="o">=</span> <span class="n">tri_props</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="n">quads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quad_props</span> <span class="o">=</span> <span class="n">quad_props</span></div>
+
+<div class="viewcode-block" id="SurfReader.read_surf_failnode"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.SurfReader.read_surf_failnode">[docs]</a>    <span class="k">def</span> <span class="nf">read_surf_failnode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surf_filename</span><span class="p">):</span>
+        <span class="c1">#print(surf_filename)</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">surf_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">fail_node_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.FAIL.node&#39;</span>
+
+        <span class="c1"># nnodes = self.nodes.shape[0]</span>
+        <span class="n">nodes_failed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fail_node_filename</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_node_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fail_file</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">fail_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="n">nid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">nodes_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+            <span class="n">nodes_failed</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">nodes_failed</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_failed</span> <span class="o">=</span> <span class="n">nodes_failed</span></div>
+
+<div class="viewcode-block" id="SurfReader.get_normals"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.SurfReader.get_normals">[docs]</a>    <span class="k">def</span> <span class="nf">get_normals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ntris</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nquads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="n">ntris</span> <span class="o">+</span> <span class="n">nquads</span>
+        <span class="n">normals</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">n3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span> <span class="o">==</span> <span class="n">ntris</span><span class="p">,</span> <span class="s1">&#39;axis is wrong&#39;</span>
+        <span class="n">normal</span> <span class="o">/=</span> <span class="n">mag</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">normals</span><span class="p">[:</span><span class="n">ntris</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">normal</span>
+
+        <span class="n">n1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">n3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">n4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quads</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="c1">#print(n1)</span>
+        <span class="c1">#print(n3)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span> <span class="o">==</span> <span class="n">nquads</span><span class="p">,</span> <span class="s1">&#39;axis is wrong&#39;</span>
+        <span class="n">normal</span> <span class="o">/=</span> <span class="n">mag</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">normals</span><span class="p">[</span><span class="n">ntris</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">normal</span>
+        <span class="k">return</span> <span class="n">normals</span></div></div>
+
+
+<div class="viewcode-block" id="TagReader"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.TagReader">[docs]</a><span class="k">class</span> <span class="nc">TagReader</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+
+<div class="viewcode-block" id="TagReader.read_tag_filename"><a class="viewcode-back" href="../../../../../reference/converters/pyNastran.converters.aflr.html#pyNastran.converters.aflr.surf.surf_reader.TagReader.read_tag_filename">[docs]</a>    <span class="k">def</span> <span class="nf">read_tag_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tag_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tag_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">tag_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="c1">#print(&#39;\n&#39;.join(lines))</span>
+
+        <span class="c1">#ID Group  Visc  Recon  Rebuild Fixed  Source  Trans  Delete  Spacing Thcknss Layers</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">sline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline</span><span class="p">)</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">is_visc</span><span class="p">,</span> <span class="n">is_recon</span><span class="p">,</span> <span class="n">is_rebuild</span><span class="p">,</span> <span class="n">is_fixed</span><span class="p">,</span> <span class="n">is_source</span><span class="p">,</span>
+                 <span class="n">is_trans</span><span class="p">,</span> <span class="n">is_delete</span><span class="p">,</span> <span class="n">bl_spacing</span><span class="p">,</span> <span class="n">bl_thickness</span><span class="p">,</span> <span class="n">nlayers</span><span class="p">)</span> <span class="o">=</span> <span class="n">sline</span>
+                <span class="n">ID</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ID</span><span class="p">)</span>
+                <span class="n">is_visc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_visc</span><span class="p">)</span>
+                <span class="n">is_recon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_recon</span><span class="p">)</span>
+                <span class="n">is_rebuild</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_rebuild</span><span class="p">)</span>
+                <span class="n">is_source</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_source</span><span class="p">)</span>
+                <span class="n">is_trans</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_trans</span><span class="p">)</span>
+                <span class="n">is_delete</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">is_delete</span><span class="p">)</span>
+                <span class="n">bl_spacing</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">bl_spacing</span><span class="p">)</span>
+                <span class="n">bl_thickness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">bl_thickness</span><span class="p">)</span>
+                <span class="n">nlayers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nlayers</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;invalid data line in tags file=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tag_filename</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;split line = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;expected 12 values; got </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sline</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  ID           = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  name         = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_visc      = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_recon     = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_rebuild   = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_fixed     = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_source    = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_trans     = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  is_delete    = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bl_spacing   = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  bl_thickness = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  nlayers = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sline</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">data</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="p">,</span> <span class="n">is_visc</span><span class="p">,</span> <span class="n">is_recon</span><span class="p">,</span> <span class="n">is_rebuild</span><span class="p">,</span> <span class="n">is_fixed</span><span class="p">,</span> <span class="n">is_source</span><span class="p">,</span>
+                        <span class="n">is_trans</span><span class="p">,</span> <span class="n">is_delete</span><span class="p">,</span> <span class="n">bl_spacing</span><span class="p">,</span> <span class="n">bl_thickness</span><span class="p">,</span> <span class="n">nlayers</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

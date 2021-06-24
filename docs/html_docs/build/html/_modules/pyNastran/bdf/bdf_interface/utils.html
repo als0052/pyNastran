@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.bdf_interface.utils &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.bdf_interface.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.bdf_interface.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines various utilities for BDF parsing including:</span>
+<span class="sd"> - to_fields</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="c1">#import pyNastran</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.errors</span> <span class="kn">import</span> <span class="n">CardParseSyntaxError</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+<span class="n">_REMOVED_LINES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;$EXECUTIVE CONTROL DECK&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$CASE CONTROL DECK&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$NODES&#39;</span><span class="p">,</span> <span class="s1">&#39;$SPOINTS&#39;</span><span class="p">,</span> <span class="s1">&#39;$ELEMENTS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$PARAMS&#39;</span><span class="p">,</span> <span class="s1">&#39;$PROPERTIES&#39;</span><span class="p">,</span> <span class="s1">&#39;$ELEMENTS_WITH_PROPERTIES&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$ELEMENTS_WITH_NO_PROPERTIES (PID=0 and unanalyzed properties)&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$UNASSOCIATED_PROPERTIES&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$MATERIALS&#39;</span><span class="p">,</span> <span class="s1">&#39;$THERMAL MATERIALS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$CONSTRAINTS&#39;</span><span class="p">,</span> <span class="s1">&#39;$SPCs&#39;</span><span class="p">,</span> <span class="s1">&#39;$MPCs&#39;</span><span class="p">,</span> <span class="s1">&#39;$RIGID ELEMENTS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$LOADS&#39;</span><span class="p">,</span> <span class="s1">&#39;$AERO&#39;</span><span class="p">,</span> <span class="s1">&#39;$AERO CONTROL SURFACES&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$STATIC AERO&#39;</span><span class="p">,</span> <span class="s1">&#39;$FLUTTER&#39;</span><span class="p">,</span> <span class="s1">&#39;$GUST&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$DYNAMIC&#39;</span><span class="p">,</span> <span class="s1">&#39;$OPTIMIZATION&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$COORDS&#39;</span><span class="p">,</span> <span class="s1">&#39;$THERMAL&#39;</span><span class="p">,</span> <span class="s1">&#39;$TABLES&#39;</span><span class="p">,</span> <span class="s1">&#39;$RANDOM TABLES&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$SETS&#39;</span><span class="p">,</span> <span class="s1">&#39;$CONTACT&#39;</span><span class="p">,</span> <span class="s1">&#39;$REJECTS&#39;</span><span class="p">,</span> <span class="s1">&#39;$REJECT_LINES&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$PROPERTIES_MASS&#39;</span><span class="p">,</span> <span class="s1">&#39;$MASSES&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">EXPECTED_HEADER_KEYS_CHECK</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;nnodes&#39;</span><span class="p">,</span> <span class="s1">&#39;nelements&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;punch&#39;</span><span class="p">,</span> <span class="s1">&#39;dumplines&#39;</span><span class="p">,</span> <span class="s1">&#39;is_superelements&#39;</span><span class="p">,</span> <span class="c1"># booleans</span>
+<span class="p">]</span>
+<span class="n">EXPECTED_HEADER_KEYS_NO_CHECK</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;skip_cards&#39;</span><span class="p">,</span> <span class="s1">&#39;units&#39;</span><span class="p">,</span> <span class="s1">&#39;code-block&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_to_fields_mntpnt1</span><span class="p">(</span><span class="n">card_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="n">card_lines</span>
+    <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span> <span class="o">=</span> <span class="n">card_lines</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">line1</span><span class="p">[:</span><span class="mi">24</span><span class="p">]</span>
+    <span class="n">unused_comment</span> <span class="o">=</span> <span class="n">line1</span><span class="p">[</span><span class="mi">24</span><span class="p">:]</span>  <span class="c1"># len=56 max</span>
+    <span class="k">assert</span> <span class="s1">&#39;,&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base</span><span class="p">,</span> <span class="n">base</span>
+    <span class="k">assert</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base</span><span class="p">,</span> <span class="n">base</span>
+
+    <span class="k">assert</span> <span class="s1">&#39;,&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">,</span> <span class="n">card_lines</span>
+    <span class="k">assert</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">,</span> <span class="n">card_lines</span>
+    <span class="k">assert</span> <span class="s1">&#39;*&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">,</span> <span class="n">card_lines</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">line1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span>
+        <span class="n">line1</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">],</span>
+        <span class="n">line1</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">64</span><span class="p">],</span> <span class="n">line1</span><span class="p">[</span><span class="mi">64</span><span class="p">:</span><span class="mi">72</span><span class="p">],</span>
+
+        <span class="n">line2</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">],</span>
+        <span class="n">line2</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">64</span><span class="p">],</span> <span class="n">line2</span><span class="p">[</span><span class="mi">64</span><span class="p">:</span><span class="mi">72</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">fields</span>
+
+
+<div class="viewcode-block" id="to_fields"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.utils.html#pyNastran.bdf.bdf_interface.utils.to_fields">[docs]</a><span class="k">def</span> <span class="nf">to_fields</span><span class="p">(</span><span class="n">card_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">card_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a series of lines in a card into string versions of the field.</span>
+<span class="sd">    Handles large, small, and CSV formatted cards.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lines : List[str]</span>
+<span class="sd">        the lines of the BDF card object</span>
+<span class="sd">    card_name : str</span>
+<span class="sd">        the card_name -&gt; &#39;GRID&#39;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fields : List[str]</span>
+<span class="sd">        the string formatted fields of the card</span>
+
+<span class="sd">    .. warning:: this function is used by the reader and isn&#39;t intended</span>
+<span class="sd">                 to be called by a separate process</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       &gt;&gt;&gt; card_lines = [&#39;GRID,1,,1.0,2.0,3.0&#39;]</span>
+<span class="sd">       &gt;&gt;&gt; card_name = &#39;GRID&#39;</span>
+<span class="sd">       &gt;&gt;&gt; fields = to_fields(lines, card_name)</span>
+<span class="sd">       &gt;&gt;&gt; fields</span>
+<span class="sd">       [&#39;GRID&#39;, &#39;1&#39;, &#39;&#39;, &#39;1.0&#39;, &#39;2.0&#39;, &#39;3.0&#39;]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: List[str]</span>
+
+    <span class="k">if</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;MONPNT1&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_to_fields_mntpnt1</span><span class="p">(</span><span class="n">card_lines</span><span class="p">)</span>
+
+    <span class="c1"># first line</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">card_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;card_name=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">equal signs are not supported...line=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">card_name</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">CardParseSyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">expand_tabs</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># large field</span>
+        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># csv</span>
+            <span class="n">new_fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)):</span>
+                <span class="n">new_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># standard</span>
+            <span class="n">new_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span>
+                          <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">72</span><span class="p">]]</span>
+        <span class="n">fields</span> <span class="o">+=</span> <span class="n">new_fields</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="n">fields</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># small field</span>
+        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># csv</span>
+            <span class="n">new_fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[:</span><span class="mi">9</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)):</span>
+                <span class="n">new_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># standard</span>
+            <span class="n">new_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span>
+                          <span class="n">line</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">64</span><span class="p">],</span>
+                          <span class="n">line</span><span class="p">[</span><span class="mi">64</span><span class="p">:</span><span class="mi">72</span><span class="p">]]</span>
+        <span class="n">fields</span> <span class="o">+=</span> <span class="n">new_fields</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9</span><span class="p">,</span> <span class="n">fields</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">card_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span> <span class="c1"># continuation lines</span>
+        <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">card_name</span> <span class="o">!=</span> <span class="s1">&#39;EIGRL&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;card_name=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">equal signs are not supported...</span><span class="se">\n</span><span class="s1">line=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">card_name</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">CardParseSyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">expand_tabs</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># large field</span>
+            <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># csv</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)):</span>
+                    <span class="n">new_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># standard</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">72</span><span class="p">]]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="n">new_fields</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># small field</span>
+            <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># csv</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)):</span>
+                    <span class="n">new_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># standard</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span>
+                              <span class="n">line</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span>
+                              <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">64</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">64</span><span class="p">:</span><span class="mi">72</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="n">nfields</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_fields</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;nfields=</span><span class="si">%s</span><span class="s1"> new_fields=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nfields</span><span class="p">,</span> <span class="n">new_fields</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">+=</span> <span class="n">new_fields</span>
+    <span class="k">return</span> <span class="n">fields</span></div>
+
+<div class="viewcode-block" id="expand_tabs"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.utils.html#pyNastran.bdf.bdf_interface.utils.expand_tabs">[docs]</a><span class="k">def</span> <span class="nf">expand_tabs</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;expands the tabs; breaks if you mix commas and tabs&quot;&quot;&quot;</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;tabs and commas in the same line are not supported...</span><span class="se">\n</span><span class="s1">line=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+        <span class="k">raise</span> <span class="n">CardParseSyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">line</span></div>
+
+<div class="viewcode-block" id="parse_executive_control_deck"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.utils.html#pyNastran.bdf.bdf_interface.utils.parse_executive_control_deck">[docs]</a><span class="k">def</span> <span class="nf">parse_executive_control_deck</span><span class="p">(</span>
+        <span class="n">executive_control_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Extracts the solution from the executive control deck&quot;&quot;&quot;</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sol_iline</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">eline</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">executive_control_lines</span><span class="p">):</span>
+        <span class="n">uline</span> <span class="o">=</span> <span class="n">eline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>  <span class="c1"># uppercase line</span>
+        <span class="n">uline</span> <span class="o">=</span> <span class="n">uline</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">uline</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SOL &#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">uline</span><span class="p">:</span>
+                <span class="n">sline</span> <span class="o">=</span> <span class="n">uline</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>  <span class="c1"># SOL 600,method</span>
+                <span class="n">sol_value</span> <span class="o">=</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sol_value</span> <span class="o">=</span> <span class="n">uline</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">sol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sol</span> <span class="o">=</span> <span class="n">sol_value</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot overwrite solution existing=&#39;</span>
+                                 <span class="s1">&#39;|SOL </span><span class="si">%s</span><span class="s1">| new =|</span><span class="si">%s</span><span class="s1">|&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sol</span><span class="p">,</span> <span class="n">uline</span><span class="p">))</span>
+            <span class="n">sol_iline</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">sol</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">sol_iline</span></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_pynastran_header</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    line : str</span>
+<span class="sd">        the line to parse (e.g., &#39;$ pyNastran: version=NX&#39;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    key : str / None</span>
+<span class="sd">        the key for the parameters</span>
+<span class="sd">        str : valid (e.g., &#39;version&#39;)</span>
+<span class="sd">        None : invalid</span>
+<span class="sd">    value : str / None</span>
+<span class="sd">        the key for the parameters</span>
+<span class="sd">        str : valid (e.g., &#39;NX&#39;)</span>
+<span class="sd">        None : invalid</span>
+
+<span class="sd">    Search for data of the form:</span>
+<span class="sd">        ..code-block :: python</span>
+<span class="sd">            $ pyNastran: version=NX</span>
+<span class="sd">            $ pyNastran: encoding=latin-1</span>
+<span class="sd">            $ pyNastran: punch=True</span>
+<span class="sd">            $ pyNastran: dumplines=True</span>
+<span class="sd">            $ pyNastran: nnodes=10</span>
+<span class="sd">            $ pyNastran: nelements=100</span>
+<span class="sd">            $ pyNastran: skip_cards=PBEAM,CBEAM</span>
+<span class="sd">            $ pyNastran: units=in,lb,s</span>
+<span class="sd">            $ pyNastran: skip elements=12345,6,7,8</span>
+
+<span class="sd">    If we find:</span>
+<span class="sd">        ..code-block :: python</span>
+<span class="sd">            $$ pyNastran: version=NX</span>
+
+<span class="sd">    or a line without a valid pyNastran flag, we&#39;ll stop reading,</span>
+<span class="sd">    even a valid header statement is on the following line.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lline</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lline</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;$&#39;</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="s1">&#39;pynastran&#39;</span> <span class="ow">in</span> <span class="n">lline</span><span class="p">:</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">word</span> <span class="o">=</span> <span class="n">lline</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;pynastran&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;unrecognized pyNastran marker</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;line=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;expected header of the form:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: version=NX</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: encoding=latin-1</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: punch=True</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: dumplines=True</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: nnodes=10</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: nelements=100</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: skip_cards=PBEAM,CBEAM</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: units=in,lb,s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;$ pyNastran: skip elements=12345,6,7,8</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">EXPECTED_HEADER_KEYS_CHECK</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="s1">&#39; &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;value=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">EXPECTED_HEADER_KEYS_NO_CHECK</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="s1">&#39;skip &#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">unrecognized pyNastran key=</span><span class="si">%r</span><span class="s1"> type(key)=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;line=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;expected_keys = [</span><span class="si">%s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">EXPECTED_HEADER_KEYS_CHECK</span> <span class="o">+</span> <span class="n">EXPECTED_HEADER_KEYS_NO_CHECK</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;type(key0) = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">EXPECTED_HEADER_KEYS_CHECK</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
+
+
+<span class="c1">#def clean_empty_lines(lines):</span>
+    <span class="c1">## type: (List[str]) -&gt; List[str]</span>
+    <span class="c1">#&quot;&quot;&quot;</span>
+    <span class="c1">#Removes leading and trailing empty lines</span>
+    <span class="c1">#don&#39;t remove internally blank lines</span>
+    <span class="c1">#&quot;&quot;&quot;</span>
+    <span class="c1">#found_lines = False</span>
+    <span class="c1">#if len(lines) &lt; 2:</span>
+        <span class="c1">#return lines</span>
+
+    <span class="c1">#for i, line in enumerate(lines):</span>
+        <span class="c1">#if not found_lines and line:</span>
+            <span class="c1">#found_lines = True</span>
+            <span class="c1">#n1 = i</span>
+            <span class="c1">#n2 = i + 1</span>
+        <span class="c1">#elif found_lines and line:</span>
+            <span class="c1">#n2 = i + 1</span>
+    <span class="c1">#lines2 = lines[n1:n2]</span>
+    <span class="c1">#return lines2</span>
+
+
+<div class="viewcode-block" id="print_filename"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.utils.html#pyNastran.bdf.bdf_interface.utils.print_filename">[docs]</a><span class="k">def</span> <span class="nf">print_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">relpath</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a path such as C:/work/fem.bdf and locates the file using</span>
+<span class="sd">    relative paths.  If it&#39;s on another drive, the path is not modified.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        a filename string</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    filename_string : str</span>
+<span class="sd">        a shortened representation of the filename</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">StringIO</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;StringIO&gt;&#39;</span>
+    <span class="n">drive_letter</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">drive_letter</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">relpath</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filename</span></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_dynamic_syntax</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">dict_of_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+                          <span class="n">log</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies the dynamic syntax for %varName</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    key : str</span>
+<span class="sd">        the uppercased key</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : int/float/str</span>
+<span class="sd">        the dynamic value defined by dict_of_vars</span>
+
+<span class="sd">    .. seealso:: :func: `set_dynamic_syntax`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;dynamic key = </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+    <span class="c1">#dict_of_vars = {&#39;P5&#39;:0.5,&#39;ONEK&#39;:1000.}</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dict_of_vars</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;key=</span><span class="si">%r</span><span class="s2"> not found in keys=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dict_of_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dict_of_vars</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">_get_card_name</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">active_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the name of the card defined by the provided lines</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lines : list[str]</span>
+<span class="sd">        the lines of the card</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    card_name : str</span>
+<span class="sd">        the name of the card</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">card_name</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">, &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;*</span><span class="se">\t</span><span class="s1"> &#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">card_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">card_name</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">card_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;card_name=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">line=</span><span class="si">%r</span><span class="s1"> in filename=</span><span class="si">%r</span><span class="s1"> is invalid&#39;</span> \
+              <span class="o">%</span> <span class="p">(</span><span class="n">card_name</span><span class="p">,</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">active_filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">CardParseSyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">card_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+<div class="viewcode-block" id="fill_dmigs"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.utils.html#pyNastran.bdf.bdf_interface.utils.fill_dmigs">[docs]</a><span class="k">def</span> <span class="nf">fill_dmigs</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;fills the DMIx cards with the column data that&#39;s been stored&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">card_comments</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">_dmig_temp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">card0</span><span class="p">,</span> <span class="n">unused_comment0</span> <span class="o">=</span> <span class="n">card_comments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">card_name</span> <span class="o">=</span> <span class="n">card0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">card_name</span> <span class="o">=</span> <span class="n">card_name</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; *&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMIG&#39;</span><span class="p">:</span>
+            <span class="c1"># if field2 == &#39;UACCEL&#39;:  # special DMIG card</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmig</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMI&#39;</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmi</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMIJ&#39;</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmij</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMIJI&#39;</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmiji</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMIK&#39;</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmik</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">card_name</span> <span class="o">==</span> <span class="s1">&#39;DMIAX&#39;</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dmiax</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">card_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">card_obj</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span> <span class="ow">in</span> <span class="n">card_comments</span><span class="p">:</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">_add_column</span><span class="p">(</span><span class="n">card_obj</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+        <span class="n">card</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="c1"># empty the _dmig_temp variable</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">_dmig_temp</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.nastran.nastran_to_tecplot &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.nastran.nastran_to_tecplot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.nastran.nastran_to_tecplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - tecplot = nastran_to_tecplot(model)</span>
+<span class="sd"> - tecplot = nastran_to_tecplot_filename(bdf_filename, tecplot_filename, z</span>
+<span class="sd">                                         log=None, debug=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.converters.tecplot.tecplot</span> <span class="kn">import</span> <span class="n">Tecplot</span><span class="p">,</span> <span class="n">Zone</span>
+
+
+<div class="viewcode-block" id="nastran_to_tecplot"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.nastran.html#pyNastran.converters.nastran.nastran_to_tecplot.nastran_to_tecplot">[docs]</a><span class="k">def</span> <span class="nf">nastran_to_tecplot</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;assumes sequential nodes&quot;&quot;&quot;</span>
+    <span class="n">tecplot</span> <span class="o">=</span> <span class="n">Tecplot</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">inode_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nnodes</span> <span class="o">==</span> <span class="n">inode_max</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">unused_nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">xyz</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;sequential node IDs required; nnodes=</span><span class="si">%s</span><span class="s1"> inode_max=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">nnodes</span><span class="p">,</span> <span class="n">inode_max</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">zone</span> <span class="o">=</span> <span class="n">Zone</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">headers_dict</span><span class="p">[</span><span class="s1">&#39;VARIABLES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
+
+    <span class="n">nquads</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;CQUAD4&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">ntets</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;CTETRA&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="c1">#ntrias = model.card_count[&#39;CTRIA3&#39;] if &#39;CTRIA3&#39; in model.card_count else 0</span>
+    <span class="n">nhexas</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;CHEXA&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">card_count</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+    <span class="n">tris</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">hexas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pentas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#i = 0</span>
+    <span class="c1">#pids = np.zeros(nelements, dtype=&#39;int32&#39;)</span>
+    <span class="c1">#mids = np.zeros(nelements, dtype=&#39;int32&#39;)</span>
+    <span class="n">unhandled_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">]:</span>
+            <span class="n">tris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">]:</span>
+            <span class="n">quads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CTETRA&#39;</span><span class="p">:</span>
+            <span class="n">tets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">:</span>
+            <span class="n">pentas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">[:</span><span class="mi">6</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">:</span>
+            <span class="n">hexas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">[:</span><span class="mi">8</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unhandled_types</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="c1">#pid = element.Pid()</span>
+        <span class="c1">#mid = element.Mid()</span>
+        <span class="c1">#pids[i] = pid</span>
+        <span class="c1">#mids[i] = mid</span>
+        <span class="c1">#i += 1</span>
+
+    <span class="k">for</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">unhandled_types</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ignoring </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">etype</span><span class="p">)</span>
+
+    <span class="c1"># only supports nodal results</span>
+    <span class="c1">#tecplot.nodal_results = vstack([pids, mids])#.T</span>
+    <span class="c1">#print(tecplot.nodal_results.shape)</span>
+    <span class="c1">#tecplot.result_names = [&#39;PropertyID&#39;, &#39;MaterialID&#39;]</span>
+
+    <span class="n">ntris</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tris</span><span class="p">)</span>
+    <span class="n">nquads</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
+    <span class="n">nshells</span> <span class="o">=</span> <span class="n">ntris</span> <span class="o">+</span> <span class="n">nquads</span>
+
+    <span class="n">ntets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tets</span><span class="p">)</span>
+    <span class="n">npentas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pentas</span><span class="p">)</span>
+    <span class="n">nhexas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hexas</span><span class="p">)</span>
+    <span class="n">nsolids</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span>
+    <span class="n">nnot_tris</span> <span class="o">=</span> <span class="n">nquads</span>
+    <span class="n">nnot_quads</span> <span class="o">=</span> <span class="n">ntris</span>
+    <span class="n">nnot_tets</span> <span class="o">=</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span>
+    <span class="n">nnot_hexas</span> <span class="o">=</span> <span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span>
+    <span class="k">if</span> <span class="n">ntris</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nnot_tris</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nsolids</span><span class="p">:</span>
+        <span class="n">zone</span><span class="o">.</span><span class="n">tri_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nquads</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nnot_quads</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nsolids</span><span class="p">:</span>
+        <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ntets</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nnot_tets</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nshells</span><span class="p">:</span>
+        <span class="n">zone</span><span class="o">.</span><span class="n">tet_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nhexas</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nnot_hexas</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nshells</span><span class="p">:</span>
+        <span class="n">zone</span><span class="o">.</span><span class="n">hexa_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hexas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">nshells</span><span class="p">:</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+            <span class="n">tets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tets</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">tets</span>
+            <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">npentas</span><span class="p">:</span>
+            <span class="c1"># penta6</span>
+            <span class="n">pentas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pentas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">,</span> <span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">pentas</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nhexas</span><span class="p">:</span>
+            <span class="n">hexas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hexas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span><span class="p">,</span> <span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">pentas</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span><span class="p">:</span><span class="n">ntets</span> <span class="o">+</span> <span class="n">npentas</span> <span class="o">+</span> <span class="n">nhexas</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="n">zone</span><span class="o">.</span><span class="n">hexa_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">nsolids</span><span class="p">:</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">elements</span><span class="p">[:</span><span class="n">ntris</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tris</span>
+        <span class="n">elements</span><span class="p">[:</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">ntets</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">quads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">elements</span><span class="p">[</span><span class="n">ntris</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">quads</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Only solids or shells are allowed (not both)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  nsolids=</span><span class="si">%s</span><span class="s1"> nshells=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nsolids</span><span class="p">,</span> <span class="n">nshells</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  ntris=</span><span class="si">%s</span><span class="s1"> nquads=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntris</span><span class="p">,</span> <span class="n">nquads</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  ntets=</span><span class="si">%s</span><span class="s1"> npentas=</span><span class="si">%s</span><span class="s1"> nhexas=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ntets</span><span class="p">,</span> <span class="n">npentas</span><span class="p">,</span> <span class="n">nhexas</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">tecplot</span><span class="o">.</span><span class="n">zones</span> <span class="o">=</span> <span class="p">[</span><span class="n">zone</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tecplot</span></div>
+
+<div class="viewcode-block" id="nastran_to_tecplot_filename"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.nastran.html#pyNastran.converters.nastran.nastran_to_tecplot.nastran_to_tecplot_filename">[docs]</a><span class="k">def</span> <span class="nf">nastran_to_tecplot_filename</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;converts a BDF file to Tecplot format; supports solid elements&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">)</span>
+    <span class="c1"># tecplot = nastran_to_tecplot(model)</span>
+
+    <span class="c1">#log.info(&#39;card_count = %s&#39; % model.card_count)</span>
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nodeid_to_i_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+        <span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">xyz</span>
+        <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;model.nodes=</span><span class="si">%s</span><span class="s1"> i=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">]:</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span> <span class="o">=</span> <span class="p">(</span><span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n2</span><span class="p">],</span>
+                              <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n4</span><span class="p">])</span>
+            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span>
+                             <span class="n">i4</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">i4</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CPENTA&#39;</span><span class="p">]:</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">i5</span><span class="p">,</span> <span class="n">i6</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n2</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n4</span><span class="p">],</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n5</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n6</span><span class="p">])</span>
+            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span>
+                             <span class="n">i5</span><span class="p">,</span> <span class="n">i6</span><span class="p">,</span> <span class="n">i6</span><span class="p">,</span> <span class="n">i6</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CPYRAM&#39;</span><span class="p">]:</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">i5</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n2</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n4</span><span class="p">],</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n5</span><span class="p">])</span>
+            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span>
+                             <span class="n">i5</span><span class="p">,</span> <span class="n">i5</span><span class="p">,</span> <span class="n">i5</span><span class="p">,</span> <span class="n">i5</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">]:</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n8</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">i5</span><span class="p">,</span> <span class="n">i6</span><span class="p">,</span> <span class="n">i7</span><span class="p">,</span> <span class="n">i8</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n1</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n2</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n3</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n4</span><span class="p">],</span>
+                <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n5</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n6</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n7</span><span class="p">],</span> <span class="n">nodeid_to_i_map</span><span class="p">[</span><span class="n">n8</span><span class="p">])</span>
+            <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span>
+                             <span class="n">i5</span><span class="p">,</span> <span class="n">i6</span><span class="p">,</span> <span class="n">i7</span><span class="p">,</span> <span class="n">i8</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skip etype=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="n">tecplot</span> <span class="o">=</span> <span class="n">Tecplot</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">zone</span> <span class="o">=</span> <span class="n">Zone</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">headers_dict</span><span class="p">[</span><span class="s1">&#39;VARIABLES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">nodes</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">hexa_elements</span> <span class="o">=</span> <span class="n">elements</span>
+    <span class="n">zone</span><span class="o">.</span><span class="n">nodal_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">tecplot</span><span class="o">.</span><span class="n">zones</span> <span class="o">=</span> <span class="p">[</span><span class="n">zone</span><span class="p">]</span>
+    <span class="n">tecplot</span><span class="o">.</span><span class="n">write_tecplot</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tecplot</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

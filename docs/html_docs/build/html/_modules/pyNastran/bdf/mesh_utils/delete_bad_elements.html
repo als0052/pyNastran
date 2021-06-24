@@ -1,0 +1,1181 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.delete_bad_elements &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.delete_bad_elements</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.delete_bad_elements</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - model = delete_bad_shells(model, max_theta=175., max_skew=70., max_aspect_ratio=100.,</span>
+<span class="sd">                              max_taper_ratio=4.0)</span>
+<span class="sd"> - eids_to_delete = get_bad_shells(model, xyz_cid0, nid_map, max_theta=175., max_skew=70.,</span>
+<span class="sd">                                   max_aspect_ratio=100., max_taper_ratio=4.0)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">SIDE_MAP</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">SIDE_MAP</span><span class="p">[</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span> <span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="mi">2</span> <span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="mi">3</span> <span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="mi">4</span> <span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="mi">5</span> <span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="mi">6</span> <span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">PIOVER2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span>
+<span class="n">PIOVER3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">3.</span>
+
+
+<div class="viewcode-block" id="delete_bad_shells"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.delete_bad_shells">[docs]</a><span class="k">def</span> <span class="nf">delete_bad_shells</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                      <span class="n">min_theta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_theta</span><span class="o">=</span><span class="mf">175.</span><span class="p">,</span>
+                      <span class="n">max_skew</span><span class="o">=</span><span class="mf">70.</span><span class="p">,</span> <span class="n">max_aspect_ratio</span><span class="o">=</span><span class="mf">100.</span><span class="p">,</span>
+                      <span class="n">max_taper_ratio</span><span class="o">=</span><span class="mf">4.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes bad CQUAD4/CTRIA3 elements</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF ()</span>
+<span class="sd">        this should be equivalenced</span>
+<span class="sd">    min_theta : float; default=0.1</span>
+<span class="sd">        the maximum interior angle (degrees)</span>
+<span class="sd">    max_theta : float; default=175.</span>
+<span class="sd">        the maximum interior angle (degrees)</span>
+<span class="sd">    max_skew : float; default=70.</span>
+<span class="sd">        the maximum skew angle (degrees)</span>
+<span class="sd">    max_aspect_ratio : float; default=100.</span>
+<span class="sd">        the max aspect ratio</span>
+<span class="sd">    taper_ratio : float; default=4.0</span>
+<span class="sd">        the taper ratio; applies to CQUAD4s only</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_xyz_in_coord</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="n">get_node_map</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">eids_to_delete</span> <span class="o">=</span> <span class="n">get_bad_shells</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span>
+                                    <span class="n">min_theta</span><span class="o">=</span><span class="n">min_theta</span><span class="p">,</span> <span class="n">max_theta</span><span class="o">=</span><span class="n">max_theta</span><span class="p">,</span>
+                                    <span class="n">max_skew</span><span class="o">=</span><span class="n">max_skew</span><span class="p">,</span>
+                                    <span class="n">max_aspect_ratio</span><span class="o">=</span><span class="n">max_aspect_ratio</span><span class="p">,</span>
+                                    <span class="n">max_taper_ratio</span><span class="o">=</span><span class="n">max_taper_ratio</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids_to_delete</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted </span><span class="si">%s</span><span class="s1"> bad CTRIA3/CQUAD4s&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">eids_to_delete</span><span class="p">))</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="get_node_map"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.get_node_map">[docs]</a><span class="k">def</span> <span class="nf">get_node_map</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets an nid-&gt;inid mapper&quot;&quot;&quot;</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+        <span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">nid_map</span></div>
+
+<div class="viewcode-block" id="get_bad_shells"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.get_bad_shells">[docs]</a><span class="k">def</span> <span class="nf">get_bad_shells</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span>
+                   <span class="n">min_theta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">max_theta</span><span class="o">=</span><span class="mf">175.</span><span class="p">,</span> <span class="n">max_skew</span><span class="o">=</span><span class="mf">70.</span><span class="p">,</span>
+                   <span class="n">max_aspect_ratio</span><span class="o">=</span><span class="mf">100.</span><span class="p">,</span> <span class="n">max_taper_ratio</span><span class="o">=</span><span class="mf">4.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the bad shell elements</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the model object</span>
+<span class="sd">    xyz_cid0 : (N, 3) float ndarray</span>
+<span class="sd">        the xyz coordinates in cid=0</span>
+<span class="sd">    nid_map : dict[nid] : index</span>
+<span class="sd">        nid : int</span>
+<span class="sd">            the node id</span>
+<span class="sd">        index : int</span>
+<span class="sd">            the index of the node id in xyz_cid0</span>
+<span class="sd">    min_theta : float; default=0.1</span>
+<span class="sd">        the maximum interior angle (degrees)</span>
+<span class="sd">    max_theta : float; default=175.</span>
+<span class="sd">        the maximum interior angle (degrees)</span>
+<span class="sd">    max_skew : float; default=70.</span>
+<span class="sd">        the maximum skew angle (degrees)</span>
+<span class="sd">    max_aspect_ratio : float; default=100.</span>
+<span class="sd">        the max aspect ratio</span>
+<span class="sd">    taper_ratio : float; default=4.0</span>
+<span class="sd">        the taper ratio; applies to CQUAD4s only</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eids_failed : List[int]</span>
+<span class="sd">        element ids that fail the criteria</span>
+
+<span class="sd">    shells with a edge length=0.0 are automatically added</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">min_theta_quad</span> <span class="o">=</span> <span class="n">min_theta</span>
+    <span class="n">min_theta_tri</span> <span class="o">=</span> <span class="n">min_theta</span>
+    <span class="n">min_theta_quad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">min_theta_quad</span><span class="p">)</span>
+    <span class="n">min_theta_tri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">min_theta_tri</span><span class="p">)</span>
+    <span class="n">max_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">max_theta</span><span class="p">)</span>
+    <span class="n">max_skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">max_skew</span><span class="p">)</span>
+    <span class="n">eids_failed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">:</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="c1">#pid = element.Pid()</span>
+            <span class="c1">#for nid in node_ids:</span>
+                <span class="c1">#if nid is not None:</span>
+                    <span class="c1">#nid_to_pid_map[nid].append(pid)</span>
+            <span class="c1">#self.eid_to_nid_map[eid] = node_ids</span>
+
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p3</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p4</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v21</span> <span class="o">=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span>
+            <span class="n">v32</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p2</span>
+            <span class="n">v43</span> <span class="o">=</span> <span class="n">p4</span> <span class="o">-</span> <span class="n">p3</span>
+            <span class="n">v14</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p4</span>
+
+            <span class="c1">#aspect_ratio = max(p12, p23, p34, p14) / max(p12, p23, p34, p14)</span>
+            <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">,</span> <span class="n">v43</span><span class="p">,</span> <span class="n">v14</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1">#assert len(lengths) == 3, lengths</span>
+            <span class="n">length_min</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">length_min</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed length_min check; length_min=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">length_min</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">length_min</span>
+            <span class="k">if</span> <span class="n">aspect_ratio</span> <span class="o">&gt;</span> <span class="n">max_aspect_ratio</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed aspect_ratio check; AR=</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">p12</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">p23</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">p34</span> <span class="o">=</span> <span class="p">(</span><span class="n">p3</span> <span class="o">+</span> <span class="n">p4</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">p14</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4</span> <span class="o">+</span> <span class="n">p1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">p3</span> <span class="o">-</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p4</span> <span class="o">-</span> <span class="n">p2</span><span class="p">)</span>  <span class="c1"># v42 x v31</span>
+            <span class="c1">#    e3</span>
+            <span class="c1"># 4-------3</span>
+            <span class="c1"># |       |</span>
+            <span class="c1"># |e4     |  e2</span>
+            <span class="c1"># 1-------2</span>
+            <span class="c1">#     e1</span>
+            <span class="n">e13</span> <span class="o">=</span> <span class="n">p34</span> <span class="o">-</span> <span class="n">p12</span>
+            <span class="n">e42</span> <span class="o">=</span> <span class="n">p23</span> <span class="o">-</span> <span class="n">p14</span>
+
+            <span class="n">cos_skew1</span> <span class="o">=</span> <span class="p">(</span><span class="n">e13</span> <span class="o">@</span> <span class="n">e42</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e13</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e42</span><span class="p">))</span>
+            <span class="n">cos_skew2</span> <span class="o">=</span> <span class="p">(</span><span class="n">e13</span> <span class="o">@</span> <span class="o">-</span><span class="n">e42</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e13</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e42</span><span class="p">))</span>
+            <span class="n">skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span><span class="n">cos_skew1</span><span class="p">,</span> <span class="n">cos_skew2</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">skew</span> <span class="o">&gt;</span> <span class="n">max_skew</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed max_skew check; skew=</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">skew</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="n">area1</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="o">-</span><span class="n">v14</span><span class="p">,</span> <span class="n">v21</span><span class="p">))</span> <span class="c1"># v41 x v21</span>
+            <span class="n">area2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="o">-</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">))</span> <span class="c1"># v12 x v32</span>
+            <span class="n">area3</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v43</span><span class="p">,</span> <span class="n">v32</span><span class="p">))</span> <span class="c1"># v43 x v32</span>
+            <span class="n">area4</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v14</span><span class="p">,</span> <span class="o">-</span><span class="n">v43</span><span class="p">))</span> <span class="c1"># v14 x v34</span>
+            <span class="n">aavg</span> <span class="o">=</span> <span class="p">(</span><span class="n">area1</span> <span class="o">+</span> <span class="n">area2</span> <span class="o">+</span> <span class="n">area3</span> <span class="o">+</span> <span class="n">area4</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+            <span class="n">taper_ratioi</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">area1</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">area2</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="nb">abs</span><span class="p">(</span><span class="n">area3</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">area4</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">))</span> <span class="o">/</span> <span class="n">aavg</span>
+            <span class="k">if</span> <span class="n">taper_ratioi</span> <span class="o">&gt;</span> <span class="n">max_taper_ratio</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed taper_ratio check; taper=</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">taper_ratioi</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#if 0:</span>
+                <span class="c1">#areai = 0.5 * np.linalg.norm(normal)</span>
+                <span class="c1">## still kind of in development</span>
+                <span class="c1">##</span>
+                <span class="c1">## the ratio of the ideal area to the actual area</span>
+                <span class="c1">## this is an hourglass check</span>
+                <span class="c1">#areas = [</span>
+                    <span class="c1">#np.linalg.norm(np.cross(-v14, v21)), # v41 x v21</span>
+                    <span class="c1">#np.linalg.norm(np.cross(v32, -v21)), # v32 x v12</span>
+                    <span class="c1">#np.linalg.norm(np.cross(v43, -v32)), # v43 x v23</span>
+                    <span class="c1">#np.linalg.norm(np.cross(v14, v43)),  # v14 x v43</span>
+                <span class="c1">#]</span>
+                <span class="c1">#area_ratioi1 = areai / min(areas)</span>
+                <span class="c1">#area_ratioi2 = max(areas) / areai</span>
+                <span class="c1">#area_ratioi = max(area_ratioi1, area_ratioi2)</span>
+
+            <span class="c1"># ixj = k</span>
+            <span class="c1"># dot the local normal with the normal vector</span>
+            <span class="c1"># then take the norm of that to determine the angle relative to the normal</span>
+            <span class="c1"># then take the sign of that to see if we&#39;re pointing roughly towards the normal</span>
+
+            <span class="c1"># np.sign(np.linalg.norm(np.dot(</span>
+            <span class="c1"># a x b = ab sin(theta)</span>
+            <span class="c1"># a x b / ab = sin(theta)</span>
+            <span class="c1"># sin(theta) &lt; 0. -&gt; normal is flipped</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+            <span class="n">n3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v32</span><span class="p">,</span> <span class="n">v43</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+            <span class="n">n4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v43</span><span class="p">,</span> <span class="n">v14</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+            <span class="n">n1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v14</span><span class="p">,</span> <span class="n">v21</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">])</span>
+
+            <span class="n">theta_additional</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+            <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v14</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v14</span><span class="p">))</span>
+            <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">))</span>
+            <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v43</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v43</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">))</span>
+            <span class="n">cos_theta4</span> <span class="o">=</span> <span class="p">(</span><span class="n">v14</span> <span class="o">@</span> <span class="o">-</span><span class="n">v43</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v14</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v43</span><span class="p">))</span>
+            <span class="n">interior_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">,</span> <span class="n">cos_theta4</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">interior_angle</span> <span class="o">+</span> <span class="n">theta_additional</span>
+
+            <span class="n">theta_mini</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">theta_maxi</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">theta_mini</span> <span class="o">&lt;</span> <span class="n">min_theta_quad</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed min_theta check; theta=</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta_mini</span><span class="p">)))</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">theta_maxi</span> <span class="o">&gt;</span> <span class="n">max_theta</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed max_theta check; theta=</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta_maxi</span><span class="p">)))</span>
+                <span class="k">continue</span>
+            <span class="c1">#print(&#39;eid=%s theta_min=%-5.2f theta_max=%-5.2f &#39;</span>
+                  <span class="c1">#&#39;skew=%-5.2f AR=%-5.2f taper_ratioi=%.2f&#39; % (</span>
+                      <span class="c1">#eid,</span>
+                      <span class="c1">#np.degrees(theta_mini), np.degrees(theta_maxi),</span>
+                      <span class="c1">#np.degrees(skew), aspect_ratio, taper_ratioi))</span>
+
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CTRIA3&#39;</span><span class="p">:</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="c1">#pid = element.Pid()</span>
+            <span class="c1">#self.eid_to_nid_map[eid] = node_ids</span>
+            <span class="c1">#for nid in node_ids:</span>
+                <span class="c1">#if nid is not None:</span>
+                    <span class="c1">#nid_to_pid_map[nid].append(pid)</span>
+
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">p3</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="n">v21</span> <span class="o">=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span>
+            <span class="n">v32</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p2</span>
+            <span class="n">v13</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p3</span>
+            <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">,</span> <span class="n">v13</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">length_min</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">length_min</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed length_min check; length_min=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">length_min</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#assert len(lengths) == 3, lengths</span>
+            <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">length_min</span>
+            <span class="k">if</span> <span class="n">aspect_ratio</span> <span class="o">&gt;</span> <span class="n">max_aspect_ratio</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed aspect_ratio check; AR=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v13</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v13</span><span class="p">))</span>
+            <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">))</span>
+            <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v13</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v13</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">))</span>
+
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+            <span class="n">theta_mini</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">theta_maxi</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">theta_mini</span> <span class="o">&lt;</span> <span class="n">min_theta_tri</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed min_theta check; theta=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta_mini</span><span class="p">)))</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">theta_maxi</span> <span class="o">&gt;</span> <span class="n">max_theta</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed max_theta check; theta=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta_maxi</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#     3</span>
+            <span class="c1">#    / \</span>
+            <span class="c1"># e3/   \ e2</span>
+            <span class="c1">#  /    /\</span>
+            <span class="c1"># /    /  \</span>
+            <span class="c1"># 1---/----2</span>
+            <span class="c1">#    e1</span>
+            <span class="n">e1</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">e2</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+            <span class="n">e3</span> <span class="o">=</span> <span class="p">(</span><span class="n">p3</span> <span class="o">+</span> <span class="n">p1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+
+            <span class="n">e21</span> <span class="o">=</span> <span class="n">e2</span> <span class="o">-</span> <span class="n">e1</span>
+            <span class="n">e31</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">e1</span>
+            <span class="n">e32</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">e2</span>
+
+            <span class="n">e3_p2</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">p2</span>
+            <span class="n">e2_p1</span> <span class="o">=</span> <span class="n">e2</span> <span class="o">-</span> <span class="n">p1</span>
+            <span class="n">e1_p3</span> <span class="o">=</span> <span class="n">e1</span> <span class="o">-</span> <span class="n">p3</span>
+            <span class="n">cos_skew1</span> <span class="o">=</span> <span class="p">(</span><span class="n">e2_p1</span> <span class="o">@</span> <span class="n">e31</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e2_p1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e31</span><span class="p">))</span>
+            <span class="n">cos_skew2</span> <span class="o">=</span> <span class="p">(</span><span class="n">e2_p1</span> <span class="o">@</span> <span class="o">-</span><span class="n">e31</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e2_p1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e31</span><span class="p">))</span>
+            <span class="n">cos_skew3</span> <span class="o">=</span> <span class="p">(</span><span class="n">e3_p2</span> <span class="o">@</span> <span class="n">e21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e3_p2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e21</span><span class="p">))</span>
+            <span class="n">cos_skew4</span> <span class="o">=</span> <span class="p">(</span><span class="n">e3_p2</span> <span class="o">@</span> <span class="o">-</span><span class="n">e21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e3_p2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e21</span><span class="p">))</span>
+            <span class="n">cos_skew5</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1_p3</span> <span class="o">@</span> <span class="n">e32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1_p3</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e32</span><span class="p">))</span>
+            <span class="n">cos_skew6</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1_p3</span> <span class="o">@</span> <span class="o">-</span><span class="n">e32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1_p3</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e32</span><span class="p">))</span>
+            <span class="n">skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span><span class="n">cos_skew1</span><span class="p">,</span> <span class="n">cos_skew2</span><span class="p">,</span> <span class="n">cos_skew3</span><span class="p">,</span>
+                         <span class="n">cos_skew4</span><span class="p">,</span> <span class="n">cos_skew5</span><span class="p">,</span> <span class="n">cos_skew6</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+            <span class="p">))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">skew</span> <span class="o">&gt;</span> <span class="n">max_skew</span><span class="p">:</span>
+                <span class="n">eids_failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;eid=</span><span class="si">%s</span><span class="s1"> failed max_skew check; skew=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">skew</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#print(&#39;eid=%s theta_min=%-5.2f theta_max=%-5.2f skew=%-5.2f AR=%-5.2f&#39; % (</span>
+                <span class="c1">#eid,</span>
+                <span class="c1">#np.degrees(theta_mini), np.degrees(theta_maxi),</span>
+                <span class="c1">#np.degrees(skew), aspect_ratio))</span>
+    <span class="k">return</span> <span class="n">eids_failed</span></div>
+
+<div class="viewcode-block" id="element_quality"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.element_quality">[docs]</a><span class="k">def</span> <span class="nf">element_quality</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nid_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets various measures of element quality</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        a cross-referenced model</span>
+<span class="sd">    nids : (nnodes, ) int ndarray; default=None</span>
+<span class="sd">        the nodes of the model in sorted order</span>
+<span class="sd">        includes GRID, SPOINT, &amp; EPOINTs</span>
+<span class="sd">    xyz_cid0 : (nnodes, 3) float ndarray; default=None</span>
+<span class="sd">        the associated global xyz locations</span>
+<span class="sd">    nid_map : Dict[nid]-&gt;index; default=None</span>
+<span class="sd">        a mapper dictionary</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quality : Dict[name] : (nelements, ) float ndarray</span>
+<span class="sd">        Various quality metrics</span>
+<span class="sd">        names : min_interior_angle, max_interior_angle, dideal_theta,</span>
+<span class="sd">                max_skew_angle, max_aspect_ratio,</span>
+<span class="sd">                area_ratio, taper_ratio, min_edge_length</span>
+<span class="sd">        values : The result is ``np.nan`` if element type does not define</span>
+<span class="sd">                 the parameter.  For example, CELAS1 doesn&#39;t have an</span>
+<span class="sd">                 aspect ratio.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">     - pulled from nastran_io.py</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">nids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">xyz_cid0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_displacement_index_xyz_cp_cd</span><span class="p">(</span>
+            <span class="n">fdtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="n">idtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">,</span> <span class="n">sort_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">unused_icd_transform</span><span class="p">,</span> <span class="n">icp_transform</span><span class="p">,</span> <span class="n">xyz_cp</span><span class="p">,</span> <span class="n">nid_cp_cd</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">nid_cp_cd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform_xyzcp_to_xyz_cid</span><span class="p">(</span>
+            <span class="n">xyz_cp</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">icp_transform</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">in_place</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nid_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nids</span><span class="p">):</span>
+            <span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="n">all_nids</span> <span class="o">=</span> <span class="n">nids</span>
+    <span class="k">del</span> <span class="n">nids</span>
+
+    <span class="c1"># these normals point inwards</span>
+    <span class="c1">#      4</span>
+    <span class="c1">#    / | \</span>
+    <span class="c1">#   /  |  \</span>
+    <span class="c1">#  3-------2</span>
+    <span class="c1">#   \  |   /</span>
+    <span class="c1">#    \ | /</span>
+    <span class="c1">#      1</span>
+    <span class="n">_ctetra_faces</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># (1, 2, 3),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># (1, 4, 2),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># (1, 3, 4),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># (2, 4, 3),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># these normals point inwards</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1">#        /4-----3</span>
+    <span class="c1">#       /       /</span>
+    <span class="c1">#      /  5    /</span>
+    <span class="c1">#    /    \   /</span>
+    <span class="c1">#   /      \ /</span>
+    <span class="c1"># 1---------2</span>
+    <span class="n">_cpyram_faces</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="c1"># (1, 2, 3, 4),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># (2, 5, 3),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="c1"># (3, 5, 4),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1"># (1, 4, 5),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># (1, 5, 2),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># these normals point inwards</span>
+    <span class="c1">#       /6</span>
+    <span class="c1">#     /  | \</span>
+    <span class="c1">#   /    |   \</span>
+    <span class="c1"># 3\     |     \</span>
+    <span class="c1"># |  \   /4-----5</span>
+    <span class="c1"># |    \/       /</span>
+    <span class="c1"># |   /  \     /</span>
+    <span class="c1"># |  /    \   /</span>
+    <span class="c1"># | /      \ /</span>
+    <span class="c1"># 1---------2</span>
+    <span class="n">_cpenta_faces</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># (1, 3, 2),</span>
+        <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="c1"># (4, 5, 6),</span>
+
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="c1"># (1, 2, 5, 4), # bottom</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1"># (2, 3, 6, 5), # right</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># (1, 4, 6, 3), # left</span>
+    <span class="p">)</span>
+
+    <span class="c1"># these normals point inwards</span>
+    <span class="c1">#      8----7</span>
+    <span class="c1">#     /|   /|</span>
+    <span class="c1">#    / |  / |</span>
+    <span class="c1">#   /  5-/--6</span>
+    <span class="c1"># 4-----3   /</span>
+    <span class="c1"># |  /  |  /</span>
+    <span class="c1"># | /   | /</span>
+    <span class="c1"># 1-----2</span>
+    <span class="n">_chexa_faces</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="c1"># (5, 6, 7, 8),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># (1, 4, 3, 2),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="c1"># (2, 3, 7, 6),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="c1"># (3, 4, 8, 7),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="c1"># (1, 5, 8, 4),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1"># (1, 7, 6, 5),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># quality</span>
+    <span class="n">nelements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+    <span class="n">min_interior_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">max_interior_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">dideal_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">max_skew_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">max_warp_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">max_aspect_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="c1">#area = np.zeros(nelements, &#39;float32&#39;)</span>
+    <span class="n">area_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">taper_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">min_edge_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="c1">#normals = np.full((nelements, 3), np.nan, &#39;float32&#39;)</span>
+
+
+    <span class="c1">#nids_list = []</span>
+    <span class="n">ieid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">ieid</span> <span class="o">%</span> <span class="mi">5000</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ieid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  map_elements = </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ieid</span><span class="p">)</span>
+        <span class="n">etype</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">inids</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">dideal_thetai</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">min_thetai</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">max_thetai</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1">#max_thetai = np.nan</span>
+        <span class="n">max_skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">max_warp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1">#areai = np.nan</span>
+        <span class="n">area_ratioi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">taper_ratioi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1">#normali = np.nan</span>
+        <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRAX3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN3&#39;</span><span class="p">]:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">tri_quality</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">areai</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+             <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="c1">#normali = np.cross(p1 - p2, p1 - p3)</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADR&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX4&#39;</span><span class="p">]:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">quad_quality</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">areai</span><span class="p">,</span> <span class="n">taper_ratioi</span><span class="p">,</span> <span class="n">area_ratioi</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+             <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span><span class="p">,</span> <span class="n">max_warp</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">,</span> <span class="n">unused_p5</span><span class="p">,</span> <span class="n">unused_p6</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">tri_quality</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">areai</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+             <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">quad_quality</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">areai</span><span class="p">,</span> <span class="n">taper_ratioi</span><span class="p">,</span> <span class="n">area_ratioi</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+             <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span><span class="p">,</span> <span class="n">max_warp</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="c1">#normali = np.cross(p1 - p3, p2 - p4)</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CSHEAR&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">quad_quality</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">areai</span><span class="p">,</span> <span class="n">taper_ratioi</span><span class="p">,</span> <span class="n">area_ratioi</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+             <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span><span class="p">,</span> <span class="n">max_warp</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CTETRA&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">get_min_max_theta</span><span class="p">(</span>
+                <span class="n">_ctetra_faces</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">get_min_max_theta</span><span class="p">(</span>
+                <span class="n">_chexa_faces</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">get_min_max_theta</span><span class="p">(</span>
+                <span class="n">_cpenta_faces</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">:</span>
+            <span class="c1"># TODO: assuming 5</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">:</span>
+                <span class="n">nids</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">dideal_thetai</span><span class="p">,</span> <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">get_min_max_theta</span><span class="p">(</span>
+                <span class="n">_cpyram_faces</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">]:</span>
+            <span class="c1"># these can have empty nodes and have no property</span>
+            <span class="c1"># CELAS1: 1/2 GRID/SPOINT and pid</span>
+            <span class="c1"># CELAS2: 1/2 GRID/SPOINT, k, ge, and s</span>
+            <span class="c1"># CELAS3: 1/2 SPOINT and pid</span>
+            <span class="c1"># CELAS4: 1/2 SPOINT and k</span>
+            <span class="k">continue</span>
+            <span class="c1">#nids = elem.nodes</span>
+            <span class="c1">#assert nids[0] != nids[1]</span>
+            <span class="c1">#if None in nids:</span>
+                <span class="c1">#assert nids[0] is not None, nids</span>
+                <span class="c1">#assert nids[1] is None, nids</span>
+                <span class="c1">#nids = [nids[0]]</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#nids = elem.nodes</span>
+                <span class="c1">#assert nids[0] != nids[1]</span>
+            <span class="c1">#inids = np.searchsorted(all_nids, nids)</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH2D&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP5&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;CFAST&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAP&#39;</span><span class="p">,</span> <span class="s1">&#39;CVISC&#39;</span><span class="p">]:</span>
+            <span class="c1">#nids = elem.nodes</span>
+            <span class="c1">#assert nids[0] != nids[1]</span>
+            <span class="c1">#assert None not in nids, &#39;nids=%s\n%s&#39; % (nids, elem)</span>
+            <span class="c1">#inids = np.searchsorted(all_nids, nids)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">]:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">]:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+            <span class="c1">#nnodes = 2</span>
+            <span class="c1">#dim = 1</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">:</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">nodes</span>
+            <span class="n">inids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">inids</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">min_edge_lengthi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+        <span class="c1">#------------------------------</span>
+        <span class="c1"># rare</span>
+        <span class="c1">#elif etype == &#39;CIHEX1&#39;:</span>
+            <span class="c1">#nids = elem.nodes</span>
+            <span class="c1">#pid = elem.pid</span>
+            <span class="c1">#cell_type = cell_type_hexa8</span>
+            <span class="c1">#inids = np.searchsorted(all_nids, nids)</span>
+            <span class="c1">#min_thetai, max_thetai, dideal_thetai, min_edge_lengthi = get_min_max_theta(</span>
+                <span class="c1">#_chexa_faces, nids, nid_map, xyz_cid0)</span>
+            <span class="c1">#nnodes = 8</span>
+            <span class="c1">#dim = 3</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CHBDYE&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+            <span class="c1">#self.eid_map[eid] = ieid</span>
+            <span class="c1">#eid_solid = elem.eid2</span>
+            <span class="c1">#side = elem.side</span>
+            <span class="c1">#element_solid = model.elements[eid_solid]</span>
+
+            <span class="c1">#mapped_inids = SIDE_MAP[element_solid.type][side]</span>
+            <span class="c1">#side_inids = [nid - 1 for nid in mapped_inids]</span>
+            <span class="c1">#nodes = element_solid.node_ids</span>
+
+            <span class="c1">##nnodes = len(side_inids)</span>
+            <span class="c1">#nids = [nodes[inid] for inid in side_inids]</span>
+            <span class="c1">#inids = np.searchsorted(all_nids, nids)</span>
+
+            <span class="c1">#if len(side_inids) == 4:</span>
+                <span class="c1">#pass</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#msg = &#39;element_solid:\n%s&#39; % (str(element_solid))</span>
+                <span class="c1">#msg += &#39;mapped_inids = %s\n&#39; % mapped_inids</span>
+                <span class="c1">#msg += &#39;side_inids = %s\n&#39; % side_inids</span>
+                <span class="c1">#msg += &#39;nodes = %s\n&#39; % nodes</span>
+                <span class="c1">##msg += &#39;side_nodes = %s\n&#39; % side_nodes</span>
+                <span class="c1">#raise NotImplementedError(msg)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#raise NotImplementedError(elem)</span>
+            <span class="n">nelements</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="c1">#nids_list.append(nnodes)</span>
+        <span class="c1">#nids_list.extend(inids)</span>
+        <span class="c1">#normals[ieid] = normali</span>
+        <span class="c1">#eids_array[ieid] = eid</span>
+        <span class="c1">#pids_array[ieid] = pid</span>
+        <span class="c1">#dim_array[ieid] = dim</span>
+        <span class="c1">#cell_types_array[ieid] = cell_type</span>
+        <span class="c1">#cell_offsets_array[ieid] = cell_offset  # I assume the problem is here</span>
+        <span class="c1">#cell_offset += nnodes + 1</span>
+        <span class="c1">#eid_map[eid] = ieid</span>
+
+        <span class="n">min_interior_angle</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_thetai</span>
+        <span class="n">max_interior_angle</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_thetai</span>
+        <span class="n">dideal_theta</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">dideal_thetai</span>
+        <span class="n">max_skew_angle</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_skew</span>
+        <span class="n">max_warp_angle</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_warp</span>
+        <span class="n">max_aspect_ratio</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">aspect_ratio</span>
+        <span class="c1">#area[ieid] = areai</span>
+        <span class="n">area_ratio</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">area_ratioi</span>
+        <span class="n">taper_ratio</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">taper_ratioi</span>
+        <span class="n">min_edge_length</span><span class="p">[</span><span class="n">ieid</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_edge_lengthi</span>
+        <span class="n">ieid</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;min_interior_angle&#39;</span> <span class="p">:</span> <span class="n">min_interior_angle</span><span class="p">,</span>
+        <span class="s1">&#39;max_interior_angle&#39;</span> <span class="p">:</span> <span class="n">max_interior_angle</span><span class="p">,</span>
+        <span class="s1">&#39;dideal_theta&#39;</span> <span class="p">:</span> <span class="n">dideal_theta</span><span class="p">,</span>
+        <span class="s1">&#39;max_skew_angle&#39;</span> <span class="p">:</span> <span class="n">max_skew_angle</span><span class="p">,</span>
+        <span class="s1">&#39;max_warp_angle&#39;</span> <span class="p">:</span> <span class="n">max_warp_angle</span><span class="p">,</span>
+        <span class="s1">&#39;max_aspect_ratio&#39;</span> <span class="p">:</span> <span class="n">max_aspect_ratio</span><span class="p">,</span>
+        <span class="c1">#&#39;area&#39; : area,</span>
+        <span class="s1">&#39;area_ratio&#39;</span> <span class="p">:</span> <span class="n">area_ratio</span><span class="p">,</span>
+        <span class="s1">&#39;taper_ratio&#39;</span> <span class="p">:</span> <span class="n">taper_ratio</span><span class="p">,</span>
+        <span class="s1">&#39;min_edge_length&#39;</span> <span class="p">:</span> <span class="n">min_edge_length</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">quality</span></div>
+
+<div class="viewcode-block" id="tri_quality"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.tri_quality">[docs]</a><span class="k">def</span> <span class="nf">tri_quality</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets the quality metrics for a tri&quot;&quot;&quot;</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">e3</span> <span class="o">=</span> <span class="p">(</span><span class="n">p3</span> <span class="o">+</span> <span class="n">p1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+
+    <span class="c1">#    3</span>
+    <span class="c1">#    / \</span>
+    <span class="c1"># e3/   \ e2</span>
+    <span class="c1">#  /    /\</span>
+    <span class="c1"># /    /  \</span>
+    <span class="c1"># 1---/----2</span>
+    <span class="c1">#    e1</span>
+    <span class="n">e21</span> <span class="o">=</span> <span class="n">e2</span> <span class="o">-</span> <span class="n">e1</span>
+    <span class="n">e31</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">e1</span>
+    <span class="n">e32</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">e2</span>
+
+    <span class="n">e3_p2</span> <span class="o">=</span> <span class="n">e3</span> <span class="o">-</span> <span class="n">p2</span>
+    <span class="n">e2_p1</span> <span class="o">=</span> <span class="n">e2</span> <span class="o">-</span> <span class="n">p1</span>
+    <span class="n">e1_p3</span> <span class="o">=</span> <span class="n">e1</span> <span class="o">-</span> <span class="n">p3</span>
+
+    <span class="n">v21</span> <span class="o">=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span>
+    <span class="n">v32</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p2</span>
+    <span class="n">v13</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p3</span>
+    <span class="n">length21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span>
+    <span class="n">length32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span>
+    <span class="n">length13</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v13</span><span class="p">)</span>
+    <span class="n">min_edge_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length21</span><span class="p">,</span> <span class="n">length32</span><span class="p">,</span> <span class="n">length13</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v21</span><span class="p">,</span> <span class="n">v13</span><span class="p">))</span>
+
+    <span class="n">ne31</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e31</span><span class="p">)</span>
+    <span class="n">ne21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e21</span><span class="p">)</span>
+    <span class="n">ne32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e32</span><span class="p">)</span>
+    <span class="n">ne2_p1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e2_p1</span><span class="p">)</span>
+    <span class="n">ne3_p2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e3_p2</span><span class="p">)</span>
+    <span class="n">ne1_p3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1_p3</span><span class="p">)</span>
+    <span class="n">cos_skew1</span> <span class="o">=</span> <span class="p">(</span><span class="n">e2_p1</span> <span class="o">@</span> <span class="n">e31</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne2_p1</span> <span class="o">*</span> <span class="n">ne31</span><span class="p">)</span>
+    <span class="n">cos_skew2</span> <span class="o">=</span> <span class="p">(</span><span class="n">e2_p1</span> <span class="o">@</span> <span class="o">-</span><span class="n">e31</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne2_p1</span> <span class="o">*</span> <span class="n">ne31</span><span class="p">)</span>
+    <span class="n">cos_skew3</span> <span class="o">=</span> <span class="p">(</span><span class="n">e3_p2</span> <span class="o">@</span> <span class="n">e21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne3_p2</span> <span class="o">*</span> <span class="n">ne21</span><span class="p">)</span>
+    <span class="n">cos_skew4</span> <span class="o">=</span> <span class="p">(</span><span class="n">e3_p2</span> <span class="o">@</span> <span class="o">-</span><span class="n">e21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne3_p2</span> <span class="o">*</span> <span class="n">ne21</span><span class="p">)</span>
+    <span class="n">cos_skew5</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1_p3</span> <span class="o">@</span> <span class="n">e32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne1_p3</span> <span class="o">*</span> <span class="n">ne32</span><span class="p">)</span>
+    <span class="n">cos_skew6</span> <span class="o">=</span> <span class="p">(</span><span class="n">e1_p3</span> <span class="o">@</span> <span class="o">-</span><span class="n">e32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne1_p3</span> <span class="o">*</span> <span class="n">ne32</span><span class="p">)</span>
+    <span class="n">max_skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span>
+        <span class="n">cos_skew1</span><span class="p">,</span> <span class="n">cos_skew2</span><span class="p">,</span> <span class="n">cos_skew3</span><span class="p">,</span>
+        <span class="n">cos_skew4</span><span class="p">,</span> <span class="n">cos_skew5</span><span class="p">,</span> <span class="n">cos_skew6</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">,</span> <span class="n">v13</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#assert len(lengths) == 3, lengths</span>
+    <span class="n">length_min</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">length_min</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1"># assume length_min = length21 = nan, so:</span>
+        <span class="c1">#   cos_theta1 = nan</span>
+        <span class="c1">#   thetas = [nan, b, c]</span>
+        <span class="c1">#   min_theta = max_theta = dideal_theta = nan</span>
+        <span class="n">min_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">max_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">dideal_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">length_min</span>
+
+        <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v13</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length21</span> <span class="o">*</span> <span class="n">length13</span><span class="p">)</span>
+        <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length32</span> <span class="o">*</span> <span class="n">length21</span><span class="p">)</span>
+        <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v13</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length13</span> <span class="o">*</span> <span class="n">length32</span><span class="p">)</span>
+        <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+        <span class="n">min_theta</span> <span class="o">=</span> <span class="n">thetas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">max_theta</span> <span class="o">=</span> <span class="n">thetas</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">dideal_theta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_theta</span> <span class="o">-</span> <span class="n">PIOVER3</span><span class="p">,</span> <span class="n">PIOVER3</span> <span class="o">-</span> <span class="n">min_theta</span><span class="p">)</span>
+
+    <span class="c1">#theta_deg = np.degrees(np.arccos(max_cos_theta))</span>
+    <span class="c1">#if theta_deg &lt; 60.:</span>
+        <span class="c1">#print(&#39;p1=%s&#39; % xyz_cid0[p1, :])</span>
+        <span class="c1">#print(&#39;p2=%s&#39; % xyz_cid0[p2, :])</span>
+        <span class="c1">#print(&#39;p3=%s&#39; % xyz_cid0[p3, :])</span>
+        <span class="c1">#print(&#39;theta1=%s&#39; % np.degrees(np.arccos(cos_theta1)))</span>
+        <span class="c1">#print(&#39;theta2=%s&#39; % np.degrees(np.arccos(cos_theta2)))</span>
+        <span class="c1">#print(&#39;theta3=%s&#39; % np.degrees(np.arccos(cos_theta3)))</span>
+        <span class="c1">#print(&#39;max_theta=%s&#39; % theta_deg)</span>
+        <span class="c1">#asdf</span>
+    <span class="k">return</span> <span class="n">area</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span> <span class="n">min_theta</span><span class="p">,</span> <span class="n">max_theta</span><span class="p">,</span> <span class="n">dideal_theta</span><span class="p">,</span> <span class="n">min_edge_length</span></div>
+
+
+<div class="viewcode-block" id="quad_quality"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.quad_quality">[docs]</a><span class="k">def</span> <span class="nf">quad_quality</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets the quality metrics for a quad&quot;&quot;&quot;</span>
+    <span class="n">v21</span> <span class="o">=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span>
+    <span class="n">v32</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p2</span>
+    <span class="n">v43</span> <span class="o">=</span> <span class="n">p4</span> <span class="o">-</span> <span class="n">p3</span>
+    <span class="n">v14</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p4</span>
+    <span class="n">length21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span>
+    <span class="n">length32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span>
+    <span class="n">length43</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v43</span><span class="p">)</span>
+    <span class="n">length14</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v14</span><span class="p">)</span>
+    <span class="n">min_edge_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length21</span><span class="p">,</span> <span class="n">length32</span><span class="p">,</span> <span class="n">length43</span><span class="p">,</span> <span class="n">length14</span><span class="p">)</span>
+
+    <span class="n">v42</span> <span class="o">=</span> <span class="n">p4</span> <span class="o">-</span> <span class="n">p2</span>
+    <span class="n">v31</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p1</span>
+    <span class="n">p12</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">p23</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">p34</span> <span class="o">=</span> <span class="p">(</span><span class="n">p3</span> <span class="o">+</span> <span class="n">p4</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">p14</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4</span> <span class="o">+</span> <span class="n">p1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="n">v31</span> <span class="o">=</span> <span class="n">p3</span> <span class="o">-</span> <span class="n">p1</span>
+    <span class="n">v42</span> <span class="o">=</span> <span class="n">p4</span> <span class="o">-</span> <span class="n">p2</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v31</span><span class="p">,</span> <span class="n">v42</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+    <span class="c1"># still kind of in development</span>
+    <span class="c1">#</span>
+    <span class="c1"># the ratio of the ideal area to the actual area</span>
+    <span class="c1"># this is an hourglass check</span>
+    <span class="n">areas</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="o">-</span><span class="n">v14</span><span class="p">,</span> <span class="n">v21</span><span class="p">)),</span> <span class="c1"># v41 x v21</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v32</span><span class="p">,</span> <span class="o">-</span><span class="n">v21</span><span class="p">)),</span> <span class="c1"># v32 x v12</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v43</span><span class="p">,</span> <span class="o">-</span><span class="n">v32</span><span class="p">)),</span> <span class="c1"># v43 x v23</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v14</span><span class="p">,</span> <span class="n">v43</span><span class="p">)),</span>  <span class="c1"># v14 x v43</span>
+    <span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="c1"># for:</span>
+    <span class="c1">#   area=1; area1=0.5 -&gt; area_ratioi1=2.0; area_ratio=2.0</span>
+    <span class="c1">#   area=1; area1=2.0 -&gt; area_ratioi2=2.0; area_ratio=2.0</span>
+    <span class="n">min_area</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_area</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;nan min area; area=</span><span class="si">%g</span><span class="s1"> areas=</span><span class="si">%s</span><span class="s1">:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">element</span><span class="p">))</span>
+        <span class="c1">#nodes = element.nodes</span>
+        <span class="c1">#print(&#39;  n_%i = %s&#39; % (nodes[0], p1))</span>
+        <span class="c1">#print(&#39;  n_%i = %s&#39; % (nodes[1], p2))</span>
+        <span class="c1">#print(&#39;  n_%i = %s&#39; % (nodes[2], p3))</span>
+        <span class="c1">#print(&#39;  n_%i = %s&#39; % (nodes[3], p4))</span>
+        <span class="n">area_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1">#raise RuntimeError(&#39;bad quad...&#39;)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">area_ratioi1</span> <span class="o">=</span> <span class="n">area</span> <span class="o">/</span> <span class="n">min_area</span>
+        <span class="n">area_ratioi2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span> <span class="o">/</span> <span class="n">area</span>
+        <span class="n">area_ratio</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">area_ratioi1</span><span class="p">,</span> <span class="n">area_ratioi2</span><span class="p">)</span>
+
+    <span class="n">area1</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">areas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># v41 x v21</span>
+    <span class="n">area2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="o">-</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">))</span> <span class="c1"># v12 x v32</span>
+    <span class="n">area3</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v43</span><span class="p">,</span> <span class="n">v32</span><span class="p">))</span> <span class="c1"># v43 x v32</span>
+    <span class="n">area4</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v14</span><span class="p">,</span> <span class="o">-</span><span class="n">v43</span><span class="p">))</span> <span class="c1"># v14 x v34</span>
+    <span class="n">aavg</span> <span class="o">=</span> <span class="p">(</span><span class="n">area1</span> <span class="o">+</span> <span class="n">area2</span> <span class="o">+</span> <span class="n">area3</span> <span class="o">+</span> <span class="n">area4</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+    <span class="n">taper_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">area1</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">area2</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="nb">abs</span><span class="p">(</span><span class="n">area3</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">area4</span> <span class="o">-</span> <span class="n">aavg</span><span class="p">))</span> <span class="o">/</span> <span class="n">aavg</span>
+
+    <span class="c1">#    e3</span>
+    <span class="c1"># 4-------3</span>
+    <span class="c1"># |       |</span>
+    <span class="c1"># |e4     |  e2</span>
+    <span class="c1"># 1-------2</span>
+    <span class="c1">#     e1</span>
+    <span class="n">e13</span> <span class="o">=</span> <span class="n">p34</span> <span class="o">-</span> <span class="n">p12</span>
+    <span class="n">e42</span> <span class="o">=</span> <span class="n">p23</span> <span class="o">-</span> <span class="n">p14</span>
+    <span class="n">ne42</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e42</span><span class="p">)</span>
+    <span class="n">ne13</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e13</span><span class="p">)</span>
+    <span class="n">cos_skew1</span> <span class="o">=</span> <span class="p">(</span><span class="n">e13</span> <span class="o">@</span> <span class="n">e42</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne13</span> <span class="o">*</span> <span class="n">ne42</span><span class="p">)</span>
+    <span class="n">cos_skew2</span> <span class="o">=</span> <span class="p">(</span><span class="n">e13</span> <span class="o">@</span> <span class="o">-</span><span class="n">e42</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ne13</span> <span class="o">*</span> <span class="n">ne42</span><span class="p">)</span>
+    <span class="n">max_skew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span><span class="n">cos_skew1</span><span class="p">,</span> <span class="n">cos_skew2</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="c1">#aspect_ratio = max(p12, p23, p34, p14) / max(p12, p23, p34, p14)</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">([</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">,</span> <span class="n">v43</span><span class="p">,</span> <span class="n">v14</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#assert len(lengths) == 3, lengths</span>
+    <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">lengths</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v14</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length21</span> <span class="o">*</span> <span class="n">length14</span><span class="p">)</span>
+    <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length32</span> <span class="o">*</span> <span class="n">length21</span><span class="p">)</span>
+    <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v43</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length43</span> <span class="o">*</span> <span class="n">length32</span><span class="p">)</span>
+    <span class="n">cos_theta4</span> <span class="o">=</span> <span class="p">(</span><span class="n">v14</span> <span class="o">@</span> <span class="o">-</span><span class="n">v43</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length14</span> <span class="o">*</span> <span class="n">length43</span><span class="p">)</span>
+    <span class="c1">#max_thetai = np.arccos([cos_theta1, cos_theta2, cos_theta3, cos_theta4]).max()</span>
+
+    <span class="c1"># dot the local normal with the normal vector</span>
+    <span class="c1"># then take the norm of that to determine the angle relative to the normal</span>
+    <span class="c1"># then take the sign of that to see if we&#39;re pointing roughly towards the normal</span>
+    <span class="c1">#</span>
+    <span class="c1"># np.sign(np.linalg.norm(np.dot(</span>
+    <span class="c1"># a x b = ab sin(theta)</span>
+    <span class="c1"># a x b / ab = sin(theta)</span>
+    <span class="c1"># sin(theta) &lt; 0. -&gt; normal is flipped</span>
+    <span class="n">normal2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v21</span><span class="p">,</span> <span class="n">v32</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+    <span class="n">normal3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v32</span><span class="p">,</span> <span class="n">v43</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+    <span class="n">normal4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v43</span><span class="p">,</span> <span class="n">v14</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+    <span class="n">normal1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v14</span><span class="p">,</span> <span class="n">v21</span><span class="p">)</span> <span class="o">@</span> <span class="n">normal</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">normal1</span><span class="p">,</span> <span class="n">normal2</span><span class="p">,</span> <span class="n">normal3</span><span class="p">,</span> <span class="n">normal4</span><span class="p">])</span>
+    <span class="n">theta_additional</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">,</span> <span class="n">cos_theta4</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span> <span class="o">+</span> <span class="n">theta_additional</span>
+    <span class="n">min_theta</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">max_theta</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">dideal_theta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_theta</span> <span class="o">-</span> <span class="n">PIOVER2</span><span class="p">,</span> <span class="n">PIOVER2</span> <span class="o">-</span> <span class="n">min_theta</span><span class="p">)</span>
+    <span class="c1">#print(&#39;theta_max = &#39;, theta_max)</span>
+
+
+    <span class="c1"># warp angle</span>
+    <span class="c1"># split the quad and find the normals of each triangl</span>
+    <span class="c1"># find the angle between the two triangles</span>
+    <span class="c1">#</span>
+    <span class="c1"># 4---3</span>
+    <span class="c1"># | / |</span>
+    <span class="c1"># |/  |</span>
+    <span class="c1"># 1---2</span>
+    <span class="c1">#</span>
+    <span class="n">v41</span> <span class="o">=</span> <span class="o">-</span><span class="n">v14</span>
+    <span class="n">n123</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v21</span><span class="p">,</span> <span class="n">v31</span><span class="p">)</span>
+    <span class="n">n134</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v31</span><span class="p">,</span> <span class="n">v41</span><span class="p">)</span>
+    <span class="c1">#v1 o v2 = v1 * v2 cos(theta)</span>
+    <span class="n">cos_warp1</span> <span class="o">=</span> <span class="p">(</span><span class="n">n123</span> <span class="o">@</span> <span class="n">n134</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n123</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n134</span><span class="p">))</span>
+
+    <span class="c1"># split the quad in the order direction and take the maximum of the two splits</span>
+    <span class="c1"># 4---3</span>
+    <span class="c1"># | \ |</span>
+    <span class="c1"># |  \|</span>
+    <span class="c1"># 1---2</span>
+    <span class="n">n124</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v21</span><span class="p">,</span> <span class="n">v41</span><span class="p">)</span>
+    <span class="n">n234</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v32</span><span class="p">,</span> <span class="n">v42</span><span class="p">)</span>
+    <span class="n">cos_warp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">n124</span> <span class="o">@</span> <span class="n">n234</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n124</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n234</span><span class="p">))</span>
+
+    <span class="n">max_warp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">([</span><span class="n">cos_warp1</span><span class="p">,</span> <span class="n">cos_warp2</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">taper_ratio</span><span class="p">,</span> <span class="n">area_ratio</span><span class="p">,</span> <span class="n">max_skew</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">,</span>
+           <span class="n">min_theta</span><span class="p">,</span> <span class="n">max_theta</span><span class="p">,</span> <span class="n">dideal_theta</span><span class="p">,</span> <span class="n">min_edge_length</span><span class="p">,</span> <span class="n">max_warp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="get_min_max_theta"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.delete_bad_elements.get_min_max_theta">[docs]</a><span class="k">def</span> <span class="nf">get_min_max_theta</span><span class="p">(</span><span class="n">faces</span><span class="p">,</span> <span class="n">all_node_ids</span><span class="p">,</span> <span class="n">nid_map</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get the min/max thetas for CTETRA, CPENTA, CHEXA, CPYRAM&quot;&quot;&quot;</span>
+    <span class="n">cos_thetas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ideal_theta</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#print(&#39;faces =&#39;, faces)</span>
+    <span class="c1">#assert len(faces) &gt; 0, &#39;faces=%s nids=%s&#39; % (faces, all_node_ids)</span>
+    <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]</span>
+            <span class="n">v21</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v32</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v13</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">length21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span>
+            <span class="n">length32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span>
+            <span class="n">length13</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v13</span><span class="p">)</span>
+            <span class="n">min_edge_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length21</span><span class="p">,</span> <span class="n">length32</span><span class="p">,</span> <span class="n">length13</span><span class="p">)</span>
+
+            <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v13</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length21</span> <span class="o">*</span> <span class="n">length13</span><span class="p">)</span>
+            <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length32</span> <span class="o">*</span> <span class="n">length21</span><span class="p">)</span>
+            <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v13</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length13</span> <span class="o">*</span> <span class="n">length32</span><span class="p">)</span>
+            <span class="n">cos_thetas</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">])</span>
+            <span class="n">ideal_theta</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">PIOVER3</span><span class="p">,</span> <span class="n">PIOVER3</span><span class="p">,</span> <span class="n">PIOVER3</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                            <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">all_node_ids</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+            <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid_map</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">[:</span><span class="mi">4</span><span class="p">]]</span>
+            <span class="n">v21</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v32</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n2</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v43</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n3</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v14</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">n4</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">length21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v21</span><span class="p">)</span>
+            <span class="n">length32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v32</span><span class="p">)</span>
+            <span class="n">length43</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v43</span><span class="p">)</span>
+            <span class="n">length14</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v14</span><span class="p">)</span>
+            <span class="n">min_edge_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length21</span><span class="p">,</span> <span class="n">length32</span><span class="p">,</span> <span class="n">length43</span><span class="p">,</span> <span class="n">length14</span><span class="p">)</span>
+            <span class="n">cos_theta1</span> <span class="o">=</span> <span class="p">(</span><span class="n">v21</span> <span class="o">@</span> <span class="o">-</span><span class="n">v14</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length21</span> <span class="o">*</span> <span class="n">length14</span><span class="p">)</span>
+            <span class="n">cos_theta2</span> <span class="o">=</span> <span class="p">(</span><span class="n">v32</span> <span class="o">@</span> <span class="o">-</span><span class="n">v21</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length32</span> <span class="o">*</span> <span class="n">length21</span><span class="p">)</span>
+            <span class="n">cos_theta3</span> <span class="o">=</span> <span class="p">(</span><span class="n">v43</span> <span class="o">@</span> <span class="o">-</span><span class="n">v32</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length43</span> <span class="o">*</span> <span class="n">length32</span><span class="p">)</span>
+            <span class="n">cos_theta4</span> <span class="o">=</span> <span class="p">(</span><span class="n">v14</span> <span class="o">@</span> <span class="o">-</span><span class="n">v43</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">length14</span> <span class="o">*</span> <span class="n">length43</span><span class="p">)</span>
+            <span class="n">cos_thetas</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">cos_theta1</span><span class="p">,</span> <span class="n">cos_theta2</span><span class="p">,</span> <span class="n">cos_theta3</span><span class="p">,</span> <span class="n">cos_theta4</span><span class="p">])</span>
+            <span class="n">ideal_theta</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">PIOVER2</span><span class="p">,</span> <span class="n">PIOVER2</span><span class="p">,</span> <span class="n">PIOVER2</span><span class="p">,</span> <span class="n">PIOVER2</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos_thetas</span><span class="p">)</span>
+    <span class="n">ideal_theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ideal_theta</span><span class="p">)</span>
+    <span class="n">ideal_thetai</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">thetas</span> <span class="o">-</span> <span class="n">ideal_theta</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="p">(</span><span class="n">ideal_theta</span> <span class="o">-</span> <span class="n">thetas</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+    <span class="n">min_thetai</span> <span class="o">=</span> <span class="n">thetas</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">max_thetai</span> <span class="o">=</span> <span class="n">thetas</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">min_thetai</span><span class="p">,</span> <span class="n">max_thetai</span><span class="p">,</span> <span class="n">ideal_thetai</span><span class="p">,</span> <span class="n">min_edge_length</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1041 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.result_objects.op2_objects &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.result_objects.op2_objects</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.result_objects.op2_objects</h1><div class="highlight"><pre>
+<span></span><span class="c1">#pylint: disable=C0301,C0111</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">pack</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">SimpleLogger</span>
+<span class="kn">from</span> <span class="nn">pyNastran</span> <span class="kn">import</span> <span class="n">is_release</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">object_attributes</span><span class="p">,</span> <span class="n">object_methods</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+
+<span class="c1">#from pyNastran.utils import list_print</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.errors</span> <span class="kn">import</span> <span class="n">OverwriteTableError</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_codes</span> <span class="kn">import</span> <span class="n">Op2Codes</span><span class="p">,</span> <span class="n">get_sort_method_from_table_name</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.write_utils</span> <span class="kn">import</span> <span class="n">write_table_header</span><span class="p">,</span> <span class="n">export_to_hdf5</span>
+
+<span class="n">GRID_TYPE_INT_TO_STR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="c1"># GRID</span>
+    <span class="mi">2</span> <span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="c1"># SPOINT</span>
+    <span class="mi">3</span> <span class="p">:</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="c1"># EXTRA POINT</span>
+    <span class="mi">4</span> <span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="c1"># MODAL POINT</span>
+    <span class="mi">7</span> <span class="p">:</span> <span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="c1"># RIGID POINT (e.g. RBE3)</span>
+    <span class="mi">0</span> <span class="p">:</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="c1"># SECTOR/HARMONIC/RING POINT</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="BaseScalarObject"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject">[docs]</a><span class="k">class</span> <span class="nc">BaseScalarObject</span><span class="p">(</span><span class="n">Op2Codes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The base scalar class is used by:</span>
+<span class="sd">     - RealEigenvalues</span>
+<span class="sd">     - BucklingEigenvalues</span>
+<span class="sd">     - ComplexEigenvalues</span>
+<span class="sd">     - ScalarObject</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Op2Codes</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_built</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># init value</span>
+        <span class="c1">#  None - static</span>
+        <span class="c1">#  int/float - transient/freq/load step/eigenvalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_wide</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#self.ntimes = 0</span>
+        <span class="c1">#self.ntotal = 0</span>
+        <span class="c1">#assert isinstance(self.name, (str, bytes)), &#39;name=%s type=%s&#39; % (self.name, type(self.name))</span>
+
+<div class="viewcode-block" id="BaseScalarObject.object_attributes"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.object_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">filter_properties</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys_to_skip</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[</span><span class="n">keys_to_skip</span><span class="p">]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">,</span>
+                                 <span class="n">filter_properties</span><span class="o">=</span><span class="n">filter_properties</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseScalarObject.object_methods"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.object_methods">[docs]</a>    <span class="k">def</span> <span class="nf">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys_to_skip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">my_keys_to_skip</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;object_methods&#39;</span><span class="p">,</span> <span class="s1">&#39;object_attributes&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">object_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="o">+</span><span class="n">my_keys_to_skip</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="c1">#raise NotImplementedError(str(self.get_stats()))</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">table</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">class_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+<div class="viewcode-block" id="BaseScalarObject.get_headers"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.get_headers">[docs]</a>    <span class="k">def</span> <span class="nf">get_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_stats_short</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;_get_stats_short&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseScalarObject.build_dataframe"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.build_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;creates a pandas dataframe&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;build_dataframe is not implemented in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseScalarObject.export_to_hdf5"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.export_to_hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;exports the object to HDF5 format&quot;&quot;&quot;</span>
+        <span class="n">export_to_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseScalarObject.write_f06"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.write_f06">[docs]</a>    <span class="k">def</span> <span class="nf">write_f06</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_file</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">page_stamp</span><span class="o">=</span><span class="s1">&#39;PAGE </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                  <span class="n">page_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">is_mag_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_f06_transient</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="n">page_num</span><span class="p">,</span> <span class="n">f06_file</span><span class="o">=</span><span class="n">f06_file</span><span class="p">,</span>
+                                             <span class="n">is_mag_phase</span><span class="o">=</span><span class="n">is_mag_phase</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="n">is_sort1</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;write_f06 is not implemented in </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1">#raise NotImplementedError(msg)</span>
+        <span class="k">return</span> <span class="n">page_num</span></div>
+
+    <span class="k">def</span> <span class="nf">_write_f06_transient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">f06_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">is_mag_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;_write_f06_transient is not implemented in </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1">#raise NotImplementedError(msg)</span>
+        <span class="k">return</span> <span class="n">page_num</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+
+<div class="viewcode-block" id="BaseScalarObject.get_stats"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseScalarObject.get_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">short</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;get_stats is not implemented in </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_release</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">msg</span></div></div>
+
+
+<div class="viewcode-block" id="ScalarObject"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject">[docs]</a><span class="k">class</span> <span class="nc">ScalarObject</span><span class="p">(</span><span class="n">BaseScalarObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used by all vectorized objects including:</span>
+<span class="sd">     - DisplacementArray</span>
+<span class="sd">     - RodStressArray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">apply_data_code</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="s1">&#39;nonlinear_factor&#39;</span> <span class="ow">in</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">data_code</span>
+
+        <span class="c1"># new terms...I think they&#39;re all valid...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ogs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pval_step</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">superelement_adaptivity_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#--------------------------------</span>
+
+        <span class="n">BaseScalarObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span> <span class="o">=</span> <span class="n">isubcase</span>
+
+        <span class="c1">#--------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># the nonlinear factor; None=static; float=transient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># the number of time steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntimes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># the number of entries in a table for a single time step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># there are a few tables (e.g. GridPointForcesArray) that change</span>
+        <span class="c1"># length from time=1 to time=2.  As such, we will track the</span>
+        <span class="c1"># length of each time step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ntotals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_as_h5</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;load_as_h5&#39;</span> <span class="ow">in</span> <span class="n">data_code</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_as_h5</span> <span class="o">=</span> <span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;load_as_h5&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;load_as_h5&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;h5_file&#39;</span> <span class="ow">in</span> <span class="n">data_code</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span> <span class="o">=</span> <span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;h5_file&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;h5_file&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data_code</span><span class="p">)</span>
+        <span class="c1">#self.table_name = self.data_code[&#39;table_name&#39;]</span>
+        <span class="c1"># if data code isn&#39;t being applied and you don&#39;t have</span>
+        <span class="c1"># parameters that were in data_code (e.g.</span>
+        <span class="c1"># self.element_name/self.element_type), you need to define</span>
+        <span class="c1"># your vectorized class as setting data_code</span>
+        <span class="c1">#</span>
+        <span class="c1"># see pyNastran.op2.oes_stressStrain.real.oes_bars for an example</span>
+        <span class="c1"># it&#39;s really subtle...</span>
+        <span class="c1">#</span>
+        <span class="c1"># since you won&#39;t get it, the inherited RealBarStressArray class inits</span>
+        <span class="c1"># data code, but RealBarArray does not.</span>
+        <span class="k">if</span> <span class="n">apply_data_code</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_data_members</span><span class="p">()</span>
+        <span class="c1">#print(self.code_information())</span>
+
+    <span class="k">def</span> <span class="nf">_get_stats_short</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">):</span>
+            <span class="n">unused_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">()</span>
+            <span class="n">headers_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">))</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">]; </span><span class="si">%s</span><span class="s1">; [</span><span class="si">%s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">class_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">headers_str</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eq_header</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="c1">#raise NotImplementedError(self.class_name)</span>
+        <span class="c1">#raise NotImplementedError(str(self.get_stats()))</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_eq_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+        <span class="n">is_nan</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                  <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">)</span> <span class="ow">and</span>
+                  <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_nan</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="s1">&#39;nonlinear_factor=</span><span class="si">%s</span><span class="s1"> table.nonlinear_factor=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntotal</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="s1">&#39;table_name=</span><span class="si">%r</span><span class="s1"> table.table_name=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">approach_code</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">approach_code</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;we need to remove the saved functions&quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;add&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;add&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;add_new_eid&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;add_new_eid&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;class_name&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;class_name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;nnodes_per_element&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;nnodes_per_element&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;add_node&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;add_node&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;add_eid&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;add_eid&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;_add&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_add&#39;</span><span class="p">]</span>
+        <span class="c1">#if &#39;_add_new_eid_sort1&#39; in state:</span>
+            <span class="c1">#del state[&#39;_add_new_eid_sort1&#39;]</span>
+        <span class="c1">#if &#39;_add_new_node_sort1&#39; in state:</span>
+            <span class="c1">#del state[&#39;_add_new_node_sort1&#39;]</span>
+        <span class="k">if</span> <span class="s1">&#39;_add_new_eid&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_add_new_eid&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;_add_new_node&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_add_new_node&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;dataframe&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;dataframe&#39;</span><span class="p">]</span>
+
+        <span class="c1">#for key, value in state.items():</span>
+            <span class="c1">#if isinstance(value, (int, float, str, np.ndarray, list)) or value is None:</span>
+                <span class="c1">#continue</span>
+            <span class="c1">#print(&#39; %s = %s&#39; % (key, value))</span>
+        <span class="c1">#print(state)</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">_get_result_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;gets the h5 result group&quot;&quot;&quot;</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_code</span><span class="p">()</span>
+        <span class="n">case_name</span> <span class="o">=</span> <span class="s1">&#39;Subcase=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="c1"># (self.isubcase)</span>
+        <span class="k">if</span> <span class="n">case_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">:</span>
+            <span class="n">subcase_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subcase_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_file</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">subcase_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">group</span>
+
+    <span class="k">def</span> <span class="nf">_get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span>
+        <span class="n">ogs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ogs&#39;</span><span class="p">):</span>
+            <span class="n">ogs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ogs</span>
+        <span class="c1">#if self.binary_debug:</span>
+            <span class="c1">#self.binary_debug.write(self.code_information(include_time=True))</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isubcase</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysis_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_method</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span><span class="p">,</span> <span class="n">ogs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">superelement_adaptivity_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pval_step</span><span class="p">)</span>
+        <span class="c1">#code = (self.isubcase, self.analysis_code, self._sort_method, self._count,</span>
+                <span class="c1">#self.superelement_adaptivity_index, self.table_name_str)</span>
+        <span class="c1">#print(&#39;%r&#39; % self.subtitle)</span>
+        <span class="c1">#self.code = code</span>
+        <span class="c1">#self.log.debug(&#39;code = %s&#39; % str(self.code))</span>
+        <span class="k">return</span> <span class="n">code</span>
+
+    <span class="c1">#@property</span>
+    <span class="k">def</span> <span class="nf">_sort_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sort_method</span><span class="p">,</span> <span class="n">unused_is_real</span><span class="p">,</span> <span class="n">unused_is_random</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_specs</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sort_method</span> <span class="o">=</span> <span class="n">get_sort_method_from_table_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="c1">#is_sort1 = self.table_name.endswith(&#39;1&#39;)</span>
+        <span class="c1">#is_sort1 = self.is_sort1  # uses the sort_bits</span>
+        <span class="k">assert</span> <span class="n">sort_method</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;sort_method=</span><span class="si">%r</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sort_method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">sort_method</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;alternate way to get the dataframe&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span>
+
+<div class="viewcode-block" id="ScalarObject.apply_data_code"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.apply_data_code">[docs]</a>    <span class="k">def</span> <span class="nf">apply_data_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#print(self.__class__.__name__)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;table_name&#39;</span><span class="p">]:</span>
+            <span class="c1">#print(self.data_code)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;old_table_name=</span><span class="si">%r</span><span class="s1"> new_table_name=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;table_name&#39;</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">OverwriteTableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  key=</span><span class="si">%s</span><span class="s2"> value=</span><span class="si">%s</span><span class="s2">; value is bytes&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+            <span class="c1">#print(&quot;  key=%s value=%s&quot; % (key, value))</span>
+
+<div class="viewcode-block" id="ScalarObject.get_data_code"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.get_data_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_data_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;  &#39;</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;data_names&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">sort1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">prefix</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_sort1</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">sort2</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">prefix</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;data_names&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">):</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span>
+                <span class="n">vals_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">vals_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals_array</span> <span class="o">=</span> <span class="s1">&#39;???&#39;</span>
+            <span class="c1">#msg.append(&#39;%s = [%s]\n&#39; % (name, &#39;, &#39;.join([&#39;%r&#39; % val for val in vals])))</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1"> = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals_array</span><span class="p">)</span>
+        <span class="c1">#print(&quot;***data_names =&quot;, self.data_names)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">msg</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ScalarObject.get_unsteady_value"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.get_unsteady_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_unsteady_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_start_data_member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">value_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_var</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_append_data_member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">value_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        this appends a data member to a variable that may or may not exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_data_member</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">value_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_list</span><span class="p">:</span>
+            <span class="n">listA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">listA</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1">#print(&quot;has %s&quot; % var_name)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">value_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listA</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;listA = &quot;</span><span class="p">,</span> <span class="n">listA</span><span class="p">)</span>
+                    <span class="k">raise</span>
+                <span class="n">listA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">listA</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_set_data_members</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;data_names&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;No &quot;transient&quot; variable was set for </span><span class="si">%s</span><span class="s1"> (&quot;data_names&quot; &#39;</span>
+                   <span class="s1">&#39;was not defined in self.data_code).</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;data_names&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_data_member</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScalarObject.update_data_code"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.update_data_code">[docs]</a>    <span class="k">def</span> <span class="nf">update_data_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span> <span class="ow">or</span> <span class="p">(</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;nonlinear_factor&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;nonlinear_factor&#39;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span> <span class="o">=</span> <span class="n">data_code</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code</span><span class="p">()</span>  <span class="c1"># take all the parameters in data_code and make them attributes of the class</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_data_members</span><span class="p">()</span>  <span class="c1"># set the transient variables</span></div>
+        <span class="c1">#else:</span>
+            <span class="c1">#print(&#39;NF_new=%r NF_old=%r&#39; % (data_code[&#39;nonlinear_factor&#39;], self.data_code[&#39;nonlinear_factor&#39;]))</span>
+
+<div class="viewcode-block" id="ScalarObject.print_data_members"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.print_data_members">[docs]</a>    <span class="k">def</span> <span class="nf">print_data_members</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints out the &quot;unique&quot; vals of the case.</span>
+
+<span class="sd">        Uses a provided list of data_code[&#39;data_names&#39;] to set the values for</span>
+<span class="sd">        each subcase.  Then populates a list of self.name+&#39;s&#39; (by using</span>
+<span class="sd">        setattr) with the current value.  For example, if the variable name is</span>
+<span class="sd">        &#39;mode&#39;, we make self.modes.  Then to extract the values, we build a</span>
+<span class="sd">        list of of the variables that were set like this and then loop over</span>
+<span class="sd">        them to print their values.</span>
+
+<span class="sd">        This way there is no dependency on one result type having [&#39;mode&#39;] and</span>
+<span class="sd">        another result type having [&#39;mode&#39;,&#39;eigr&#39;,&#39;eigi&#39;].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key_vals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;data_names&#39;</span><span class="p">]:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+            <span class="n">key_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+            <span class="c1">#print(&quot;%ss = %s&quot; % (name, vals))</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;data_names&#39;</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%-10s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">nmodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmodes</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">key_vals</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%-10g</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="ScalarObject.recast_gridtype_as_string"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.recast_gridtype_as_string">[docs]</a>    <span class="k">def</span> <span class="nf">recast_gridtype_as_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        converts a grid_type integer to a string</span>
+
+<span class="sd">        Point type (per NX 10; OUG table; p.5-663):</span>
+<span class="sd">        =1, GRID Point</span>
+<span class="sd">        =2, Scalar Point</span>
+<span class="sd">        =3, Extra Point</span>
+<span class="sd">        =4, Modal</span>
+<span class="sd">        =5, p-elements, 0-DOF</span>
+<span class="sd">        -6, p-elements, number of DOF</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">grid_type_str</span> <span class="o">=</span> <span class="n">GRID_TYPE_INT_TO_STR</span><span class="p">[</span><span class="n">grid_type</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;grid_type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grid_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grid_type_str</span></div>
+
+<div class="viewcode-block" id="ScalarObject.cast_grid_type"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.cast_grid_type">[docs]</a>    <span class="k">def</span> <span class="nf">cast_grid_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_type_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;converts a grid_type string to an integer&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">grid_type_str</span> <span class="o">==</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span>
+            <span class="n">grid_type</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># GRID</span>
+        <span class="k">elif</span> <span class="n">grid_type_str</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+            <span class="n">grid_type</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># SPOINT</span>
+        <span class="k">elif</span> <span class="n">grid_type_str</span> <span class="o">==</span> <span class="s1">&#39;L&#39;</span><span class="p">:</span>
+            <span class="n">grid_type</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># RIGID POINT (e.g. RBE3)</span>
+        <span class="k">elif</span> <span class="n">grid_type_str</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+            <span class="n">grid_type</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># SECTOR/HARMONIC/RING POINT</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;grid_type=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">grid_type_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grid_type</span></div>
+
+<div class="viewcode-block" id="ScalarObject.update_dt"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.ScalarObject.update_dt">[docs]</a>    <span class="k">def</span> <span class="nf">update_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">unused_dt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called if the object already exits and a new</span>
+<span class="sd">        time/freq/load step is found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span> <span class="o">=</span> <span class="n">data_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_data_code</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;update_dt not implemented in the </span><span class="si">%s</span><span class="s1"> class&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+        <span class="c1">#assert dt&gt;=0.</span>
+        <span class="c1">#print(&quot;updating dt...dt=%s&quot; % dt)</span>
+        <span class="c1">#if dt is not None:</span>
+            <span class="c1">#self.dt = dt</span>
+            <span class="c1">#self.add_new_transient()</span>
+
+    <span class="k">def</span> <span class="nf">_build_dataframe_transient_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;builds the header for the Pandas DataFrame/table&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)),</span> <span class="s1">&#39;name=</span><span class="si">%s</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="c1">#print(&#39;self.name = %r&#39; % self.name)</span>
+        <span class="c1">#name = self.name #data_code[&#39;name&#39;]</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span>
+        <span class="n">utimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">utimes</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;WARNING : </span><span class="si">%s</span><span class="s1"> - times=</span><span class="si">%s</span><span class="s1"> unique_times=</span><span class="si">%s</span><span class="s1">...assuming new values...new_times=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">utimes</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1">#raise RuntimeError(msg)</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">))</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">column_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">data_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_code</span><span class="p">[</span><span class="s1">&#39;data_names&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data_names</span><span class="p">:</span>
+            <span class="c1">#if name == primary_name:</span>
+            <span class="c1">#times = self.da</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;mode&#39;</span><span class="p">:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Mode&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+                <span class="c1">#if freq not in data_names:</span>
+                <span class="c1">#if name == &#39;freq&#39;:</span>
+                <span class="c1">##if hasattr(self, &#39;freqs&#39;):</span>
+                    <span class="c1">#column_names.append(&#39;Freq&#39;)</span>
+                    <span class="c1">#column_values.append(self.freqs)</span>
+                <span class="c1">#elif name == &#39;eigr&#39;:</span>
+                    <span class="c1">#column_names.append(&#39;eigenvalue_real&#39;)</span>
+                    <span class="c1">#column_values.append(self.eigrs)</span>
+                <span class="c1">#elif hasattr(self, &#39;eigrs&#39;) and 0:</span>
+                    <span class="c1">#try:</span>
+                        <span class="c1">#abs_freqs = np.sqrt(np.abs(self.eigrs)) / (2 * np.pi)</span>
+                    <span class="c1">#except FloatingPointError:</span>
+                        <span class="c1">#msg = &#39;Cant analyze freq = sqrt(eig)/(2*pi)\neigr=%s\n&#39; % (self.eigrs)</span>
+                        <span class="c1">#abs_freqs = np.sqrt(np.abs(self.eigrs)) / (2 * np.pi)</span>
+                        <span class="c1">#msg += &#39;freq = sqrt(abs(self.eigrs)) / (2 * np.pi)=%s&#39; % abs_freqs</span>
+                        <span class="c1">#raise FloatingPointError(msg)</span>
+                    <span class="c1">#column_names.append(&#39;Freq&#39;)</span>
+                    <span class="c1">#column_values.append(abs_freqs)</span>
+                <span class="c1">#else:</span>
+                    <span class="c1">#pass</span>
+
+                <span class="c1"># Convert eigenvalues to frequencies</span>
+                <span class="c1"># TODO: add damping header</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;eign&#39;</span><span class="p">]:</span>
+                <span class="n">abs_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigns</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Freq&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">abs_freqs</span><span class="p">)</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Eigenvalue&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Radians&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">abs_freqs</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;eigr&#39;</span><span class="p">]:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EigenvalueReal&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;eigi&#39;</span><span class="p">]:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;EigenvalueImag&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                <span class="n">eigr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigrs</span><span class="p">)</span>
+                <span class="n">eigi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigis</span><span class="p">)</span>
+                <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigr</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">eigi</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">damping</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eigr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">eigr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">inonzero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">denom</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inonzero</span><span class="p">):</span>
+                    <span class="n">damping</span><span class="p">[</span><span class="n">inonzero</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">eigr</span><span class="p">[</span><span class="n">inonzero</span><span class="p">]</span> <span class="o">/</span> <span class="n">denom</span><span class="p">[</span><span class="n">inonzero</span><span class="p">]</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Damping&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">damping</span><span class="p">)</span>
+                <span class="c1">#calculate_damping</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mode_cycle&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+                <span class="c1">#column_names.append(&#39;mode_cycle(Freq?)&#39;)</span>
+                <span class="c1">#column_values.append(times)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mode2&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+                <span class="c1">#column_names.append(&#39;mode2(Freq?)&#39;)</span>
+                <span class="c1">#column_values.append(times)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cycle&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+                <span class="c1">#column_names.append(&#39;Freq (Cycles/s)&#39;)</span>
+                <span class="c1">#column_values.append(times)</span>
+
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span> <span class="s1">&#39;freq2&#39;</span><span class="p">]:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Freq&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">]:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lftsfq&#39;</span><span class="p">,</span> <span class="s1">&#39;lsdvmn&#39;</span><span class="p">,</span> <span class="s1">&#39;load_step&#39;</span><span class="p">,</span> <span class="s1">&#39;loadID&#39;</span><span class="p">,</span> <span class="s1">&#39;loadFactor&#39;</span><span class="p">,</span> <span class="s1">&#39;loadIDs&#39;</span><span class="p">]:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;LoadStep&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;node_id&#39;</span><span class="p">:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;NodeID&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;element_id&#39;</span><span class="p">:</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ElementID&#39;</span><span class="p">)</span>
+                <span class="n">column_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;build_dataframe; name=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">column_names</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_values</span><span class="p">),</span> <span class="s1">&#39;names=</span><span class="si">%s</span><span class="s1"> values=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="n">column_values</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">())</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;headers=</span><span class="si">%s</span><span class="s1">; n=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">data.headers=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_headers</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">column_values</span>
+
+    <span class="k">def</span> <span class="nf">_write_table_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op2_file</span><span class="p">,</span> <span class="n">fascii</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">subtable_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtable_name</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">subtable_name</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;OUG1    &#39;</span>
+            <span class="c1">#print(&#39;attrs =&#39;, self.object_attributes())</span>
+            <span class="c1">#raise</span>
+            <span class="k">pass</span>
+        <span class="n">_write_table_header</span><span class="p">(</span><span class="n">op2_file</span><span class="p">,</span> <span class="n">fascii</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="n">subtable_name</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_write_table_header</span><span class="p">(</span><span class="n">op2_file</span><span class="p">,</span> <span class="n">fascii</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">subtable_name</span><span class="p">):</span>
+    <span class="n">table_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%-8s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">table_name</span> <span class="c1"># &#39;BOUGV1  &#39;</span>
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">._write_table_header</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">table_name</span><span class="p">)</span>
+    <span class="c1">#get_nmarkers- [4, 0, 4]</span>
+    <span class="c1">#marker = [4, 2, 4]</span>
+    <span class="c1">#table_header = [8, &#39;BOUGV1  &#39;, 8]</span>
+    <span class="n">write_table_header</span><span class="p">(</span><span class="n">op2_file</span><span class="p">,</span> <span class="n">fascii</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+
+
+    <span class="c1">#read_markers -&gt; [4, -1, 4]</span>
+    <span class="c1">#get_nmarkers- [4, 0, 4]</span>
+    <span class="c1">#read_record - marker = [4, 7, 4]</span>
+    <span class="c1">#read_record - record = [28, recordi, 28]</span>
+
+    <span class="c1">#write_markers(op2_file, fascii, &#39;  %s header1a&#39; % table_name, [-1, 0, 7])</span>
+    <span class="n">data_a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,]</span>
+    <span class="c1">#data_a = []</span>
+    <span class="c1">#data_b = [4, -1, 4,]</span>
+    <span class="n">data_c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">,]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data_a</span> <span class="o">+</span> <span class="n">data_c</span>
+    <span class="n">blank</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> header1a_i = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">data_a</span><span class="p">))</span>
+    <span class="c1">#fascii.write(&#39;%s            = %s\n&#39; % (blank, data_b))</span>
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">            = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">blank</span><span class="p">,</span> <span class="n">data_c</span><span class="p">))</span>
+    <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;6i&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="n">table1_fmt</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&lt;9i&#39;</span>
+    <span class="n">table1</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="mi">28</span><span class="p">,</span>
+        <span class="mi">102</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="mi">28</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> header1b = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">table1</span><span class="p">))</span>
+    <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">table1_fmt</span><span class="p">,</span> <span class="o">*</span><span class="n">table1</span><span class="p">))</span>
+
+    <span class="c1">#recordi = [subtable_name, month, day, year, 0, 1]</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> header2a = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+    <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;&lt;12i&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">year</span> <span class="o">=</span> <span class="n">date</span>
+    <span class="k">if</span> <span class="n">subtable_name</span><span class="p">:</span>
+        <span class="n">table2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="mi">28</span><span class="p">,</span>  <span class="c1"># 4i -&gt; 13i</span>
+            <span class="c1"># subtable,todays date 3/6/2014, 0, 1  ( year=year-2000)</span>
+            <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%-8s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">subtable_name</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">year</span> <span class="o">-</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="mi">28</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">table2_format</span> <span class="o">=</span> <span class="s1">&#39;i8s6i&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">table2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="mi">28</span><span class="p">,</span>  <span class="c1"># 4i -&gt; 13i</span>
+            <span class="c1"># todays date 3/6/2014, 0, 1  ( year=year-2000)</span>
+            <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">year</span> <span class="o">-</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="mi">28</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">table2_format</span> <span class="o">=</span> <span class="s1">&#39;i6i&#39;</span>
+
+    <span class="n">fascii</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> header2b = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">table2</span><span class="p">))</span>
+    <span class="n">op2_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">table2_format</span><span class="p">,</span> <span class="o">*</span><span class="n">table2</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="BaseElement"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.BaseElement">[docs]</a><span class="k">class</span> <span class="nc">BaseElement</span><span class="p">(</span><span class="n">ScalarObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">apply_data_code</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1">#--------------------------------</span>
+        <span class="c1"># TODO: remove ???</span>
+        <span class="c1">#self.element_name = None</span>
+        <span class="c1">#self.element = None</span>
+        <span class="c1">#self.element_node = None</span>
+        <span class="c1">#self.element_type = None</span>
+        <span class="n">ScalarObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_code</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">apply_data_code</span><span class="o">=</span><span class="n">apply_data_code</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_eq_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+        <span class="n">ScalarObject</span><span class="o">.</span><span class="n">_eq_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+        <span class="n">is_nan</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                  <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">)</span> <span class="ow">and</span>
+                  <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">nonlinear_factor</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;element_name&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_nan</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">_times</span><span class="p">),</span> <span class="s1">&#39;ename=</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1"> times=</span><span class="si">%s</span><span class="s1"> table.times=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">_times</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">table</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s1">&#39;shape=</span><span class="si">%s</span><span class="s1"> element.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;table_name=</span><span class="si">%r</span><span class="s1"> class_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">Eid</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">eid1</span><span class="p">,</span> <span class="n">eid2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">eid1</span><span class="p">,</span> <span class="n">eid2</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;element_node&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element_node</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">table</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;self.element_node.shape=</span><span class="si">%s</span><span class="s1"> table.element_node.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">element_node</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;table_name=</span><span class="si">%r</span><span class="s1"> class_name=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_information</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">eid1</span><span class="p">,</span> <span class="n">nid1</span><span class="p">),</span> <span class="p">(</span><span class="n">eid2</span><span class="p">,</span> <span class="n">nid2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_node</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">element_node</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> : (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">), (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">eid1</span><span class="p">,</span> <span class="n">nid1</span><span class="p">,</span> <span class="n">eid2</span><span class="p">,</span> <span class="n">nid2</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_pandas_transient_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_values</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;common method to build a transient dataframe&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">column_values</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+        <span class="n">eid_item</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">element</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">:</span>
+                <span class="n">eid_item</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">eid</span><span class="p">,</span> <span class="n">header</span><span class="p">])</span>
+        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ElementID&#39;</span><span class="p">,</span> <span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">eid_item</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A.shape =&#39;</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;len(element) =&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;columns =&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="c1"># old</span>
+        <span class="c1">#data_frame = pd.Panel(data, items=column_values, major_axis=element, minor_axis=headers).to_frame()</span>
+        <span class="c1">#data_frame.columns.names = column_names</span>
+        <span class="c1">#data_frame.index.names = [&#39;ElementID&#39;, &#39;Item&#39;]</span>
+        <span class="c1">#print(data_frame)</span>
+        <span class="k">return</span> <span class="n">data_frame</span>
+
+    <span class="k">def</span> <span class="nf">_build_pandas_transient_element_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_values</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span>
+                                             <span class="n">element_node</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                             <span class="n">from_tuples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">from_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;common method to build a transient dataframe&quot;&quot;&quot;</span>
+        <span class="c1"># Freq                  0.00001  10.00000 20.00000 30.00000                 40.00000 50.00000 60.00000</span>
+        <span class="c1"># ElementID NodeID Item</span>
+        <span class="c1"># 1         0      oxx        0j       0j       0j       0j    (3200.0806+6017.714j)       0j       0j</span>
+        <span class="c1">#                  oyy        0j       0j       0j       0j    (410.68146+772.2816j)       0j       0j</span>
+        <span class="c1">#                  ozz        0j       0j       0j       0j    (0.306115+0.5756457j)       0j       0j</span>
+        <span class="c1">#                  txy        0j       0j       0j       0j  (-120.69606-226.96753j)       0j       0j</span>
+        <span class="c1">#                  tyz        0j       0j       0j       0j  (0.70554054+1.3267606j)       0j       0j</span>
+        <span class="c1">#                  txz        0j       0j       0j       0j     (5193.834+9766.943j)       0j       0j</span>
+        <span class="c1"># 2                oxx        0j       0j       0j       0j    (8423.371+15840.051j)       0j       0j</span>
+        <span class="c1">#                  oyy        0j       0j       0j       0j    (-3364.359-6326.637j)       0j       0j</span>
+        <span class="c1">#                  ozz        0j       0j       0j       0j  (-74931.664-140908.11j)       0j       0j</span>
+        <span class="c1">#                  txy        0j       0j       0j       0j  (-261.20972-491.20178j)       0j       0j</span>
+        <span class="c1">#                  tyz        0j       0j       0j       0j   (121.57285+228.61633j)       0j       0j</span>
+        <span class="c1">#                  txz        0j       0j       0j       0j     (5072.678+9539.112j)       0j       0j</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">column_values</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+        <span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">nheaders</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ntimes</span><span class="p">,</span> <span class="n">nelements</span><span class="o">*</span><span class="n">nheaders</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">ntotal</span> <span class="o">=</span> <span class="n">ntimes</span> <span class="o">*</span> <span class="n">nelements</span> <span class="o">*</span> <span class="n">nheaders</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;data.shape=</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">; ntimes=</span><span class="si">{</span><span class="n">ntimes</span><span class="si">}</span><span class="s1"> nelements=</span><span class="si">{</span><span class="n">nelements</span><span class="si">}</span><span class="s1"> nheaders=</span><span class="si">{</span><span class="n">nheaders</span><span class="si">}</span><span class="s1">; ntotal=</span><span class="si">{</span><span class="n">ntotal</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ElementID&#39;</span><span class="p">,</span> <span class="s1">&#39;NodeID&#39;</span><span class="p">,</span> <span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">from_tuples</span><span class="p">:</span>
+            <span class="n">nvars</span> <span class="o">=</span> <span class="n">element_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="n">nvars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;names=</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1"> element_node=</span><span class="si">{</span><span class="n">element_node</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">element_node</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">eid_nid_item</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element_node</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">:</span>
+                    <span class="n">eid_nid_item</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">eid</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">header</span><span class="p">])</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">eid_nid_item</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">from_array</span><span class="p">:</span>
+            <span class="n">nvars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_node</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="n">nvars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;names=</span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s1"> element_node=</span><span class="si">{</span><span class="n">element_node</span><span class="si">}</span><span class="s1"> (n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">element_node</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="n">eid_nid_item</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">element_node</span><span class="p">:</span>
+                <span class="n">eidi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">eid</span><span class="p">]</span><span class="o">*</span><span class="n">nheaders</span><span class="p">)</span>
+                <span class="n">eid_nid_item</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eidi</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+            <span class="n">eid_nid_item</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">headers</span> <span class="o">*</span> <span class="n">nelements</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">eid_nid_item</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;from_tuple, from_array&#39;</span><span class="p">)</span>
+        <span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="c1">#element_node = [element_node[:, 0], element_node[:, 1]]</span>
+        <span class="c1">#data_frame = pd.Panel(data, items=column_values, major_axis=element_node, minor_axis=headers).to_frame()</span>
+        <span class="c1">#data_frame.columns.names = column_names</span>
+        <span class="c1">#data_frame.index.names = [&#39;ElementID&#39;, &#39;NodeID&#39;, &#39;Item&#39;]</span>
+        <span class="c1">#print(data_frame)</span>
+        <span class="k">return</span> <span class="n">data_frame</span></div>
+
+<div class="viewcode-block" id="get_times_dtype"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.get_times_dtype">[docs]</a><span class="k">def</span> <span class="nf">get_times_dtype</span><span class="p">(</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;int&#39;</span>
+
+    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">+=</span> <span class="s1">&#39;32&#39;</span>
+        <span class="n">fdtype</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>
+        <span class="n">idtype</span> <span class="o">=</span> <span class="s1">&#39;int32&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">+=</span> <span class="s1">&#39;64&#39;</span>
+        <span class="n">fdtype</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
+        <span class="n">idtype</span> <span class="o">=</span> <span class="s1">&#39;int64&#39;</span>
+    <span class="k">return</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">idtype</span><span class="p">,</span> <span class="n">fdtype</span></div>
+
+<div class="viewcode-block" id="get_complex_times_dtype"><a class="viewcode-back" href="../../../../reference/op2/result_objects/pyNastran.op2.result_objects.html#pyNastran.op2.result_objects.op2_objects.get_complex_times_dtype">[docs]</a><span class="k">def</span> <span class="nf">get_complex_times_dtype</span><span class="p">(</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nonlinear_factor</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;int&#39;</span>
+
+    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">+=</span> <span class="s1">&#39;32&#39;</span>
+        <span class="n">cfdtype</span> <span class="o">=</span> <span class="s1">&#39;complex64&#39;</span>
+        <span class="n">idtype</span> <span class="o">=</span> <span class="s1">&#39;int32&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">+=</span> <span class="s1">&#39;64&#39;</span>
+        <span class="n">cfdtype</span> <span class="o">=</span> <span class="s1">&#39;complex128&#39;</span>
+        <span class="n">idtype</span> <span class="o">=</span> <span class="s1">&#39;int64&#39;</span>
+    <span class="k">return</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">idtype</span><span class="p">,</span> <span class="n">cfdtype</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

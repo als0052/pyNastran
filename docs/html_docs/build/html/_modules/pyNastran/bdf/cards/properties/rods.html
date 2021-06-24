@@ -1,0 +1,731 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.cards.properties.rods &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.cards.properties.rods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.cards.properties.rods</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=C0103,R0902,R0904,R0914,C0111</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">All beam properties are defined in this file.  This includes:</span>
+<span class="sd"> *   PBEAM</span>
+<span class="sd"> *   PBEAML</span>
+<span class="sd"> *   PBAR</span>
+<span class="sd"> *   PBARL</span>
+
+<span class="sd">All beams are Property objects.</span>
+<span class="sd">Multi-segment beams are IntegratedLineProperty objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">set_blank_if_default</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.base_card</span> <span class="kn">import</span> <span class="n">Property</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.assign_type</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer</span><span class="p">,</span> <span class="n">double</span><span class="p">,</span> <span class="n">double_or_blank</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_card_16</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+
+<div class="viewcode-block" id="PROD"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD">[docs]</a><span class="k">class</span> <span class="nc">PROD</span><span class="p">(</span><span class="n">Property</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +------+-----+-----+-----+-----+-----+-----+</span>
+<span class="sd">    |  1   |  2  |  3  |  4  |  5  |  6  |  7  |</span>
+<span class="sd">    +======+=====+=====+=====+=====+=====+=====+</span>
+<span class="sd">    | PROD | PID | MID |  A  |  J  |  C  | NSM |</span>
+<span class="sd">    +------+-----+-----+-----+-----+-----+-----+</span>
+<span class="sd">    | PROD |  1  |  2  | 2.0 | 3.0 | 0.5 | 1.0 |</span>
+<span class="sd">    +------+-----+-----+-----+-----+-----+-----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;PROD&#39;</span>
+    <span class="n">pname_fid_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">4</span> <span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span> <span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span>
+        <span class="mi">5</span> <span class="p">:</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span> <span class="p">:</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span>
+        <span class="mi">6</span> <span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span> <span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="PROD.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">pids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the properties in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+            <span class="c1">#comments.append(prop.comment)</span>
+            <span class="n">mids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">mid</span><span class="p">)</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+            <span class="n">J</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">nsm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">nsm</span><span class="p">)</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">mids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">J</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nsm&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nsm</span><span class="p">)</span></div>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">nsm</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a PROD card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">           property id</span>
+<span class="sd">        mid : int</span>
+<span class="sd">           material id</span>
+<span class="sd">        A : float</span>
+<span class="sd">           area</span>
+<span class="sd">        J : float; default=0.</span>
+<span class="sd">           polar moment of inertia</span>
+<span class="sd">        c : float; default=0.</span>
+<span class="sd">           stress factor</span>
+<span class="sd">        nsm : float; default=0.</span>
+<span class="sd">           nonstructural mass per unit length</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Property</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid</span> <span class="o">=</span> <span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span> <span class="o">=</span> <span class="n">nsm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PROD.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PROD card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;mid&#39;</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;nsm&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;len(PROD card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PROD</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">nsm</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PROD card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">PROD</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">nsm</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="p">()</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nsm</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;pid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;mid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;pid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">A</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;cid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">J</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;c=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">c</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nsm</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;nsm=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsm</span>
+
+<div class="viewcode-block" id="PROD.Area"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.Area">[docs]</a>    <span class="k">def</span> <span class="nf">Area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span></div>
+
+<div class="viewcode-block" id="PROD.J"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.J">[docs]</a>    <span class="k">def</span> <span class="nf">J</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span></div>
+
+<div class="viewcode-block" id="PROD.C"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.C">[docs]</a>    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span></div>
+
+<div class="viewcode-block" id="PROD.Nsm"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.Nsm">[docs]</a>    <span class="k">def</span> <span class="nf">Nsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span></div>
+
+<div class="viewcode-block" id="PROD.E"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.E">[docs]</a>    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">E</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PROD.G"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.G">[docs]</a>    <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">G</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PROD.Rho"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.Rho">[docs]</a>    <span class="k">def</span> <span class="nf">Rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">Rho</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PROD.MassPerLength"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.MassPerLength">[docs]</a>    <span class="k">def</span> <span class="nf">MassPerLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Gets the mass per length :math:`\frac{m}{L}` of the CBEAM.</span>
+
+<span class="sd">            .. math:: \frac{m}{L} = A \rho + nsm</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rho</span><span class="p">()</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span>
+        <span class="k">return</span> <span class="n">area</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">+</span> <span class="n">nsm</span></div>
+
+<div class="viewcode-block" id="PROD.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by PROD mid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PROD.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by PROD mid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_material</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PROD.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PROD.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="PROD.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsm</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PROD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">nsm</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="PROD.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PROD.write_card_16"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PROD.write_card_16">[docs]</a>    <span class="k">def</span> <span class="nf">write_card_16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PTUBE"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE">[docs]</a><span class="k">class</span> <span class="nc">PTUBE</span><span class="p">(</span><span class="n">Property</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    +-------+------+-----+------+------+------+-----+</span>
+<span class="sd">    |   1   |  2   |  3  |   4  |  5   |  6   |  7  |</span>
+<span class="sd">    +=======+======+=====+======+======+======+=====+</span>
+<span class="sd">    | PTUBE | PID  | MID |  OD  |   T  |  NSM | OD2 |</span>
+<span class="sd">    +-------+------+-----+------+------+------+-----+</span>
+<span class="sd">    | PTUBE |  2   |  6  | 6.29 | 0.25 |      |     |</span>
+<span class="sd">    +-------+------+-----+------+------+------+-----+</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;PTUBE&#39;</span>
+    <span class="n">pname_fid_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">4</span> <span class="p">:</span> <span class="s1">&#39;OD1&#39;</span><span class="p">,</span> <span class="s1">&#39;OD&#39;</span> <span class="p">:</span> <span class="s1">&#39;OD1&#39;</span><span class="p">,</span>
+        <span class="mi">5</span> <span class="p">:</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span> <span class="p">:</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span>
+        <span class="mi">7</span> <span class="p">:</span> <span class="s1">&#39;OD2&#39;</span><span class="p">,</span> <span class="s1">&#39;OD2&#39;</span> <span class="p">:</span> <span class="s1">&#39;OD2&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="PTUBE.export_to_hdf5"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.export_to_hdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">export_to_hdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">h5_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">pids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;exports the properties in a vectorized way&quot;&quot;&quot;</span>
+        <span class="c1">#comments = []</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">OD</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+            <span class="c1">#comments.append(prop.comment)</span>
+            <span class="n">mids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">mid</span><span class="p">)</span>
+            <span class="n">OD</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prop</span><span class="o">.</span><span class="n">OD1</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">OD2</span><span class="p">])</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">nsm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">nsm</span><span class="p">)</span>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">pids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">mids</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;OD&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">OD</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">h5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;nsm&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nsm</span><span class="p">)</span></div>
+        <span class="c1">#h5_file.create_dataset(&#39;_comment&#39;, data=comments)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">OD1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nsm</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">OD2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PTUBE card</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pid : int</span>
+<span class="sd">            property id</span>
+<span class="sd">        mid : int</span>
+<span class="sd">            material id</span>
+<span class="sd">        OD1 : float</span>
+<span class="sd">            outer diameter at End A</span>
+<span class="sd">        t : float; default=None -&gt; OD1/2.</span>
+<span class="sd">            thickness</span>
+<span class="sd">        nsm : float; default=0.</span>
+<span class="sd">            non-structural mass per unit length</span>
+<span class="sd">        OD2 : float; default=None -&gt; OD1</span>
+<span class="sd">            outer diameter at End B</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Property</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">OD1</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="k">if</span> <span class="n">OD2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">OD2</span> <span class="o">=</span> <span class="n">OD1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid</span> <span class="o">=</span> <span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span> <span class="o">=</span> <span class="n">OD1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OD2</span> <span class="o">=</span> <span class="n">OD2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span> <span class="o">=</span> <span class="n">nsm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PTUBE.validate"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">,</span> <span class="s1">&#39;PTUBE: pid=</span><span class="si">%s</span><span class="s1"> OD1=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD2</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">,</span> <span class="s1">&#39;PTUBE: pid=</span><span class="si">%s</span><span class="s1"> OD2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD2</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">,</span> <span class="s1">&#39;PTUBE: pid=</span><span class="si">%s</span><span class="s1"> t=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PTUBE.add_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.add_card">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_card</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PTUBE card from ``BDF.add_card(...)``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        card : BDFCard()</span>
+<span class="sd">            a BDFCard object</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;mid&#39;</span><span class="p">)</span>
+        <span class="n">OD1</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;OD1&#39;</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">OD1</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;nsm&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">OD2</span> <span class="o">=</span> <span class="n">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;OD2&#39;</span><span class="p">,</span> <span class="n">OD1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;len(PTUBE card) = </span><span class="si">%i</span><span class="se">\n</span><span class="s1">card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">),</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PTUBE</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">OD1</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">nsm</span><span class="p">,</span> <span class="n">OD2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_op2_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a PTUBE card from the OP2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : List[varies]</span>
+<span class="sd">            a list of fields defined in OP2 format</span>
+<span class="sd">        comment : str; default=&#39;&#39;</span>
+<span class="sd">            a comment for the card</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">OD1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">OD2</span> <span class="o">=</span> <span class="n">OD1</span>
+        <span class="c1">#OD2 = data[5]  #: .. note:: quirk to this one...</span>
+        <span class="k">return</span> <span class="n">PTUBE</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">OD1</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">nsm</span><span class="p">,</span> <span class="n">OD2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_verify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xref</span><span class="p">):</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nsm</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;pid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mid</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;mid=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mid</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;A=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">A</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nsm</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;nsm=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nsm</span>
+
+<div class="viewcode-block" id="PTUBE.Nsm"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.Nsm">[docs]</a>    <span class="k">def</span> <span class="nf">Nsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the non-structural mass :math:`nsm` of the CTUBE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span></div>
+
+<div class="viewcode-block" id="PTUBE.cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by PTUBE mid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PTUBE.safe_cross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.safe_cross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">safe_cross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cross links the card so referenced cards can be extracted directly</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : BDF()</span>
+<span class="sd">            the BDF object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required by PTUBE mid=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">safe_material</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">xref_errors</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PTUBE.uncross_reference"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.uncross_reference">[docs]</a>    <span class="k">def</span> <span class="nf">uncross_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes cross-reference links&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PTUBE.Rho"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.Rho">[docs]</a>    <span class="k">def</span> <span class="nf">Rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the density :math:`\rho` of the CTUBE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">Rho</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PTUBE.MassPerLength"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.MassPerLength">[docs]</a>    <span class="k">def</span> <span class="nf">MassPerLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the mass per length :math:`\frac{m}{L}` of the CTUBE.</span>
+
+<span class="sd">        .. math:: \frac{m}{L} = (A \rho) nsm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rho</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span></div>
+
+<div class="viewcode-block" id="PTUBE.E"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.E">[docs]</a>    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">E</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PTUBE.G"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.G">[docs]</a>    <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Material mid=</span><span class="si">%i</span><span class="s1"> has not been cross referenced.</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid_ref</span><span class="o">.</span><span class="n">G</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PTUBE.J"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.J">[docs]</a>    <span class="k">def</span> <span class="nf">J</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Dout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">8.</span> <span class="o">*</span> <span class="n">Dout</span><span class="o">**</span><span class="mi">4</span>
+        <span class="n">Din</span> <span class="o">=</span> <span class="n">Dout</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="k">return</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">8.</span> <span class="o">*</span> <span class="p">(</span><span class="n">Dout</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="n">Din</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PTUBE.Area"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.Area">[docs]</a>    <span class="k">def</span> <span class="nf">Area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the area :math:`A` of the CTUBE.</span>
+
+<span class="sd">        .. math:: A_1 = \pi \frac{d_1^2}{4} - \pi {(D_1-2t)^2}{4}</span>
+
+<span class="sd">        .. math:: A_2 = \pi \frac{d_2^2}{4} - \pi {(D_2-2t)^2}{4}</span>
+
+<span class="sd">        .. math:: A = A_1 + A_2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_area1</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area2</span><span class="p">())</span> <span class="o">/</span> <span class="mf">2.</span>
+
+        <span class="c1">#A1 = pi*D1^2/4 - pi*((D1-2t)^2)/4</span>
+        <span class="c1">#A2 = pi*D2^2/4 - pi*((D2-2t)^2)/4</span>
+        <span class="c1">#A = A1 + A2</span>
+
+        <span class="c1">#A = pi*D1*t/2 + pi*D2*t/2 - pi*t</span>
+        <span class="c1">#A = pi*t*(D1/2 + D2/2 - t)</span>
+        <span class="c1">#A = pi*t*( (D1+D2)/2.-t )</span>
+
+        <span class="c1">#A2 = pi*t*( (D1+D2)/2.-t )</span>
+
+        <span class="c1">#if A != A2:</span>
+            <span class="c1">#msg = (&#39;AREA method has problem in PTUBE &#39;</span>
+            <span class="c1">#       &#39;Aold=%s != Anew=%s&#39; %(A, A2))</span>
+            <span class="c1">#raise RuntimeError(msg)</span>
+        <span class="k">return</span> <span class="n">A</span></div>
+
+<div class="viewcode-block" id="PTUBE._area1"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE._area1">[docs]</a>    <span class="k">def</span> <span class="nf">_area1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the Area of Section 1 of the CTUBE.&quot;&quot;&quot;</span>
+        <span class="n">Dout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">Dout</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">Din</span> <span class="o">=</span> <span class="n">Dout</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">A1</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">*</span> <span class="p">(</span><span class="n">Dout</span> <span class="o">*</span> <span class="n">Dout</span> <span class="o">-</span> <span class="n">Din</span> <span class="o">*</span> <span class="n">Din</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A1</span></div>
+
+<div class="viewcode-block" id="PTUBE._area2"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE._area2">[docs]</a>    <span class="k">def</span> <span class="nf">_area2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the Area of Section 2 of the CTUBE.&quot;&quot;&quot;</span>
+        <span class="n">Dout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">Dout</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">Din</span> <span class="o">=</span> <span class="n">Dout</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">A2</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">*</span> <span class="p">(</span><span class="n">Dout</span> <span class="o">*</span> <span class="n">Dout</span> <span class="o">-</span> <span class="n">Din</span> <span class="o">*</span> <span class="n">Din</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A2</span></div>
+
+    <span class="c1">#def massMatrix(self):</span>
+        <span class="c1">#&quot;&quot;&quot;</span>
+        <span class="c1">#.. todo:: not done</span>
+        <span class="c1">#&quot;&quot;&quot;</span>
+        <span class="c1">#m = zeros(6, 6)</span>
+        <span class="c1">#m[0, 0] = 1.</span>
+        <span class="c1">#return m</span>
+
+<div class="viewcode-block" id="PTUBE.raw_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.raw_fields">[docs]</a>    <span class="k">def</span> <span class="nf">raw_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">nsm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="PTUBE.repr_fields"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.repr_fields">[docs]</a>    <span class="k">def</span> <span class="nf">repr_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+        <span class="n">nsm</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsm</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">OD2</span> <span class="o">=</span> <span class="n">set_blank_if_default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OD2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span><span class="p">)</span>
+        <span class="n">list_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PTUBE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Mid</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">OD1</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">nsm</span><span class="p">,</span> <span class="n">OD2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">list_fields</span></div>
+
+<div class="viewcode-block" id="PTUBE.write_card"><a class="viewcode-back" href="../../../../../reference/bdf/cards/properties/pyNastran.bdf.cards.properties.rods.html#pyNastran.bdf.cards.properties.rods.PTUBE.write_card">[docs]</a>    <span class="k">def</span> <span class="nf">write_card</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">print_card_16</span><span class="p">(</span><span class="n">card</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

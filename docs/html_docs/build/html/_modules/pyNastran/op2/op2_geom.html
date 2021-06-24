@@ -1,0 +1,691 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.op2_geom &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.op2_geom</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.op2_geom</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines:</span>
+<span class="sd"> - read_op2_geom(op2_filename=None, combine=True, subcases=None,</span>
+<span class="sd">                 exclude_results=None, include_results=None,</span>
+<span class="sd">                 validate=True, xref=True,</span>
+<span class="sd">                 build_dataframe=False, skip_undefined_matrices=True,</span>
+<span class="sd">                 mode=&#39;msc&#39;, log=None, debug=True, debug_file=None, encoding=None)</span>
+<span class="sd"> - OP2Geom(make_geom=True, debug=False, log=None, debug_file=None, mode=&#39;msc&#39;)</span>
+<span class="sd">   - OP2</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pickle</span> <span class="kn">import</span> <span class="n">dump</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom1</span> <span class="kn">import</span> <span class="n">GEOM1</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom2</span> <span class="kn">import</span> <span class="n">GEOM2</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom3</span> <span class="kn">import</span> <span class="n">GEOM3</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom4</span> <span class="kn">import</span> <span class="n">GEOM4</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.ept</span> <span class="kn">import</span> <span class="n">EPT</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.mpt</span> <span class="kn">import</span> <span class="n">MPT</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.edt</span> <span class="kn">import</span> <span class="n">EDT</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.edom</span> <span class="kn">import</span> <span class="n">EDOM</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.dit</span> <span class="kn">import</span> <span class="n">DIT</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.dynamics</span> <span class="kn">import</span> <span class="n">DYNAMICS</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.axic</span> <span class="kn">import</span> <span class="n">AXIC</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.errors</span> <span class="kn">import</span> <span class="n">DuplicateIDsError</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2</span> <span class="kn">import</span> <span class="n">OP2</span><span class="p">,</span> <span class="n">FatalError</span><span class="p">,</span> <span class="n">SortCodeError</span><span class="p">,</span> <span class="n">DeviceCodeError</span><span class="p">,</span> <span class="n">FortranMarkerError</span>
+
+
+<div class="viewcode-block" id="read_op2_geom"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.read_op2_geom">[docs]</a><span class="k">def</span> <span class="nf">read_op2_geom</span><span class="p">(</span><span class="n">op2_filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">combine</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">subcases</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">exclude_results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">include_results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">build_dataframe</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_undefined_matrices</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">debug_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">encoding</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates the OP2 object without calling the OP2 class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    op2_filename : str (default=None -&gt; popup)</span>
+<span class="sd">        the op2_filename</span>
+<span class="sd">    combine : bool; default=True</span>
+<span class="sd">        True : objects are isubcase based</span>
+<span class="sd">        False : objects are (isubcase, subtitle) based;</span>
+<span class="sd">                will be used for superelements regardless of the option</span>
+<span class="sd">    subcases : List[int, ...] / int; default=None-&gt;all subcases</span>
+<span class="sd">        list of [subcase1_ID,subcase2_ID]</span>
+<span class="sd">    exclude_results / include_results : List[str] / str; default=None</span>
+<span class="sd">        a list of result types to exclude/include</span>
+<span class="sd">        one of these must be None</span>
+<span class="sd">    validate : bool</span>
+<span class="sd">        runs various checks on the BDF (default=True)</span>
+<span class="sd">    xref :  bool</span>
+<span class="sd">        should the bdf be cross referenced (default=True)</span>
+<span class="sd">    build_dataframe : bool; default=False</span>
+<span class="sd">        builds a pandas DataFrame for op2 objects</span>
+<span class="sd">    skip_undefined_matrices : bool; default=False</span>
+<span class="sd">         True : prevents matrix reading crashes</span>
+<span class="sd">    log : Log()</span>
+<span class="sd">        a logging object to write debug messages to</span>
+<span class="sd">     (.. seealso:: import logging)</span>
+<span class="sd">    debug : bool; default=False</span>
+<span class="sd">        enables the debug log and sets the debug in the logger</span>
+<span class="sd">    debug_file : str; default=None (No debug)</span>
+<span class="sd">        sets the filename that will be written to</span>
+<span class="sd">    encoding : str</span>
+<span class="sd">        the unicode encoding (default=None; system default)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : OP2()</span>
+<span class="sd">        an OP2 object</span>
+
+<span class="sd">    .. todo:: creates the OP2 object without all the read methods</span>
+
+<span class="sd">    .. note :: this method will change in order to return an object that</span>
+<span class="sd">               does not have so many methods</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">OP2Geom</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">debug_file</span><span class="o">=</span><span class="n">debug_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">set_subcases</span><span class="p">(</span><span class="n">subcases</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclude_results</span> <span class="ow">and</span> <span class="n">include_results</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;exclude_results or include_results must be None</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;exclude_results=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">exclude_results</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;include_results=</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">include_results</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">exclude_results</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">remove_results</span><span class="p">(</span><span class="n">exclude_results</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">include_results</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">set_results</span><span class="p">(</span><span class="n">include_results</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">read_op2</span><span class="p">(</span><span class="n">op2_filename</span><span class="o">=</span><span class="n">op2_filename</span><span class="p">,</span> <span class="n">build_dataframe</span><span class="o">=</span><span class="n">build_dataframe</span><span class="p">,</span>
+                   <span class="n">skip_undefined_matrices</span><span class="o">=</span><span class="n">skip_undefined_matrices</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="n">combine</span><span class="p">,</span>
+                   <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">xref</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cross_reference</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="OP2GeomCommon"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2GeomCommon">[docs]</a><span class="k">class</span> <span class="nc">OP2GeomCommon</span><span class="p">(</span><span class="n">OP2</span><span class="p">,</span> <span class="n">GEOM1</span><span class="p">,</span> <span class="n">GEOM2</span><span class="p">,</span> <span class="n">GEOM3</span><span class="p">,</span> <span class="n">GEOM4</span><span class="p">,</span> <span class="n">EPT</span><span class="p">,</span> <span class="n">MPT</span><span class="p">,</span> <span class="n">EDT</span><span class="p">,</span> <span class="n">EDOM</span><span class="p">,</span> <span class="n">DIT</span><span class="p">,</span> <span class="n">DYNAMICS</span><span class="p">,</span> <span class="n">AXIC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;interface for the OP2Geom class for to loading subclasses&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_geom</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the OP2 object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        make_geom : bool; default=False</span>
+<span class="sd">            reads the BDF tables</span>
+<span class="sd">        debug : bool; default=False</span>
+<span class="sd">            enables the debug log and sets the debug in the logger</span>
+<span class="sd">        log: log()</span>
+<span class="sd">            a logging object to write debug messages to</span>
+<span class="sd">            (.. seealso:: import logging)</span>
+<span class="sd">        debug_file : default=None -&gt; no debug</span>
+<span class="sd">            sets the filename that will be written to</span>
+<span class="sd">        mode : str; default=None -&gt; &#39;msc&#39;</span>
+<span class="sd">            {msc, nx}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">GEOM1</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GEOM2</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GEOM3</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GEOM4</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">EPT</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">MPT</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">EDT</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">EDOM</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">DIT</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">DYNAMICS</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AXIC</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">OP2</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug_file</span><span class="o">=</span><span class="n">debug_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_geom</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_boltsold11b.op2</span>
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_conedg01b.op2</span>
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_conprop06.op2</span>
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_glueac103a.op2</span>
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_conedg01s.op2</span>
+        <span class="c1"># F:\work\pyNastran\pyNastran\master2\pyNastran\bdf\test\nx_spike\out_sline5.op2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contact_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">7110</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">588</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BSURFS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">724</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">441</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BSURF&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">224</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">436</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BLSEG&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">1224</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">446</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BGSET&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">7210</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">589</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCPROP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">7410</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">591</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCTSET&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">7510</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">592</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCTADD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8810</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">603</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BGADD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8920</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">614</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BEDGE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">124</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">435</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCONP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">7710</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">594</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCRPARA&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8110</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">598</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCTPARM&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8301</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">605</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BCPROPS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8710</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">449</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;???&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">424</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">438</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;???&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+        <span class="p">}</span>
+
+        <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\beamp10.op2</span>
+        <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\ifsr22r.op2</span>
+        <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\ifssh22.op2</span>
+        <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\ifsr22r.op2</span>
+        <span class="c1"># F:\work\pyNastran\examples\Dropbox\move_tpl\ifsv02pp.op2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_viewtb_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">10300</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;QUADP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">10400</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TRIAP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">10500</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BEAMP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">14100</span><span class="p">,</span> <span class="mi">141</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;HEXAP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_view_hexa</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">14200</span><span class="p">,</span> <span class="mi">142</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PENTAP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">14300</span><span class="p">,</span> <span class="mi">143</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;TETRAP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="c1">#(10500, 105, 14) : [&#39;???&#39;, self._read_fake],</span>
+            <span class="c1">#(10500, 105, 14) : [&#39;???&#39;, self._read_fake],</span>
+
+        <span class="p">}</span>
+    <span class="k">def</span> <span class="nf">_read_view_hexa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 EID         I Element identification number</span>
+<span class="sd">        2 CID         I Coordinate system identification number -- from CID field</span>
+<span class="sd">        3 NX          I View mesh subdivision -- from VIEW field</span>
+<span class="sd">        4 NY          I View mesh subdivision -- from VIEW field</span>
+<span class="sd">        5 NZ          I View mesh subdivision -- from VIEW field</span>
+<span class="sd">        6 MTH     CHAR4 Method -- &#39;DIRE&#39; means direct</span>
+<span class="sd">        7 MINEID      I Mininum VUHEXA identification number for this element</span>
+<span class="sd">        8 MAXEID      I Maximum VUHEXA identification number for this element</span>
+<span class="sd">        9 MINGID      I Minimum grid identification number for this element</span>
+<span class="sd">        10 MAXGID     I Maximum grid identification number for this element</span>
+<span class="sd">        11 G(8)       I Corner grid identification numbers</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># C:\NASA\m4\formats\git\examples\move_tpl\ifsv34b.op2</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">idtype</span><span class="p">)</span> <span class="c1"># .tolist()</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span> <span class="o">//</span> <span class="mi">18</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ints</span><span class="p">)</span> <span class="o">%</span> <span class="mi">18</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="c1">#print(&#39;nelements =&#39;, nelements)</span>
+        <span class="n">ints2</span> <span class="o">=</span> <span class="n">ints</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">intsi</span> <span class="ow">in</span> <span class="n">ints2</span><span class="p">:</span>
+            <span class="n">eid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">junk_imth</span><span class="p">,</span> <span class="n">mineid</span><span class="p">,</span> <span class="n">maxeid</span><span class="p">,</span> <span class="n">mingid</span><span class="p">,</span> <span class="n">maxgid</span><span class="p">,</span> <span class="o">*</span><span class="n">nids</span> <span class="o">=</span> <span class="n">intsi</span>
+            <span class="n">mth</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">20</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="mi">24</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span>
+            <span class="c1">#print(eid, cid, [nx, ny, nz], mth, [mineid, maxeid, mingid, maxgid], nids)</span>
+            <span class="k">assert</span> <span class="n">mth</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;DIRE&#39;</span><span class="p">,</span> <span class="s1">&#39;EXTR&#39;</span><span class="p">],</span> <span class="n">mth</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">72</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<div class="viewcode-block" id="OP2GeomCommon.save"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2GeomCommon.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;model.obj&#39;</span><span class="p">,</span> <span class="n">unxref</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Saves a pickleable object&quot;&quot;&quot;</span>
+        <span class="c1">#del self.log</span>
+        <span class="c1">#del self._card_parser, self._card_parser_prepare</span>
+
+        <span class="c1">#print(object_attributes(self, mode=&quot;all&quot;, keys_to_skip=[]))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">obj_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">obj_file</span><span class="p">:</span>
+            <span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_file</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_table_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">table_mapper</span> <span class="o">=</span> <span class="n">OP2</span><span class="o">.</span><span class="n">_get_table_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;CONTACT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_contact_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_contact_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;CONTACTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_contact_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_contact_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;VIEWTB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_viewtb_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_viewtb_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EDT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_edt_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_edt_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EDTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_edt_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_edt_4</span><span class="p">]</span>
+
+        <span class="c1"># geometry</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">]</span>
+
+        <span class="c1"># superelements</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM1S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM2S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM3S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM4S&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM1N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM2N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM3N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM4N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM1OLD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom1_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM2OLD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom2_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM3OLD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom3_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;GEOM4OLD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom4_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EDOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_edom4_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_edom4_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EPT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EPTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;EPTOLD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ept_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;MPT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mpt_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mpt_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;MPTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mpt_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mpt_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;DYNAMIC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_dynamics_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dynamics_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;DYNAMICS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_dynamics_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dynamics_4</span><span class="p">]</span>
+
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;AXIC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_axic_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_axic_4</span><span class="p">]</span>
+
+        <span class="c1"># table objects (e.g. TABLED1)</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;DIT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_dit_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dit_4</span><span class="p">]</span>
+        <span class="n">table_mapper</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;DITS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_dit_4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dit_4</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">table_mapper</span>
+
+
+    <span class="k">def</span> <span class="nf">_read_contact_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads the CONTACT/CONTACTS table</span>
+<span class="sd">        Table of Bulk Data entry related to surface contact</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contact_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_viewtb_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        View information table</span>
+<span class="sd">        Contains the relationship between each p-element and its view-elements</span>
+<span class="sd">        and view-grids.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_viewtb_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OP2Geom"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2Geom">[docs]</a><span class="k">class</span> <span class="nc">OP2Geom</span><span class="p">(</span><span class="n">BDF</span><span class="p">,</span> <span class="n">OP2GeomCommon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;creates an interface for the OP2 and BDF classes&quot;&quot;&quot;</span>
+    <span class="n">_properties</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;is_bdf_vectorized&#39;</span><span class="p">,</span> <span class="s1">&#39;nid_map&#39;</span><span class="p">,</span> <span class="s1">&#39;wtmass&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;is_real&#39;</span><span class="p">,</span> <span class="s1">&#39;is_complex&#39;</span><span class="p">,</span> <span class="s1">&#39;is_random&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;_sort_method&#39;</span><span class="p">,</span> <span class="s1">&#39;is_sort1&#39;</span><span class="p">,</span> <span class="s1">&#39;is_sort2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;matrix_tables&#39;</span><span class="p">,</span> <span class="s1">&#39;table_name_str&#39;</span><span class="p">,</span> <span class="s1">&#39;is_geometry&#39;</span><span class="p">,</span>
+        <span class="c1">#&#39;dmigs&#39;, &#39;dmijs&#39;, &#39;dmiks&#39;, &#39;dmijis&#39;, &#39;dtis&#39;, &#39;dmis&#39;,</span>
+    <span class="p">]</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_geom</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">debug_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the OP2 object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        make_geom : bool; default=False</span>
+<span class="sd">            reads the BDF tables</span>
+<span class="sd">        debug : bool; default=False</span>
+<span class="sd">            enables the debug log and sets the debug in the logger</span>
+<span class="sd">        log: log()</span>
+<span class="sd">            a logging object to write debug messages to</span>
+<span class="sd">            (.. seealso:: import logging)</span>
+<span class="sd">        debug_file : default=None -&gt; no debug</span>
+<span class="sd">            sets the filename that will be written to</span>
+<span class="sd">        mode : str; default=&#39;msc&#39;</span>
+<span class="sd">            {msc, nx}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BDF</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">OP2GeomCommon</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_geom</span><span class="o">=</span><span class="n">make_geom</span><span class="p">,</span>
+                               <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug_file</span><span class="o">=</span><span class="n">debug_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="OP2Geom.read_op2"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2Geom.read_op2">[docs]</a>    <span class="k">def</span> <span class="nf">read_op2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op2_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">build_dataframe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_undefined_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;see ``OP2.read_op2``&quot;&quot;&quot;</span>
+        <span class="n">OP2</span><span class="o">.</span><span class="n">read_op2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op2_filename</span><span class="o">=</span><span class="n">op2_filename</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="n">combine</span><span class="p">,</span>
+                     <span class="n">build_dataframe</span><span class="o">=</span><span class="n">build_dataframe</span><span class="p">,</span>
+                     <span class="n">skip_undefined_matrices</span><span class="o">=</span><span class="n">skip_undefined_matrices</span><span class="p">,</span>
+                     <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gpdt_to_nodes</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="OP2Geom.gpdt_to_nodes"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2Geom.gpdt_to_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">gpdt_to_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;converts the GPDT &amp; EQEXIN tables to node ids&quot;&quot;&quot;</span>
+        <span class="n">eqexin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op2_results</span><span class="o">.</span><span class="n">eqexin</span>
+        <span class="n">gpdt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op2_results</span><span class="o">.</span><span class="n">gpdt</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">eqexin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;eqexin is None; &#39;</span>
+        <span class="k">if</span> <span class="n">gpdt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;gpdt is None&#39;</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Cannot convert EQEXIN/GPDT to nodes because </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;; &#39;</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">nid_cp_cd_ps</span> <span class="o">=</span> <span class="n">gpdt</span><span class="o">.</span><span class="n">nid_cp_cd_ps</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">gpdt</span><span class="o">.</span><span class="n">xyz</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">eqexin</span><span class="o">.</span><span class="n">nid</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">nid_cp_cd_psi</span><span class="p">,</span> <span class="n">xyzi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">nid_cp_cd_ps</span><span class="p">,</span> <span class="n">xyz</span><span class="p">):</span>
+            <span class="n">_nid</span><span class="p">,</span> <span class="n">cp</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">nid_cp_cd_psi</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_grid</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">xyzi</span><span class="p">,</span> <span class="n">cp</span><span class="o">=</span><span class="n">cp</span><span class="p">,</span> <span class="n">cd</span><span class="o">=</span><span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;clears out a few variables in order to pickle the object&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="c1"># Copy the object&#39;s state from self.__dict__ which contains</span>
+        <span class="c1"># all our instance attributes. Always use the dict.copy()</span>
+        <span class="c1"># method to avoid modifying the original state.</span>
+        <span class="c1">#adfasd</span>
+        <span class="c1">#state = BDF.__getstate__(self)</span>
+        <span class="c1">#print(state)</span>
+        <span class="c1">#state = self.__dict__.copy()</span>
+
+        <span class="c1"># Remove the unpicklable entries.</span>
+        <span class="c1">#i = 0</span>
+        <span class="c1">#for key, value in sorted(state.items()):</span>
+            <span class="c1">#if isinstance(value, dict) and len(value) == 0:</span>
+                <span class="c1">#continue</span>
+            <span class="c1">##if not isinstance(value, (str, int, float)):</span>
+            <span class="c1">#if i &gt; 5: # 72</span>
+                <span class="c1">#del state[key]</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#print(key, type(value), value)</span>
+                <span class="c1">#break</span>
+            <span class="c1">#i += 1</span>
+
+        <span class="c1">#i = 0</span>
+        <span class="c1">#for key, value in sorted(state.items()):</span>
+            <span class="c1">#if isinstance(value, dict) and len(value) == 0:</span>
+                <span class="c1">#continue</span>
+            <span class="c1">#if not isinstance(value, (str, int, float)):</span>
+            <span class="c1">#if i &gt; 200: # 72</span>
+                <span class="c1">#del state[key]</span>
+            <span class="c1">#else:</span>
+                <span class="c1">#print(key, type(value), value)</span>
+                <span class="c1">#break</span>
+            <span class="c1">#i += 1</span>
+        <span class="c1">#return state</span>
+
+<div class="viewcode-block" id="OP2Geom.export_hdf5_file"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.OP2Geom.export_hdf5_file">[docs]</a>    <span class="k">def</span> <span class="nf">export_hdf5_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdf5_file</span><span class="p">,</span> <span class="n">exporter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the OP2 objects into hdf5 object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hdf5_file : H5File()</span>
+<span class="sd">            an h5py object</span>
+<span class="sd">        exporter : HDF5Exporter; default=None</span>
+<span class="sd">            unused</span>
+
+<span class="sd">        TODO: doesn&#39;t support:</span>
+<span class="sd">          - BucklingEigenvalues</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#from pyNastran.op2.op2_interface.hdf5_interface import export_op2_to_hdf5_file</span>
+        <span class="c1">#op2_model = self</span>
+        <span class="n">OP2GeomCommon</span><span class="o">.</span><span class="n">export_hdf5_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdf5_file</span><span class="p">)</span>
+        <span class="n">BDF</span><span class="o">.</span><span class="n">export_hdf5_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdf5_file</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="bdf_to_op2_geom"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.bdf_to_op2_geom">[docs]</a><span class="k">def</span> <span class="nf">bdf_to_op2_geom</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OP2Geom</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;converts a BDF() -&gt; OP2Geom()&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">OP2Geom</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+    <span class="k">assert</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="c1">#assert op2_model is not None</span>
+    <span class="c1">#assert model.bdf_filename is not None</span>
+    <span class="n">debug</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">debug</span>
+    <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">op2_geom_model</span> <span class="o">=</span> <span class="n">OP2Geom</span><span class="p">(</span><span class="n">make_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="p">,</span>
+                             <span class="n">debug_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">)</span>
+
+    <span class="c1"># apply data from our 2 models to the new model</span>
+    <span class="n">_properties</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_properties</span>
+    <span class="n">keys_to_skip</span> <span class="o">=</span> <span class="n">_properties</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;_properties&#39;</span><span class="p">,</span> <span class="s1">&#39;npoints&#39;</span><span class="p">,</span> <span class="s1">&#39;is_geometry&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">object_attributes</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">keys_to_skip</span><span class="o">=</span><span class="n">keys_to_skip</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="c1">#if isinstance(value, (dict, list)) and len(value) == 0:</span>
+            <span class="c1">#continue</span>
+        <span class="c1">#print(key, value)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">op2_geom_model</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">op2_geom_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;cant set </span><span class="si">%r</span><span class="s1"> to </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">raise</span>
+    <span class="c1">#op2_geom_model.nodes = bdf_model.nodes</span>
+    <span class="c1">#op2_geom_model.elements = bdf_model.elements</span>
+    <span class="k">return</span> <span class="n">op2_geom_model</span></div>
+
+<div class="viewcode-block" id="attach_op2_results_to_bdf"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.op2_geom.html#pyNastran.op2.op2_geom.attach_op2_results_to_bdf">[docs]</a><span class="k">def</span> <span class="nf">attach_op2_results_to_bdf</span><span class="p">(</span><span class="n">bdf_model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">op2_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OP2</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OP2Geom</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;We&#39;re up-coverting a BDF and an OP2 result into an OP2Geom object.&quot;&quot;&quot;</span>
+    <span class="n">op2_geom_model</span> <span class="o">=</span> <span class="n">bdf_to_op2_geom</span><span class="p">(</span><span class="n">bdf_model</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">op2_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">op2_geom_model</span>
+
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;op2_filename&#39;</span><span class="p">,</span> <span class="s1">&#39;matrices&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenvalues&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenvalues_fluid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;displacements&#39;</span><span class="p">,</span> <span class="s1">&#39;load_vectors&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenvectors&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">op2_model</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">op2_model</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">op2_geom_model</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="c1">#if hasattr(op2_model, &#39;displacements&#39;):</span>
+        <span class="c1">#op2_geom_model.displacements = op2_model.displacements</span>
+
+    <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">op2_geom_model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">op2_geom_model</span><span class="o">.</span><span class="n">get_bdf_stats</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">op2_geom_model</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

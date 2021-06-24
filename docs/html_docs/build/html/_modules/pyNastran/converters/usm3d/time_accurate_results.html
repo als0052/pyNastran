@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.usm3d.time_accurate_results &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.usm3d.time_accurate_results</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.usm3d.time_accurate_results</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">savetxt</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">zeros</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.converters.usm3d.usm3d_reader</span> <span class="kn">import</span> <span class="n">Usm3d</span>
+
+<div class="viewcode-block" id="get_n_list"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.get_n_list">[docs]</a><span class="k">def</span> <span class="nf">get_n_list</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    gets files of the form:</span>
+<span class="sd">     - modelname + &#39;_xxx.flo&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flo_filenames</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+    <span class="n">n_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># get the max N value</span>
+    <span class="k">for</span> <span class="n">flo_filename</span> <span class="ow">in</span> <span class="n">flo_filenames</span><span class="p">:</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.flo&#39;</span> <span class="ow">and</span> <span class="s1">&#39;.aux.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flo_filename</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;_&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flo_filename</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">n_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">n_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">n_list</span></div>
+
+<div class="viewcode-block" id="get_flo_files"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.get_flo_files">[docs]</a><span class="k">def</span> <span class="nf">get_flo_files</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">nstart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nlimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_dirname_in_path</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get the flo files in ascending order&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dirname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">n_list</span> <span class="o">=</span> <span class="n">get_n_list</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nlimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nlimit</span> <span class="o">=</span> <span class="n">n_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># inclusive</span>
+
+    <span class="c1"># handles case of user didn&#39;t define every data point</span>
+    <span class="n">n_list2</span> <span class="o">=</span> <span class="n">n_list</span><span class="p">[</span><span class="n">nstart</span><span class="p">:</span><span class="n">nlimit</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#for ni in n_list:</span>
+        <span class="c1">#if nstart &lt;= ni &lt;= nlimit:</span>
+            <span class="c1">#n_list2.append(ni)</span>
+
+    <span class="k">if</span> <span class="n">include_dirname_in_path</span><span class="p">:</span>
+        <span class="n">flo_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%i</span><span class="s1">.flo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_list2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flo_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%i</span><span class="s1">.flo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_list2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">n_list2</span><span class="p">,</span> <span class="n">flo_filenames</span></div>
+
+<div class="viewcode-block" id="get_flo_files_from_n"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.get_flo_files_from_n">[docs]</a><span class="k">def</span> <span class="nf">get_flo_files_from_n</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">include_dirname_in_path</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    get the flo files in ascending order</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dirname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">include_dirname_in_path</span><span class="p">:</span>
+        <span class="n">flo_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%i</span><span class="s1">.flo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_list</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flo_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%i</span><span class="s1">.flo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_list</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">flo_filenames</span></div>
+
+
+<div class="viewcode-block" id="run_time_acc"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.run_time_acc">[docs]</a><span class="k">def</span> <span class="nf">run_time_acc</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">,</span> <span class="n">nstart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nlimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_cpus</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    node ids start at index=0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Usm3d</span><span class="p">()</span>
+
+    <span class="n">n_list</span><span class="p">,</span> <span class="n">flo_filenames</span> <span class="o">=</span> <span class="n">get_flo_files</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">nstart</span><span class="p">,</span> <span class="n">nlimit</span><span class="p">)</span>
+    <span class="n">nlimit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flo_filenames</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">nlimit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nfiles=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nlimit</span><span class="p">)</span>
+    <span class="c1">#print(&quot;nmax =&quot;, nlimit)</span>
+
+    <span class="n">Cp</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">Mach</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">rhoU</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># initialize the arrays</span>
+    <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">:</span>
+        <span class="n">Cp</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">Mach</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">T</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">U</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">V</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">W</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">p</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">rhoU</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nlimit</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="c1">#flo_filenames = flo_filenames[:10]</span>
+    <span class="c1">#num_cpus = 1</span>
+    <span class="k">if</span> <span class="n">num_cpus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Usm3d</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">flo_filename</span> <span class="ow">in</span> <span class="n">flo_filenames</span><span class="p">:</span>
+            <span class="n">node_ids2</span><span class="p">,</span> <span class="n">loads</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_ids</span><span class="p">):</span>
+                <span class="n">Cp</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Cp&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">Mach</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Mach&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">T</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">U</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">V</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">W</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">p</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">rhoU</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rhoU&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">num_cpus</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">_loads_func</span><span class="p">,</span>
+                           <span class="p">[(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">)</span> <span class="k">for</span> <span class="n">flo_filename</span> <span class="ow">in</span> <span class="n">flo_filenames</span><span class="p">])</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">loads</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">%</span> <span class="mi">500</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;n =&quot;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">flo_filenames</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_ids</span><span class="p">):</span>
+                <span class="c1">#print(&quot;Cp[node=%s] =%s&quot; % (node_id, loads[&#39;Cp&#39;][i]))</span>
+                <span class="n">Cp</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Cp&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">Mach</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Mach&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">T</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">U</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">V</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">W</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">p</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">rhoU</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rhoU&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">n_list</span><span class="p">,</span> <span class="n">Cp</span><span class="p">,</span> <span class="n">Mach</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">rhoU</span></div>
+
+<span class="k">def</span> <span class="nf">_loads_func</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">flo_filename</span><span class="p">,</span> <span class="n">node_ids</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Usm3d</span><span class="p">()</span>
+    <span class="n">node_ids2</span><span class="p">,</span> <span class="n">loads</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loads</span>
+
+<div class="viewcode-block" id="write_loads"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.write_loads">[docs]</a><span class="k">def</span> <span class="nf">write_loads</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">loads</span><span class="p">,</span> <span class="n">node_id</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">Cp</span><span class="p">,</span> <span class="n">Mach</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">rhoU</span><span class="p">)</span> <span class="o">=</span> <span class="n">loads</span>
+    <span class="c1">#print(&quot;loads.keys() = &quot;, sorted(loads.keys()))</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Cp</span><span class="p">[</span><span class="n">node_id</span><span class="p">]))</span> <span class="o">*</span> <span class="n">dt</span>  <span class="c1"># broken...</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;time</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">Cpi</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Cp</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">node_id=</span><span class="si">%i</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">node_id</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Cp[</span><span class="si">%s</span><span class="s1">],&#39;</span> <span class="o">%</span> <span class="n">node_id</span><span class="p">)</span>
+        <span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Cpi</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">p[</span><span class="si">%s</span><span class="s1">],&#39;</span> <span class="o">%</span> <span class="n">node_id</span><span class="p">)</span>
+        <span class="n">savetxt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="n">node_id</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.time_accurate_results.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">dirname</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;W:\usm3d\usm3d\spw4&#39;</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;spw4&#39;</span>
+    <span class="n">node_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">517</span><span class="p">]</span>
+    <span class="n">loads</span> <span class="o">=</span> <span class="n">run_time_acc</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">)</span>
+    <span class="n">write_loads</span><span class="p">(</span><span class="s1">&#39;usm3d.csv&#39;</span><span class="p">,</span> <span class="n">loads</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

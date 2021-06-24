@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.collapse_bad_quads &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.collapse_bad_quads</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.collapse_bad_quads</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - convert_bad_quads_to_tris(model, eids_to_check=None, xyz_cid0=None,</span>
+<span class="sd">                             min_edge_length=0.0)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.elements.shell</span> <span class="kn">import</span> <span class="n">CTRIA3</span>
+
+
+<div class="viewcode-block" id="convert_bad_quads_to_tris"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.collapse_bad_quads.convert_bad_quads_to_tris">[docs]</a><span class="k">def</span> <span class="nf">convert_bad_quads_to_tris</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">eids_to_check</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_edge_length</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A standard quad is a nice rectangle.  If an edge is collapsed, it&#39;s a triangle.</span>
+<span class="sd">    Change the element type.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        a BDF model that has not had it&#39;s properties/load xref&#39;d, but is valid</span>
+<span class="sd">        such that it could</span>
+<span class="sd">    eids : list; (default=None -&gt; all CQUAD4s)</span>
+<span class="sd">        the subset of element ids to check</span>
+<span class="sd">    xyz_cid0 : (n, 3) ndarray</span>
+<span class="sd">        nodes in cid=0</span>
+<span class="sd">    min_edge_length : float; default=0.0</span>
+<span class="sd">        what is classified as &quot;short&quot;</span>
+
+<span class="sd">    .. warning::  Don&#39;t cross reference properties/loads</span>
+
+<span class="sd">    .. todo::  check for bad xref</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_card_ids_by_card_types</span><span class="p">(</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">)</span>
+    <span class="n">cquad4s</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">eids_to_check</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cquad4s_to_check</span> <span class="o">=</span> <span class="n">cquad4s</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cquad4s_to_check</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eids_to_check</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cquad4s</span><span class="p">)))</span>
+
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span>
+    <span class="n">unused_eids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">xyz_cid0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_xyz_in_coord</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">nid_cd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">nid</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">Cd</span><span class="p">()]</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span>
+    <span class="n">all_nids</span> <span class="o">=</span> <span class="n">nid_cd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cquad4s_to_check</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no quads in the model...&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cquad4s_to_check</span><span class="p">):</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="n">nids_long</span> <span class="o">=</span> <span class="n">nids</span> <span class="o">+</span> <span class="n">nids</span>
+
+        <span class="n">nids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">nid0</span> <span class="o">=</span> <span class="n">nids_long</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span>
+            <span class="n">nid1</span> <span class="o">=</span> <span class="n">nids_long</span><span class="p">[</span><span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid0</span><span class="p">,</span> <span class="n">nid1</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">edge_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="k">if</span> <span class="n">edge_length</span> <span class="o">&lt;=</span> <span class="n">min_edge_length</span><span class="p">:</span>
+                <span class="n">nids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids_to_remove</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids_to_remove</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;found eid=</span><span class="si">%s</span><span class="s1"> is a line/point...removing&#39;</span> <span class="o">%</span> <span class="n">eid</span><span class="p">)</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="k">continue</span>
+
+        <span class="n">nids_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nids_long</span> <span class="o">=</span> <span class="n">nids</span> <span class="o">+</span> <span class="n">nids</span>
+        <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">nid0</span> <span class="o">=</span> <span class="n">nids_long</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span>
+            <span class="n">nid1</span> <span class="o">=</span> <span class="n">nids_long</span><span class="p">[</span><span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid0</span><span class="p">,</span> <span class="n">nid1</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">edge_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="k">if</span> <span class="n">edge_length</span> <span class="o">&lt;=</span> <span class="n">min_edge_length</span><span class="p">:</span>
+                <span class="n">nids_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nid1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids_to_remove</span><span class="p">:</span>
+            <span class="n">nids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;found eid=</span><span class="si">%s</span><span class="s1"> is a line/point...removing&#39;</span> <span class="o">%</span> <span class="n">eid</span><span class="p">)</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="n">etype</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+            <span class="k">continue</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;found eid=</span><span class="si">%s</span><span class="s1"> is a triangle...replacing CQUAD4 with CTRIA3&#39;</span> <span class="o">%</span> <span class="n">eid</span><span class="p">)</span>
+        <span class="c1">#print(&#39;  nids2=%s&#39; % (nids))</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">tflag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">elem</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">T1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">T1</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">T2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">T2</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">T3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">T3</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">T4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">T4</span>
+        <span class="n">elem2</span> <span class="o">=</span> <span class="n">CTRIA3</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">nids</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">zoffset</span><span class="p">,</span>
+                       <span class="n">theta_mcid</span><span class="o">=</span><span class="n">elem</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">,</span> <span class="n">tflag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">T1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T3</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;$ was a CQUAD4</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">increase_card_count</span><span class="p">(</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem2</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

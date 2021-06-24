@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.tecplot.tecplot_to_cart3d &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.tecplot.tecplot_to_cart3d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.tecplot.tecplot_to_cart3d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines:</span>
+<span class="sd"> - tecplot_to_cart3d_filename(tecplot_filename, cart3d_filename, debug=True)</span>
+<span class="sd"> - tecplot_to_cart3d(tecplot_filename, cart3d_filename=None, debug=True)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1">#from pyNastran.bdf.mesh_utils.remove_unused import remove_unassociated_nodes</span>
+<span class="kn">from</span> <span class="nn">pyNastran.converters.tecplot.tecplot</span> <span class="kn">import</span> <span class="n">read_tecplot</span>
+<span class="kn">from</span> <span class="nn">pyNastran.converters.cart3d.cart3d</span> <span class="kn">import</span> <span class="n">Cart3D</span>
+
+
+<div class="viewcode-block" id="tecplot_to_cart3d_filename"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.tecplot.html#pyNastran.converters.tecplot.tecplot_to_cart3d.tecplot_to_cart3d_filename">[docs]</a><span class="k">def</span> <span class="nf">tecplot_to_cart3d_filename</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">cart3d_filename</span><span class="p">,</span>
+                               <span class="n">remove_degenerate_tris</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a Tecplot file to Cart3d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">tecplot_to_cart3d</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">cart3d_filename</span><span class="p">,</span>
+                             <span class="n">remove_degenerate_tris</span><span class="o">=</span><span class="n">remove_degenerate_tris</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tecplot_to_cart3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.tecplot.html#pyNastran.converters.tecplot.tecplot_to_cart3d.tecplot_to_cart3d">[docs]</a><span class="k">def</span> <span class="nf">tecplot_to_cart3d</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">cart3d_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">remove_degenerate_tris</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a Tecplot file to Cart3d.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    remove_degenerate_tris : bool; default=False</span>
+<span class="sd">        removes degenerate triangles (triangles with an area of 0.0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_tecplot</span><span class="p">(</span><span class="n">tecplot_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">tecplot_filename</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">zones</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;only 1 zone is supported&#39;</span>
+    <span class="k">for</span> <span class="n">izone</span><span class="p">,</span> <span class="n">zone</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">zones</span><span class="p">):</span>
+        <span class="c1">#print(zone)</span>
+        <span class="n">tris</span><span class="p">,</span> <span class="n">xyz</span> <span class="o">=</span> <span class="n">get_zone_tris_xyz</span><span class="p">(</span><span class="n">zone</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remove_degenerate_tris</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">assert</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">_get_tri_area</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
+            <span class="n">iarea</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">tris</span> <span class="o">=</span> <span class="n">tris</span><span class="p">[</span><span class="n">iarea</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">npoints</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">npoints</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">nelements</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nelements</span>
+        <span class="k">assert</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tris</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1">#print(&#39;npoints=%s nelements=%s&#39; % (npoints, nelements))</span>
+
+        <span class="c1">#removed_nodes = False</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">ones_float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="n">cart3d_model</span> <span class="o">=</span> <span class="n">Cart3D</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">cart3d_model</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">xyz</span>
+    <span class="n">cart3d_model</span><span class="o">.</span><span class="n">regions</span> <span class="o">=</span> <span class="n">regions</span>
+    <span class="n">cart3d_model</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="n">tris</span> <span class="c1"># + 1</span>
+    <span class="k">assert</span> <span class="n">npoints</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">npoints</span>
+
+    <span class="n">headers_no_xyz</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="c1"># drop the xyz, get what&#39;s left</span>
+    <span class="k">if</span> <span class="s1">&#39;cp&#39;</span> <span class="ow">in</span> <span class="n">headers_no_xyz</span><span class="p">:</span>
+        <span class="n">iCp</span> <span class="o">=</span> <span class="n">headers_no_xyz</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;cp&#39;</span><span class="p">)</span>
+        <span class="n">cp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="p">[:,</span> <span class="n">iCp</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cp</span><span class="p">)</span> <span class="o">==</span> <span class="n">npoints</span>
+        <span class="n">cart3d_model</span><span class="o">.</span><span class="n">loads</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Cp&#39;</span> <span class="p">:</span> <span class="n">cp</span><span class="p">,</span> <span class="c1"># nodal Cp</span>
+            <span class="s1">&#39;rho&#39;</span> <span class="p">:</span> <span class="n">ones_float</span><span class="p">,</span>
+            <span class="s1">&#39;rhoU&#39;</span> <span class="p">:</span> <span class="n">ones_float</span><span class="p">,</span>
+            <span class="s1">&#39;rhoV&#39;</span> <span class="p">:</span> <span class="n">ones_float</span><span class="p">,</span>
+            <span class="s1">&#39;rhoW&#39;</span> <span class="p">:</span> <span class="n">ones_float</span><span class="p">,</span>
+            <span class="s1">&#39;E&#39;</span> <span class="p">:</span> <span class="n">ones_float</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;skipping Cp&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cart3d_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cart3d_model</span><span class="o">.</span><span class="n">write_cart3d</span><span class="p">(</span><span class="n">cart3d_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cart3d_model</span></div>
+
+<span class="k">def</span> <span class="nf">_get_tri_area</span><span class="p">(</span><span class="n">tris</span><span class="p">,</span> <span class="n">xyz</span><span class="p">):</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+    <span class="n">n3</span> <span class="o">=</span> <span class="n">xyz</span><span class="p">[</span><span class="n">tris</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+    <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">n2</span> <span class="o">-</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n3</span> <span class="o">-</span> <span class="n">n1</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">A</span>
+
+<div class="viewcode-block" id="get_zone_tris_xyz"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.tecplot.html#pyNastran.converters.tecplot.tecplot_to_cart3d.get_zone_tris_xyz">[docs]</a><span class="k">def</span> <span class="nf">get_zone_tris_xyz</span><span class="p">(</span><span class="n">zone</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets the tris and associated xyz points&quot;&quot;&quot;</span>
+    <span class="n">ntris</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zone</span><span class="o">.</span><span class="n">tri_elements</span><span class="p">)</span>
+    <span class="n">nquads</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ntris</span> <span class="ow">and</span> <span class="n">nquads</span><span class="p">:</span>
+        <span class="c1"># double stack the quads to size the array</span>
+        <span class="c1"># then overwrite the second set of quads</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span>
+            <span class="n">zone</span><span class="o">.</span><span class="n">tri_elements</span><span class="p">,</span>
+            <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+        <span class="p">])</span>
+        <span class="n">tris</span><span class="p">[</span><span class="n">ntris</span><span class="o">+</span><span class="n">nquads</span><span class="p">:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="n">tris</span><span class="p">[</span><span class="n">ntris</span><span class="o">+</span><span class="n">nquads</span><span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">ntris</span><span class="p">:</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">tri_elements</span>
+    <span class="k">elif</span> <span class="n">nquads</span><span class="p">:</span>
+        <span class="c1"># double stack the quads to size the array</span>
+        <span class="c1"># then overwrite the second set of quads</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span>
+            <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+        <span class="p">])</span>
+        <span class="n">tris</span><span class="p">[</span><span class="n">ntris</span><span class="o">+</span><span class="n">nquads</span><span class="p">:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="n">tris</span><span class="p">[</span><span class="n">ntris</span><span class="o">+</span><span class="n">nquads</span><span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">quad_elements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;need quads/tris&#39;</span><span class="p">)</span>
+
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">zone</span><span class="o">.</span><span class="n">get_xyz</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tris</span><span class="p">,</span> <span class="n">xyz</span></div>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.tecplot.html#pyNastran.converters.tecplot.tecplot_to_cart3d.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;runs the test problem&quot;&quot;&quot;</span>
+    <span class="n">tecplot_filename2</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;PressureMapping\point_fmt.dat&#39;</span>
+    <span class="n">cart3d_filename2</span> <span class="o">=</span> <span class="s1">&#39;wing.tri&#39;</span>
+    <span class="n">tecplot_to_cart3d_filename</span><span class="p">(</span><span class="n">tecplot_filename2</span><span class="p">,</span> <span class="n">cart3d_filename2</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

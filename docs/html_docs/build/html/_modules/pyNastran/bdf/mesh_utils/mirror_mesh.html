@@ -1,0 +1,1212 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.mirror_mesh &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.mirror_mesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.mirror_mesh</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file defines:</span>
+<span class="sd">  - model, nid_offset, eid_offset = bdf_mirror(bdf_filename, plane=&#39;xz&#39;)</span>
+<span class="sd">  - model, nid_offset, eid_offset = write_bdf_symmetric(</span>
+<span class="sd">        bdf_filename, out_filename=None, encoding=None,</span>
+<span class="sd">        size=8, is_double=False,</span>
+<span class="sd">        enddata=None, close=True, plane=&#39;xz&#39;)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.coordinate_systems</span> <span class="kn">import</span> <span class="n">CORD1R</span><span class="p">,</span> <span class="n">CORD1C</span><span class="p">,</span> <span class="n">CORD1S</span><span class="p">,</span> <span class="n">CORD2R</span><span class="p">,</span> <span class="n">CORD2C</span><span class="p">,</span> <span class="n">CORD2S</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.loads.static_loads</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FORCE</span><span class="p">,</span> <span class="n">FORCE1</span><span class="p">,</span> <span class="n">FORCE2</span><span class="p">,</span> <span class="n">MOMENT</span><span class="p">,</span> <span class="n">MOMENT1</span><span class="p">,</span> <span class="n">MOMENT2</span><span class="p">,</span>
+    <span class="n">PLOAD</span><span class="p">,</span> <span class="n">PLOAD2</span><span class="p">,</span> <span class="n">PLOAD4</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.thermal.loads</span> <span class="kn">import</span> <span class="n">TEMP</span><span class="p">,</span> <span class="n">QVOL</span><span class="p">,</span> <span class="n">QBDY1</span><span class="p">,</span> <span class="n">QBDY2</span><span class="p">,</span> <span class="n">QBDY3</span><span class="p">,</span> <span class="n">QHBDY</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.aero.aero</span> <span class="kn">import</span> <span class="n">CAERO1</span><span class="p">,</span> <span class="n">SPLINE1</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.bdf_sets</span> <span class="kn">import</span> <span class="n">SET1</span> <span class="c1">#, SET3</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.internal_utils</span> <span class="kn">import</span> <span class="n">get_bdf_model</span>
+
+
+<div class="viewcode-block" id="bdf_mirror_plane"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.bdf_mirror_plane">[docs]</a><span class="k">def</span> <span class="nf">bdf_mirror_plane</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDF</span><span class="p">],</span> <span class="n">plane</span><span class="p">,</span> <span class="n">mirror_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_nid_offset</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;mirrors a model about an arbitrary plane&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mirror_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mirror_model</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;msc&#39;</span><span class="p">)</span>
+
+    <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span> <span class="o">=</span> <span class="n">_mirror_nodes_plane</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span>
+                                            <span class="n">use_nid_offset</span><span class="o">=</span><span class="n">use_nid_offset</span><span class="p">)</span>
+    <span class="n">eid_offset</span> <span class="o">=</span> <span class="n">_mirror_elements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">use_eid_offset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#_mirror_loads(model, nid_offset, eid_offset)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span></div>
+
+
+<div class="viewcode-block" id="bdf_mirror"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.bdf_mirror">[docs]</a><span class="k">def</span> <span class="nf">bdf_mirror</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDF</span><span class="p">],</span>
+               <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the model about the symmetry plane</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF()</span>
+<span class="sd">        str : the bdf filename</span>
+<span class="sd">        BDF : the BDF model object</span>
+<span class="sd">    plane : str; {&#39;xy&#39;, &#39;yz&#39;, &#39;xz&#39;}; default=&#39;xz&#39;</span>
+<span class="sd">        the plane to mirror about</span>
+<span class="sd">        xz : +y/-y</span>
+<span class="sd">        yz : +x/-x</span>
+<span class="sd">        xy : +z/-z</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        BDF : the BDF model object</span>
+<span class="sd">    nid_offset : int</span>
+<span class="sd">        the offset node id</span>
+<span class="sd">    eid_offset : int</span>
+<span class="sd">        the offset element id</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">mirror_model</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span> <span class="o">=</span> <span class="n">_mirror_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+    <span class="n">eid_offset</span> <span class="o">=</span> <span class="n">_mirror_elements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+    <span class="n">_mirror_loads</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">)</span>
+    <span class="n">_mirror_aero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span></div>
+
+<div class="viewcode-block" id="write_bdf_symmetric"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.write_bdf_symmetric">[docs]</a><span class="k">def</span> <span class="nf">write_bdf_symmetric</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDF</span><span class="p">],</span>
+                        <span class="n">out_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">enddata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">close</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the model about the symmetry plane</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF()</span>
+<span class="sd">        str : the bdf filename</span>
+<span class="sd">        BDF : the BDF model object</span>
+<span class="sd">    out_filename : varies; default=None</span>
+<span class="sd">        str        - the name to call the output bdf</span>
+<span class="sd">        file       - a file object</span>
+<span class="sd">        StringIO() - a StringIO object</span>
+<span class="sd">        None       - pops a dialog</span>
+<span class="sd">    encoding : str; default=None -&gt; system specified encoding</span>
+<span class="sd">        the unicode encoding</span>
+<span class="sd">        latin1, and utf8 are generally good options</span>
+<span class="sd">    size : int; {8, 16}</span>
+<span class="sd">        the field size</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        False : small field</span>
+<span class="sd">        True : large field</span>
+<span class="sd">    enddata : bool; default=None</span>
+<span class="sd">        bool - enable/disable writing ENDDATA</span>
+<span class="sd">        None - depends on input BDF</span>
+<span class="sd">    close : bool; default=True</span>
+<span class="sd">        should the output file be closed</span>
+<span class="sd">    plane : str; {&#39;xy&#39;, &#39;yz&#39;, &#39;xz&#39;}; default=&#39;xz&#39;</span>
+<span class="sd">        the plane to mirror about</span>
+<span class="sd">        xz : +y/-y</span>
+<span class="sd">        yz : +x/-x</span>
+<span class="sd">        xy : +z/-z</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        BDF : the BDF model object</span>
+<span class="sd">    nid_offset : int</span>
+<span class="sd">        the offset node id</span>
+<span class="sd">    eid_offset : int</span>
+<span class="sd">        the offset element id</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Updates the BDF object to be symmetric</span>
+<span class="sd">      - see bdf_mirror if you don&#39;t want to write the model</span>
+<span class="sd">    Doesn&#39;t equivalence nodes on the centerline.</span>
+
+<span class="sd">    Considers</span>
+<span class="sd">     - nodes : GRID</span>
+<span class="sd">     - elements, rigid_elements, mass_elements : see ``_mirror_elements``</span>
+<span class="sd">     - loads : see ``_mirror_loads``</span>
+<span class="sd">     - aero cards : see ``_mirror_aero``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span> <span class="o">=</span> <span class="n">bdf_mirror</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">out_filename</span><span class="o">=</span><span class="n">out_filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span>
+                    <span class="n">interspersed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enddata</span><span class="o">=</span><span class="n">enddata</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="n">close</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span></div>
+
+<div class="viewcode-block" id="_mirror_nodes"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._mirror_nodes">[docs]</a><span class="k">def</span> <span class="nf">_mirror_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the GRIDs</span>
+
+<span class="sd">    .. warning:: doesn&#39;t consider coordinate systems;</span>
+<span class="sd">                  it could, but you&#39;d need 20 new coordinate systems</span>
+<span class="sd">    .. warning:: doesn&#39;t mirror SPOINTs, EPOINTs</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">iy</span><span class="p">,</span> <span class="n">plane</span> <span class="o">=</span> <span class="n">_plane_to_iy</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span>
+
+    <span class="n">nid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">:</span>
+        <span class="n">nid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">),</span> <span class="n">nid_offset</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">:</span>
+        <span class="n">nid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">),</span> <span class="n">nid_offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+            <span class="n">nid2</span> <span class="o">=</span> <span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">xyz2</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">xyz2</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add_grid</span><span class="p">(</span><span class="n">nid2</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">cp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cd</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">seid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">):</span>
+            <span class="n">nid2</span> <span class="o">=</span> <span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add_spoint</span><span class="p">(</span><span class="n">nid2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">):</span>
+            <span class="n">nid2</span> <span class="o">=</span> <span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add_spoint</span><span class="p">(</span><span class="n">nid2</span><span class="p">)</span>
+    <span class="c1">#if model.epoints:</span>
+
+    <span class="k">return</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span></div>
+
+<div class="viewcode-block" id="_mirror_nodes_plane"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._mirror_nodes_plane">[docs]</a><span class="k">def</span> <span class="nf">_mirror_nodes_plane</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span>
+                        <span class="n">use_nid_offset</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the GRIDs about an arbitrary plane</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF</span>
+<span class="sd">        ???</span>
+<span class="sd">    mirror_model : BDF</span>
+<span class="sd">        ???</span>
+<span class="sd">    plane : str</span>
+<span class="sd">        ???</span>
+<span class="sd">    use_nid_offset : bool</span>
+<span class="sd">        ???</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nid_offset : int</span>
+<span class="sd">        the node id offset</span>
+<span class="sd">    plane : str</span>
+<span class="sd">        the sorted plane; ZX -&gt; xz</span>
+
+<span class="sd">    .. warning:: doesn&#39;t consider coordinate systems;</span>
+<span class="sd">                  it could, but you&#39;d need 20 new coordinate systems</span>
+<span class="sd">    .. warning:: doesn&#39;t mirror SPOINTs, EPOINTs</span>
+
+<span class="sd">    https://mathinsight.org/distance_point_plane</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nid_offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="n">all_nodes</span><span class="p">,</span> <span class="n">xyz_cid0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_xyz_in_coord_no_xref</span><span class="p">(</span>
+            <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="n">sort_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">unused_cid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># just a triangle&#39;s normal vector</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="n">plane</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">n3</span> <span class="o">=</span> <span class="n">plane</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">n2</span> <span class="o">-</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n3</span> <span class="o">-</span> <span class="n">n1</span><span class="p">)</span>
+        <span class="n">normal</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="c1">#cord2r = model.add_cord2r(cid, plane[0, :], plane[1, :], plane[2, :])</span>
+        <span class="c1">#del model.coords[cid]</span>
+        <span class="c1">#print(cord2r)</span>
+
+        <span class="c1">#origin = cord2r.origin</span>
+        <span class="c1">#normal = cord2r.beta()[2, :]</span>
+        <span class="c1">#print(&#39;normal =&#39;, normal)</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">xyz_cid0</span> <span class="o">-</span> <span class="n">origin</span>
+        <span class="k">assert</span> <span class="n">xyz_cid0</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s1">&#39;xyz_cid0.shape=</span><span class="si">%s</span><span class="s1">; vector.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xyz_cid0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">v_dot_n</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">*</span> <span class="n">normal</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">assert</span> <span class="n">v_dot_n</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s1">&#39;v_dot_n.shape=</span><span class="si">%s</span><span class="s1">; vector.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v_dot_n</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v_dot_n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">v_dot_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">distance</span><span class="p">),</span> <span class="s1">&#39;v_dot_n.shape=</span><span class="si">%s</span><span class="s1">; distance.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v_dot_n</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1"># we&#39;re some distance from the plane, but we don&#39;t know the</span>
+        <span class="c1"># direction, so we take the max distance from the plane and</span>
+        <span class="c1"># project it in the +normal direction and then check that</span>
+        <span class="c1"># distance in comparison to the known distance</span>
+        <span class="c1">#</span>
+        <span class="n">max_distance</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">imax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">distance</span> <span class="o">==</span> <span class="n">max_distance</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">distance0</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="n">imax</span><span class="p">]</span>
+        <span class="n">xyz0</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">imax</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">distance0</span> <span class="o">*</span> <span class="n">normal</span>
+        <span class="n">v0_dot_n</span> <span class="o">=</span> <span class="n">xyz0</span> <span class="o">*</span> <span class="n">normal</span>
+        <span class="n">distance_plus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v0_dot_n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">distance_plus</span> <span class="o">&gt;</span> <span class="mf">1.1</span><span class="o">*</span><span class="n">distance0</span><span class="p">:</span>
+            <span class="n">xyz_cid0_2</span> <span class="o">=</span> <span class="n">xyz_cid0</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">normal</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xyz_cid0_2</span> <span class="o">=</span> <span class="n">xyz_cid0</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">distance</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">normal</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">use_nid_offset</span><span class="p">:</span>
+            <span class="n">nid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">xyz2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">,</span> <span class="n">xyz_cid0_2</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+            <span class="n">nid2</span> <span class="o">=</span> <span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_grid</span><span class="p">(</span><span class="n">nid2</span><span class="p">,</span> <span class="n">xyz2</span><span class="p">,</span> <span class="n">cp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cd</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">cd</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">ps</span><span class="p">,</span> <span class="n">seid</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">seid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">plane</span></div>
+
+<div class="viewcode-block" id="_plane_to_iy"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._plane_to_iy">[docs]</a><span class="k">def</span> <span class="nf">_plane_to_iy</span><span class="p">(</span><span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;gets the index fo the mirror plane&quot;&quot;&quot;</span>
+    <span class="n">plane</span> <span class="o">=</span> <span class="n">plane</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">plane_sorted</span> <span class="o">=</span>  <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">plane</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">plane_sorted</span> <span class="o">==</span> <span class="s1">&#39;yz&#39;</span><span class="p">:</span>
+        <span class="n">iy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">plane_sorted</span> <span class="o">==</span> <span class="s1">&#39;xz&#39;</span><span class="p">:</span>
+        <span class="n">iy</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">plane_sorted</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+        <span class="n">iy</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;plane=</span><span class="si">%r</span><span class="s2"> and must be &#39;yz&#39;, &#39;xz&#39;, or &#39;xy&#39;.&quot;</span> <span class="o">%</span> <span class="n">plane</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">iy</span><span class="p">,</span> <span class="n">plane_sorted</span></div>
+
+<div class="viewcode-block" id="_mirror_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._mirror_elements">[docs]</a><span class="k">def</span> <span class="nf">_mirror_elements</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                     <span class="n">nid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">use_eid_offset</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the elements</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF</span>
+<span class="sd">        the base model</span>
+<span class="sd">    mirror_model : BDF</span>
+<span class="sd">        the mirrored model</span>
+<span class="sd">    nid_offset : int</span>
+<span class="sd">        the node id offset</span>
+<span class="sd">    use_eid_offset : bool; default=True</span>
+<span class="sd">        what is this for???</span>
+
+<span class="sd">    elements:</span>
+<span class="sd">       0d : CELAS1, CELAS2, CELAS3, CELAS4, CDAMP1, CDAMP2, CDAMP3, CDAMP4, CDAMP5</span>
+<span class="sd">            CFAST, CBUSH, CBUSH1D</span>
+<span class="sd">       1d:  CROD, CONROD, CTUBE, CBAR, CBEAM, CBEAM3</span>
+<span class="sd">       2d : CTRIA3, CQUAD4, CTRIA6, CQUAD8, CQUAD, CTRIAR, CQUADR</span>
+<span class="sd">       3d : ???</span>
+<span class="sd">       missing : CVISC, CTRIAX, CTRIAX6, CQUADX, CQUADX8, CCONEAX</span>
+<span class="sd">    rigid_elements:</span>
+<span class="sd">       loaded: RBE2, RBE3, RBAR</span>
+<span class="sd">       missing: RBAR1</span>
+<span class="sd">    mass_elements:</span>
+<span class="sd">       loaded: CONM2</span>
+<span class="sd">       missing CONM1, CMASS1, CMASS2, CMASS3, CMASS4</span>
+<span class="sd">    plotels:</span>
+<span class="sd">       loaded: PLOTEL</span>
+<span class="sd">       missing: ???</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Doesn&#39;t handle CBAR/CBEAM offsets</span>
+<span class="sd">    Doesn&#39;t handle CBEAM SPOINTs</span>
+<span class="sd">    Do I need to invert the solids?</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># why eid_offset not always calculated?</span>
+    <span class="n">eid_max_elements</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eid_max_masses</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eid_max_rigid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eid_max_plotels</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">use_eid_offset</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">eid_max_elements</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">:</span>
+            <span class="n">eid_max_masses</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">:</span>
+            <span class="n">eid_max_rigid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="p">:</span>
+            <span class="n">eid_max_plotels</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">eid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">eid_max_elements</span><span class="p">,</span> <span class="n">eid_max_masses</span><span class="p">,</span> <span class="n">eid_max_rigid</span><span class="p">,</span> <span class="n">eid_max_plotels</span><span class="p">)</span>
+    <span class="n">cid_offset</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+        <span class="n">__mirror_elements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">,</span> <span class="n">cid_offset</span><span class="p">,</span>
+                          <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="p">:</span>
+        <span class="n">__mirror_masses</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">:</span>
+        <span class="n">__mirror_rigid_elements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">plotels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">eid_mirror</span> <span class="o">=</span> <span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PLOTEL&#39;</span><span class="p">:</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+                <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_plotel</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">mirror_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">eid_offset</span></div>
+
+<div class="viewcode-block" id="__mirror_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.__mirror_elements">[docs]</a><span class="k">def</span> <span class="nf">__mirror_elements</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                      <span class="n">nid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;mirrors model.elements&quot;&quot;&quot;</span>
+    <span class="n">shells</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADR&#39;</span><span class="p">}</span>
+    <span class="n">shell_nones</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD&#39;</span><span class="p">,</span> <span class="p">}</span>
+    <span class="n">rods</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">}</span>
+    <span class="n">spring_dampers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CVISC&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">solids</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CYPRAM&#39;</span><span class="p">}</span>
+    <span class="n">generic_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;CSHEAR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRAX3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRAX6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CQUADX4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX8&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CPLSTN3&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN4&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN6&#39;</span><span class="p">,</span> <span class="s1">&#39;CPLSTN8&#39;</span><span class="p">,</span> <span class="p">}</span>
+    <span class="n">generic_types_none</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;CHBDYP&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC2D&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC3D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CQUADX&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CTRIAX&#39;</span><span class="p">,</span>
+        <span class="c1"># acoustic</span>
+        <span class="s1">&#39;CHACAB&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_set_nodes</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="n">update_mcids</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">element_cids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="n">etypes_skipped</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">etype</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CHBDYG&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYE&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="n">nodes1</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span>
+        <span class="c1">#try:</span>
+            <span class="c1">#nodes = [node_id + nid_offset for node_id in nodes]</span>
+        <span class="c1">#except TypeError:</span>
+            <span class="c1">#msg = &#39;cannot mirror %r eid=%s because None exists in nodes=%s&#39; % (</span>
+                <span class="c1">#element.type, eid, nodes)</span>
+            <span class="c1">#model.log.warning(msg)</span>
+            <span class="c1">#continue</span>
+
+        <span class="n">eid_mirror</span> <span class="o">=</span> <span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">repr_fields</span><span class="p">()</span>
+        <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid_mirror</span>
+        <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_card</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">etype</span><span class="p">)</span>
+        <span class="n">element2</span> <span class="o">=</span> <span class="n">mirror_model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid_mirror</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">shells</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">flip_normal</span><span class="p">()</span> <span class="c1"># nodes = nodes[::-1]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update_mcids</span><span class="p">:</span>
+                <span class="n">element_cids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">)</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">theta_mcid</span> <span class="o">+=</span> <span class="n">cid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">solids</span><span class="p">:</span>
+            <span class="c1"># what about inverting solids?</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">node_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                     <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">etypes_skipped</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes2</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">cross_reference</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">vol</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">Volume</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">vol</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">vol</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">shell_nones</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">node_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                     <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">flip_normal</span><span class="p">()</span> <span class="c1"># nodes = nodes[::-1]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update_mcids</span><span class="p">:</span>
+                <span class="n">element_cids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">theta_mcid</span><span class="p">)</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">theta_mcid</span> <span class="o">+=</span> <span class="n">cid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">rods</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">]:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CBEAM3&#39;</span><span class="p">:</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">nodes1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">nodes1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CGAP&#39;</span><span class="p">:</span>
+            <span class="c1">#nodes = [node_id + nid_offset if node_id is not None else None</span>
+                     <span class="c1">#for node_id in nodes]</span>
+            <span class="c1">#_set_nodes(element2, nodes)</span>
+            <span class="n">ga</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">gb</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">ga</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">gb</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update_mcids</span><span class="p">:</span>
+                <span class="n">element_cids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">cid</span> <span class="o">+=</span> <span class="n">cid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CBUSH&#39;</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">g0</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">g0</span> <span class="o">=</span> <span class="n">g0</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="c1">#  TODO: ocid</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update_mcids</span><span class="p">:</span>
+                <span class="n">element_cids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">cid</span> <span class="o">+=</span> <span class="n">cid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CBUSH1D&#39;</span><span class="p">:</span>
+            <span class="n">ga</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">gb</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">ga</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">gb</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update_mcids</span><span class="p">:</span>
+                <span class="n">element_cids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">cid</span> <span class="o">+=</span> <span class="n">cid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CFAST&#39;</span><span class="p">:</span>
+            <span class="n">ga</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">gb</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">gs</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">element2</span><span class="o">.</span><span class="n">gs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ga</span> <span class="o">=</span> <span class="n">ga</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">gb</span> <span class="o">=</span> <span class="n">gb</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">gs</span> <span class="o">=</span> <span class="n">gs</span>
+
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;CCONEAX&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">spring_dampers</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">node_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">_set_nodes</span><span class="p">(</span><span class="n">element2</span><span class="p">,</span> <span class="n">nodes2</span><span class="p">)</span>
+            <span class="c1">#print(nodes)</span>
+            <span class="c1">#element2.nodes = nodes</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;GENEL&#39;</span><span class="p">:</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ul</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">ul</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">element2</span><span class="o">.</span><span class="n">ud</span> <span class="o">=</span> <span class="n">element2</span><span class="o">.</span><span class="n">ud</span> <span class="o">+</span> <span class="n">nid_offset</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">generic_types</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+                <span class="k">raise</span>
+            <span class="n">_set_nodes</span><span class="p">(</span><span class="n">element2</span><span class="p">,</span> <span class="n">nodes2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">generic_types_none</span><span class="p">:</span>
+            <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">node_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+            <span class="n">_set_nodes</span><span class="p">(</span><span class="n">element2</span><span class="p">,</span> <span class="n">nodes2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">etypes_skipped</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes1</span><span class="p">]</span>
+                <span class="n">element2</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+                <span class="k">raise</span>
+    <span class="k">if</span> <span class="n">etypes_skipped</span><span class="p">:</span>
+        <span class="n">etypes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">etypes_skipped</span><span class="p">)</span>
+        <span class="n">etypes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Verify element_types=</span><span class="si">{</span><span class="n">etypes</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">element_cids</span><span class="p">:</span>
+        <span class="n">cids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">element_cids</span><span class="p">)</span>
+        <span class="n">cids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;verify material coordinate systems %s&#39;</span> <span class="o">%</span> <span class="n">cids</span><span class="p">)</span>
+        <span class="n">_asymmetrically_mirror_coords</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">element_cids</span><span class="p">,</span> <span class="n">cid_offset</span><span class="p">,</span> <span class="n">plane</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="__mirror_masses"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.__mirror_masses">[docs]</a><span class="k">def</span> <span class="nf">__mirror_masses</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;mirrors model.masses&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">eid_mirror</span> <span class="o">=</span> <span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span>
+
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">:</span>
+            <span class="n">old_nid</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">nid</span>
+            <span class="n">new_nid</span> <span class="o">=</span> <span class="n">old_nid</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">mass</span>
+            <span class="n">cid</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">cid</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">X</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">I</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_conm2</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">new_nid</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">I</span><span class="o">=</span><span class="n">I</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CONM1&#39;</span><span class="p">:</span>
+            <span class="n">new_nid</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">nid_offset</span>
+            <span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">mass_matrix</span>
+            <span class="n">cid</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">Cid</span><span class="p">()</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_conm1</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">new_nid</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CMASS1&#39;</span><span class="p">:</span>
+            <span class="n">old_node_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">G1</span><span class="p">(),</span> <span class="n">element</span><span class="o">.</span><span class="n">G2</span><span class="p">()]</span>
+            <span class="n">new_nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">old_node_ids</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_cmass1</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">new_nids</span><span class="p">,</span>
+                                    <span class="n">c1</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CMASS2&#39;</span><span class="p">:</span>
+            <span class="n">old_node_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">G1</span><span class="p">(),</span> <span class="n">element</span><span class="o">.</span><span class="n">G2</span><span class="p">()]</span>
+            <span class="n">new_nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">old_node_ids</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_cmass2</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">new_nids</span><span class="p">,</span>
+                                    <span class="n">c1</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CMASS3&#39;</span><span class="p">:</span>
+            <span class="c1"># this uses SPOINTs, so we don&#39;t need as fancy checking as CMASS1 and CMASS2</span>
+            <span class="n">new_nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_cmass3</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">Pid</span><span class="p">(),</span> <span class="n">new_nids</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CMASS4&#39;</span><span class="p">:</span>
+            <span class="c1"># this uses SPOINTs, so we don&#39;t need as fancy checking as CMASS1 and CMASS2</span>
+            <span class="n">new_nids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_cmass4</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">new_nids</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping mass element:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+    <span class="k">del</span> <span class="n">eid_mirror</span></div>
+
+<div class="viewcode-block" id="__mirror_rigid_elements"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh.__mirror_rigid_elements">[docs]</a><span class="k">def</span> <span class="nf">__mirror_rigid_elements</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">mirror_model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                            <span class="n">nid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;mirrors model.rigid_elements&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">rigid_element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rigid_elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">eid_mirror</span> <span class="o">=</span> <span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span>
+        <span class="k">if</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">:</span>
+            <span class="n">Gmi_node_ids</span> <span class="o">=</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gmi_node_ids</span>
+            <span class="n">Gn</span> <span class="o">=</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gn</span><span class="p">()</span>
+            <span class="n">Gijs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">ref_grid_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">:</span>
+            <span class="n">Gmi_node_ids</span> <span class="o">=</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gmi_node_ids</span>
+            <span class="n">Gijs</span> <span class="o">=</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gijs</span>
+            <span class="n">ref_grid_id</span> <span class="o">=</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">ref_grid_id</span>
+            <span class="n">Gn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RROD&#39;</span><span class="p">:</span>
+            <span class="n">node_ids_mirror</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">nodes</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rrod</span><span class="p">(</span>
+                <span class="n">eid_mirror</span><span class="p">,</span> <span class="n">node_ids_mirror</span><span class="p">,</span>
+                <span class="n">cma</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">cma</span><span class="p">,</span> <span class="n">cmb</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">cmb</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBAR&#39;</span><span class="p">:</span>
+            <span class="n">node_ids_mirror</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">nodes</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rbar</span><span class="p">(</span>
+                <span class="n">eid_mirror</span><span class="p">,</span> <span class="n">node_ids_mirror</span><span class="p">,</span>
+                <span class="n">rigid_element</span><span class="o">.</span><span class="n">cna</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">cnb</span><span class="p">,</span>
+                <span class="n">rigid_element</span><span class="o">.</span><span class="n">cma</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">cmb</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBAR1&#39;</span><span class="p">:</span>
+            <span class="n">node_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span>
+                        <span class="p">[</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">ga</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">gb</span><span class="p">]]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rbar1</span><span class="p">(</span>
+                <span class="n">eid_mirror</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">cb</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBE1&#39;</span><span class="p">:</span>
+            <span class="n">Gni</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gni</span><span class="p">]</span>
+            <span class="n">Gmi</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Gmi</span><span class="p">]</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rbe1</span><span class="p">(</span>
+                <span class="n">eid_mirror</span><span class="p">,</span>
+                <span class="n">Gni</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Cni</span><span class="p">,</span>
+                <span class="n">Gmi</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">Cmi</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">rigid_element</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;_write_elements_symmetric: </span><span class="si">%s</span><span class="s1"> not implemented&#39;</span> <span class="o">%</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="k">continue</span>
+            <span class="c1">#raise NotImplementedError(msg)</span>
+
+        <span class="c1">#if rigid_element.type in [&#39;RBE2&#39;, &#39;RBE3&#39;]:</span>
+        <span class="n">Gmi_node_ids_mirror</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">Gmi_node_ids</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">Gn</span><span class="p">:</span>
+            <span class="n">Gn_mirror</span> <span class="o">=</span> <span class="n">Gn</span> <span class="o">+</span> <span class="n">nid_offset</span>
+        <span class="k">if</span> <span class="n">Gijs</span><span class="p">:</span>
+            <span class="n">Gijs_mirror</span> <span class="o">=</span> <span class="p">[[</span><span class="n">node_id</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span> <span class="k">for</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="n">Gijs</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ref_grid_id</span><span class="p">:</span>
+            <span class="n">ref_grid_id_mirror</span> <span class="o">=</span> <span class="n">ref_grid_id</span> <span class="o">+</span> <span class="n">nid_offset</span>
+
+        <span class="k">if</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">:</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rbe2</span><span class="p">(</span><span class="n">eid_mirror</span><span class="p">,</span> <span class="n">Gn_mirror</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">cm</span><span class="p">,</span>
+                                  <span class="n">Gmi_node_ids_mirror</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">:</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">add_rbe3</span><span class="p">(</span>
+                <span class="n">eid_mirror</span><span class="p">,</span> <span class="n">ref_grid_id_mirror</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">refc</span><span class="p">,</span> <span class="n">rigid_element</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span>
+                <span class="n">rigid_element</span><span class="o">.</span><span class="n">comps</span><span class="p">,</span> <span class="n">Gijs_mirror</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">mirror_model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">rigid_element</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="_mirror_loads"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._mirror_loads">[docs]</a><span class="k">def</span> <span class="nf">_mirror_loads</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">eid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the loads.  A mirrored force acts in the same direction.</span>
+
+<span class="sd">    Considers:</span>
+<span class="sd">     - PLOAD4</span>
+<span class="sd">        - no coordinate systems (assumes cid=0)</span>
+<span class="sd">     - FORCE, FORCE1, FORCE2, MOMENT, MOMENT1, MOMENT2</span>
+<span class="sd">     - PLOAD, PLOAD2</span>
+<span class="sd">     - TEMP, QVOL, QHBDY, QBDY1, QBDY2, QBDY3</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># unmirrorable loads</span>
+    <span class="n">skip_loads</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;FORCEAX&#39;</span><span class="p">,</span> <span class="s1">&#39;TEMPAX&#39;</span><span class="p">,</span> <span class="s1">&#39;PRESAX&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">unused_load_id</span><span class="p">,</span> <span class="n">loads</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">loads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">load</span> <span class="ow">in</span> <span class="n">loads</span><span class="p">:</span>
+            <span class="n">loads_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">load_type</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">type</span>
+            <span class="k">if</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD4&#39;</span><span class="p">:</span>
+                <span class="n">g1</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">g34</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">g1</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="o">+</span> <span class="n">nid_offset</span>
+                <span class="k">if</span> <span class="n">load</span><span class="o">.</span><span class="n">g34</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">g34</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">g34</span> <span class="o">+</span> <span class="n">nid_offset</span>
+
+                <span class="n">eids</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">eids</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD4</span><span class="p">(</span>
+                    <span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">eids</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">pressures</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g34</span><span class="p">,</span>
+                    <span class="n">cid</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">nvector</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">nvector</span><span class="p">,</span>
+                    <span class="n">surf_or_line</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">surf_or_line</span><span class="p">,</span>
+                    <span class="n">line_load_dir</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">line_load_dir</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;FORCE&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">FORCE</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span>
+                              <span class="n">cid</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;FORCE1&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">FORCE1</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span>
+                              <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g2</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;FORCE2&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">FORCE2</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span>
+                              <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g2</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span>
+                              <span class="n">load</span><span class="o">.</span><span class="n">g3</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g4</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;MOMENT&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span>
+                              <span class="n">cid</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;MOMENT1&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT1</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span>
+                               <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g2</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;MOMENT2&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT2</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">mag</span><span class="p">,</span>
+                               <span class="n">load</span><span class="o">.</span><span class="n">g1</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g2</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span>
+                               <span class="n">load</span><span class="o">.</span><span class="n">g3</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">g4</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD&#39;</span><span class="p">:</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">nodes</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">pressure</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;PLOAD2&#39;</span><span class="p">:</span>
+                <span class="n">eids</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">eids</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD2</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">pressure</span><span class="p">,</span> <span class="n">eids</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;QVOL&#39;</span><span class="p">:</span>
+                <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">elements</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">QVOL</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">qvol</span><span class="p">,</span> <span class="n">nid_offset</span> <span class="o">+</span> <span class="n">load</span><span class="o">.</span><span class="n">control_point</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;QHBDY&#39;</span><span class="p">:</span>
+                <span class="n">grids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">grids</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">QHBDY</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">flag</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">q0</span><span class="p">,</span> <span class="n">grids</span><span class="p">,</span> <span class="n">af</span><span class="o">=</span><span class="n">load</span><span class="o">.</span><span class="n">af</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;QBDY1&#39;</span><span class="p">:</span>
+                <span class="n">eids</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">eids</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY1</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">qflux</span><span class="p">,</span> <span class="n">eids</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;QBDY2&#39;</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY2</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">qfluxs</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;QBDY3&#39;</span><span class="p">:</span>
+                <span class="n">eids</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">eid_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">eids</span><span class="p">]</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY3</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">q0</span><span class="p">,</span> <span class="n">load</span><span class="o">.</span><span class="n">cntrlnd</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">,</span> <span class="n">eids</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;TEMP&#39;</span><span class="p">:</span>
+                <span class="n">temperatures</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">temp</span> <span class="ow">in</span> <span class="n">load</span><span class="o">.</span><span class="n">temperatures</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">temperatures</span><span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">TEMP</span><span class="p">(</span><span class="n">load</span><span class="o">.</span><span class="n">sid</span><span class="p">,</span> <span class="n">temperatures</span><span class="p">)</span>
+                <span class="n">loads_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="o">==</span> <span class="s1">&#39;GRAV&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">load_type</span> <span class="ow">in</span> <span class="n">skip_loads</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">load</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">loads_new</span><span class="p">:</span>
+            <span class="n">loads</span> <span class="o">+=</span> <span class="n">loads_new</span></div>
+
+<div class="viewcode-block" id="_mirror_aero"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._mirror_aero">[docs]</a><span class="k">def</span> <span class="nf">_mirror_aero</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">nid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mirrors the aero cards</span>
+
+<span class="sd">    Considers:</span>
+<span class="sd">     - AEROS</span>
+<span class="sd">      - doesn&#39;t consider sideslip</span>
+<span class="sd">     - CAERO1</span>
+<span class="sd">      - doesn&#39;t consider sideslip</span>
+<span class="sd">      - considers Cp</span>
+<span class="sd">      - considers lchord/lspan/nchord/nspan</span>
+<span class="sd">     - SPLINE1</span>
+<span class="sd">       - handle boxes</span>
+<span class="sd">     - SET1</span>
+<span class="sd">       - handle nodes</span>
+<span class="sd">     - AELIST</span>
+<span class="sd">       - handle boxes</span>
+<span class="sd">     - AESURF</span>
+<span class="sd">       - only supports names of length 7 or less (appends an M to the name)</span>
+<span class="sd">       - handles AELIST</span>
+<span class="sd">       - doesn&#39;t handle coords well</span>
+<span class="sd">       - doesn&#39;t handle second AESURF</span>
+
+<span class="sd">    Doesnt consider:</span>
+<span class="sd">     - AERO</span>
+<span class="sd">     - AEFORCE</span>
+<span class="sd">     - AEPRES</span>
+<span class="sd">     - CAERO2/3/4/5</span>
+<span class="sd">     - PAERO1/2/3/4/5</span>
+<span class="sd">     - AESURFS</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">aero_cids_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">aeros</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">aeros</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">aeros</span>
+        <span class="c1"># The ACSID must be a rectangular coordinate system.</span>
+        <span class="c1"># Flow is in the positive x-direction (T1).</span>
+        <span class="k">if</span> <span class="n">aeros</span><span class="o">.</span><span class="n">acsid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Sideslip coordinate system (ACSID) mirroring is not supported&#39;</span><span class="p">)</span>
+
+        <span class="c1"># REFB should be full span, even on half-span models</span>
+        <span class="c1"># REFS should be half area on half-span models</span>
+        <span class="n">aeros</span><span class="o">.</span><span class="n">sref</span> <span class="o">*=</span> <span class="mf">2.</span>
+        <span class="k">if</span> <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;xz&#39;</span><span class="p">:</span>
+            <span class="n">aeros</span><span class="o">.</span><span class="n">sym_xz</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;yz&#39;</span><span class="p">:</span>
+            <span class="n">aeros</span><span class="o">.</span><span class="n">sym_yz</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;not mirroring plane </span><span class="si">%r</span><span class="s1">; only xz, yz&#39;</span> <span class="o">%</span> <span class="n">plane</span><span class="p">)</span>
+
+    <span class="n">caero_id_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">):</span>
+        <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">caero_id_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caero_ids</span><span class="p">)</span>
+        <span class="n">caero_id_offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">[</span><span class="n">caero_id_max</span><span class="p">]</span><span class="o">.</span><span class="n">box_ids</span><span class="o">.</span><span class="n">flat</span><span class="p">)</span>
+
+        <span class="n">caeros</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_caero_id</span><span class="p">,</span> <span class="n">caero</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO1&#39;</span><span class="p">:</span>
+                <span class="c1"># the AEFACTs are assumed to be the same on the left and right side</span>
+                <span class="c1"># I think the spanwise direction will be fine</span>
+                <span class="n">lchord</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">lchord</span>
+                <span class="n">nchord</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">nchord</span>
+                <span class="n">lspan</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">lspan</span>
+                <span class="n">nspan</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">nspan</span>
+                <span class="n">p1</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">get_leading_edge_points</span><span class="p">()</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">p4</span> <span class="o">=</span> <span class="n">p4</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">x12</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">x12</span>
+                <span class="n">x43</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">x43</span>
+                <span class="k">if</span> <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;xz&#39;</span><span class="p">:</span> <span class="c1"># flip the y</span>
+                    <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+                    <span class="n">p4</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+                <span class="k">elif</span>  <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+                    <span class="n">p1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+                    <span class="n">p4</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;plane=</span><span class="si">%r</span><span class="s1"> not supported in CAERO1&#39;</span> <span class="o">%</span> <span class="n">plane</span><span class="p">)</span>
+                <span class="n">eid2</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">eid</span> <span class="o">+</span> <span class="n">caero_id_offset</span>
+                <span class="n">caero_new</span> <span class="o">=</span> <span class="n">CAERO1</span><span class="p">(</span><span class="n">eid2</span><span class="p">,</span> <span class="n">caero</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">caero</span><span class="o">.</span><span class="n">igroup</span><span class="p">,</span>
+                                   <span class="n">p1</span><span class="p">,</span> <span class="n">x12</span><span class="p">,</span> <span class="n">p4</span><span class="p">,</span> <span class="n">x43</span><span class="p">,</span>
+                                   <span class="n">cp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                   <span class="n">nspan</span><span class="o">=</span><span class="n">nspan</span><span class="p">,</span> <span class="n">lspan</span><span class="o">=</span><span class="n">lspan</span><span class="p">,</span>
+                                   <span class="n">nchord</span><span class="o">=</span><span class="n">nchord</span><span class="p">,</span> <span class="n">lchord</span><span class="o">=</span><span class="n">lchord</span><span class="p">,</span>
+                                   <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                <span class="c1"># we flip the normal so if we ever use W2GJ it&#39;s going to be consistent</span>
+                <span class="n">caero_new</span><span class="o">.</span><span class="n">flip_normal</span><span class="p">()</span>
+                <span class="n">caeros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">caero_new</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;skipping (only supports CAERO1):</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">caero</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">caero</span> <span class="ow">in</span> <span class="n">caeros</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_add_caero_object</span><span class="p">(</span><span class="n">caero</span><span class="p">)</span>
+
+    <span class="n">nsplines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="p">)</span>
+    <span class="n">sets_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">caero_id_offset</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">nsplines</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;cant mirror splines because CAEROs don&#39;t exist...&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nsplines</span> <span class="ow">and</span> <span class="n">sets_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;cant mirror splines because SET1/3 don&#39;t exist...&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nsplines</span><span class="p">:</span>
+        <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">splines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">spline_sets_to_duplicate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">spline_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_spline_id</span><span class="p">,</span> <span class="n">spline</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">splines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">spline</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;SPLINE1&#39;</span><span class="p">:</span>
+                <span class="n">eid</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">eid</span> <span class="o">+</span> <span class="n">spline_max</span>
+                <span class="n">caero</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">caero</span> <span class="o">+</span> <span class="n">caero_id_offset</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">method</span>
+                <span class="n">usage</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">usage</span>
+                <span class="n">box1</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">box1</span> <span class="o">+</span> <span class="n">caero_id_offset</span>
+                <span class="n">box2</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">box2</span> <span class="o">+</span> <span class="n">caero_id_offset</span>
+                <span class="n">setg</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">setg</span> <span class="o">+</span> <span class="n">sets_max</span>
+                <span class="n">dz</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">dz</span>
+                <span class="n">melements</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">melements</span>
+                <span class="n">nelements</span> <span class="o">=</span> <span class="n">spline</span><span class="o">.</span><span class="n">nelements</span>
+                <span class="n">spline_new</span> <span class="o">=</span> <span class="n">SPLINE1</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="n">caero</span><span class="p">,</span> <span class="n">box1</span><span class="p">,</span> <span class="n">box2</span><span class="p">,</span> <span class="n">setg</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="n">dz</span><span class="p">,</span>
+                                     <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">,</span>
+                                     <span class="n">nelements</span><span class="o">=</span><span class="n">nelements</span><span class="p">,</span> <span class="n">melements</span><span class="o">=</span><span class="n">melements</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">splines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spline_new</span><span class="p">)</span>
+                <span class="n">spline_sets_to_duplicate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spline</span><span class="o">.</span><span class="n">setg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;skipping (only support SPLINE1):</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spline</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+
+        <span class="c1">#print(&quot;spline_sets_to_duplicate =&quot;, spline_sets_to_duplicate)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;, which is required to mirror:</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spline</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="n">sets_to_add</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">set_id</span> <span class="ow">in</span> <span class="n">spline_sets_to_duplicate</span><span class="p">:</span>
+            <span class="n">set_card</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">set_id</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">set_card</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;SET1&#39;</span><span class="p">:</span>
+                <span class="n">sid</span> <span class="o">=</span> <span class="n">set_card</span><span class="o">.</span><span class="n">sid</span> <span class="o">+</span> <span class="n">sets_max</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">nid</span> <span class="o">+</span> <span class="n">nid_offset</span> <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">set_card</span><span class="o">.</span><span class="n">ids</span><span class="p">]</span>
+                <span class="n">is_skin</span> <span class="o">=</span> <span class="n">set_card</span><span class="o">.</span><span class="n">is_skin</span>
+                <span class="n">set_card</span> <span class="o">=</span> <span class="n">SET1</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">is_skin</span><span class="o">=</span><span class="n">is_skin</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">sets_to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">set_card</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;skipping (only support SET1):</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">set_card</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">spline</span> <span class="ow">in</span> <span class="n">splines</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_add_spline_object</span><span class="p">(</span><span class="n">spline</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">set_card</span> <span class="ow">in</span> <span class="n">sets_to_add</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_add_set_object</span><span class="p">(</span><span class="n">set_card</span><span class="p">)</span>
+
+    <span class="n">aelist_id_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aelists</span><span class="p">):</span>
+        <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">aelist_id_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aelists</span><span class="p">)</span>
+
+    <span class="n">cid_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="p">):</span>
+        <span class="n">is_aero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">aesurf_id_offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">aelist_id</span><span class="p">,</span> <span class="n">aelist</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aelists</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">aelist_id_new</span> <span class="o">=</span> <span class="n">aelist_id</span> <span class="o">+</span> <span class="n">aelist_id_offset</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span> <span class="o">+</span> <span class="n">caero_id_offset</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">aelist</span><span class="o">.</span><span class="n">elements</span><span class="p">]</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add_aelist</span><span class="p">(</span><span class="n">aelist_id_new</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">aesurf_id</span><span class="p">,</span> <span class="n">aesurf</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># TODO: doesn&#39;t handle cid2/aelist2</span>
+            <span class="n">aesurf_id_new</span> <span class="o">=</span> <span class="n">aesurf_id</span> <span class="o">+</span> <span class="n">aesurf_id_offset</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;M&#39;</span>
+            <span class="n">cid1</span> <span class="o">=</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">cid1</span> <span class="o">+</span> <span class="n">cid_offset</span>
+            <span class="n">alid1</span> <span class="o">=</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">alid1</span> <span class="o">+</span> <span class="n">aelist_id_offset</span>
+            <span class="k">if</span> <span class="n">cid_offset</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">aero_cids_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">aesurf</span><span class="o">.</span><span class="n">cid1</span><span class="p">)</span>
+
+            <span class="c1">#cid2 = None</span>
+            <span class="c1">#alid2 = None</span>
+            <span class="k">if</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">cid2</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;skipping aesurf=&#39;</span><span class="si">{aesurf.label}</span><span class="s2">&#39; second cid/aelist&quot;</span><span class="p">)</span>
+                <span class="c1"># combine this into the first coordinate system</span>
+                <span class="c1">#</span>
+                <span class="c1">#  don&#39;t mirror the coordinate system because it&#39;s antisymmetric?</span>
+                <span class="c1">#cid2 = aesurf.cid1 + cid_offset * 2</span>
+                <span class="c1"># how is the second coord and aelist made?</span>
+                <span class="c1">#aero_cids_set.add(aesurf.cid1)</span>
+                <span class="c1">#alid2 = aesurf.alid1 + aelist_id_offset * 2</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">add_aesurf</span><span class="p">(</span><span class="n">aesurf_id_new</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">cid1</span><span class="p">,</span> <span class="n">alid1</span><span class="p">,</span>
+                             <span class="n">cid2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alid2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">eff</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">eff</span><span class="p">,</span> <span class="n">ldw</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">ldw</span><span class="p">,</span>
+                             <span class="n">crefc</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">crefc</span><span class="p">,</span> <span class="n">crefs</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">crefs</span><span class="p">,</span>
+                             <span class="n">pllim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">pllim</span><span class="p">,</span> <span class="n">pulim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">pulim</span><span class="p">,</span>
+                             <span class="n">hmllim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">hmllim</span><span class="p">,</span> <span class="n">hmulim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">hmulim</span><span class="p">,</span>
+                             <span class="n">tqllim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">tqllim</span><span class="p">,</span> <span class="n">tqulim</span><span class="o">=</span><span class="n">aesurf</span><span class="o">.</span><span class="n">tqulim</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_aero</span><span class="p">:</span>
+        <span class="n">_asymmetrically_mirror_coords</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">aero_cids_set</span><span class="p">,</span> <span class="n">cid_offset</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">pop_parse_errors</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="_asymmetrically_mirror_coords2"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._asymmetrically_mirror_coords2">[docs]</a><span class="k">def</span> <span class="nf">_asymmetrically_mirror_coords2</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                                  <span class="n">cids_nominal_set</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                  <span class="n">cid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    We&#39;ll invert i, but not j, which will invert k.</span>
+
+<span class="sd">    This will allow us to mirror material coordinate systems (defined in x).</span>
+<span class="sd">    Additionally, we can mirror CGAP coordinate systems (defined in x) as well</span>
+<span class="sd">    as some arbitrary y-direction.  We&#39;ll try to make y look mirrored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="_asymmetrically_mirror_coords"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.mirror_mesh._asymmetrically_mirror_coords">[docs]</a><span class="k">def</span> <span class="nf">_asymmetrically_mirror_coords</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                                  <span class="n">cids_nominal_set</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                  <span class="n">cid_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;xz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;we&#39;ll leave i the same, flip j, and invert k&quot;&quot;&quot;</span>
+    <span class="c1"># doesn&#39;t handle CORD1x</span>
+
+    <span class="n">coord_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;CORD1R&#39;</span><span class="p">:</span> <span class="n">CORD1R</span><span class="p">,</span>
+        <span class="s1">&#39;CORD1C&#39;</span><span class="p">:</span> <span class="n">CORD1C</span><span class="p">,</span>
+        <span class="s1">&#39;CORD1S&#39;</span><span class="p">:</span> <span class="n">CORD1S</span><span class="p">,</span>
+
+        <span class="s1">&#39;CORD2R&#39;</span><span class="p">:</span> <span class="n">CORD2R</span><span class="p">,</span>
+        <span class="s1">&#39;CORD2C&#39;</span><span class="p">:</span> <span class="n">CORD2C</span><span class="p">,</span>
+        <span class="s1">&#39;CORD2S&#39;</span><span class="p">:</span> <span class="n">CORD2S</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">cids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cids_nominal_set</span><span class="p">)</span>
+    <span class="n">cids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;asymmetrically mirroring coordinate systems&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">cids</span><span class="p">:</span>
+
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Coord</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">cid_new</span> <span class="o">=</span> <span class="n">cid</span> <span class="o">+</span> <span class="n">cid_offset</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  cid=</span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s1"> -&gt; </span><span class="si">{</span><span class="n">cid_new</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">coord</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;CORD2R&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD2C&#39;</span><span class="p">,</span> <span class="s1">&#39;CORD2S&#39;</span><span class="p">}:</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">unused_k</span> <span class="o">=</span> <span class="n">coord</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">coord</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;xz&#39;</span><span class="p">:</span>
+                <span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">plane</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+                <span class="n">origin</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping coord_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">coord</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="c1">#k = np.cross(i, j)</span>
+            <span class="n">coord_obj</span> <span class="o">=</span> <span class="n">coord_map</span><span class="p">[</span><span class="n">coord</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>  <span class="c1"># CORD2R/C/S</span>
+            <span class="n">coord_new</span> <span class="o">=</span> <span class="n">coord_obj</span><span class="o">.</span><span class="n">add_ijk</span><span class="p">(</span><span class="n">cid_new</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">rid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;skipping coord_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">coord</span><span class="o">.</span><span class="n">cid</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">cid_new</span><span class="p">]</span> <span class="o">=</span> <span class="n">coord_new</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

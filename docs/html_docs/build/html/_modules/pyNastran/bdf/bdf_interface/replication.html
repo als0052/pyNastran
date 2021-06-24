@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.bdf_interface.replication &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.bdf_interface.replication</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.bdf_interface.replication</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines various utilities for replicated BDF parsing including:</span>
+<span class="sd"> - to_fields</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.utils</span> <span class="kn">import</span> <span class="n">expand_tabs</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.utils</span> <span class="kn">import</span> <span class="n">wipe_empty_fields</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.errors</span> <span class="kn">import</span> <span class="n">ReplicationError</span>
+
+
+<div class="viewcode-block" id="to_fields_replication"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication.to_fields_replication">[docs]</a><span class="k">def</span> <span class="nf">to_fields_replication</span><span class="p">(</span><span class="n">card_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a series of lines in a card into string versions of the field.</span>
+<span class="sd">    Handles large, small, and CSV formatted cards.  Same as to_fields, but</span>
+<span class="sd">    uses a different method to determine if it&#39;s large or small field format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lines : List[str]</span>
+<span class="sd">        the lines of the BDF card object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fields : List[str]</span>
+<span class="sd">        the string formatted fields of the card</span>
+
+<span class="sd">    .. warning:: this function is used by the reader and isn&#39;t intended</span>
+<span class="sd">                 to be called by a separate process</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       &gt;&gt;&gt; card_lines = [&#39;GRID,1,,1.0,2.0,3.0&#39;]</span>
+<span class="sd">       &gt;&gt;&gt; card_name = &#39;GRID&#39;</span>
+<span class="sd">       &gt;&gt;&gt; fields = to_fields_replication(lines)</span>
+<span class="sd">       &gt;&gt;&gt; fields</span>
+<span class="sd">       [&#39;GRID&#39;, &#39;1&#39;, &#39;&#39;, &#39;1.0&#39;, &#39;2.0&#39;, &#39;3.0&#39;]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print(&#39;to_fields_replicationA =&#39;, card_lines)</span>
+    <span class="c1">#line0 = card_lines[0]</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">iline</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">card_lines</span><span class="p">):</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">expand_tabs</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="c1">#print(&#39;  line = %r&#39; % line)</span>
+        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span>
+            <span class="n">sline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="c1">#print(&#39;sline = &#39;, iline, sline)</span>
+            <span class="k">if</span> <span class="n">iline</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">card_name</span> <span class="o">=</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1">#assert card_name != &#39;=&#39;, card_lines</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">card_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline</span><span class="p">)):</span>
+                    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline</span><span class="p">)):</span>
+                    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">,</span> <span class="n">line</span>
+            <span class="k">if</span> <span class="n">iline</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">card_name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="n">card_name</span> <span class="o">!=</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="n">card_lines</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">card_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">card_name</span><span class="p">:</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span>
+                               <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">72</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">24</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">],</span>
+                               <span class="n">line</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">40</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">56</span><span class="p">:</span><span class="mi">64</span><span class="p">],</span>
+                               <span class="n">line</span><span class="p">[</span><span class="mi">64</span><span class="p">:</span><span class="mi">72</span><span class="p">]])</span>
+    <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">card_name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ReplicationError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;* found in unexpected position; </span><span class="si">{</span><span class="n">card_name</span><span class="si">!r}</span><span class="se">\n</span><span class="s1">lines = </span><span class="si">{</span><span class="n">card_lines</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">wiped_fields</span> <span class="o">=</span> <span class="n">wipe_empty_fields</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">sfield</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1">#while &#39;= &#39; in sfield:</span>
+            <span class="c1">#sfield = field.replace(&#39;= &#39;,&#39;=&#39;)</span>
+            <span class="c1">#print(&#39;sfield=%r&#39; % sfield)</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">sfield</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;field=</span><span class="si">{</span><span class="n">sfield</span><span class="si">!r}</span><span class="s1"> has embedded blanks &#39;</span>
+                               <span class="sa">f</span><span class="s1">&#39;(mixed comma/space separated fields)</span><span class="se">\n</span><span class="s1">fields=</span><span class="si">{</span><span class="n">fields</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wiped_fields</span></div>
+
+<div class="viewcode-block" id="get_nrepeats"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication.get_nrepeats">[docs]</a><span class="k">def</span> <span class="nf">get_nrepeats</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">new_card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;=4, =(11)&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;field=</span><span class="si">{</span><span class="n">field</span><span class="si">!r}</span><span class="s1">; expected =(1), =2, ...</span><span class="se">\n</span><span class="s1">old_card=</span><span class="si">{</span><span class="n">old_card</span><span class="si">}</span><span class="se">\n</span><span class="s1">new_card=</span><span class="si">{</span><span class="n">new_card</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="s1">&#39;*&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">field</span> <span class="ow">or</span> <span class="s1">&#39;)&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">nrepeats</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fieldi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nrepeats</span></div>
+
+<div class="viewcode-block" id="float_replication"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication.float_replication">[docs]</a><span class="k">def</span> <span class="nf">float_replication</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_field</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;*4., *(11.5)&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;field=</span><span class="si">{</span><span class="n">field</span><span class="si">!r}</span><span class="s1">; expected *(1.), *2., ..., *11.&#39;</span>
+    <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">nfloat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fieldi</span><span class="p">)</span>
+    <span class="n">field2</span> <span class="o">=</span> <span class="n">nfloat</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">old_field</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">field2</span></div>
+
+<div class="viewcode-block" id="int_replication"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication.int_replication">[docs]</a><span class="k">def</span> <span class="nf">int_replication</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_field</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;*4, *(11)&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;field=</span><span class="si">{</span><span class="n">field</span><span class="si">!r}</span><span class="s1">; expected *(1), *2, ..., *11&#39;</span>
+    <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="k">assert</span> <span class="s1">&#39;)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+        <span class="n">fieldi</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">assert</span> <span class="s1">&#39;*&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldi</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">msg</span>
+    <span class="c1">#assert len(field) == 2, &#39;field=%r; expected *1, *2, *3, ..., *9&#39; % field</span>
+    <span class="c1"># integer</span>
+    <span class="n">nint</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fieldi</span><span class="p">)</span>
+    <span class="n">field2</span> <span class="o">=</span> <span class="n">nint</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">old_field</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">field2</span></div>
+
+<div class="viewcode-block" id="_field"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication._field">[docs]</a><span class="k">def</span> <span class="nf">_field</span><span class="p">(</span><span class="n">old_card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for replication&quot;&quot;&quot;</span>
+    <span class="c1">#if isinstance(old_card, list):</span>
+    <span class="c1">#print(old_card, ifield)</span>
+    <span class="n">field2</span> <span class="o">=</span> <span class="n">old_card</span><span class="p">[</span><span class="n">ifield</span><span class="p">]</span>
+    <span class="c1">#else:</span>
+        <span class="c1">#field2 = old_card.field(ifield)</span>
+    <span class="k">return</span> <span class="n">field2</span></div>
+
+<div class="viewcode-block" id="repeat_cards"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.replication.html#pyNastran.bdf.bdf_interface.replication.repeat_cards">[docs]</a><span class="k">def</span> <span class="nf">repeat_cards</span><span class="p">(</span><span class="n">old_card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">new_card</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;helper for replication&quot;&quot;&quot;</span>
+    <span class="n">card</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cards</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#print(&#39;*old_card = %s&#39; % old_card)</span>
+    <span class="c1">#print(&#39;*new_card = %s&#39; % new_card)</span>
+    <span class="k">assert</span> <span class="n">old_card</span> <span class="o">!=</span> <span class="n">new_card</span>
+    <span class="k">for</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_card</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">field2</span> <span class="o">=</span> <span class="n">_field</span><span class="p">(</span><span class="n">old_card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">)</span>
+            <span class="c1">#field2 = old_card.field(ifield)</span>
+            <span class="c1">#print(&#39; %i: %r -&gt; %r&#39; % (ifield, field, field2))</span>
+            <span class="c1">#assert field2 is None, &#39;field=%s field2=%s&#39; % (field, field2)</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field2</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1">#1. Duplication of fields from the preceding entry is accomplished</span>
+        <span class="c1">#   by coding the symbol =.</span>
+        <span class="c1">#2. Duplication of all trailing fields from the preceding entry is</span>
+        <span class="c1">#   accomplished by coding the symbol</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">field2</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;=&#39;</span><span class="p">:</span>
+            <span class="n">field2</span> <span class="o">=</span> <span class="n">_field</span><span class="p">(</span><span class="n">old_card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;==&#39;</span><span class="p">:</span>
+            <span class="c1"># just append the remaining fields</span>
+            <span class="c1">#print(&#39; %s : extending %s&#39; % (ifield, old_card[ifield:]))</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">old_card</span><span class="p">[</span><span class="n">ifield</span><span class="p">:])</span>
+            <span class="k">break</span>
+
+        <span class="k">elif</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+            <span class="c1"># this is an increment, not multiplication...</span>
+            <span class="n">old_field</span> <span class="o">=</span> <span class="n">_field</span><span class="p">(</span><span class="n">old_card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">)</span>
+            <span class="c1">#old_field = old_card.field(ifield)</span>
+            <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">old_field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;old_card:</span><span class="si">{</span><span class="n">old_card</span><span class="si">}</span><span class="se">\n</span><span class="s1">new_card:</span><span class="se">\n</span><span class="si">{</span><span class="n">new_card</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">field2</span> <span class="o">=</span> <span class="n">float_replication</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">old_field</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">old_field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;old_card:</span><span class="si">{</span><span class="n">old_card</span><span class="si">}</span><span class="se">\n</span><span class="s1">new_card:</span><span class="se">\n</span><span class="si">{</span><span class="n">new_card</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">field2</span> <span class="o">=</span> <span class="n">int_replication</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">old_field</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;field=</span><span class="si">{</span><span class="n">field</span><span class="si">!r}</span><span class="se">\n</span><span class="s1">old_card=</span><span class="si">{</span><span class="n">old_card</span><span class="si">}</span><span class="se">\n</span><span class="s1">new_card=</span><span class="si">{</span><span class="n">new_card</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">assert</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+            <span class="k">assert</span> <span class="s1">&#39;*&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+            <span class="k">assert</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="p">,</span> <span class="n">msg</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">field2</span>
+        <span class="c1">#print(&#39; %i: %r -&gt; %r&#39; % (ifield, field, field2))</span>
+        <span class="n">card</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field2</span><span class="p">)</span>
+    <span class="c1">#print(&#39; appending %s&#39; % card)</span>
+    <span class="n">cards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cards</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

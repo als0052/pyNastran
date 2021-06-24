@@ -1,0 +1,865 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.vector_utils &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.vector_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.vector_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines some methods for working with arrays:</span>
+<span class="sd"> - filter1d(a, b=None, zero_tol=0.001)</span>
+<span class="sd"> - where_searchsorted(a, v, side=&#39;left&#39;, x=None, y=None)</span>
+<span class="sd"> - sortedsum1d(ids, values, axis=None)</span>
+<span class="sd"> - iformat(format_old, precision=2)</span>
+<span class="sd"> - abs_max_min_global(values)</span>
+<span class="sd"> - abs_max_min_vector(values)</span>
+<span class="sd"> - abs_max_min(values, global_abs_max=True)</span>
+<span class="sd"> - principal_3d(o11, o22, o33, o12, o23, o13)</span>
+<span class="sd"> - transform_force(force_in_local,</span>
+<span class="sd">                   coord_out, coords,</span>
+<span class="sd">                   nid_cd, i_transform)</span>
+<span class="sd"> - transform_force_moment(force_in_local, moment_in_local,</span>
+<span class="sd">                          coord_out, coords,</span>
+<span class="sd">                          nid_cd, i_transform,</span>
+<span class="sd">                          xyz_cid0, summation_point_cid0=None,</span>
+<span class="sd">                          consider_rxf=True,</span>
+<span class="sd">                          debug=False, log=None)</span>
+<span class="sd"> - transform_force_moment_sum(force_in_local, moment_in_local,</span>
+<span class="sd">                              coord_out, coords,</span>
+<span class="sd">                              nid_cd, i_transform,</span>
+<span class="sd">                              xyz_cid0, summation_point_cid0=None,</span>
+<span class="sd">                              consider_rxf=True,</span>
+<span class="sd">                              debug=False, log=None)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">calcsize</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">arccos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">in1d</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">ndarray</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">CORDx</span> <span class="c1"># , CORD1R, CORD1C, CORD1S, CORD2R, CORD2C, CORD2S</span>
+
+
+<div class="viewcode-block" id="filter1d"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.filter1d">[docs]</a><span class="k">def</span> <span class="nf">filter1d</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zero_tol</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filters a 1d numpy array of values near 0.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : (n, ) float ndarray</span>
+<span class="sd">        a vector to compare</span>
+<span class="sd">    b : (n, ) float ndarray; default=None</span>
+<span class="sd">        another vector to compare</span>
+<span class="sd">        If b is defined, both a and b must be near 0 for a value to be removed.</span>
+<span class="sd">    zero_tol : float; default=0.001</span>
+<span class="sd">        the zero tolerance value</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    k : (m, ) int ndarray</span>
+<span class="sd">        the indices of the removed values</span>
+
+<span class="sd">    a = [1., 2., 0.1]</span>
+<span class="sd">    &gt;&gt;&gt; i = filter(a, zero_tol=0.5)</span>
+<span class="sd">    a[i]</span>
+<span class="sd">    &gt;&gt;&gt; [0, 1]</span>
+
+<span class="sd">    a = [1., 2., 0.1]</span>
+<span class="sd">    b = [1., -0.1, 0.1]</span>
+<span class="sd">    &gt;&gt;&gt; i = filter(a, b, zero_tol=0.5)</span>
+<span class="sd">    [0, 1]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">zero_tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">i</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s1">&#39;a.shape=</span><span class="si">%s</span><span class="s1"> b.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="s1">&#39;a.size=</span><span class="si">%s</span><span class="s1"> b.size=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">zero_tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">k</span></div>
+
+<div class="viewcode-block" id="where_searchsorted"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.where_searchsorted">[docs]</a><span class="k">def</span> <span class="nf">where_searchsorted</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implements a np.where that assumes a sorted array set.&quot;&quot;&quot;</span>
+    <span class="c1"># TODO: take advantage of searchsorted</span>
+    <span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span>
+    <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span>
+    <span class="k">assert</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">side</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">in1d</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span></div>
+
+<div class="viewcode-block" id="sortedsum1d"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.sortedsum1d">[docs]</a><span class="k">def</span> <span class="nf">sortedsum1d</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sums the values in a sorted 1d/2d array.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ids : (n, ) int ndarray</span>
+<span class="sd">        the integer values in a sorted order that indicate what is to</span>
+<span class="sd">        be summed</span>
+<span class="sd">    values : (n, m) float ndarray</span>
+<span class="sd">        the values to be summed</span>
+<span class="sd">        Presumably m is 2 because this function is intended to be used</span>
+<span class="sd">        for summing forces and moments</span>
+<span class="sd">    axis : None or int or tuple of ints, optional</span>
+<span class="sd">        Axis or axes along which a sum is performed. The default</span>
+<span class="sd">        (axis=None) is perform a sum over all the dimensions of the</span>
+<span class="sd">        input array. axis may be negative, in which case it counts</span>
+<span class="sd">        from the last to the first axis.</span>
+<span class="sd">        If this is a tuple of ints, a sum is performed on multiple</span>
+<span class="sd">        axes, instead of a single axis or all the axes as before.</span>
+
+<span class="sd">        Not actually supported...</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : (nunique, m) float ndarray</span>
+<span class="sd">        the summed values</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    **1D Example**</span>
+<span class="sd">    For an set  of arrays, there are 5 values in sorted order.</span>
+
+<span class="sd">    ..code-block :: python</span>
+
+<span class="sd">       ids = [1, 1, 2, 2, 3, 3, 3, 4, 5, 5, 5]</span>
+<span class="sd">       values = 1.0 * ids</span>
+
+<span class="sd">    We want to sum the values such that:</span>
+<span class="sd">    ..code-block :: python</span>
+<span class="sd">        out = [2.0, 4.0, 9.0, 4.0, 15.0]</span>
+
+<span class="sd">    **2D Example**</span>
+<span class="sd">    ..code-block :: python</span>
+
+<span class="sd">       ids = [1, 1, 2, 2, 3, 3, 3, 4, 5, 5, 5]</span>
+<span class="sd">       values = [</span>
+<span class="sd">           [1.0, 1.0, 2.0, 2.0, 3.0, 3.0],</span>
+<span class="sd">           [1.0, 1.0, 2.0, 2.0, 3.0, 3.0],</span>
+<span class="sd">       ]</span>
+
+
+<span class="sd">    values = 1.0 * ids</span>
+<span class="sd">    For 2D</span>
+
+<span class="sd">    .. todo::  This could probably be more efficient</span>
+<span class="sd">    .. todo::  Doesn&#39;t support axis</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">uids</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+    <span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">uids</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span> <span class="c1"># left is the default</span>
+    <span class="n">i2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">uids</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">i1i</span><span class="p">,</span> <span class="n">i2i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i1i</span><span class="p">:</span><span class="n">i2i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="iformat"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.iformat">[docs]</a><span class="k">def</span> <span class="nf">iformat</span><span class="p">(</span><span class="n">format_old</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts binary data types to size vector arrays.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    format_old : str</span>
+<span class="sd">        the int/float data types in single precision format</span>
+<span class="sd">    precision : int; default=2</span>
+<span class="sd">        the precision to convert to</span>
+<span class="sd">        1 : single precision (no conversion)</span>
+<span class="sd">        2 : double precision</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    format_new : str</span>
+<span class="sd">        the int/float data types in single/double precision format</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; iformat(&#39;8i6f10s&#39;, precision=1)</span>
+<span class="sd">    &#39;8i6f10s&#39;</span>
+<span class="sd">    &gt;&gt;&gt; iformat(&#39;8i6f10s&#39;, precision=2)</span>
+<span class="sd">    &#39;8l6d10q&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># double</span>
+        <span class="n">format_new</span> <span class="o">=</span> <span class="n">format_old</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">precision</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># single</span>
+        <span class="n">format_new</span> <span class="o">=</span> <span class="n">format_old</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span>
+    <span class="n">ndata</span> <span class="o">=</span> <span class="n">calcsize</span><span class="p">(</span><span class="n">format_new</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">format_new</span><span class="p">,</span> <span class="n">ndata</span></div>
+
+
+<div class="viewcode-block" id="abs_max_min_global"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.abs_max_min_global">[docs]</a><span class="k">def</span> <span class="nf">abs_max_min_global</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is useful for figuring out absolute max or min principal stresses</span>
+<span class="sd">    across single/multiple elements and finding a global max/min value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values: ndarray/listtuple</span>
+<span class="sd">        an ND-array of values;</span>
+<span class="sd">        common NDARRAY/list/tuple shapes:</span>
+<span class="sd">            1. [nprincipal_stresses]</span>
+<span class="sd">            2. [nelements, nprincipal_stresses]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    abs_max_mins: int/float</span>
+<span class="sd">        an array of the max or min principal stress</span>
+<span class="sd">        don&#39;t input mixed types</span>
+
+<span class="sd">    nvalues &gt;= 1</span>
+<span class="sd">      &gt;&gt;&gt; element1 = [0.0, -1.0, 2.0]  # 2.0</span>
+<span class="sd">      &gt;&gt;&gt; element2 = [0.0, -3.0, 2.0]  # -3.0</span>
+<span class="sd">      &gt;&gt;&gt; values = abs_max_min_global([element1, element2])</span>
+<span class="sd">      &gt;&gt;&gt; values</span>
+<span class="sd">      -3.0</span>
+
+<span class="sd">      &gt;&gt;&gt; element1 = [0.0, -1.0, 2.0]  # 2.0</span>
+<span class="sd">      &gt;&gt;&gt; values = abs_max_min_global([element1])</span>
+<span class="sd">      &gt;&gt;&gt; values</span>
+<span class="sd">      2.0</span>
+
+<span class="sd">    .. note:: [3.0,  2.0, -3.0] will return 3.0, and</span>
+<span class="sd">             [-3.0, 2.0,  3.0] will return 3.0</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># support lists/tuples</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># find the [max,</span>
+    <span class="c1">#           min]</span>
+    <span class="c1"># we organize it as [max, min], which is why the note applies</span>
+    <span class="c1"># we could make both of the edge cases return -3.0, but if you&#39;re using</span>
+    <span class="c1"># this function it shouldn&#39;t matter</span>
+    <span class="n">values2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">values</span><span class="o">.</span><span class="n">min</span><span class="p">()])</span>
+
+    <span class="c1"># we figure out the absolute max/min</span>
+    <span class="n">abs_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values2</span><span class="p">)</span>
+    <span class="n">abs_val</span> <span class="o">=</span> <span class="n">abs_vals</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="c1"># find the location of the absolute max value</span>
+    <span class="c1"># 1.  we take the first value (the where[0]) to chop the return value</span>
+    <span class="c1">#     since there is no else conditional</span>
+    <span class="c1"># 2.  we take the first value (the where[0][0]) to only get the max</span>
+    <span class="c1">#     value if 2+ values are returned</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">abs_val</span> <span class="o">==</span> <span class="n">abs_vals</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># get the raw value from the absoluted value, so:</span>
+    <span class="c1"># value = npabs(raw_value)</span>
+    <span class="k">return</span> <span class="n">values2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="abs_max_min_vector"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.abs_max_min_vector">[docs]</a><span class="k">def</span> <span class="nf">abs_max_min_vector</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is useful for figuring out principal stresses across multiple</span>
+<span class="sd">    elements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values: ndarray/listtuple</span>
+<span class="sd">        an array of values, where the rows are interated over</span>
+<span class="sd">        and the columns are going to be compressed</span>
+
+<span class="sd">        common NDARRAY/list/tuple shapes:</span>
+<span class="sd">            1. [nprincipal_stresses]</span>
+<span class="sd">            2. [nelements, nprincipal_stresses]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    abs_max_mins: NDARRAY shape=[nelements] with dtype=values.dtype</span>
+<span class="sd">        an array of the max or min principal stress</span>
+<span class="sd">        don&#39;t input mixed types</span>
+
+<span class="sd">    ::</span>
+<span class="sd">       &gt;&gt;&gt; element1 = [0.0,  1.0, 2.0]  # 2.0</span>
+<span class="sd">       &gt;&gt;&gt; element2 = [0.0, -1.0, 2.0]  # 2.0</span>
+<span class="sd">       &gt;&gt;&gt; element3 = [0.0, -3.0, 2.0]  # -3.0</span>
+<span class="sd">       &gt;&gt;&gt; values = [element1 element2, element3]</span>
+<span class="sd">       &gt;&gt;&gt; values0 = abs_max_min_vectorized(values)</span>
+<span class="sd">       &gt;&gt;&gt; values0</span>
+<span class="sd">       [2.0, 2.0, -3.0]</span>
+
+<span class="sd">    .. note:: [3.0,  2.0, -3.0] will return 3.0, and</span>
+<span class="sd">              [-3.0, 2.0,  3.0] will return 3.0</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># support lists/tuples</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># find the [maxs,</span>
+    <span class="c1">#           mins]</span>
+    <span class="c1"># we organize it as [maxs, mins], which is why the note applies</span>
+    <span class="c1"># we could make both of the edge cases return -3.0, but if you&#39;re using</span>
+    <span class="c1"># this function it shouldn&#39;t matter</span>
+    <span class="n">maxs_mins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">values</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+
+    <span class="c1"># we figure out the absolute max/min for each row</span>
+    <span class="n">abs_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">maxs_mins</span><span class="p">)</span>
+    <span class="n">absolute_maxs</span> <span class="o">=</span> <span class="n">abs_vals</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">outs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">absolute_maxs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">absolute_max</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">absolute_maxs</span><span class="p">):</span>
+        <span class="c1"># find the location of the absolute max value</span>
+        <span class="c1"># 1.  we take the first value (the where[0]) to chop the return value</span>
+        <span class="c1">#     since there is no else conditional</span>
+        <span class="c1"># 2.  we take the first value (the where[0][0]) to only get the max</span>
+        <span class="c1">#     value if 2+ values are returned</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">absolute_max</span> <span class="o">==</span> <span class="n">abs_vals</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># get the raw value from the absoluted value, so:</span>
+        <span class="c1"># value = npabs(raw_value)</span>
+        <span class="n">outs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxs_mins</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">outs</span></div>
+
+
+<div class="viewcode-block" id="abs_max_min"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.abs_max_min">[docs]</a><span class="k">def</span> <span class="nf">abs_max_min</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">global_abs_max</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the maximum value of x and -x.</span>
+<span class="sd">    This is used for getting the max/min principal stress.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">global_abs_max</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">abs_max_min_global</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">abs_max_min_vector</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+
+<span class="c1"># def principal_2d(o11, o22, o12):</span>
+    <span class="c1"># oxx = 5</span>
+    <span class="c1"># return oxx, oy</span>
+
+
+<div class="viewcode-block" id="principal_3d"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.principal_3d">[docs]</a><span class="k">def</span> <span class="nf">principal_3d</span><span class="p">(</span><span class="n">o11</span><span class="p">,</span> <span class="n">o22</span><span class="p">,</span> <span class="n">o33</span><span class="p">,</span> <span class="n">o12</span><span class="p">,</span> <span class="n">o23</span><span class="p">,</span> <span class="n">o13</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;http://www.continuummechanics.org/cm/principalstrain.html&quot;&quot;&quot;</span>
+    <span class="c1"># e = a</span>
+    <span class="n">i1</span> <span class="o">=</span> <span class="n">o11</span> <span class="o">+</span> <span class="n">o22</span> <span class="o">+</span> <span class="n">o33</span>
+    <span class="n">i2</span> <span class="o">=</span> <span class="n">o11</span><span class="o">*</span><span class="n">o22</span> <span class="o">+</span> <span class="n">o22</span><span class="o">*</span><span class="n">o33</span> <span class="o">+</span> <span class="n">o11</span><span class="o">*</span><span class="n">o33</span> <span class="o">-</span> <span class="n">o12</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">o13</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">o23</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">i3</span> <span class="o">=</span> <span class="n">o11</span><span class="o">*</span><span class="n">o22</span><span class="o">*</span><span class="n">o33</span> <span class="o">-</span> <span class="n">o11</span><span class="o">*</span><span class="n">o23</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">o22</span><span class="o">*</span><span class="n">o13</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">o12</span><span class="o">*</span><span class="n">o13</span><span class="o">*</span><span class="n">o23</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">i2</span> <span class="o">-</span> <span class="n">i1</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">i1</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">9</span><span class="o">*</span><span class="n">i1</span><span class="o">*</span><span class="n">i2</span> <span class="o">+</span> <span class="mi">27</span><span class="o">*</span><span class="n">i3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">54.</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">arccos</span><span class="p">(</span><span class="n">R</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">Q</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">q2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">Q</span><span class="p">)</span>
+    <span class="n">i13</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">i1</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">q2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">i13</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">q2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span> <span class="o">+</span> <span class="n">i13</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">q2</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span> <span class="o">+</span> <span class="n">i13</span>
+    <span class="n">max_min_mid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">])</span>
+    <span class="n">pmax</span> <span class="o">=</span> <span class="n">max_min_mid</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pmin</span> <span class="o">=</span> <span class="n">max_min_mid</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pmax</span><span class="p">,</span> <span class="n">pmin</span></div>
+
+
+<div class="viewcode-block" id="transform_force"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.transform_force">[docs]</a><span class="k">def</span> <span class="nf">transform_force</span><span class="p">(</span><span class="n">force_in_local</span><span class="p">,</span>
+                    <span class="n">coord_out</span><span class="p">:</span> <span class="n">CORDx</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">CORDx</span><span class="p">],</span>
+                    <span class="n">nid_cd</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">unused_icd_transform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms force/moment from global to local and returns all the forces.</span>
+
+<span class="sd">    Supports cylindrical/spherical coordinate systems.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    force : (N, 3) ndarray</span>
+<span class="sd">        forces in the local frame</span>
+<span class="sd">    coord_out : CORD()</span>
+<span class="sd">        the desired local frame</span>
+<span class="sd">    coords : dict[int] = CORDx</span>
+<span class="sd">        all the coordinate systems</span>
+<span class="sd">        key : int</span>
+<span class="sd">        value : CORDx</span>
+<span class="sd">    nid_cd : (M, 2) int ndarray</span>
+<span class="sd">        the (BDF.point_ids, cd) array</span>
+<span class="sd">    icd_transform : dict[cd] = (Mi, ) int ndarray</span>
+<span class="sd">        the mapping for nid_cd</span>
+
+<span class="sd">    .. warning:: the function signature will change...</span>
+<span class="sd">    .. todo:: sum of moments about a point must have an rxF term to get the</span>
+<span class="sd">               same value as Patran.</span>
+
+<span class="sd">    Fglobal = Flocal @ T</span>
+<span class="sd">    Flocal = T.T @ Fglobal</span>
+<span class="sd">    Flocal2 = T2.T @ (Flocal1 @ T1)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">force_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">force_in_local</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">force_in_local</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1">#nids = nid_cd[:, 0]</span>
+    <span class="n">cds</span> <span class="o">=</span> <span class="n">nid_cd</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ucds</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">cds</span><span class="p">)</span>
+
+    <span class="n">coord_out_cid</span> <span class="o">=</span> <span class="n">coord_out</span><span class="o">.</span><span class="n">cid</span>
+    <span class="n">coord_out_T</span> <span class="o">=</span> <span class="n">coord_out</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">cd</span> <span class="ow">in</span> <span class="n">ucds</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cds</span> <span class="o">==</span> <span class="n">cd</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#nidsi = nids[i]</span>
+        <span class="n">analysis_coord</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">cd</span><span class="p">]</span>
+        <span class="n">cd_T</span> <span class="o">=</span> <span class="n">analysis_coord</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span>
+
+        <span class="c1"># rxF from local_in to global to local_out</span>
+        <span class="n">force_in_locali</span> <span class="o">=</span> <span class="n">force_in_local</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">force_in_globali</span> <span class="o">=</span> <span class="n">force_in_locali</span> <span class="o">@</span> <span class="n">cd_T</span>
+        <span class="n">force_outi</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord_out_T</span> <span class="o">@</span> <span class="n">force_in_globali</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">force_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">force_outi</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">force_out</span></div>
+
+
+<div class="viewcode-block" id="transform_force_moment"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.transform_force_moment">[docs]</a><span class="k">def</span> <span class="nf">transform_force_moment</span><span class="p">(</span><span class="n">force_in_local</span><span class="p">,</span> <span class="n">moment_in_local</span><span class="p">,</span>
+                           <span class="n">coord_out</span><span class="p">:</span> <span class="n">CORDx</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">CORDx</span><span class="p">],</span>
+                           <span class="n">nid_cd</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">icd_transform</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">],</span>
+                           <span class="n">xyz_cid0</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">summation_point_cid0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">consider_rxf</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms force/moment from global to local and returns all the forces.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    force_in_local : (N, 3) ndarray</span>
+<span class="sd">        forces in the local frame</span>
+<span class="sd">    moment_in_local : (N, 3) ndarray</span>
+<span class="sd">        moments in the local frame</span>
+<span class="sd">    coord_out : CORDx()</span>
+<span class="sd">        the desired local frame</span>
+<span class="sd">    coords : dict[int] = CORDx</span>
+<span class="sd">        all the coordinate systems</span>
+<span class="sd">        key : int</span>
+<span class="sd">        value : CORDx</span>
+<span class="sd">    nid_cd : (M, 2) int ndarray</span>
+<span class="sd">        the (BDF.point_ids, cd) array</span>
+<span class="sd">    icd_transform : dict[cd] = (Mi, ) int ndarray</span>
+<span class="sd">        the mapping for nid_cd</span>
+<span class="sd">    xyz_cid0 : (n, 3) ndarray</span>
+<span class="sd">        the nodes in the global frame</span>
+<span class="sd">    summation_point_cid0 : (3, ) ndarray</span>
+<span class="sd">        the summation point in the global frame???</span>
+<span class="sd">    consider_rxf : bool; default=True</span>
+<span class="sd">        considers the r x F term</span>
+<span class="sd">    debug : bool; default=False</span>
+<span class="sd">        debugging flag</span>
+<span class="sd">    log : log; default=None</span>
+<span class="sd">        a log object that gets used when debug=True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    force_out : (n, 3) float ndarray</span>
+<span class="sd">        the ith float components in the coord_out coordinate frame</span>
+<span class="sd">    moment_out : (n, 3) float ndarray</span>
+<span class="sd">        the ith moment components about the summation point in the</span>
+<span class="sd">        coord_out coordinate frame</span>
+
+<span class="sd">    .. todo:: doesn&#39;t seem to handle cylindrical/spherical systems</span>
+
+<span class="sd">    https://flexiblelearning.auckland.ac.nz/sportsci303/13_3/forceplate_manual.pdf</span>
+
+<span class="sd">    xyz0 = T_1_to_0 @ xyz1</span>
+<span class="sd">    xyz1 = T_1_to_0.T @ xyz0</span>
+
+<span class="sd">    xyz2 = T_2_to_0.T @ xyz0</span>
+<span class="sd">    xyz2 = T_2_to_0.T @ T_1_to_0 @ xyz1</span>
+
+<span class="sd">    xyz_g = T_a2g @ xyz_a</span>
+<span class="sd">    xyz_g = T_b2g @ xyz_b</span>
+<span class="sd">    T_b2g @ xyz_b = T_a2g @ xyz_a</span>
+<span class="sd">    xyz_b = T_b2g.T @ T_a2g @ xyz_a = T_g2b @ T_a2g @ xyz_a</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print(&#39;consider_rxf =&#39;, consider_rxf)</span>
+    <span class="c1">#debug = True</span>
+    <span class="k">assert</span> <span class="n">log</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">nid_cd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">force_in_local</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">force_in_local</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="c1">#dtype = &#39;float64&#39;</span>
+
+    <span class="n">force_in_local_sum</span> <span class="o">=</span> <span class="n">force_in_local</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">force_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">force_in_local</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">moment_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">force_in_local</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">nids</span> <span class="o">=</span> <span class="n">nid_cd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">cds</span> <span class="o">=</span> <span class="n">nid_cd</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="c1">#* 0</span>
+    <span class="n">ucds</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">cds</span><span class="p">)</span>
+
+    <span class="c1">#coord_out_cid = coord_out.cid</span>
+    <span class="n">beta_out</span> <span class="o">=</span> <span class="n">coord_out</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;beta_out =</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">beta_out</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">coord_out</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">consider_rxf</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xyz_cid0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;***i=</span><span class="si">%s</span><span class="s1"> xyz=</span><span class="si">%s</span><span class="s1"> nid=</span><span class="si">%s</span><span class="s1"> cd=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">ii</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="p">:],</span> <span class="n">nid_cd</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nid_cd</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;------------&#39;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ucds = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ucds</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">consider_rxf</span> <span class="ow">and</span> <span class="n">summation_point_cid0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">summation_point_cid0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+    <span class="c1">#eye = np.eye(3, dtype=beta_cd.dtype)</span>
+    <span class="k">for</span> <span class="n">cd</span> <span class="ow">in</span> <span class="n">ucds</span><span class="p">:</span>
+        <span class="c1">#log.debug(&#39;cd = %s&#39; % cd)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cds</span> <span class="o">==</span> <span class="n">cd</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nidsi</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">analysis_coord</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">cd</span><span class="p">]</span>
+        <span class="n">beta_cd</span> <span class="o">=</span> <span class="n">analysis_coord</span><span class="o">.</span><span class="n">beta</span><span class="p">()</span>
+
+        <span class="n">force_in_locali</span> <span class="o">=</span> <span class="o">-</span><span class="n">force_in_local</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">moment_in_locali</span> <span class="o">=</span> <span class="o">-</span><span class="n">moment_in_local</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1">#if 0 and np.array_equal(beta_cd, eye):</span>
+        <span class="n">force_in_globali</span> <span class="o">=</span> <span class="n">force_in_locali</span>
+        <span class="n">moment_in_globali</span> <span class="o">=</span> <span class="n">moment_in_locali</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="c1">#log.debug(&#39;analysis_coord =\n%s&#39; % analysis_coord)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;beta_cd =</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">beta_cd</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;i = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_local = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_local</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_local.sum() = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_local_sum</span><span class="p">)</span>
+        <span class="c1">#force_in_locali.astype(&#39;float64&#39;)</span>
+        <span class="c1">#moment_in_locali.astype(&#39;float64&#39;)</span>
+
+        <span class="c1"># rotate loads from an arbitrary coordinate system to local xyz</span>
+        <span class="k">if</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">analysis_coord</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">force_in_locali</span><span class="p">)</span>
+            <span class="n">force_in_locali</span> <span class="o">=</span> <span class="n">analysis_coord</span><span class="o">.</span><span class="n">coord_to_xyz_array</span><span class="p">(</span><span class="n">force_in_locali</span><span class="p">)</span>
+            <span class="n">moment_in_locali</span> <span class="o">=</span> <span class="n">analysis_coord</span><span class="o">.</span><span class="n">coord_to_xyz_array</span><span class="p">(</span><span class="n">moment_in_locali</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;i = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nids = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nidsi</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_input = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_locali</span><span class="p">)</span>
+
+        <span class="c1"># rotate the forces/moments into a coordinate system coincident</span>
+        <span class="c1"># with the local frame and with the same primary directions</span>
+        <span class="c1"># as the global frame</span>
+        <span class="n">force_in_globali</span> <span class="o">=</span> <span class="n">force_in_locali</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta_cd</span><span class="p">)</span>
+        <span class="n">moment_in_globali</span> <span class="o">=</span> <span class="n">moment_in_locali</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta_cd</span><span class="p">)</span>
+
+        <span class="c1"># rotate the forces and moments into a coordinate system coincident</span>
+        <span class="c1"># with the output frame and with the same primary directions</span>
+        <span class="c1"># as the output frame</span>
+
+        <span class="c1">#if 0 and np.array_equal(beta_out, eye):</span>
+            <span class="c1">#force_outi = force_in_globali</span>
+            <span class="c1">#moment_outi = moment_in_globali</span>
+        <span class="n">force_outi</span> <span class="o">=</span> <span class="n">force_in_globali</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta_out</span><span class="p">)</span>
+        <span class="n">moment_outi</span> <span class="o">=</span> <span class="n">moment_in_globali</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta_out</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="c1">#if show_local:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_locali = </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_locali</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_globali = </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_globali</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_locali.sum()  = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_locali</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_in_globali.sum() = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_in_globali</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_outi = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_outi</span><span class="p">)</span>
+            <span class="c1">#log.debug(&#39;moment_outi = %s&#39; % moment_outi)</span>
+
+        <span class="c1"># these are in the local XYZ coordinates</span>
+        <span class="c1"># we&#39;ll do the final transform later</span>
+        <span class="n">force_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">force_outi</span>
+        <span class="n">moment_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">moment_outi</span>
+
+        <span class="c1"># Now we need to consider the &quot;r x F&quot; term.</span>
+        <span class="c1"># We calculate it in the global xyz frame about the summation</span>
+        <span class="c1"># point.  Then we transform it to the output XYZ frame</span>
+        <span class="k">if</span> <span class="n">consider_rxf</span><span class="p">:</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">xyz_cid0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">summation_point_cid0</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">rxf</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">force_in_globali</span><span class="p">)</span>
+
+            <span class="n">rxf_in_cid</span> <span class="o">=</span> <span class="n">rxf</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta_out</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;delta_moment = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">delta</span><span class="p">)</span>
+                <span class="c1">#log.debug(&#39;rxf = %s&#39; % rxf.T)</span>
+                <span class="c1">#log.debug(&#39;rxf_in_cid = %s&#39; % rxf_in_cid)</span>
+
+            <span class="n">moment_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">rxf_in_cid</span>
+
+    <span class="c1"># rotate loads from the local XYZ to an arbitrary coordinate system</span>
+    <span class="c1"># flip the sign of the output to be consistent with Patran</span>
+    <span class="c1">#force_out2 = -coord_out.xyz_to_coord_array(force_out)</span>
+    <span class="c1">#moment_out2 = -coord_out.xyz_to_coord_array(moment_out)</span>
+    <span class="c1">#return force_out2, moment_out2</span>
+    <span class="k">return</span> <span class="n">force_out</span><span class="p">,</span> <span class="n">moment_out</span></div>
+
+
+<div class="viewcode-block" id="transform_force_moment_sum"><a class="viewcode-back" href="../../../reference/op2/pyNastran.op2.vector_utils.html#pyNastran.op2.vector_utils.transform_force_moment_sum">[docs]</a><span class="k">def</span> <span class="nf">transform_force_moment_sum</span><span class="p">(</span><span class="n">force_in_local</span><span class="p">,</span> <span class="n">moment_in_local</span><span class="p">,</span>
+                               <span class="n">coord_out</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span>
+                               <span class="n">nid_cd</span><span class="p">,</span> <span class="n">icd_transform</span><span class="p">,</span>
+                               <span class="n">xyz_cid0</span><span class="p">,</span> <span class="n">summation_point_cid0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                               <span class="n">consider_rxf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms force/moment from global to local and returns a sum of forces/moments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    force_in_local : (N, 3) ndarray</span>
+<span class="sd">        forces in the local frame</span>
+<span class="sd">    moment_in_local : (N, 3) ndarray</span>
+<span class="sd">        moments in the local frame</span>
+<span class="sd">    coord_out : CORDx()</span>
+<span class="sd">        the desired local frame</span>
+<span class="sd">    coords : dict[int] = CORDx</span>
+<span class="sd">        all the coordinate systems</span>
+<span class="sd">        key : int</span>
+<span class="sd">        value : CORDx</span>
+<span class="sd">    nid_cd : (M, 2) int ndarray</span>
+<span class="sd">        the (BDF.point_ids, cd) array</span>
+<span class="sd">    icd_transform : dict[cd] = (Mi, ) int ndarray</span>
+<span class="sd">        the mapping for nid_cd</span>
+<span class="sd">    xyz_cid0 : (nnodes + nspoints + nepoints, 3) ndarray</span>
+<span class="sd">        the grid locations in coordinate system 0</span>
+<span class="sd">    summation_point_cid0 : (3, ) ndarray</span>
+<span class="sd">        the summation point in the global frame</span>
+<span class="sd">    consider_rxf : bool; default=True</span>
+<span class="sd">        considers the r x F term</span>
+<span class="sd">    debug : bool; default=False</span>
+<span class="sd">        debugging flag</span>
+<span class="sd">    log : log; default=None</span>
+<span class="sd">        a log object that gets used when debug=True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    force_out : (n, 3) float ndarray</span>
+<span class="sd">        the ith float components in the coord_out coordinate frame</span>
+<span class="sd">    moment_out : (n, 3) float ndarray</span>
+<span class="sd">        the ith moment components about the summation point in the coord_out coordinate frame</span>
+<span class="sd">    force_out_sum : (3, ) float ndarray</span>
+<span class="sd">        the sum of forces in the coord_out coordinate frame</span>
+<span class="sd">    moment_out_sum : (3, ) float ndarray</span>
+<span class="sd">        the sum of moments about the summation point in the coord_out coordinate frame</span>
+
+<span class="sd">    .. todo:: doesn&#39;t seem to handle cylindrical/spherical systems</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">log</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">transform_force_moment</span><span class="p">(</span>
+        <span class="n">force_in_local</span><span class="p">,</span> <span class="n">moment_in_local</span><span class="p">,</span>
+        <span class="n">coord_out</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">nid_cd</span><span class="p">,</span>
+        <span class="n">icd_transform</span><span class="p">,</span> <span class="n">xyz_cid0</span><span class="p">,</span>
+        <span class="n">summation_point_cid0</span><span class="o">=</span><span class="n">summation_point_cid0</span><span class="p">,</span> <span class="n">consider_rxf</span><span class="o">=</span><span class="n">consider_rxf</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="n">force_out</span><span class="p">,</span> <span class="n">moment_out</span> <span class="o">=</span> <span class="n">out</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;force_sum = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">force_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">consider_rxf</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;moment_sum = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">moment_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">force_out</span><span class="p">,</span> <span class="n">moment_out</span><span class="p">,</span> <span class="n">force_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">moment_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

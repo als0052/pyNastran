@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.free_faces &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.free_faces</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.free_faces</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - get_element_faces(model, element_ids=None)</span>
+<span class="sd"> - get_solid_skin_faces(model)</span>
+<span class="sd"> - write_skin_solid_faces(model, skin_filename,</span>
+<span class="sd">                          write_solids=False, write_shells=True,</span>
+<span class="sd">                          size=8, is_double=False, encoding=None)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">read_bdf</span><span class="p">,</span> <span class="n">BDF</span>
+
+<div class="viewcode-block" id="get_element_faces"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.free_faces.get_element_faces">[docs]</a><span class="k">def</span> <span class="nf">get_element_faces</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">element_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the elements and faces that are skinned from solid elements.</span>
+<span class="sd">    This includes internal faces.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the BDF object</span>
+<span class="sd">    element_ids : List[int] / None</span>
+<span class="sd">        skin a subset of element faces</span>
+<span class="sd">        default=None -&gt; all elements</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eid_faces : (int, List[(int, int, ...)])</span>
+<span class="sd">       value1 : element id</span>
+<span class="sd">       value2 : face</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">element_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">element_ids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element_ids</span>
+
+    <span class="n">eid_faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">element_ids</span><span class="p">:</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPYRAM&#39;</span><span class="p">]:</span>
+            <span class="n">faces</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">faces</span>
+            <span class="c1">#print(faces)</span>
+            <span class="k">for</span> <span class="n">face_id</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">face</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;There is a None in the face.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;face_id=</span><span class="si">%s</span><span class="s1"> face=</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">face</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">eid_faces</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">eid</span><span class="p">,</span> <span class="n">face</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">eid_faces</span></div>
+
+
+<div class="viewcode-block" id="get_solid_skin_faces"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.free_faces.get_solid_skin_faces">[docs]</a><span class="k">def</span> <span class="nf">get_solid_skin_faces</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the elements and faces that are skinned from solid elements</span>
+<span class="sd">    This doesn&#39;t include internal faces.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the BDF object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eid_set : Dict[tuple(int, int, ...)] = List[int]</span>
+<span class="sd">       key : sorted face</span>
+<span class="sd">       value : list of element ids with that face</span>
+<span class="sd">    face_map : Dict[tuple(int, int, ...)] = List[int]</span>
+<span class="sd">       key : sorted face</span>
+<span class="sd">       value : unsorted face</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eid_faces</span> <span class="o">=</span> <span class="n">get_element_faces</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">face_set</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">eid_set</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">face_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">eid_faces</span><span class="p">:</span>
+        <span class="c1">#print(eid, face)</span>
+        <span class="n">raw_face</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;face = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">face</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="n">tface</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+        <span class="c1">#print(tface)</span>
+        <span class="n">face_set</span><span class="p">[</span><span class="n">tface</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">eid_set</span><span class="p">[</span><span class="n">tface</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="n">face_map</span><span class="p">[</span><span class="n">tface</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_face</span>
+
+    <span class="c1">#print(&#39;eid_set:&#39;)</span>
+    <span class="c1">#for tface, eidset in eid_set.items():</span>
+        <span class="c1">#print(tface, eidset)</span>
+
+    <span class="c1">#print(&#39;face_set:&#39;)</span>
+    <span class="c1">#for tface, faceset in face_set.items():</span>
+        <span class="c1">#print(tface, faceset)</span>
+
+    <span class="c1">#print(&#39;face_map:&#39;)</span>
+    <span class="c1">#for tface, facemap in face_map.items():</span>
+        <span class="c1">#print(tface, facemap)</span>
+
+    <span class="n">del_faces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">face_count</span> <span class="ow">in</span> <span class="n">face_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">face_count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">del_faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">del_faces</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">face_set</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">eid_set</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">eid_set</span><span class="p">,</span> <span class="n">face_map</span></div>
+
+
+<div class="viewcode-block" id="write_skin_solid_faces"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.free_faces.write_skin_solid_faces">[docs]</a><span class="k">def</span> <span class="nf">write_skin_solid_faces</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">skin_filename</span><span class="p">,</span>
+                           <span class="n">write_solids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">punch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes the skinned elements</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF() or str</span>
+<span class="sd">        BDF : the BDF object</span>
+<span class="sd">        str : bdf_filename and the read_bdf method is called</span>
+<span class="sd">    skin_filename : str</span>
+<span class="sd">        the file to write</span>
+<span class="sd">    write_solids : bool; default=False</span>
+<span class="sd">        write solid elements that have skinned faces</span>
+<span class="sd">    write_shells : bool; default=False</span>
+<span class="sd">        write shell elements</span>
+<span class="sd">    size : int; default=8</span>
+<span class="sd">        the field width</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        double precision flag</span>
+<span class="sd">    encoding : str; default=None -&gt; system default</span>
+<span class="sd">        the string encoding</span>
+<span class="sd">    log : logger; default=None</span>
+<span class="sd">        a python logging object</span>
+<span class="sd">    punch : bool; default=False</span>
+<span class="sd">        is this a punch file; should  be used by the read_bdf if model is a string</span>
+<span class="sd">        unused</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">read_bdf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">element_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">material_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span>
+       <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">property_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;returning due to no elements/materials/properties</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;  nelements=</span><span class="si">%s</span><span class="s1"> nmaterials=</span><span class="si">%s</span><span class="s1"> nproperties=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">element_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">material_ids</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">property_ids</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">eid_set</span><span class="p">,</span> <span class="n">face_map</span> <span class="o">=</span> <span class="n">get_solid_skin_faces</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">eid_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;returning due to no elements in set&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">eid_set_to_write</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">nid_set_to_write</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">mid_set_to_write</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">write_solids</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">eids</span> <span class="ow">in</span> <span class="n">eid_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">eid_set_to_write</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="c1"># PSOLID</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+                <span class="c1">#print(prop)</span>
+                <span class="n">nid_set_to_write</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+                <span class="n">mid_set_to_write</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+                <span class="c1">#print(&#39;added_mid (a) =&#39;, mid)</span>
+    <span class="k">elif</span> <span class="n">write_shells</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">eids</span> <span class="ow">in</span> <span class="n">eid_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">eid_set_to_write</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+            <span class="n">nid_set_to_write</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">:</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span> <span class="c1"># PSOLID</span>
+                <span class="c1">#print(prop)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1">#print(prop.mid)</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+                    <span class="n">mid_set_to_write</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+                    <span class="c1">#print(&#39;added eid=%s pid=%s mid=%s (b)&#39; % (eid, pid, mid))</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;write_solids=False write_shells=False&#39;</span><span class="p">)</span>
+
+    <span class="n">eids_to_write</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">eid_set_to_write</span><span class="p">)</span>
+    <span class="n">nids_to_write</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nid_set_to_write</span><span class="p">)</span>
+    <span class="n">mids_to_write</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mid_set_to_write</span><span class="p">)</span>
+
+    <span class="c1">#element_ids_to_delete = set(model.element_ids) - eids_to_write</span>
+
+    <span class="n">eid_shell</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">pid_shell</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">mid_shell</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">_write_skin_solid_faces</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">skin_filename</span><span class="p">,</span> <span class="n">face_map</span><span class="p">,</span>
+                            <span class="n">nids_to_write</span><span class="p">,</span> <span class="n">eids_to_write</span><span class="p">,</span> <span class="n">mids_to_write</span><span class="p">,</span> <span class="n">eid_set</span><span class="p">,</span>
+                            <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span><span class="p">,</span> <span class="n">mid_shell</span><span class="p">,</span>
+                            <span class="n">write_solids</span><span class="o">=</span><span class="n">write_solids</span><span class="p">,</span> <span class="n">write_shells</span><span class="o">=</span><span class="n">write_shells</span><span class="p">,</span>
+                            <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_write_skin_solid_faces"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.free_faces._write_skin_solid_faces">[docs]</a><span class="k">def</span> <span class="nf">_write_skin_solid_faces</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">skin_filename</span><span class="p">,</span> <span class="n">face_map</span><span class="p">,</span>
+                            <span class="n">nids_to_write</span><span class="p">,</span> <span class="n">eids_to_write</span><span class="p">,</span> <span class="n">mids_to_write</span><span class="p">,</span> <span class="n">eid_set</span><span class="p">,</span>
+                            <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span><span class="p">,</span> <span class="n">mid_shell</span><span class="p">,</span>
+                            <span class="n">write_solids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write_shells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    helper method for ``write_skin_solid_faces``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        the BDF object</span>
+<span class="sd">    skin_filename : str</span>
+<span class="sd">        the file to write</span>
+<span class="sd">    face_map : dict[sorted_face] : face</span>
+<span class="sd">        sorted_face : List[int, int, int] / List[int, int, int, int]</span>
+<span class="sd">        face : List[int, int, int] / List[int, int, int, int]</span>
+<span class="sd">    nids_to_write : List[int, int, ...]</span>
+<span class="sd">        list of node ids to write</span>
+<span class="sd">    eids_to_write : List[int, int, ...]</span>
+<span class="sd">        list of element ids to write</span>
+<span class="sd">    mids_to_write : List[int, int, ...]</span>
+<span class="sd">        list of material ids to write</span>
+<span class="sd">    eid_set : Set[int]</span>
+<span class="sd">        is the type right???</span>
+<span class="sd">    eid_shell : int</span>
+<span class="sd">        the next id to use for the shell id</span>
+<span class="sd">    pid_shell : int</span>
+<span class="sd">        the next id to use for the shell property</span>
+<span class="sd">    mid_shell : int</span>
+<span class="sd">        the next id to use for the shell material</span>
+<span class="sd">    write_solids : bool; default=False</span>
+<span class="sd">        write solid elements that have skinned faces</span>
+<span class="sd">    write_shells : bool; default=True</span>
+<span class="sd">        write shell elements</span>
+<span class="sd">    size : int; default=/8</span>
+<span class="sd">        the field width</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        double precision flag</span>
+<span class="sd">    encoding : str; default=None -&gt; system default</span>
+<span class="sd">        the string encoding</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#encoding = model.get_encoding(encoding)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">skin_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bdf_file</span><span class="p">:</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ pyNastran: punch=True</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">nids_to_write</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">cid</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">coord</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">write_solids</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">eids_to_write</span><span class="p">):</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">mid</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mids_to_write</span><span class="p">):</span>
+                <span class="n">material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">material</span><span class="o">.</span><span class="n">write_card</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">))</span>
+            <span class="k">del</span> <span class="n">eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">mid</span>
+
+        <span class="k">if</span> <span class="n">write_shells</span><span class="p">:</span>
+            <span class="n">eid_shell</span> <span class="o">=</span> <span class="n">_write_shells</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eid_set</span><span class="p">,</span> <span class="n">face_map</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span><span class="p">,</span> <span class="n">mid_shell</span><span class="p">,</span> <span class="n">mids_to_write</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDDATA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    <span class="c1">#if 0:</span>
+        <span class="c1">#model = model.__class__.__init__()</span>
+        <span class="c1">#model.read_bdf(skin_filename)</span>
+
+
+<div class="viewcode-block" id="_write_shells"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.free_faces._write_shells">[docs]</a><span class="k">def</span> <span class="nf">_write_shells</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eid_set</span><span class="p">,</span> <span class="n">face_map</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span><span class="p">,</span> <span class="n">mid_shell</span><span class="p">,</span> <span class="n">mids_to_write</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method for ``_write_skin_solid_faces``&quot;&quot;&quot;</span>
+    <span class="n">mids_to_write</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">imid</span><span class="p">,</span> <span class="n">mid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mids_to_write</span><span class="p">):</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PSHELL&#39;</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">,</span> <span class="n">mid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+
+        <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAT1&#39;</span><span class="p">,</span> <span class="n">mid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">,</span> <span class="mf">3.e7</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
+        <span class="c1">#bdf_file.write(model.materials[mid].comment)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">face</span><span class="p">,</span> <span class="n">eids</span> <span class="ow">in</span> <span class="n">eid_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">face_raw</span> <span class="o">=</span> <span class="n">face_map</span><span class="p">[</span><span class="n">face</span><span class="p">]</span>
+        <span class="n">nface</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+        <span class="c1">#assert len(eids) == 1, eids</span>
+        <span class="c1">#for eid in sorted(eids):</span>
+            <span class="c1">#elem = model.elements[eid]</span>
+            <span class="c1">#print(elem)</span>
+            <span class="c1">#break</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">eids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Pid</span><span class="p">()</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">Mid</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1">#print(&#39;mids_to_write = %s&#39; % mids_to_write)</span>
+        <span class="c1">#print(&#39;mids = &#39;, model.materials.keys())</span>
+        <span class="n">imid</span> <span class="o">=</span> <span class="n">mids_to_write</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nface</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">face_raw</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nface</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">face_raw</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nface</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">face_raw</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nface</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">face_raw</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nface</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="n">eid_shell</span><span class="p">,</span> <span class="n">pid_shell</span> <span class="o">+</span> <span class="n">imid</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">face_raw</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;face=</span><span class="si">%s</span><span class="s1"> len(face)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">nface</span><span class="p">))</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">card</span><span class="p">))</span>
+        <span class="n">eid_shell</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">#elem = model.elements[eid]</span>
+        <span class="c1">#bdf_file.write(elem.write_card(size=size))</span>
+    <span class="c1">#for pid, prop in model.properties.items():</span>
+        <span class="c1">#bdf_file.write(prop.write_card(size=size, is_double=is_double))</span>
+    <span class="k">return</span> <span class="n">eid_shell</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

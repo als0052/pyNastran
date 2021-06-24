@@ -1,0 +1,1062 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.op2.tables.geom.geom3 &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.op2.tables.geom.geom3</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.op2.tables.geom.geom3</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines readers for BDF objects in the OP2 GEOM3/GEOM3S table</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#pylint: disable=C0103,C0111,C0301,W0612,R0914,C0326</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_16</span> <span class="kn">import</span> <span class="n">print_card_16</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.loads.static_loads</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FORCE</span><span class="p">,</span> <span class="n">FORCE1</span><span class="p">,</span> <span class="n">FORCE2</span><span class="p">,</span> <span class="n">GRAV</span><span class="p">,</span>
+    <span class="n">MOMENT</span><span class="p">,</span> <span class="n">MOMENT1</span><span class="p">,</span> <span class="n">MOMENT2</span><span class="p">,</span>
+    <span class="n">LOAD</span><span class="p">,</span> <span class="n">PLOAD</span><span class="p">,</span> <span class="n">PLOAD1</span><span class="p">,</span> <span class="n">PLOAD2</span><span class="p">,</span>  <span class="c1">#PLOAD3,</span>
+    <span class="n">PLOAD4</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># PLOAD3,</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.axisymmetric.loads</span> <span class="kn">import</span> <span class="n">PLOADX1</span> <span class="c1"># , PRESAX, TEMPAX, FORCEAX</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.loads.loads</span> <span class="kn">import</span> <span class="n">LSEQ</span><span class="p">,</span> <span class="n">SLOAD</span><span class="p">,</span> <span class="n">RFORCE</span> <span class="c1">#, DAREA, RANDPS, RFORCE1, LOADCYN</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.thermal.loads</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QBDY1</span><span class="p">,</span> <span class="n">QBDY2</span><span class="p">,</span> <span class="n">QBDY3</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">,</span> <span class="n">TEMPD</span><span class="p">,</span> <span class="n">TEMPP1</span><span class="p">,</span> <span class="n">QVOL</span><span class="p">,</span> <span class="n">QHBDY</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.tables.geom.geom_common</span> <span class="kn">import</span> <span class="n">GeomCommon</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_reader</span> <span class="kn">import</span> <span class="n">mapfmt</span><span class="p">,</span> <span class="n">reshape_bytes_block</span>
+
+
+<div class="viewcode-block" id="GEOM3"><a class="viewcode-back" href="../../../../../reference/op2/tables/geom/pyNastran.op2.tables.geom.geom3.html#pyNastran.op2.tables.geom.geom3.GEOM3">[docs]</a><span class="k">class</span> <span class="nc">GEOM3</span><span class="p">(</span><span class="n">GeomCommon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;defines methods for reading op2 loads&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_add_op2_rigid_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;helper method for op2&quot;&quot;&quot;</span>
+        <span class="n">ntables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;GEOM4&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;GEOM4S&#39;</span><span class="p">)</span>
+        <span class="n">eid</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">eid</span>
+        <span class="n">allow_overwrites</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ntables</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span>
+            <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rigid_elements</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rigid_elements</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">elem</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_rigid_element_object</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">allow_overwrites</span><span class="o">=</span><span class="n">allow_overwrites</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_geom3_4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_geom_4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geom3_map</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ndata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GeomCommon</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geom3_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="mi">11302</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">600</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;ACCEL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_accel</span><span class="p">],</span>    <span class="c1"># record 2 - not done</span>
+            <span class="p">(</span><span class="mi">11402</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">601</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;ACCEL1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_accel1</span><span class="p">],</span>  <span class="c1"># record 3 - not done</span>
+            <span class="p">(</span><span class="mi">4201</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span>  <span class="mi">18</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;FORCE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_force</span><span class="p">],</span>      <span class="c1"># record 3</span>
+            <span class="p">(</span><span class="mi">4001</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span>  <span class="mi">20</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;FORCE1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_force1</span><span class="p">],</span>    <span class="c1"># record 4</span>
+            <span class="p">(</span><span class="mi">4101</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span>  <span class="mi">22</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;FORCE2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_force2</span><span class="p">],</span>    <span class="c1"># record 5</span>
+            <span class="p">(</span><span class="mi">4401</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span>  <span class="mi">26</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GRAV&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_grav</span><span class="p">],</span>        <span class="c1"># record 7 - buggy</span>
+            <span class="p">(</span><span class="mi">4551</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span>  <span class="mi">84</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;LOAD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_load</span><span class="p">],</span>        <span class="c1"># record 8</span>
+            <span class="p">(</span><span class="mi">3709</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">331</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;LOADCYH&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_loadcyh</span><span class="p">],</span>  <span class="c1"># record 9 - not done</span>
+            <span class="p">(</span><span class="mi">3609</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">188</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;LSEQ&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_lseq</span><span class="p">],</span>        <span class="c1"># record 12 - not done</span>
+            <span class="p">(</span><span class="mi">4801</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span>  <span class="mi">19</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;MOMENT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_moment</span><span class="p">],</span>    <span class="c1"># record 13 - not tested</span>
+            <span class="p">(</span><span class="mi">4601</span><span class="p">,</span> <span class="mi">46</span><span class="p">,</span>  <span class="mi">21</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;MOMENT1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_moment1</span><span class="p">],</span>  <span class="c1"># record 14 - not tested</span>
+            <span class="p">(</span><span class="mi">4701</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span>  <span class="mi">23</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;MOMENT2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_moment2</span><span class="p">],</span>  <span class="c1"># record 15 - not tested</span>
+            <span class="p">(</span><span class="mi">5101</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span>  <span class="mi">24</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOAD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload</span><span class="p">],</span>      <span class="c1"># record 16 - not done</span>
+            <span class="p">(</span><span class="mi">6909</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">198</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOAD1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload1</span><span class="p">],</span>    <span class="c1"># record 17 - buggy</span>
+            <span class="p">(</span><span class="mi">6802</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">199</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOAD2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload2</span><span class="p">],</span>    <span class="c1"># record 18 - buggy</span>
+            <span class="p">(</span><span class="mi">7109</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">255</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOAD3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload3</span><span class="p">],</span>    <span class="c1"># record 19 - not done</span>
+            <span class="p">(</span><span class="mi">7209</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">299</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOAD4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload4</span><span class="p">],</span>    <span class="c1"># record 20 - buggy - g1/g3/g4</span>
+            <span class="p">(</span><span class="mi">7001</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">278</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PLOADX&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ploadx</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">7309</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">351</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOADX1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ploadx1</span><span class="p">],</span>  <span class="c1"># record 22</span>
+            <span class="p">(</span><span class="mi">4509</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">239</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QBDY1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qbdy1</span><span class="p">],</span>      <span class="c1"># record 24</span>
+            <span class="p">(</span><span class="mi">4909</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">240</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QBDY2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qbdy2</span><span class="p">],</span>      <span class="c1"># record 25</span>
+            <span class="p">(</span><span class="mi">2109</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">414</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QBDY3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qbdy3</span><span class="p">],</span>      <span class="c1"># record 26</span>
+            <span class="p">(</span><span class="mi">5509</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="mi">190</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;RFORCE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_rforce</span><span class="p">],</span>    <span class="c1"># record 30 - not done</span>
+            <span class="p">(</span><span class="mi">5401</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span>  <span class="mi">25</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;SLOAD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_sload</span><span class="p">],</span>      <span class="c1"># record 31 - not done</span>
+            <span class="p">(</span><span class="mi">5701</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span>  <span class="mi">27</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMP&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_temp</span><span class="p">],</span>        <span class="c1"># record 32</span>
+            <span class="p">(</span><span class="mi">5641</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span>  <span class="mi">98</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempd</span><span class="p">],</span>      <span class="c1"># record 33</span>
+            <span class="p">(</span><span class="mi">8409</span><span class="p">,</span> <span class="mi">84</span><span class="p">,</span> <span class="mi">204</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPRB&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_temprb</span><span class="p">],</span>    <span class="c1"># record 40 - not done</span>
+            <span class="p">(</span><span class="mi">8109</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">201</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPP1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempp1</span><span class="p">],</span>    <span class="c1"># record 37 - not done</span>
+            <span class="p">(</span><span class="mi">8209</span><span class="p">,</span> <span class="mi">82</span><span class="p">,</span> <span class="mi">202</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPP2&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempp2</span><span class="p">],</span>    <span class="c1"># record 38 - not done</span>
+            <span class="p">(</span><span class="mi">8309</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">203</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPP3&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempp3</span><span class="p">],</span>    <span class="c1"># record 39 - not done</span>
+            <span class="p">(</span><span class="mi">8409</span><span class="p">,</span> <span class="mi">84</span><span class="p">,</span> <span class="mi">204</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMP4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempp4</span><span class="p">],</span>     <span class="c1"># record 40 - not done</span>
+            <span class="p">(</span><span class="mi">2309</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">416</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QVOL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qvol</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">4309</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">233</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QHBDY&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qhbdy</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">6609</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">9031</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PEDGE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pedge</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">8100</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">381</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;CHACAB&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">2209</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">241</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;QVECT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_qvect</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">6409</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">9032</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PFACE&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pface</span><span class="p">],</span>
+            <span class="p">(</span><span class="mi">3809</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">332</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;LOADCYN&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_loadcyn</span><span class="p">],</span>    <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">6209</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">390</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;TEMPF&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tempf</span><span class="p">],</span>    <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">10901</span><span class="p">,</span> <span class="mi">109</span><span class="p">,</span> <span class="mi">427</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">10801</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span> <span class="mi">428</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;GMQVOL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">11329</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">9602</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">11429</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">9603</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">11529</span><span class="p">,</span> <span class="mi">115</span><span class="p">,</span> <span class="mi">9604</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">7002</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">254</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BOLTFOR&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_boltfor</span><span class="p">],</span>  <span class="c1"># record</span>
+            <span class="p">(</span><span class="mi">7601</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">608</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BOLTLD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_boltld</span><span class="p">],</span>  <span class="c1"># record</span>
+
+            <span class="c1"># ???</span>
+            <span class="p">(</span><span class="mi">6701</span><span class="p">,</span><span class="mi">67</span><span class="p">,</span><span class="mi">978</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;PLOADE1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+
+            <span class="c1"># nx-specific</span>
+            <span class="p">(</span><span class="mi">3909</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">333</span><span class="p">):</span> <span class="p">[</span><span class="s1">&#39;LOADCYT&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fake</span><span class="p">],</span>  <span class="c1"># record</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_read_accel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record - ACCEL(7401,74,601)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID     I Load set identification number</span>
+<span class="sd">        2 CID     I Coordinate system identification number</span>
+<span class="sd">        3 N(3)   RS Components of a vector coordinate system defined by CID</span>
+<span class="sd">        6 DIR CHAR1 Component direction of acceleration variation</span>
+<span class="sd">        7 LOCi   RS Location along direction DIR in coordinate system</span>
+<span class="sd">        8 VALi   RS The load scale factor associated with location LOCi</span>
+<span class="sd">        Words 7 through 8 repeat until (-1,-1) occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping ACCEL in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_accel1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ACCEL1(7501,75,602)</span>
+
+<span class="sd">        1 SID    I Load set identification number</span>
+<span class="sd">        2 CID    I Coordinate system identification number</span>
+<span class="sd">        3 A     RS Acceleration vector scale factor</span>
+<span class="sd">        4 N(3)  RS Components of a vector coordinate system defined by CID</span>
+<span class="sd">        7 GRIDID I Grid ID or THRU or BY code</span>
+<span class="sd">        Words 7 repeats until (-1) occurs.</span>
+<span class="sd">        NX/MSC</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#ntotal = 28  # 7*4</span>
+        <span class="n">ints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">strings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;|S4&#39;</span><span class="p">)</span>
+        <span class="n">i_minus_1s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ints</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">i0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#self.show_data(data[n:])</span>
+        <span class="k">for</span> <span class="n">i_minus_1</span> <span class="ow">in</span> <span class="n">i_minus_1s</span><span class="p">:</span>
+            <span class="n">sid</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">i0</span><span class="p">]</span>
+            <span class="n">cid</span> <span class="o">=</span> <span class="n">ints</span><span class="p">[</span><span class="n">i0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">i0</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">n1</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">i0</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">n2</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">i0</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
+            <span class="n">n3</span> <span class="o">=</span> <span class="n">floats</span><span class="p">[</span><span class="n">i0</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+            <span class="n">nids</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">strings</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">strings</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;THRU&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;BY  &#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">ints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i0</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="n">i_minus_1</span><span class="p">)]</span>
+            <span class="k">assert</span> <span class="n">nids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  ACCEL1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">([</span><span class="n">sid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">nids</span><span class="p">]))</span>
+            <span class="n">accel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_accel1</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">],</span> <span class="n">nids</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span>
+            <span class="n">accel</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">i0</span> <span class="o">=</span> <span class="n">i_minus_1</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FORCE(4201,42,18) - the marker for Record 3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span>  <span class="c1"># 7*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iiiffff&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">])</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  FORCE=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">FORCE</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;FORCE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_force1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FORCE1(4001,40,20) - the marker for Record 4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># 5*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iifii&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">20</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  FORCE1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">FORCE1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">([</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;FORCE1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_force2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        FORCE2(4101,41,22) - the marker for Record 5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span>  <span class="c1"># 7*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif4i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">])</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  FORCE2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">FORCE2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">([</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;FORCE2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_gmload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;GMLOAD&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping GMLOAD in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_grav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GRAV(4401,44,26) - the marker for Record 7</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID I Load set identification number</span>
+<span class="sd">        2 CID I Coordinate system identification number</span>
+<span class="sd">        3 A RS Acceleration vector scale factor</span>
+<span class="sd">        4 N(3) RS Components of a vector coordinate system defined by CID</span>
+<span class="sd">        7 MB I Bulk Data Section with CID definition: -1=main, 0=partitioned</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 7*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ii4fi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  GRAV=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, cid, a, n1, n2, n3, mb) = out</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">GRAV</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">grav</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;GRAV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (4551, 61, 84) - the marker for Record 8</span>
+<span class="sd">        .. todo:: add object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 4*4</span>
+        <span class="n">ntotal2</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>
+        <span class="c1">#nentries = (len(data) - n) // ntotal</span>
+        <span class="c1">#count = 0</span>
+        <span class="n">struct_i2fi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iffi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">struct_fi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;fi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+        <span class="n">nentries_actual</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">ntotal</span><span class="p">:</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_i2fi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="n">l1</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  LOAD=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">Si</span> <span class="o">=</span> <span class="p">[</span><span class="n">si</span><span class="p">]</span>
+            <span class="n">L1</span> <span class="o">=</span> <span class="p">[</span><span class="n">l1</span><span class="p">]</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span><span class="o">+</span><span class="n">ntotal2</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal2</span>
+                <span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">l1</span><span class="p">)</span> <span class="o">=</span> <span class="n">struct_fi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+                <span class="n">si_test</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">struct_i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="p">[</span><span class="n">si_test</span><span class="p">,</span> <span class="n">l1</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">break</span>
+                <span class="n">Si</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">si</span><span class="p">)</span>
+                <span class="n">L1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;       [</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">l1</span><span class="p">))</span>
+
+            <span class="n">load</span> <span class="o">=</span> <span class="n">LOAD</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Si</span><span class="p">,</span> <span class="n">L1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_combination_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">nentries_actual</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1">#count += 1</span>
+            <span class="c1">#if count &gt; 1000:</span>
+                <span class="c1">#raise RuntimeError(&#39;Iteration limit...probably have a bug.&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;LOAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries_actual</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_loadcyh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;LOADCYH&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping LOADCYH in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_loadcyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;LOADCYN&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping LOADCYN in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_loadcyt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;LOADCYT&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping LOADCYT in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_lseq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># 5*4</span>
+        <span class="n">struct_5i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;5i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_5i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">])</span>
+            <span class="c1">#(sid, darea, load_id, temperature_id, undef) = out</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  LSEQ=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">LSEQ</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_lseq_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;LSEQ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_moment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MOMENT(4801,48,19) - the marker for Record 13</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#ntotal = 28</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;3i4f&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="mi">28</span>  <span class="c1"># 7*4</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MOMENT=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, g, cid, m, n1, n2, n3) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MOMENT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_moment1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MOMENT1(4601,46,21) - the marker for Record 14</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># 5*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iifii&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">20</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MOMENT1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, g, m, n1, n2) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MOMENT1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_moment2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        MOMENT2(4701,47,23) - the marker for Record 15</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span>  <span class="c1"># 7*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif4i&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  MOMENT2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, g, m, n1, n2, n3, n4) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">MOMENT2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;MOMENT2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        PLOAD(5101,51,24)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span>  <span class="c1"># 6*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;i f 4i&#39;</span><span class="p">)</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">24</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, pressure, n1, n2, n3, n4) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">24</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        PLOAD1(6909, 69, 198) - the marker for Record 17</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 8*4</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;4i4f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, eid, load_type, scale, x1, p1, x2, p2) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        PLOAD2(6802,68,199) - the marker for Record 18</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># 3*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_ifi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ifi&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">12</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_ifi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, p, eid) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">12</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;PLOAD3(7109,71,255) - the marker for Record 19&quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># 5*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;if3i&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">20</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD3=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, p, eid, n1, n2) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD3</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>  <span class="c1"># undefined</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_rbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;RBAR(6601,66,292) - Record 22&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dual_card</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_rbar_nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_rbar_msc</span><span class="p">,</span>
+                                 <span class="s1">&#39;RBAR&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_op2_rigid_element</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;PLOAD4(7209,72,299) - the marker for Record 20&quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_dual_card</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload4_nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pload4_msc</span><span class="p">,</span>
+                                 <span class="s1">&#39;PLOAD4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload4_msc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>  <span class="c1">## inconsistent with DMAP</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        PLOAD4(7209,72,299) - the marker for Record 20</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID          I Load set identification number</span>
+<span class="sd">        2 EID          I Element identification number</span>
+<span class="sd">        3 P(4)        RS Pressures</span>
+<span class="sd">        7 G1           I Grid point identification number at a corner of the face</span>
+<span class="sd">        8 G34          I Grid point identification number at a diagonal from G1 or CTETRA corner</span>
+<span class="sd">        9  CID         I Coordinate system identification number</span>
+<span class="sd">        10 N(3)       RS Components of a vector coordinate system defined by CID</span>
+<span class="sd">        13 SDRL(2) CHAR4 Load set on element SURF or LINE</span>
+<span class="sd">        15 LDIR(2) CHAR4 Load direction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 16*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">loads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i 4f 3i 3f 8s 8s&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2q 4d 3q 3d 16s 16s&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD4=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g34</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">surf_or_line</span><span class="p">,</span> <span class="n">line_load_dir</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+
+            <span class="n">surf_or_line</span> <span class="o">=</span> <span class="n">surf_or_line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span>
+            <span class="n">line_load_dir</span> <span class="o">=</span> <span class="n">line_load_dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line_load_dir</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="c1"># TODO: not 100%</span>
+                <span class="n">line_load_dir</span> <span class="o">=</span> <span class="s1">&#39;NORM&#39;</span>
+
+            <span class="c1"># forces NX pload4 function to get called if it should be</span>
+            <span class="k">assert</span> <span class="n">surf_or_line</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SURF&#39;</span><span class="p">,</span> <span class="s1">&#39;LINE&#39;</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">line_load_dir</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;LINE&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;TANG&#39;</span><span class="p">,</span> <span class="s1">&#39;NORM&#39;</span><span class="p">],</span> <span class="s1">&#39;line_load_dir=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line_load_dir</span>
+
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD4</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">sid</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">],</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g34</span><span class="p">,</span>
+                 <span class="n">cid</span><span class="p">,</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">],</span> <span class="n">surf_or_line</span><span class="p">,</span> <span class="n">line_load_dir</span><span class="p">])</span>
+            <span class="n">load</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">loads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">loads</span>
+
+    <span class="k">def</span> <span class="nf">_read_pload4_nx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>  <span class="c1">## inconsistent with DMAP</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        PLOAD4(7209,72,299) - the marker for Record 20</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID          I Load set identification number</span>
+<span class="sd">        2 EID          I Element identification number</span>
+<span class="sd">        3 P(4)        RS Pressures</span>
+<span class="sd">        7 G1           I Grid point identification number at a corner of the face</span>
+<span class="sd">        8 G34          I Grid point identification number at a diagonal from G1 or CTETRA corner</span>
+<span class="sd">        9  CID         I Coordinate system identification number</span>
+<span class="sd">        10 N(3)       RS Components of a vector coordinate system defined by CID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 12*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">loads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i 4f 3i 3f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOAD4=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g34</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+
+            <span class="n">surf_or_line</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">line_load_dir</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOAD4</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">sid</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">],</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g34</span><span class="p">,</span>
+                 <span class="n">cid</span><span class="p">,</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">],</span> <span class="n">surf_or_line</span><span class="p">,</span> <span class="n">line_load_dir</span><span class="p">])</span>
+            <span class="n">load</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">loads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOAD4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">loads</span>
+
+    <span class="k">def</span> <span class="nf">_read_ploadx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record - PLOADX(7001,70,278)</span>
+<span class="sd">        This record is obsolete</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID   I Load set identification number</span>
+<span class="sd">        2 P(2) RS Pressure</span>
+<span class="sd">        4 G(3)  I Grid point identification numbers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 6*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">%</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iff3i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOADX=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PLOADX&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reject_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">print_card_16</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+            <span class="c1">#load = PLOADX.add_op2_data(out)</span>
+            <span class="c1">#self._add_load_object(load)</span>
+
+            <span class="c1">#n += ntotal + 28 * self.factor</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOADX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_ploadx1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record - PLOADX1(7309,73,351)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID    I Load set identification number</span>
+<span class="sd">        2 EID    I Element identification number</span>
+<span class="sd">        3 PA    RS Surface traction at grid point GA</span>
+<span class="sd">        4 PB    RS Surface traction at grid point GB</span>
+<span class="sd">        5 G(2)   I Corner grid point identification numbers</span>
+<span class="sd">        7 THETA RS Angle between surface traction and inward normal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">28</span>  <span class="c1"># 7*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i2f iif&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">28</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  PLOADX1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">PLOADX1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">28</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;PLOADX1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1"># PRESAX</span>
+
+    <span class="k">def</span> <span class="nf">_read_qbdy1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        QBDY1(4509,45,239) - the marker for Record 24</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># 3*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_ifi</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ifi&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">12</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_ifi</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  QBDY1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, q0, eid) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">12</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;QBDY1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_qbdy2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        QBDY2(4909,49,240) - the marker for Record 25</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">40</span>  <span class="c1"># 10*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_2i8f</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ii8f&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">40</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_2i8f</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  QBDY2=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, eid, q1, q2, q3, q4, q5, q6, q7, q8) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY2</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">40</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;QBDY2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_qbdy3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        QBDY3(2109,21,414) - the marker for Record 26</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># 4*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_if2i</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;ifii&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="mi">16</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_if2i</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="c1">#(sid, q0, cntrlnd, eid) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">QBDY3</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">16</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;QBDY3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TEMP(5701,57,27) - the marker for Record 32</span>
+<span class="sd">        .. warning:: buggy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="c1"># 3*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_2if</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;iif&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_2if</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  TEMP=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">10000000</span><span class="p">:</span>
+                <span class="n">load</span> <span class="o">=</span> <span class="n">TEMP</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_thermal_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;TEMP = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;TEMP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tempd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TEMPD(5641,65,98) - the marker for Record 33</span>
+<span class="sd">        .. todo:: add object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 2*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_if</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;if&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_if</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  TEMPD=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, T) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">TEMPD</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_tempd_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;TEMPD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_qhbdy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (4309,43,233)</span>
+
+<span class="sd">        Word Name Type Description</span>
+<span class="sd">        1 SID   I Load set identification number</span>
+<span class="sd">        2 FLAG  I Face type</span>
+<span class="sd">        3 Q0   RS Magnitude of thermal flux into face</span>
+<span class="sd">        4 AF   RS Area factor</span>
+<span class="sd">        5 G(8)  I Grid point identification numbers</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span> <span class="mi">48</span>  <span class="c1"># 12*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struct_if</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i2f 8i&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struct_if</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  QHBDY=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, flag, q0, af, n1-n8) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">QHBDY</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="c1">#self.add_thermal_load(load)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;QHBDY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_qvect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping QVECT in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_qvol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Record 30 -- QVOL(2309,23,416)</span>
+
+<span class="sd">        1 SID      I Load set identification number</span>
+<span class="sd">        2 QVOL    RS Power input per unit volume produced by a</span>
+<span class="sd">                     conduction element</span>
+<span class="sd">        3 CNTRLND  I Control point used for controlling heat generation</span>
+<span class="sd">        4 EID      I Element identification number</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span>  <span class="mi">16</span>  <span class="c1"># 4*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;if2i&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  QVOL=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, qvol, cntrlnd, eid) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">QVOL</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;QVOL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_rforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">ntotal</span> <span class="o">=</span>  <span class="mi">40</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span>  <span class="c1"># 10*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="n">mapfmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;3i 4f ifi&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  RFORCE=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, nid, scale_factor) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">RFORCE</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;RFORCE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_sload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;SLOAD(5401, 54, 25)&quot;&quot;&quot;</span>
+        <span class="n">ntotal</span> <span class="o">=</span>  <span class="mi">12</span>  <span class="c1"># 3*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i f&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  SLOAD=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#(sid, nid, scale_factor) = out</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">SLOAD</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;SLOAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+<span class="c1"># TEMP(5701,57,27) # 32</span>
+<span class="c1"># TEMPD(5641,65,98) # 33</span>
+<span class="c1"># TEMPEST</span>
+    <span class="k">def</span> <span class="nf">_read_tempf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping TEMPF in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># TEMP1C</span>
+
+    <span class="k">def</span> <span class="nf">_read_tempp1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">ntotal</span> <span class="o">=</span>  <span class="mi">24</span>  <span class="c1"># 6*4</span>
+        <span class="n">nentries</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">//</span> <span class="n">ntotal</span>
+        <span class="n">struc</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;2i 4f&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nentries</span><span class="p">):</span>
+            <span class="n">edata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:</span><span class="n">n</span> <span class="o">+</span> <span class="n">ntotal</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">struc</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">edata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  TEMPP1=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+            <span class="c1">#sid, eid, t, tprime, ts1, ts2 = data</span>
+            <span class="n">load</span> <span class="o">=</span> <span class="n">TEMPP1</span><span class="o">.</span><span class="n">add_op2_data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_load_object</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">ntotal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span><span class="p">[</span><span class="s1">&#39;TEMPP1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nentries</span>
+        <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">def</span> <span class="nf">_read_tempp2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping TEMPP2 in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;skipping TEMPP2 in GEOM3</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_tempp3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping TEMPP3 in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;skipping TEMPP3 in GEOM3</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_tempp4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TEMPP4(4201,42,18) - the marker for Record 40</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping TEMPP4 in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_temprb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping TEMPRB in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_debug_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_debug</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;skipping TEMPRB in GEOM3</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_pface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping PFACE in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_pedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping PEDGE in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_boltfor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping BOLTFOR in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_boltld</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping BOLTLD in GEOM3&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

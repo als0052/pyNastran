@@ -1,0 +1,1094 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.usm3d.usm3d_reader &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.usm3d.usm3d_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.usm3d.usm3d_reader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines:</span>
+<span class="sd">  - Usm3d(log=None, debug=False)</span>
+<span class="sd">     - read_cogsg(cogsg_file, stop_after_header=False)</span>
+<span class="sd">     - read_usm3d(self, basename, dimension_flag, read_loads=True)</span>
+<span class="sd">     - write_usm3d(basename)</span>
+<span class="sd">     - read_mapbc(mapbc_filename)</span>
+<span class="sd">     - read_bc(self, bc_filename, stop_after_header=False, get_lbouf=False)</span>
+<span class="sd">     - read_flo(self, flo_filename, n=None, node_ids=None)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">pack</span><span class="p">,</span> <span class="n">unpack</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils</span> <span class="kn">import</span> <span class="n">check_path</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+
+
+<div class="viewcode-block" id="read_usm3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.read_usm3d">[docs]</a><span class="k">def</span> <span class="nf">read_usm3d</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads a usm3d file&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Usm3d</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="c1">#model.read_cogsg(cogsg_filename, stop_after_header=False)</span>
+    <span class="n">unused_dimension_flag</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_usm3d</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">unused_dimension_flag</span><span class="p">,</span> <span class="n">read_loads</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="Usm3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d">[docs]</a><span class="k">class</span> <span class="nc">Usm3d</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Usm3d interface class&quot;&quot;&quot;</span>
+    <span class="n">bcmap_to_bc_name</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">0</span> <span class="p">:</span> <span class="s1">&#39;Supersonic Inflow&#39;</span><span class="p">,</span>
+        <span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;Reflection plane&#39;</span><span class="p">,</span>
+        <span class="mi">2</span> <span class="p">:</span> <span class="s1">&#39;Supersonic Outflow&#39;</span><span class="p">,</span>
+        <span class="mi">3</span> <span class="p">:</span> <span class="s1">&#39;Subsonic Outer Boundaries&#39;</span><span class="p">,</span>
+        <span class="mi">4</span> <span class="p">:</span> <span class="s1">&#39;Viscous Surfaces&#39;</span><span class="p">,</span>
+        <span class="mi">5</span> <span class="p">:</span> <span class="s1">&#39;Inviscid aerodynamic surface&#39;</span><span class="p">,</span>
+        <span class="mi">44</span> <span class="p">:</span> <span class="s1">&#39;Blunt base&#39;</span><span class="p">,</span>
+        <span class="mi">55</span> <span class="p">:</span> <span class="s1">&#39;Thick Trailing Edges&#39;</span><span class="p">,</span>
+
+        <span class="mi">103</span> <span class="p">:</span> <span class="s1">&#39;Engine-exhaust (Fan)&#39;</span><span class="p">,</span>
+        <span class="mi">102</span> <span class="p">:</span> <span class="s1">&#39;Engine-exhaust (Jet Core)&#39;</span><span class="p">,</span>
+        <span class="mi">101</span> <span class="p">:</span> <span class="s1">&#39;Engine-intake&#39;</span><span class="p">,</span>
+        <span class="mi">203</span> <span class="p">:</span> <span class="s1">&#39;Engine-exhaust (Fan)&#39;</span><span class="p">,</span>
+        <span class="mi">202</span> <span class="p">:</span> <span class="s1">&#39;Engine-exhaust (Jet Core)&#39;</span><span class="p">,</span>
+        <span class="mi">201</span> <span class="p">:</span> <span class="s1">&#39;Engine-intake&#39;</span><span class="p">,</span>
+
+        <span class="mi">1001</span> <span class="p">:</span> <span class="s1">&#39;Special inflow&#39;</span><span class="p">,</span>
+        <span class="mi">1002</span> <span class="p">:</span> <span class="s1">&#39;Special Outflow (Fixed Pressure)&#39;</span><span class="p">,</span>
+
+        <span class="c1">#&#39;0 - Freestream - Supersonic Inflow (Bounding Box)</span>
+        <span class="c1">#&#39;2 - Extrapolation - Supersonic Outflow (Bounding Box)</span>
+
+        <span class="c1">#&#39;1 - Reflection Plane - Tangent Flow - (Symmetry Plane)</span>
+        <span class="c1">#&#39;3 - Characteristic Inflow - Subsonic Inflow/Outflow/Sideflow (Bounding Box)</span>
+
+        <span class="c1">#&#39;4 - Inviscid Surface (Physical)</span>
+        <span class="c1">#&#39;5&#39;, Viscous Surface (Physical)</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the Usm3d object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        debug : bool/None; default=True</span>
+<span class="sd">            used to set the logger if no logger is passed in</span>
+<span class="sd">                True:  logs debug/info/error messages</span>
+<span class="sd">                False: logs info/error messages</span>
+<span class="sd">                None:  logs error messages</span>
+<span class="sd">        log : logging module object / None</span>
+<span class="sd">            if log is set, debug is ignored and uses the</span>
+<span class="sd">            settings the logging object has</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapbc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="s1">&#39;double&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Usm3d.read_mapbc"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.read_mapbc">[docs]</a>    <span class="k">def</span> <span class="nf">read_mapbc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapbc_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        0 - Supersonic Inflow</span>
+<span class="sd">        1 - Reflection plane</span>
+<span class="sd">        2 - Supersonic Outflow</span>
+<span class="sd">        3 - Subsonic Outer Boundaries</span>
+<span class="sd">        4 - Viscous Surfaces</span>
+<span class="sd">        5 - Inviscid aerodynamic surface</span>
+<span class="sd">        44 - Blunt base</span>
+<span class="sd">        55 - Thick Trailing Edges</span>
+<span class="sd">        n*100+3 - Engine-exhaust (Fan)</span>
+<span class="sd">        n*100+2 - Engine-exhaust (Jet Core)</span>
+<span class="sd">        n*100+1 - Engine-intake</span>
+<span class="sd">        1001 - Special inflow</span>
+<span class="sd">        1002 - Special Outflow (Fixed Pressure)</span>
+
+<span class="sd">        0 - Freestream - Supersonic Inflow (Bounding Box)</span>
+<span class="sd">        2 - Extrapolation - Supersonic Outflow (Bounding Box)</span>
+
+<span class="sd">        1 - Reflection Plane - Tangent Flow - (Symmetry Plane)</span>
+<span class="sd">        3 - Characteristic Inflow - Subsonic Inflow/Outflow/Sideflow (Bounding Box)</span>
+
+<span class="sd">        4 - Inviscid Surface (Physical)</span>
+<span class="sd">        5 - Viscous Surface (Physical)</span>
+<span class="sd">        #==============================</span>
+
+<span class="sd">        #Thu Dec 19 11:46:03 2013</span>
+<span class="sd">        #bc.map</span>
+<span class="sd">        Patch #    BC   Family   #surf   surfIDs      Family</span>
+<span class="sd">        #--------------------------------------------------------</span>
+<span class="sd">        1          44     44         0         0      Base  -&gt; Blunt base</span>
+<span class="sd">        2          4       4         0         0      Bay   -&gt; Viscous Surfaces</span>
+<span class="sd">        3          0       0         0         0      Inflow -&gt; Supersonic Inflow</span>
+<span class="sd">        4          2       2         0         0      Outflow -&gt; Supersonic Outflow</span>
+<span class="sd">        5          3       3         0         0      Sideflow -&gt; Characteristic Inflow/Outflow</span>
+<span class="sd">        7          1       1         0         0      Symmetry -&gt; Reflection plane</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mapbc_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mapbc_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">mapbc_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">lines2</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">lines2</span>
+
+        <span class="n">mapbc</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">sline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="c1">#self.log.info(sline)</span>
+            <span class="n">patch_id</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">family</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">surf_ids</span> <span class="o">=</span> <span class="n">sline</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">mapbc</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">patch_id</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">bc</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">family</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">surf</span><span class="p">),</span> <span class="n">surf_ids</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">mapbc</span></div>
+
+<div class="viewcode-block" id="Usm3d.read_usm3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.read_usm3d">[docs]</a>    <span class="k">def</span> <span class="nf">read_usm3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">unused_dimension_flag</span><span class="p">,</span> <span class="n">read_loads</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basename : str</span>
+<span class="sd">            the root path to the *.cogsg, *.bc, *.mapbc, *.face, *.front files</span>
+<span class="sd">        unused_dimension_flag : int; unused</span>
+<span class="sd">            ???</span>
+<span class="sd">            2?/3</span>
+<span class="sd">        read_loads : bool; default=True</span>
+<span class="sd">            ???</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        nodes : (nnodes, 3) float ndarray</span>
+<span class="sd">           the xyz coordinates</span>
+<span class="sd">        tris_tets : ???</span>
+<span class="sd">           ???</span>
+<span class="sd">        tris : (ntri, 3) int ndarray</span>
+<span class="sd">           0-based node indices</span>
+<span class="sd">        bcs : (ntris, ) int ndarray</span>
+<span class="sd">           1-based patch/&quot;property&quot; IDs</span>
+<span class="sd">        mapbc : dict[patch_id] : map_line</span>
+<span class="sd">           patch_id : int</span>
+<span class="sd">           map_line : List[bc, family, surf, surf_ids]</span>
+<span class="sd">               bc : int</span>
+<span class="sd">                   boundary condition number</span>
+<span class="sd">               family : int</span>
+<span class="sd">                   family number</span>
+<span class="sd">               surf : int</span>
+<span class="sd">                   surface number</span>
+<span class="sd">               surf_ids : str</span>
+<span class="sd">                   ???</span>
+<span class="sd">        loads : dict[]</span>
+<span class="sd">            ???</span>
+<span class="sd">        flo_filename : str</span>
+<span class="sd">            the latest result filename</span>
+<span class="sd">            None : no *.flo file could be found</span>
+<span class="sd">            static : *.flo</span>
+<span class="sd">            transient : *_xxx.flo</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cogsg_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.cogsg&#39;</span>
+        <span class="n">bc_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.bc&#39;</span>
+        <span class="n">unused_face_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.face&#39;</span>
+        <span class="n">unused_front_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.front&#39;</span>
+        <span class="n">mapbc_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.mapbc&#39;</span>
+        <span class="n">flo_filename</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># pick the highest N value or use &quot;basename.flo&quot;</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">basename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dirname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">flo_filenames</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="c1"># get the max N value</span>
+        <span class="n">nmax</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">flo_filename</span> <span class="ow">in</span> <span class="n">flo_filenames</span><span class="p">:</span>
+            <span class="n">base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.flo&#39;</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span> <span class="c1"># get the incrementation index</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">nmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">nmax</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> <span class="c1"># don&#39;t bother incrementing</span>
+                    <span class="k">pass</span>
+
+        <span class="c1"># determine .flo file name</span>
+        <span class="k">if</span> <span class="n">nmax</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">flo_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.flo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmax</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">flo_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.flo&#39;</span>
+
+        <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_cogsg</span><span class="p">(</span><span class="n">cogsg_filename</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">unused_header</span><span class="p">,</span> <span class="n">tris</span><span class="p">,</span> <span class="n">bcs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_bc</span><span class="p">(</span><span class="n">bc_filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">tris</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">bcs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Cannot find </span><span class="si">%r</span><span class="s1">...skipping; required for geometry&#39;</span> <span class="o">%</span> <span class="n">bc_filename</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mapbc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_mapbc</span><span class="p">(</span><span class="n">mapbc_filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">mapbc</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Cannot find </span><span class="si">%r</span><span class="s1">...skipping&#39;</span> <span class="o">%</span> <span class="n">mapbc_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tris</span> <span class="o">=</span> <span class="n">tris</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapbc</span> <span class="o">=</span> <span class="n">mapbc</span>
+
+        <span class="n">loads</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">read_loads</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">):</span>
+            <span class="n">npoints</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">unused_node_ids_volume</span><span class="p">,</span> <span class="n">loads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">npoints</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Had trouble reading </span><span class="si">%r</span><span class="s1">...&#39;</span> <span class="o">%</span> <span class="n">flo_filename</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Cannot find </span><span class="si">%r</span><span class="s1">...skipping&#39;</span> <span class="o">%</span> <span class="n">flo_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loads</span> <span class="o">=</span> <span class="n">loads</span>
+
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">tris</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">mapbc</span><span class="p">,</span> <span class="n">loads</span><span class="p">,</span> <span class="n">flo_filename</span></div>
+        <span class="c1">#self.read_front(front_file)</span>
+        <span class="c1">#self.read_face(face_file)</span>
+
+<div class="viewcode-block" id="Usm3d.write_usm3d"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.write_usm3d">[docs]</a>    <span class="k">def</span> <span class="nf">write_usm3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        writes a *.cogsg, *.front, *.face file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">write_usm3d_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Usm3d.read_bc"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.read_bc">[docs]</a>    <span class="k">def</span> <span class="nf">read_bc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bc_filename</span><span class="p">,</span> <span class="n">stop_after_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_lbouf</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;bc_filename = </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bc_filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bc_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bc_file</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">bc_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="c1">#mbouf,dum1,dum1,igrid</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="p">(</span><span class="n">nbouf</span><span class="p">,</span> <span class="n">nbou1</span><span class="p">,</span> <span class="n">npatch</span><span class="p">,</span> <span class="n">igrid</span><span class="p">)</span> <span class="o">=</span> <span class="n">header</span>
+       <span class="c1">#(ntris, nbou1, npatch, igrid) = header</span>
+        <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nbouf</span><span class="p">)</span>
+        <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nbou1</span><span class="p">)</span>
+        <span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npatch</span><span class="p">)</span>
+        <span class="n">header</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">igrid</span><span class="p">)</span>
+        <span class="n">ntris</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nbouf</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">stop_after_header</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">header</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">get_lbouf</span><span class="p">:</span>
+            <span class="n">lbouf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntris</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="c1">#print(&#39;%r&#39; % line)</span>
+                <span class="p">(</span><span class="n">unused_n</span><span class="p">,</span> <span class="n">isurf</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">lbouf</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">isurf</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">header</span><span class="p">,</span> <span class="n">lbouf</span>
+
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ntris</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">bcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ntris</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ntris</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">unused_n</span><span class="p">,</span> <span class="n">isurf</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">)</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">tris</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">]</span>
+            <span class="n">bcs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">isurf</span>
+        <span class="n">tris</span> <span class="o">=</span> <span class="n">tris</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="c1">#self.bcs = [tris, bcs]</span>
+        <span class="k">return</span> <span class="n">header</span><span class="p">,</span> <span class="n">tris</span><span class="p">,</span> <span class="n">bcs</span></div>
+
+<div class="viewcode-block" id="Usm3d.read_cogsg"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.read_cogsg">[docs]</a>    <span class="k">def</span> <span class="nf">read_cogsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cogsg_filename</span><span class="p">,</span> <span class="n">stop_after_header</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads the *.cogsg file</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        nodes : (N, 3) float ndarray</span>
+<span class="sd">           the nodes</span>
+<span class="sd">        tet_elements : ???</span>
+<span class="sd">           ???</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_path</span><span class="p">(</span><span class="n">cogsg_filename</span><span class="p">,</span> <span class="s1">&#39;cogsg file&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cogsg_filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cogsg_file</span><span class="p">:</span>
+            <span class="c1"># nelements * 4 * 4 + 32 ???</span>
+            <span class="n">dummy</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># 1022848</span>
+            <span class="n">dummy_int</span><span class="p">,</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy</span><span class="p">)</span>
+            <span class="c1">#assert dummy_int == 1022848, &#39;dummy_int = %s&#39; % dummy_int</span>
+
+            <span class="c1"># file header</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+                <span class="n">sformat</span> <span class="o">=</span> <span class="s1">&#39;&gt;6if&#39;</span>
+                <span class="n">nbytes</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;double&#39;</span><span class="p">:</span>
+                <span class="n">sformat</span> <span class="o">=</span> <span class="s1">&#39;&gt;6id&#39;</span>
+                <span class="n">nbytes</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;invalid precision format&#39;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nbytes</span><span class="p">)</span>
+
+            <span class="p">(</span><span class="n">inew</span><span class="p">,</span> <span class="n">ne</span><span class="p">,</span> <span class="n">npoints</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">npv</span><span class="p">,</span> <span class="n">nev</span><span class="p">,</span> <span class="n">tc</span><span class="p">)</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="n">sformat</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;dummy&#39;</span>    <span class="p">:</span> <span class="n">dummy_int</span><span class="p">,</span>
+                <span class="s1">&#39;inew&#39;</span>     <span class="p">:</span> <span class="n">inew</span><span class="p">,</span> <span class="c1"># dummy int</span>
+                <span class="s1">&#39;nElements&#39;</span><span class="p">:</span> <span class="n">ne</span><span class="p">,</span>  <span class="c1"># nc;  number of tets</span>
+                <span class="s1">&#39;nPoints&#39;</span>  <span class="p">:</span> <span class="n">npoints</span><span class="p">,</span>  <span class="c1"># npo; number of grid points including nbn</span>
+                <span class="s1">&#39;nBoundPts&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="p">,</span>  <span class="c1"># nbn; number of boundary points including nbc</span>
+                <span class="s1">&#39;nViscPts&#39;</span> <span class="p">:</span> <span class="n">npv</span><span class="p">,</span> <span class="c1"># npv; number of viscous points (=0 for Euler)</span>
+                <span class="s1">&#39;nViscElem&#39;</span><span class="p">:</span> <span class="n">nev</span><span class="p">,</span> <span class="c1"># ncv; number of viscous cells (=0 for Euler)</span>
+                <span class="s1">&#39;tc&#39;</span>       <span class="p">:</span> <span class="n">tc</span><span class="p">,</span>  <span class="c1"># dummy double</span>
+                                  <span class="c1"># nbc</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">stop_after_header</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
+
+            <span class="c1"># nbn nodes</span>
+            <span class="c1">#</span>
+            <span class="c1">#del ne, np</span>
+
+            <span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">nodes</span><span class="p">,</span> <span class="n">tets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_cogsg_volume</span><span class="p">(</span><span class="n">cogsg_file</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">tets</span>
+            <span class="c1">#else:</span>
+            <span class="c1">#----------------------------------------------------------------------</span>
+            <span class="c1"># elements</span>
+            <span class="c1"># face elements</span>
+            <span class="n">nnodes_per_face</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">nfaces</span> <span class="o">=</span> <span class="n">ne</span>
+
+            <span class="k">if</span> <span class="n">nfaces</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">data_length</span> <span class="o">=</span> <span class="n">nnodes_per_face</span> <span class="o">*</span> <span class="n">nfaces</span>
+                <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;i&#39;</span> <span class="o">*</span> <span class="n">data_length</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">data_length</span><span class="p">)</span>
+
+                <span class="n">faces</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces</span><span class="p">)</span>
+                <span class="n">faces</span> <span class="o">=</span> <span class="n">faces</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nfaces</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">faces</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1">#----------------------------------------------------------------------</span>
+            <span class="c1"># nodes</span>
+            <span class="n">nbound_pts</span> <span class="o">=</span> <span class="n">nb</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">nbound_pts</span>
+
+            <span class="c1">#data_length = nnodes</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;double&#39;</span><span class="p">:</span>
+                <span class="n">data_length</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">nnodes</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+                <span class="n">data_length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">nnodes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;precision = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+
+            <span class="n">skip_nodes</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">skip_nodes</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="n">cogsg_file</span><span class="o">.</span><span class="n">_goto</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">data_length</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;double&#39;</span><span class="p">:</span>
+                    <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;</span><span class="si">%s</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">nnodes</span>
+                    <span class="n">unused_node_array_format</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+                    <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;</span><span class="si">%s</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">nnodes</span>
+                    <span class="n">unused_node_array_format</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;precision = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">data_length</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;&gt;4f&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="c1">#nodes = np.frombuffer(data, &#39;&gt;4f&#39;).reshape(nnodes, 3).copy()</span>
+
+
+            <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>  <span class="c1"># 3 -&gt; xyz, 8 -&gt; double precision ???</span>
+
+            <span class="c1">#----------------------------------------------------------------------</span>
+            <span class="c1"># elements</span>
+            <span class="c1"># boundary layer elements</span>
+            <span class="n">nnodes_per_tet</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="n">ntets</span> <span class="o">=</span> <span class="n">nev</span>
+
+            <span class="k">if</span> <span class="n">ntets</span><span class="p">:</span>
+                <span class="n">data_length</span> <span class="o">=</span> <span class="n">nnodes_per_tet</span> <span class="o">*</span> <span class="n">ntets</span>
+                <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;i&#39;</span> <span class="o">*</span> <span class="n">data_length</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">data_length</span><span class="p">)</span>
+
+                <span class="n">tets</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">tets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tets</span><span class="p">)</span>
+                <span class="n">tets</span> <span class="o">=</span> <span class="n">tets</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">tets</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+            <span class="c1">#----------------------------------------------------------------------</span>
+            <span class="c1"># volume points</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">npv</span>
+
+            <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;</span><span class="si">%s</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">nnodes</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">nnodes</span><span class="p">)</span>
+
+        <span class="n">nodes_vol</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">nodes_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes_vol</span><span class="p">)</span>
+        <span class="n">nodes_vol</span> <span class="o">=</span> <span class="n">nodes_vol</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">tets</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_cogsg_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cogsg_file</span><span class="p">):</span>
+        <span class="c1"># volume cells</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;tell volume = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span>
+        <span class="c1"># surface + volume cells ???</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;nElements&#39;</span><span class="p">]</span>
+        <span class="c1">#str_format = &#39;&gt;%si&#39; % nelements</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;fv.tell = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span>
+        <span class="n">ndata</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">nelements</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">ndata</span><span class="p">)</span>
+
+        <span class="c1"># the 4 means that we make a (nelements, 4) array?</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="n">nelements</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">assert</span> <span class="n">elements</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">nelements</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">elements</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">dummy2</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;dummy2 = </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy2</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;f&#39;</span><span class="p">,</span> <span class="n">dummy2</span><span class="p">)))</span>
+        <span class="n">dummy_int2</span><span class="p">,</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy2</span><span class="p">)</span>
+
+        <span class="c1"># 32 = dummy_int2 - 4 * nelements * 4</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;dummy&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">dummy_int2</span>
+
+        <span class="c1">#-----------------------------------</span>
+        <span class="c1"># nodes</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;nPoints&#39;</span><span class="p">]</span>
+        <span class="c1">#str_format = &#39;&gt;%sd&#39; % nnodes</span>
+
+        <span class="n">dummy3</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># nnodes * 3 * 8</span>
+        <span class="n">dummy3_int</span><span class="p">,</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy3</span><span class="p">)</span>
+        <span class="c1">#assert dummy3_int == 298560</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;dummy3 = </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy3</span><span class="p">))</span> <span class="c1">#, unpack(&#39;&gt;f&#39;, dummy3)</span>
+
+        <span class="n">data_length</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">nnodes</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">data_length</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">==</span> <span class="s1">&#39;double&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;&gt;d&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1"># the ravel creates a copy that we can then use to put in</span>
+        <span class="c1"># a contigous order</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;d&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">dummy4</span> <span class="o">=</span> <span class="n">cogsg_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># nnodes * 3 * 8</span>
+        <span class="n">dummy4_int</span><span class="p">,</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="n">dummy4</span><span class="p">)</span>
+        <span class="c1">#print(&quot;dummy4 = &quot;, unpack(&#39;&gt;i&#39;, dummy4), unpack(&#39;&gt;f&#39;, dummy4))</span>
+
+        <span class="k">assert</span> <span class="n">dummy3_int</span> <span class="o">==</span> <span class="n">dummy4_int</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tets</span> <span class="o">=</span> <span class="n">elements</span>
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elements</span>
+
+<div class="viewcode-block" id="Usm3d.read_flo"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.Usm3d.read_flo">[docs]</a>    <span class="k">def</span> <span class="nf">read_flo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flo_filename</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ipltqn is a format code where:</span>
+<span class="sd">         - ipltqn = 0  (no printout)</span>
+<span class="sd">         - ipltqn = 1  (unformatted)</span>
+<span class="sd">         - ipltqn = 2  (formatted) - default</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        flo_filename : str</span>
+<span class="sd">            the name of the file to read</span>
+<span class="sd">        n : int; default=None</span>
+<span class="sd">            the number of points to read (initializes the array)</span>
+<span class="sd">            n is typically the number of points, but is not required to be</span>
+<span class="sd">            this lets you read nodes 1...n, but not greater than n+1.</span>
+<span class="sd">            node_ids must be set to None.</span>
+<span class="sd">        node_ids : List[int]; default=None</span>
+<span class="sd">            the specific points to read (n must be set to None).</span>
+
+<span class="sd">        nvars = 5</span>
+<span class="sd">          - (nodeID, rho, rhoU, rhoV, rhoW) = sline</span>
+<span class="sd">            (e) = line</span>
+
+<span class="sd">        nvars = 6</span>
+<span class="sd">          - (nodeID, rho, rhoU, rhoV, rhoW, e) = line</span>
+
+<span class="sd">        Also, Nastran-esque float formatting is sometimes used,</span>
+<span class="sd">        so 5.0-100 exists, which is 5.0E-100.  We just assume it&#39;s 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        node_id : (nnodes, ) int ndarray</span>
+<span class="sd">            the node ids for the selected loads</span>
+<span class="sd">        loads : dict[result_name] : data</span>
+<span class="sd">            result_name : str</span>
+<span class="sd">                the name of the result</span>
+<span class="sd">            data : (nnodes, ) float ndarray</span>
+<span class="sd">                the data corresponding to the result_name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node_id</span><span class="p">,</span> <span class="n">loads</span> <span class="o">=</span> <span class="n">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">loads</span></div></div>
+
+<div class="viewcode-block" id="read_flo"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.read_flo">[docs]</a><span class="k">def</span> <span class="nf">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads a *.flo file&quot;&quot;&quot;</span>
+    <span class="n">result_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Mach&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;rho&#39;</span><span class="p">,</span> <span class="s1">&#39;rhoU&#39;</span><span class="p">,</span> <span class="s1">&#39;rhoV&#39;</span><span class="p">,</span> <span class="s1">&#39;rhoW&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;Cp&#39;</span><span class="p">]</span>
+
+    <span class="n">is_sparse</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">node_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">node_ids</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">node_ids</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="n">is_sparse</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">node_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">node_ids</span>
+        <span class="n">is_sparse</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1">#formatCode = 2</span>
+    <span class="n">node_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">rhoU</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">rhoV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">rhoW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">flo_file</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">#file is messsed up</span>
+            <span class="n">mach</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span>
+            <span class="c1">#loads[&#39;Cp&#39;] = e  # it&#39;s 0 anyways...</span>
+            <span class="c1">#return node_id, loads</span>
+
+
+        <span class="c1"># determine the number of variables on each line</span>
+        <span class="n">sline1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">nvars</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">nvars</span> <span class="o">=</span> <span class="mi">6</span>
+            <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nvars</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+
+            <span class="n">sline2</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span>
+
+        <span class="c1"># set the i=0 values</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sparse</span><span class="p">:</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="n">n</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">node_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+            <span class="n">rhoU</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+            <span class="n">rhoV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+            <span class="n">rhoW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+            <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ni</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">node_ids_minus_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="n">node_ids_minus_1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">node_ids_minus_1</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">node_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+                <span class="n">rhoU</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+                <span class="n">rhoV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+                <span class="n">rhoW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+                <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+                <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># loop over the rest of the data in the flo file</span>
+        <span class="k">if</span> <span class="n">node_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ni</span> <span class="o">=</span> <span class="n">n</span>
+            <span class="c1"># extract nodes 1, 2, ... 10, but not 11+</span>
+            <span class="k">if</span> <span class="n">nvars</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># sequential nvars=6</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                    <span class="n">sline1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+                    <span class="n">node_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+                    <span class="n">rhoU</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+                    <span class="n">rhoV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+                    <span class="n">rhoW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+                    <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;len(sline1)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># sequential nvars=5</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+                    <span class="n">sline1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;len(sline1)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span>
+
+                    <span class="n">sline2</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span>
+
+                    <span class="n">node_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">rho</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+                    <span class="n">rhoU</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+                    <span class="n">rhoV</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+                    <span class="n">rhoW</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+                    <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;len(sline2)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># extract node 1, 2, and 10</span>
+            <span class="k">if</span> <span class="n">nvars</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># dynamic nvars=6</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nmax</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node_ids_minus_1</span><span class="p">:</span>
+                        <span class="n">sline1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                        <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+                        <span class="n">node_id</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">rho</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+                        <span class="n">rhoU</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+                        <span class="n">rhoV</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+                        <span class="n">rhoW</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+                        <span class="n">e</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;len(sline1)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span>
+                        <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unused_line1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># dynamic nvars=5</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nmax</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node_ids_minus_1</span><span class="p">:</span>
+                        <span class="n">sline1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="n">rhoi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">rhoui</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">rhovi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="n">rhowi</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline1</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;len(sline1)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline1</span><span class="p">)</span>
+
+                        <span class="n">sline2</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="n">ei</span> <span class="o">=</span> <span class="n">parse_float</span><span class="p">(</span><span class="n">sline2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                        <span class="n">node_id</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">rho</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoi</span>
+                        <span class="n">rhoU</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoui</span>
+                        <span class="n">rhoV</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhovi</span>
+                        <span class="n">rhoW</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhowi</span>
+                        <span class="n">e</span><span class="p">[</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">ei</span>
+                        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;len(sline2)=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">sline2</span><span class="p">)</span>
+                        <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unused_line1</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                        <span class="n">unused_line2</span> <span class="o">=</span> <span class="n">flo_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">==</span> <span class="n">ni</span>
+
+    <span class="c1"># limit the minimum density (to prevent division errors)</span>
+    <span class="n">rho_min</span> <span class="o">=</span> <span class="mf">0.001</span>
+    <span class="n">irho_zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rho</span> <span class="o">&lt;</span> <span class="n">rho_min</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rho</span><span class="p">[</span><span class="n">irho_zero</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho_min</span>
+
+    <span class="n">loads</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s1">&#39;.aux.&#39;</span> <span class="ow">in</span> <span class="n">flo_filename</span><span class="p">:</span>
+        <span class="c1"># the names (rho, e, rhoU, etc.) aren&#39;t correct, but that&#39;s OK</span>
+        <span class="c1"># the load names are correct</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;inst vor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;timeavg vor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoU</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;inst visc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoV</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;timeavg visc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoW</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;local CFL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">loads</span>
+
+    <span class="c1"># standard outputs</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="mf">1.4</span>
+    <span class="n">two_over_mach2</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">mach</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">one_over_gamma</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">gamma</span>
+
+    <span class="n">gm1</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># node_id, rhoi, rhoui, rhovi, rhowi, ei</span>
+    <span class="n">rhoVV</span> <span class="o">=</span> <span class="p">(</span><span class="n">rhoU</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">rhoV</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">rhoW</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">rho</span>
+    <span class="k">if</span> <span class="s1">&#39;p&#39;</span> <span class="ow">in</span> <span class="n">result_names</span> <span class="ow">or</span> <span class="s1">&#39;Mach&#39;</span> <span class="ow">in</span> <span class="n">result_names</span> <span class="ow">or</span> <span class="s1">&#39;Cp&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">pND</span> <span class="o">=</span> <span class="n">gm1</span> <span class="o">*</span> <span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">rhoVV</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;p&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+            <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pND</span>
+    <span class="k">if</span> <span class="s1">&#39;Mach&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">pabs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pND</span><span class="p">)</span>
+        <span class="n">Mach</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+        <span class="n">ipwhere</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pabs</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipwhere</span><span class="p">):</span>
+            <span class="n">inner</span> <span class="o">=</span> <span class="n">rhoVV</span><span class="p">[</span><span class="n">ipwhere</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">pabs</span><span class="p">[</span><span class="n">ipwhere</span><span class="p">])</span>
+            <span class="n">inwhere</span> <span class="o">=</span> <span class="n">ipwhere</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inner</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inwhere</span><span class="p">):</span>
+                <span class="n">Mach</span><span class="p">[</span><span class="n">inwhere</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rhoVV</span><span class="p">[</span><span class="n">inwhere</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">pabs</span><span class="p">[</span><span class="n">inwhere</span><span class="p">]))</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Mach&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mach</span>
+    <span class="k">if</span> <span class="s1">&#39;Cp&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">Cp</span> <span class="o">=</span> <span class="n">two_over_mach2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pND</span> <span class="o">-</span> <span class="n">one_over_gamma</span><span class="p">)</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;Cp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cp</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">pND</span> <span class="o">/</span> <span class="n">rho</span> <span class="c1"># =a^2 as well</span>
+    <span class="c1">#a = T.sqrt()</span>
+    <span class="k">if</span> <span class="s1">&#39;T&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
+
+    <span class="k">if</span> <span class="s1">&#39;rho&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rho</span>
+
+    <span class="k">if</span> <span class="s1">&#39;rhoU&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rhoU&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoU</span>
+    <span class="k">if</span> <span class="s1">&#39;rhoV&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rhoV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoV</span>
+    <span class="k">if</span> <span class="s1">&#39;rhoW&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;rhoW&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoW</span>
+
+    <span class="k">if</span> <span class="s1">&#39;U&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoU</span> <span class="o">/</span> <span class="n">rho</span>
+    <span class="k">if</span> <span class="s1">&#39;V&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoV</span> <span class="o">/</span> <span class="n">rho</span>
+    <span class="k">if</span> <span class="s1">&#39;W&#39;</span> <span class="ow">in</span> <span class="n">result_names</span><span class="p">:</span>
+        <span class="n">loads</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhoW</span> <span class="o">/</span> <span class="n">rho</span>
+    <span class="k">return</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">loads</span></div>
+
+<div class="viewcode-block" id="parse_float"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.parse_float">[docs]</a><span class="k">def</span> <span class="nf">parse_float</span><span class="p">(</span><span class="n">svalue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;floats a value&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+<div class="viewcode-block" id="write_usm3d_volume"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.write_usm3d_volume">[docs]</a><span class="k">def</span> <span class="nf">write_usm3d_volume</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">basename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    writes a *.cogsg, *.front, *.face file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cogsg_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.cogsg&#39;</span>
+    <span class="c1">#face_fileame = basename + &#39;.face&#39;</span>
+    <span class="c1">#front_fileame = basename + &#39;.front&#39;</span>
+
+    <span class="n">write_cogsg_volume</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cogsg_filename</span><span class="p">)</span></div>
+    <span class="c1">#write_front(model, front_fileame)</span>
+    <span class="c1">#write_face(model, face_fileame)</span>
+
+
+<span class="c1">#def write_front(model):</span>
+    <span class="c1">#pass</span>
+
+<span class="c1">#def write_face(model):</span>
+    <span class="c1">#pass</span>
+
+<div class="viewcode-block" id="write_cogsg_volume"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.write_cogsg_volume">[docs]</a><span class="k">def</span> <span class="nf">write_cogsg_volume</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cogsg_fileame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    writes a *.cogsg file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#n = 0</span>
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ntets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cogsg_fileame</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="c1"># file header</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span> <span class="o">+</span> <span class="n">ntets</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,]</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block_size</span><span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span>
+        <span class="n">values_header</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;inew&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;nElements&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;nPoints&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;nBoundPts&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;nViscPts&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;nViscElem&#39;</span><span class="p">],</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;tc&#39;</span><span class="p">],</span> <span class="c1"># d</span>
+            <span class="p">]</span>
+        <span class="c1">#n = 36</span>
+        <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;6id&#39;</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;str_format = </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">str_format</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">values_header</span><span class="p">)</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1">#print(&quot;outfile.tell = %s&quot; % outfile.tell())</span>
+        <span class="c1">#outfile.write(block_size)</span>
+        <span class="c1">#--------------------------------------------------------------------------</span>
+        <span class="n">tets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tets</span>
+
+        <span class="c1"># tet header</span>
+        <span class="c1">#values = [ntets * 4 * 4]  # n1, n2, n3, n4 -&gt; 4; 4 -&gt; int</span>
+        <span class="c1">#block_size = pack(&#39;&gt;i&#39;, *values)</span>
+        <span class="c1">#outfile.write(block_size)</span>
+
+        <span class="c1"># tets</span>
+        <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;</span><span class="si">%s</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">ntets</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">tets</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">tets</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="n">tets</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">n3</span> <span class="o">=</span> <span class="n">tets</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1">#print(&quot;n0 = %s&quot; % n0)</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n0</span><span class="p">))</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n1</span><span class="p">))</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n2</span><span class="p">))</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n3</span><span class="p">))</span>
+        <span class="c1">#n += 4 * 8 * ntets</span>
+        <span class="c1">#print(&quot;outfile.tell 2 = &quot;, outfile.tell(), n)</span>
+
+        <span class="c1"># tet footer</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block_size</span><span class="p">)</span>
+        <span class="c1">#--------------------------------------------------------------------------</span>
+
+        <span class="c1"># nodes header</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">nnodes</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">8</span><span class="p">]</span>  <span class="c1"># xyz -&gt; 3; 8 -&gt; double precision (???)</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block_size</span><span class="p">)</span>
+
+        <span class="c1"># nodes</span>
+        <span class="c1">#npoints = header[&#39;nPoints&#39;]</span>
+        <span class="n">str_format</span> <span class="o">=</span> <span class="s1">&#39;&gt;</span><span class="si">%s</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">nnodes</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n0</span><span class="p">))</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n1</span><span class="p">))</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pack</span><span class="p">(</span><span class="n">str_format</span><span class="p">,</span> <span class="o">*</span><span class="n">n2</span><span class="p">))</span>
+
+        <span class="c1"># nodes footer</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.usm3d.html#pyNastran.converters.usm3d.usm3d_reader.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;test problem&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Usm3d</span><span class="p">()</span>
+    <span class="k">if</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1">#basename = &#39;box&#39;</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="s1">&#39;new2&#39;</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">read_usm3d</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_usm3d</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;_2&#39;</span><span class="p">)</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">read_usm3d</span><span class="p">(</span><span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;_2&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="s1">&#39;new2&#39;</span>
+
+        <span class="c1">#cogsg_filename = basename + &#39;.cogsg&#39;</span>
+        <span class="c1">#bc_filename = basename + &#39;.bc&#39;</span>
+        <span class="c1">#face_filename = basename + &#39;.face&#39;</span>
+        <span class="c1">#front_filename = basename + &#39;.front&#39;</span>
+        <span class="c1">#mapbc_filename = basename + &#39;.mapbc&#39;</span>
+        <span class="n">flo_filename</span> <span class="o">=</span> <span class="n">basename</span> <span class="o">+</span> <span class="s1">&#39;.flo&#39;</span>
+
+        <span class="c1">#model.read_usm3d(basename, 3)</span>
+        <span class="n">unused_node_ids</span><span class="p">,</span> <span class="n">unused_loads</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">read_flo</span><span class="p">(</span><span class="n">flo_filename</span><span class="p">,</span> <span class="n">node_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

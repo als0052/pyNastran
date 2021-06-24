@@ -1,0 +1,815 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.converters.openfoam.block_mesh &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.converters.openfoam.block_mesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.converters.openfoam.block_mesh</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - model = read_block_mesh(block_mesh_dict_filename, log=None, debug=False)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.converters.openfoam.openfoam_parser</span> <span class="kn">import</span> <span class="n">FoamFile</span><span class="p">,</span> <span class="n">convert_to_dict</span> <span class="c1">#, write_dict</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+<span class="kn">from</span> <span class="nn">cpylog</span> <span class="kn">import</span> <span class="n">get_logger2</span>
+
+
+<div class="viewcode-block" id="read_block_mesh"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.read_block_mesh">[docs]</a><span class="k">def</span> <span class="nf">read_block_mesh</span><span class="p">(</span><span class="n">block_mesh_dict_filename</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;functional interface to BlockMesh&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">BlockMesh</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">read_openfoam</span><span class="p">(</span><span class="n">block_mesh_dict_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="area_centroid"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.area_centroid">[docs]</a><span class="k">def</span> <span class="nf">area_centroid</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;calculates the area and centroid of a quad&quot;&quot;&quot;</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span> <span class="o">+</span> <span class="n">n3</span> <span class="o">+</span> <span class="n">n4</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">n3</span> <span class="o">-</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n4</span> <span class="o">-</span> <span class="n">n2</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">area</span><span class="p">,</span> <span class="n">centroid</span></div>
+
+<div class="viewcode-block" id="volume8"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.volume8">[docs]</a><span class="k">def</span> <span class="nf">volume8</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;calculates the volume of a hex&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span> <span class="o">=</span> <span class="n">area_centroid</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">A2</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span> <span class="o">=</span> <span class="n">area_centroid</span><span class="p">(</span><span class="n">n5</span><span class="p">,</span> <span class="n">n6</span><span class="p">,</span> <span class="n">n7</span><span class="p">,</span> <span class="n">n8</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="n">A1</span> <span class="o">+</span> <span class="n">A2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">norm</span><span class="p">(</span><span class="n">c1</span> <span class="o">-</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+
+<div class="viewcode-block" id="get_not_indexes"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.get_not_indexes">[docs]</a><span class="k">def</span> <span class="nf">get_not_indexes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;only works for 1D&quot;&quot;&quot;</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">not_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setxor1d</span><span class="p">(</span><span class="n">ia</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">not_indices</span></div>
+
+
+<div class="viewcode-block" id="BlockMesh"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh">[docs]</a><span class="k">class</span> <span class="nc">BlockMesh</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;defines BlockMesh&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;creates BlockMesh&quot;&quot;&quot;</span>
+        <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1">#log = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger2</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+        <span class="c1"># arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grading</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inames</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="BlockMesh.make_hex_bar"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.make_hex_bar">[docs]</a>    <span class="k">def</span> <span class="nf">make_hex_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unused_bias</span><span class="p">,</span> <span class="n">ncells</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        bias = Llast/Lfirst</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#k = bias = ** 1/N  # close to this-ish</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ncells</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="n">ncells</span>
+        <span class="n">ipoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ncells</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># ipoint</span>
+        <span class="c1"># xmax = d0 * k**n</span>
+        <span class="n">kn</span> <span class="o">=</span> <span class="n">k</span><span class="o">**</span><span class="n">ipoints</span>
+        <span class="n">L0</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">kn</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">kn</span> <span class="o">*</span> <span class="n">L0</span>
+        <span class="k">return</span> <span class="n">ipoints</span><span class="p">,</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="BlockMesh.make_hex_bars"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.make_hex_bars">[docs]</a>    <span class="k">def</span> <span class="nf">make_hex_bars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unused_hex_id</span><span class="p">):</span>
+        <span class="c1">#self.hexas = hexas</span>
+        <span class="c1">#self.npoints = npoints</span>
+        <span class="c1">#self.grading = grading</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">line_pairs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># a set is 2 values</span>
+            <span class="c1">#set1  set2 idir,face</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">grading</span><span class="p">,</span> <span class="n">unused_hexa</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grading</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">):</span>
+            <span class="c1"># x = 0-1 to 4-5</span>
+            <span class="c1">#     3-2 to 7-6</span>
+            <span class="c1"># y = 0-3 to 1-2</span>
+            <span class="c1">#     4-7 to 5-6</span>
+            <span class="c1"># z = 0-4 to 1-5</span>
+            <span class="c1">#     3-7 to 2-6</span>
+            <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">unused_method</span> <span class="o">=</span> <span class="n">grading</span>
+            <span class="n">bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line_pair</span> <span class="ow">in</span> <span class="n">line_pairs</span><span class="p">:</span>
+                <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">i3</span><span class="p">,</span> <span class="n">i4</span><span class="p">,</span> <span class="n">idir</span><span class="p">,</span> <span class="n">iface</span> <span class="o">=</span> <span class="n">line_pair</span>
+                <span class="n">n1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i2</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i3</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i4</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">ncells_x</span> <span class="o">=</span> <span class="n">grading</span><span class="p">[</span><span class="n">idir</span><span class="p">]</span>
+                <span class="n">ncells_y</span> <span class="o">=</span> <span class="n">grading</span><span class="p">[</span><span class="n">iface</span><span class="p">]</span>
+                <span class="n">bias_x</span> <span class="o">=</span> <span class="n">bias</span><span class="p">[</span><span class="n">idir</span><span class="p">]</span>
+                <span class="n">bias_y</span> <span class="o">=</span> <span class="n">bias</span><span class="p">[</span><span class="n">iface</span><span class="p">]</span>
+
+                <span class="n">unused_npx</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_hex_bar</span><span class="p">(</span><span class="n">bias_x</span><span class="p">,</span> <span class="n">ncells_x</span><span class="p">)</span>
+                <span class="n">unused_npy</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_hex_bar</span><span class="p">(</span><span class="n">bias_y</span><span class="p">,</span> <span class="n">ncells_y</span><span class="p">)</span>
+
+                <span class="n">da</span> <span class="o">=</span> <span class="n">n1</span> <span class="o">-</span> <span class="n">n2</span>
+                <span class="n">db</span> <span class="o">=</span> <span class="n">n3</span> <span class="o">-</span> <span class="n">n4</span>
+                <span class="n">La</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
+                <span class="n">Lb</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+                <span class="n">xa</span> <span class="o">=</span> <span class="n">La</span> <span class="o">*</span> <span class="n">x</span>
+                <span class="n">xb</span> <span class="o">=</span> <span class="n">Lb</span> <span class="o">*</span> <span class="n">x</span>
+
+                <span class="n">ncells</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ncells_x</span><span class="p">,</span> <span class="n">ncells_y</span><span class="p">)</span>  <span class="c1">## TODO: what should this be?</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncells</span><span class="p">):</span>
+                    <span class="c1">#print(n2)</span>
+                    <span class="c1">#print(xa[i])</span>
+                    <span class="n">p1</span> <span class="o">=</span> <span class="n">n2</span> <span class="o">+</span> <span class="n">xa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">p2</span> <span class="o">=</span> <span class="n">n4</span> <span class="o">+</span> <span class="n">xb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">dp</span> <span class="o">=</span> <span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span>
+                    <span class="n">L</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">dp</span><span class="p">)</span>
+                    <span class="n">unused_yout</span> <span class="o">=</span> <span class="n">L</span> <span class="o">*</span> <span class="n">y</span>
+
+                    <span class="c1">#unused_new_points = p1 + dp * y</span>
+                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">i</span> <span class="o">/</span> <span class="n">L</span></div>
+                    <span class="c1">#p1 =</span>
+
+<div class="viewcode-block" id="BlockMesh.read_openfoam"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.read_openfoam">[docs]</a>    <span class="k">def</span> <span class="nf">read_openfoam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_mesh_name</span><span class="o">=</span><span class="s1">&#39;blockMeshDict&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reads the BlockMesh file&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;block_mesh_name = </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">block_mesh_name</span><span class="p">)</span>
+        <span class="n">foam_file</span> <span class="o">=</span> <span class="n">FoamFile</span><span class="p">(</span><span class="n">block_mesh_name</span><span class="p">)</span>
+        <span class="n">foam_lines</span> <span class="o">=</span> <span class="n">foam_file</span><span class="o">.</span><span class="n">read_foam_file</span><span class="p">()</span>
+
+        <span class="n">foam_file_dict</span> <span class="o">=</span> <span class="n">convert_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">foam_lines</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#print(write_dict(foam_file_dict))</span>
+        <span class="c1">#unused_keys = foam_file_dict.keys()</span>
+
+        <span class="n">vertices</span> <span class="o">=</span> <span class="n">foam_file_dict</span><span class="p">[</span><span class="s1">&#39;vertices&#39;</span><span class="p">]</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">foam_file_dict</span><span class="p">[</span><span class="s1">&#39;blocks&#39;</span><span class="p">]</span>
+        <span class="n">boundaries</span> <span class="o">=</span> <span class="n">foam_file_dict</span><span class="p">[</span><span class="s1">&#39;boundary&#39;</span><span class="p">]</span>
+        <span class="c1">#self.log.info(boundaries)</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">unused_ivertex</span><span class="p">,</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;() &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+        <span class="n">hexas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grading</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hexa</span><span class="p">,</span> <span class="n">npointsi</span><span class="p">,</span> <span class="n">gradingi</span><span class="p">,</span> <span class="n">blank</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">blank</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">blank</span>
+
+            <span class="n">hexa</span> <span class="o">=</span> <span class="n">hexa</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;hex (&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">npointsi</span> <span class="o">=</span> <span class="n">npointsi</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;( &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">gradingi</span> <span class="o">=</span> <span class="n">gradingi</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="c1">#self.log.info(&#39;%s %s&#39; % (npointsi, gradingi))</span>
+            <span class="c1">#self.log.info(hexa)</span>
+            <span class="n">hexa</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hexa</span><span class="p">]</span>
+            <span class="c1">#print(&#39;hexa&#39;, key, hexa)</span>
+            <span class="n">hexas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hexa</span><span class="p">)</span>
+            <span class="n">npoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">npointsi</span><span class="p">)</span>
+            <span class="n">grading</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gradingi</span><span class="p">)</span>
+
+        <span class="n">bc_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;wall&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;patch&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;symmetry&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">iname_to_quads</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">inames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bcs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">iname</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">iname_to_name</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">iname_to_type</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">quads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1">#print key, boundary.keys()</span>
+            <span class="n">Type</span> <span class="o">=</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+            <span class="n">bc</span> <span class="o">=</span> <span class="n">bc_map</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span>
+            <span class="c1">#bcs.append(bc)</span>
+            <span class="n">faces</span> <span class="o">=</span> <span class="n">boundary</span><span class="p">[</span><span class="s1">&#39;faces&#39;</span><span class="p">]</span>
+            <span class="n">iname_to_name</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">iname_to_type</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span> <span class="o">=</span> <span class="n">Type</span>
+            <span class="k">for</span> <span class="n">unused_iface</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">quad</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;() &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">quad</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">quad</span><span class="p">]</span>
+                <span class="n">quads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quad</span><span class="p">)</span>
+                <span class="n">iname_to_quads</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quad</span><span class="p">)</span>
+                <span class="n">inames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iname</span><span class="p">)</span>
+                <span class="n">bcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;iname=</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">; bc=</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iname</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">Type</span><span class="p">))</span>
+            <span class="n">iname</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span>
+
+        <span class="n">hexas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hexas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">grading</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grading</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span> <span class="o">=</span> <span class="n">hexas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span> <span class="o">=</span> <span class="n">npoints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grading</span> <span class="o">=</span> <span class="n">grading</span>
+
+        <span class="n">quads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">quads</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">inames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inames</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">bcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bcs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">quads</span> <span class="o">=</span> <span class="n">quads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span> <span class="o">=</span> <span class="n">iname_to_quads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inames</span> <span class="o">=</span> <span class="n">inames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_name</span> <span class="o">=</span> <span class="n">iname_to_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_type</span> <span class="o">=</span> <span class="n">iname_to_type</span>
+
+        <span class="c1">#bdf_filename = &#39;blockMesh.bdf&#39;</span>
+        <span class="c1">#self.write_bdf(bdf_filename, nodes, hexas)</span>
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">hexas</span><span class="p">,</span> <span class="n">quads</span><span class="p">,</span> <span class="n">inames</span><span class="p">,</span> <span class="n">bcs</span></div>
+
+<div class="viewcode-block" id="BlockMesh.write_bdf"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.write_bdf">[docs]</a>    <span class="k">def</span> <span class="nf">write_bdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bdf_filename</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">hexas</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes the BlockMesh as a Nastran BDF&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bdf_file</span><span class="p">:</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CEND</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BEGIN BULK</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+
+            <span class="n">pid</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">ielement</span><span class="p">,</span> <span class="n">hexa</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hexas</span><span class="p">):</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">([</span><span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span> <span class="n">ielement</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pid</span><span class="p">,]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">hexa</span><span class="p">)))</span>
+
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSOLID, 1, 1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MAT1, 1, 1.0,,0.3</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDDATA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="c1">#print(write_dict(d, baseword=&#39;BlockMesh&#39;))</span>
+
+<div class="viewcode-block" id="BlockMesh.adjust_nodes_to_symmetry"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.adjust_nodes_to_symmetry">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_nodes_to_symmetry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># find where nodes have -y value</span>
+        <span class="n">unused_y_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1">#i = where(y_locations &lt; -0.0508)[0]</span>
+        <span class="c1">#self.nodes[i, 1] = -0.0508</span>
+
+        <span class="c1"># set -y to 0</span>
+        <span class="c1">#i = where(y_locations &lt; 0.0)[0]</span>
+        <span class="c1">#self.nodes[i, 1] = 0.0</span>
+        <span class="n">neq</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ieq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">neq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">neq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equivalence_nodes</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+            <span class="c1">#self.write_block_mesh(&#39;blockMeshDict_n&#39; + str(neq), make_symmetry=True)</span>
+            <span class="n">ieq</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">ieq</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">asdf</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;neq = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">neq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ieq = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ieq</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlockMesh.equivalence_nodes"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.equivalence_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">equivalence_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Rtol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;equivalences the nodes of a BlockMeshDict&quot;&quot;&quot;</span>
+        <span class="c1">#same_location = []</span>
+        <span class="n">inode_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">neq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nnodes = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">nodei</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">jnode</span><span class="p">,</span> <span class="n">nodej</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">inode</span> <span class="o">&lt;</span> <span class="n">jnode</span><span class="p">:</span>
+                    <span class="n">delta</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">nodei</span><span class="o">-</span><span class="n">nodej</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="n">Rtol</span><span class="p">:</span>
+                        <span class="c1">#print(&#39;delta=%6g %2s %2s&#39; % (delta, inode, jnode))</span>
+                        <span class="c1">#same_location.append([inode, jnode])</span>
+                        <span class="n">inode_map</span><span class="p">[</span><span class="n">jnode</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode</span>
+                        <span class="n">neq</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#same_location = array(same_location, dtype=&#39;int32&#39;)</span>
+        <span class="c1">#print(&#39;same_location = \n%s&#39; % same_location)</span>
+        <span class="c1">#nleft = nnodes - neq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;neq = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">neq</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">neq</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">:</span>
+            <span class="n">asdf</span>
+
+        <span class="c1"># get the node mapping as a dict</span>
+        <span class="n">new_ids_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">new_ids_map2</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inode_map</span><span class="p">:</span>  <span class="c1"># nodes to adjust</span>
+                <span class="n">new_ids_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_ids_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="n">stack_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">stack_nodes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">iname</span><span class="p">,</span> <span class="n">faces</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+                <span class="n">stack_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">face</span><span class="p">)))</span>
+
+        <span class="c1">#if 0:</span>
+            <span class="c1">#print(stack_nodes, len(stack_nodes))</span>
+            <span class="c1">#for key, value in sorted(new_ids_map.items()):</span>
+                <span class="c1">#if key not in stack_nodes:</span>
+                    <span class="c1">#print(&#39; #k=%s v=%s&#39; % (key, value))</span>
+                <span class="c1">#if key != value:</span>
+                    <span class="c1">#print(&#39; *k=%s v=%s&#39; % (key, value))</span>
+                <span class="c1">#else:</span>
+                    <span class="c1">#print(&#39;  k=%s v=%s&#39; % (key, value))</span>
+
+        <span class="c1"># map them to 0...n</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;-------------------&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_ids_map</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>  <span class="c1"># the dict of collapsed nodes</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stack_nodes</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">new_ids_map2</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span> <span class="o">-</span> <span class="n">j</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">j0</span> <span class="o">=</span> <span class="n">j</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_ids_map2</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span> <span class="o">-</span> <span class="n">j0</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">#for key, value in sorted(new_ids_map2.items()):</span>
+            <span class="c1">#self.log.info(&#39;  k=%s v=%s&#39; % (key, value))</span>
+        <span class="n">new_ids_map</span> <span class="o">=</span> <span class="n">new_ids_map2</span>
+
+        <span class="c1"># get new array of nodes</span>
+        <span class="c1">#not_indexes = get_not_indexes(self.nodes, same_location[:, 1])</span>
+        <span class="c1">#nodes2 = self.nodes[not_indexes, :]</span>
+
+        <span class="c1">#a[not_indices] = 888</span>
+        <span class="c1">#print(&#39;nodes2 =&#39;, nodes2)</span>
+        <span class="n">nodes2</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes2_written</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="n">jnode</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_ids_map2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">jnode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes2_written</span><span class="p">:</span>
+                <span class="n">node2</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">nodes2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node2</span><span class="p">)</span>
+                <span class="n">nodes2_written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jnode</span><span class="p">)</span>
+
+        <span class="n">nodes2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nodes2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">nnodes2</span> <span class="o">=</span> <span class="n">nodes2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">nnodes2</span> <span class="o">&lt;=</span> <span class="n">nnodes</span><span class="p">,</span> <span class="s1">&#39;nnodes=</span><span class="si">%s</span><span class="s1"> nnodes2=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes2</span><span class="p">)</span>
+
+        <span class="c1"># update the hexas</span>
+        <span class="n">hexas2</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">npoints2</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># don&#39;t change</span>
+        <span class="n">grading2</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># don&#39;t change</span>
+        <span class="k">for</span> <span class="n">unused_ihexa</span><span class="p">,</span> <span class="n">hexa</span><span class="p">,</span> <span class="n">npointsi</span><span class="p">,</span> <span class="n">gradingi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span><span class="p">,</span>
+                                                          <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grading</span><span class="p">):</span>
+            <span class="n">hexa2</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">hexa</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">new_ids_map</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">hexa2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1">#print hexa2</span>
+            <span class="c1">#asdf</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">hexa2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+
+                <span class="n">hexas2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hexa2</span><span class="p">)</span>
+                <span class="n">npoints2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">npointsi</span><span class="p">)</span>
+                <span class="n">grading2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gradingi</span><span class="p">)</span>
+        <span class="n">hexas2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hexas2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">npoints2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">npoints2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="n">grading2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">grading2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
+
+        <span class="c1"># update the faces</span>
+        <span class="n">iname_to_quads</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">iname</span><span class="p">,</span> <span class="n">faces</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">faces2</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+                <span class="n">face2</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">face</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">new_ids_map</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">face2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">faces2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face2</span><span class="p">)</span>
+            <span class="n">iname_to_quads</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">faces2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+        <span class="c1">#self.log.info(nodes.shape)</span>
+        <span class="c1">#self.log.info(nodes2.shape)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span> <span class="o">=</span> <span class="n">hexas2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grading</span> <span class="o">=</span> <span class="n">grading2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span> <span class="o">=</span> <span class="n">npoints2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span> <span class="o">=</span> <span class="n">iname_to_quads</span>
+
+        <span class="k">return</span> <span class="n">neq</span></div>
+
+<div class="viewcode-block" id="BlockMesh.write_block_mesh"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh.write_block_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">write_block_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_mesh_name_out</span><span class="o">=</span><span class="s1">&#39;blockMeshDict.out&#39;</span><span class="p">,</span> <span class="n">make_symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;filename interface to ``_write_block_mesh``&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">block_mesh_name_out</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">block_mesh_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;writing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">block_mesh_name_out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_block_mesh</span><span class="p">(</span><span class="n">block_mesh_file</span><span class="p">,</span> <span class="n">make_symmetry</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlockMesh._write_block_mesh"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.BlockMesh._write_block_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">_write_block_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_mesh_file</span><span class="p">,</span> <span class="n">make_symmetry</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes a BlockMeshDict with a file object&quot;&quot;&quot;</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">hexas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hexas</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;/*--------------------------------*- C++ -*----------------------------------*</span><span class="se">\\\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;| =========                 |                                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;| </span><span class="se">\\</span><span class="s1">      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|  </span><span class="se">\\</span><span class="s1">    /   O peration     | Version:  2.2.2                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|   </span><span class="se">\\</span><span class="s1">  /    A nd           | Web:      www.OpenFOAM.org                      |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;|    </span><span class="se">\\</span><span class="s1">/     M anipulation  |                                                 |</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">r</span><span class="s1">&#39;\*---------------------------------------------------------------------------*/&#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;FoamFile</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;{</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    version     0.0508;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    format      ascii;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    class       dictionary;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;    object      blockMeshDict;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;convertToMeters 1.0;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;vertices</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">unique_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">unique_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">unique_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">unique_x</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">unique_y</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">unique_z</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="c1">#print(&#39;unique_x = %s&#39; % unique_x)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;unique_y = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unique_y</span><span class="p">)</span>
+        <span class="c1">#print(&#39;unique_z = %s&#39; % unique_z)</span>
+
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">fmt_node</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%%s</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
+        <span class="c1">#print(&#39;fmt-node = %r&#39; % fmt_node)</span>
+        <span class="k">for</span> <span class="n">inode</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    (</span><span class="si">%7s</span><span class="s1"> </span><span class="si">%7s</span><span class="s1"> </span><span class="si">%7s</span><span class="s1">) // </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">inode</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;);</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;blocks</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;      // hex                        npoints in each dir;    stretching</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#print &quot;nodes = &quot;, nodes.shape</span>
+        <span class="n">hexai_fmt</span> <span class="o">=</span> <span class="s1">&#39;hex (</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">fmt_node</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">m_to_inch</span> <span class="o">=</span> <span class="mf">39.3701</span>
+        <span class="k">for</span> <span class="n">ihexa</span><span class="p">,</span> <span class="p">(</span><span class="n">hexa</span><span class="p">,</span> <span class="n">npointsi</span><span class="p">,</span> <span class="n">gradingi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">hexas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grading</span><span class="p">)):</span>
+            <span class="n">save_element</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">inode</span> <span class="ow">in</span> <span class="n">hexa</span><span class="p">:</span>
+                <span class="c1">#print(&#39;inode = %s&#39; % inode)</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">inode</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="c1">#print(&#39;nodes[%s] = %s&#39; % (inode, str(node)))</span>
+                <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="n">save_element</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1">#npointsi = self.npoints[ihexa]</span>
+            <span class="c1">#gradingi = self.grading[ihexa]</span>
+            <span class="n">save_element</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">save_element</span><span class="p">:</span>
+                <span class="n">voli</span> <span class="o">=</span> <span class="n">volume8</span><span class="p">(</span>
+                    <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">:],</span>
+                    <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="p">:],</span> <span class="n">nodes</span><span class="p">[</span><span class="n">hexa</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">:],)</span>
+                <span class="k">if</span> <span class="n">voli</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">shexai</span> <span class="o">=</span> <span class="n">hexai_fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">hexa</span><span class="p">)</span>
+                    <span class="n">snpointsi</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">npointsi</span><span class="p">)</span>
+                    <span class="n">sgradingi</span> <span class="o">=</span> <span class="s1">&#39;simpleGrading (</span><span class="si">%g</span><span class="s1"> </span><span class="si">%g</span><span class="s1"> </span><span class="si">%g</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">gradingi</span><span class="p">)</span>
+                    <span class="n">svoli</span> <span class="o">=</span> <span class="s1">&#39;vol = </span><span class="si">%g</span><span class="s1"> [in]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">voli</span> <span class="o">*</span> <span class="n">m_to_inch</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;      </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">  // </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">shexai</span><span class="p">,</span> <span class="n">snpointsi</span><span class="p">,</span> <span class="n">sgradingi</span><span class="p">,</span> <span class="n">svoli</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">ihexa</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;);</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;edges</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;);</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;boundary</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1">#iname_quads = {}</span>
+
+        <span class="n">symmetry_faces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">facei_fmt</span> <span class="o">=</span> <span class="s1">&#39;           (</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">fmt_node</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">iname</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_name</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span>
+            <span class="n">Type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_type</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    {</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        type </span><span class="si">%s</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Type</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        faces</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        (</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iname_to_quads</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
+                <span class="n">n1</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n2</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">area</span><span class="p">,</span> <span class="n">centroid</span> <span class="o">=</span> <span class="n">area_centroid</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span>
+                <span class="n">centroid</span> <span class="o">*=</span> <span class="n">m_to_inch</span>
+                <span class="k">if</span> <span class="n">area</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+                    <span class="n">area</span> <span class="o">*=</span> <span class="n">m_to_inch</span> <span class="o">**</span> <span class="mi">2</span>
+                    <span class="n">y_centroid</span> <span class="o">=</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">make_symmetry</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">y_centroid</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">):</span>
+                        <span class="n">symmetry_faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">y_centroid</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                                <span class="n">facei_fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">+</span>
+                                <span class="s1">&#39; // centroid=(</span><span class="si">%3g</span><span class="s1">, </span><span class="si">%3g</span><span class="s1">, </span><span class="si">%3g</span><span class="s1">) [in]  Area=</span><span class="si">%.2f</span><span class="s1"> [in^2]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">area</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">facei_fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1">#+ &#39; // c=(%7s, %7s, %7s)\n&#39; % tuple(centroid)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        );</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    }</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1">#save_face = False</span>
+
+        <span class="k">if</span> <span class="n">make_symmetry</span><span class="p">:</span>
+            <span class="c1">#name = self.iname_to_name[iname]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;symmetry&#39;</span>
+            <span class="n">foam_type</span> <span class="o">=</span> <span class="s1">&#39;symmetryPlane&#39;</span>
+            <span class="c1">#foam_type = self.iname_to_type[iname]</span>
+
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    {</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        type </span><span class="si">%s</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">foam_type</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        faces</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        (</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">symmetry_faces</span><span class="p">:</span>
+                <span class="n">n1</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n2</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n3</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">n4</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">:]</span>
+                <span class="n">area</span><span class="p">,</span> <span class="n">centroid</span> <span class="o">=</span> <span class="n">area_centroid</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">)</span>
+                <span class="n">centroid</span> <span class="o">*=</span> <span class="n">m_to_inch</span>
+                <span class="n">area</span> <span class="o">*=</span> <span class="n">m_to_inch</span> <span class="o">**</span> <span class="mi">2</span>
+
+                <span class="n">y_centroid</span> <span class="o">=</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">y_centroid</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="n">facei_fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">+</span>
+                        <span class="s1">&#39; // centroid=(</span><span class="si">%3g</span><span class="s1">, </span><span class="si">%3g</span><span class="s1">, </span><span class="si">%3g</span><span class="s1">) [in]  Area=</span><span class="si">%.2f</span><span class="s1"> [in^2]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">centroid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">area</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">facei_fmt</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">face</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="c1">#+ &#39; // c=(%7s, %7s, %7s)\n&#39; % tuple(centroid)</span>
+
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;        );</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    }</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;);</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mergeMatchPairs</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;(</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;);</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">block_mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;// ************************************************************************* //</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="mirror_block_mesh"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.mirror_block_mesh">[docs]</a><span class="k">def</span> <span class="nf">mirror_block_mesh</span><span class="p">(</span><span class="n">block_mesh_name</span><span class="p">,</span> <span class="n">block_mesh_name_out</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;mirrors a blockMeshDict&quot;&quot;&quot;</span>
+    <span class="n">make_symmetry</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">block_mesh_model</span> <span class="o">=</span> <span class="n">read_block_mesh</span><span class="p">(</span><span class="n">block_mesh_name</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="c1">#out = block_mesh_model.read_openfoam(block_mesh_name)</span>
+    <span class="c1">#unused_nodes, unused_hexas, unused_quads, unused_names, unused_bcs = out</span>
+    <span class="k">if</span> <span class="n">make_symmetry</span><span class="p">:</span>
+        <span class="n">block_mesh_model</span><span class="o">.</span><span class="n">adjust_nodes_to_symmetry</span><span class="p">()</span>
+    <span class="n">block_mesh_model</span><span class="o">.</span><span class="n">write_block_mesh</span><span class="p">(</span><span class="n">block_mesh_name_out</span><span class="p">,</span> <span class="n">make_symmetry</span><span class="o">=</span><span class="n">make_symmetry</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../reference/converters/pyNastran.converters.openfoam.html#pyNastran.converters.openfoam.block_mesh.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">block_mesh_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">block_mesh_name_out</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">mirror_block_mesh</span><span class="p">(</span><span class="n">block_mesh_name</span><span class="p">,</span> <span class="n">block_mesh_name_out</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

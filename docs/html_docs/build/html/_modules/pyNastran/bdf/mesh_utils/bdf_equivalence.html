@@ -1,0 +1,686 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.bdf_equivalence &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.bdf_equivalence</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.bdf_equivalence</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd">    model = bdf_equivalence_nodes(bdf_filename, bdf_filename_out, tol,</span>
+<span class="sd">                                  renumber_nodes=False, neq_max=4, xref=True,</span>
+<span class="sd">                                  node_set=None,</span>
+<span class="sd">                                  size=8, is_double=False,</span>
+<span class="sd">                                  remove_collapsed_elements=False,</span>
+<span class="sd">                                  avoid_collapsed_elements=False,</span>
+<span class="sd">                                  crash_on_collapse=False, log=None, debug=True)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">searchsorted</span><span class="p">,</span>
+                   <span class="n">setdiff1d</span><span class="p">,</span> <span class="n">intersect1d</span><span class="p">,</span> <span class="n">asarray</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">scipy.spatial</span>
+
+<span class="kn">from</span> <span class="nn">pyNastran.nptyping</span> <span class="kn">import</span> <span class="n">NDArrayNint</span><span class="p">,</span> <span class="n">NDArrayN3float</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.mesh_utils.internal_utils</span> <span class="kn">import</span> <span class="n">get_bdf_model</span>
+
+
+<div class="viewcode-block" id="bdf_equivalence_nodes"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence.bdf_equivalence_nodes">[docs]</a><span class="k">def</span> <span class="nf">bdf_equivalence_nodes</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bdf_filename_out</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                          <span class="n">renumber_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">neq_max</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">xref</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">node_set</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">NDArrayNint</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">is_double</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">remove_collapsed_elements</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">avoid_collapsed_elements</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">crash_on_collapse</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;new&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Equivalences nodes; keeps the lower node id; creates two nodes with the same</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bdf_filename : str / BDF</span>
+<span class="sd">        str : bdf file path</span>
+<span class="sd">        BDF : a BDF model that is fully valid (see xref)</span>
+<span class="sd">    bdf_filename_out : str</span>
+<span class="sd">        a bdf_filename to write</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        the spherical tolerance</span>
+<span class="sd">    renumber_nodes : bool</span>
+<span class="sd">        should the nodes be renumbered (default=False)</span>
+<span class="sd">    neq_max : int</span>
+<span class="sd">        the number of &quot;close&quot; points (default=4)</span>
+<span class="sd">    xref : bool</span>
+<span class="sd">        does the model need to be cross_referenced</span>
+<span class="sd">        (default=True; only applies to model option)</span>
+<span class="sd">    node_set : List[int] / (n, ) ndarray; default=None</span>
+<span class="sd">        the list/array of nodes to consider</span>
+<span class="sd">        (not supported with renumber_nodes=True)</span>
+<span class="sd">    size : int; {8, 16}; default=8</span>
+<span class="sd">        the bdf write precision</span>
+<span class="sd">    is_double : bool; default=False</span>
+<span class="sd">        the field precision to write</span>
+<span class="sd">    remove_collapsed_elements : bool; default=False (unsupported)</span>
+<span class="sd">        True  : 1D/2D/3D elements will not be collapsed;</span>
+<span class="sd">                CELASx/CDAMP/MPC/etc. are not considered</span>
+<span class="sd">        False : no elements will be removed</span>
+<span class="sd">    avoid_collapsed_elements : bool; default=False (unsupported)</span>
+<span class="sd">        True  : only collapses that don&#39;t break 1D/2D/3D elements will be considered;</span>
+<span class="sd">                CELASx/CDAMP/MPC/etc. are considered</span>
+<span class="sd">        False : element can be collapsed</span>
+<span class="sd">    crash_on_collapse : bool; default=False</span>
+<span class="sd">        stop if nodes have been collapsed</span>
+<span class="sd">           False: blindly move on</span>
+<span class="sd">           True: rereads the BDF which catches doubled nodes (temporary);</span>
+<span class="sd">                 in the future collapse=True won&#39;t need to double read;</span>
+<span class="sd">                 an alternative is to do Patran&#39;s method of avoiding collapse)</span>
+<span class="sd">    debug : bool</span>
+<span class="sd">        bdf debugging</span>
+<span class="sd">    method: str; default=&#39;new&#39;</span>
+<span class="sd">        &#39;new&#39;: doesn&#39;t require neq_max; new in v1.3</span>
+<span class="sd">        &#39;old&#39;: use neq_max; used in v1.2</span>
+<span class="sd">    log : logger(); default=None</span>
+<span class="sd">        bdf logging</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    model : BDF()</span>
+<span class="sd">        The BDF model corresponding to bdf_filename_out</span>
+
+<span class="sd">    .. warning:: I doubt SPOINTs/EPOINTs work correctly</span>
+<span class="sd">    .. warning:: xref not fully implemented (assumes cid=0)</span>
+
+<span class="sd">    .. todo:: node_set stil does work on the all the nodes in the big</span>
+<span class="sd">               kdtree loop, which is very inefficient</span>
+<span class="sd">    .. todo:: remove_collapsed_elements is not supported</span>
+<span class="sd">    .. todo:: avoid_collapsed_elements is not supported</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">inew</span> <span class="o">=</span> <span class="n">_eq_nodes_setup</span><span class="p">(</span>
+        <span class="n">bdf_filename</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">renumber_nodes</span><span class="o">=</span><span class="n">renumber_nodes</span><span class="p">,</span>
+        <span class="n">xref</span><span class="o">=</span><span class="n">xref</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="n">nid_pairs</span> <span class="o">=</span> <span class="n">_nodes_xyz_nids_to_nid_pairs</span><span class="p">(</span>
+        <span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">inew</span><span class="p">,</span>
+        <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">,</span> <span class="n">neq_max</span><span class="o">=</span><span class="n">neq_max</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="n">_eq_nodes_final</span><span class="p">(</span><span class="n">nid_pairs</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bdf_filename_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">write_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">is_double</span><span class="o">=</span><span class="n">is_double</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crash_on_collapse</span><span class="p">:</span>
+        <span class="c1"># lazy way to make sure there aren&#39;t any collapsed nodes</span>
+        <span class="n">model2</span> <span class="o">=</span> <span class="n">BDF</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="n">model2</span><span class="o">.</span><span class="n">read_bdf</span><span class="p">(</span><span class="n">bdf_filename_out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_eq_nodes_setup</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">unused_tol</span><span class="p">,</span>
+                    <span class="n">renumber_nodes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper function for ``bdf_equivalence_nodes``&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">renumber_nodes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;node_set is not None &amp; renumber_nodes=True&#39;</span><span class="p">)</span>
+
+        <span class="c1">#print(type(node_set))</span>
+        <span class="c1">#print(&#39;*node_set&#39;, node_set)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">node_set</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+            <span class="n">node_set</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">node_set</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node_set</span> <span class="o">=</span> <span class="n">asarray</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">get_bdf_model</span><span class="p">(</span><span class="n">bdf_filename</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="n">xref</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="c1"># quads / tris</span>
+    <span class="c1">#nids_quads = []</span>
+    <span class="c1">#eids_quads = []</span>
+    <span class="c1">#nids_tris = []</span>
+    <span class="c1">#eids_tris = []</span>
+
+    <span class="c1"># map the node ids to the slot in the nids array</span>
+    <span class="n">renumber_nodes</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nids</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">,</span> <span class="n">unused_nid_map</span> <span class="o">=</span> <span class="n">_eq_nodes_setup_node_set</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">renumber_nodes</span><span class="o">=</span><span class="n">renumber_nodes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nids</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">,</span> <span class="n">unused_nid_map</span> <span class="o">=</span> <span class="n">_eq_nodes_setup_node</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">renumber_nodes</span><span class="o">=</span><span class="n">renumber_nodes</span><span class="p">)</span>
+
+    <span class="n">nodes_xyz</span> <span class="o">=</span> <span class="n">_get_xyz_cid0</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nids</span><span class="p">)</span>
+    <span class="n">inew</span> <span class="o">=</span> <span class="n">_check_for_referenced_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">,</span> <span class="n">nodes_xyz</span><span class="p">)</span>
+
+    <span class="c1">#assert np.array_equal(nids[inew], nids_new), &#39;some nodes are not defined&#39;</span>
+    <span class="k">return</span> <span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">inew</span>
+
+<div class="viewcode-block" id="_get_xyz_cid0"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._get_xyz_cid0">[docs]</a><span class="k">def</span> <span class="nf">_get_xyz_cid0</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets xyz_cid0&quot;&quot;&quot;</span>
+    <span class="n">coord_ids</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coord_ids</span>
+    <span class="n">needs_get_position</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord_ids</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">needs_get_position</span><span class="p">:</span>
+        <span class="n">nodes_xyz</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+                           <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nodes_xyz</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span><span class="o">.</span><span class="n">xyz</span>
+                           <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">nids</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nodes_xyz</span></div>
+
+<div class="viewcode-block" id="_eq_nodes_setup_node_set"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._eq_nodes_setup_node_set">[docs]</a><span class="k">def</span> <span class="nf">_eq_nodes_setup_node_set</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">renumber_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNint</span><span class="p">,</span> <span class="n">NDArrayNint</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;helper function for ``_eq_nodes_setup``&quot;&quot;&quot;</span>
+    <span class="n">inode</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_nids</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="c1"># B - A</span>
+    <span class="c1"># these are all the nodes that are requested from node_set that are missing</span>
+    <span class="c1">#   thus len(diff_nodes) == 0</span>
+    <span class="n">diff_nodes</span> <span class="o">=</span> <span class="n">setdiff1d</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff_nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;The following nodes cannot be found, but are included&#39;</span>
+               <span class="s1">&#39; in the reduced set; nids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">diff_nodes</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># A &amp; B</span>
+    <span class="c1"># the nodes to analyze are the union of all the nodes and the desired set</span>
+    <span class="c1"># which is basically the same as:</span>
+    <span class="c1">#   nids = unique(node_set)</span>
+    <span class="n">nids</span> <span class="o">=</span> <span class="n">intersect1d</span><span class="p">(</span><span class="n">all_nids</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># the new values</span>
+
+    <span class="k">if</span> <span class="n">renumber_nodes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;node_set is not None &amp; renumber_nodes=True&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">all_nids</span><span class="p">:</span>
+            <span class="n">nid_map</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nid</span>
+            <span class="n">inode</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1">#nids = array([node.nid for nid, node in sorted(model.nodes.items())</span>
+                    <span class="c1">#if nid in node_set], dtype=&#39;int32&#39;)</span>
+    <span class="k">return</span> <span class="n">nids</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">,</span> <span class="n">nid_map</span></div>
+
+<div class="viewcode-block" id="_eq_nodes_setup_node"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._eq_nodes_setup_node">[docs]</a><span class="k">def</span> <span class="nf">_eq_nodes_setup_node</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">renumber_nodes</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArrayNint</span><span class="p">,</span> <span class="n">NDArrayNint</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;helper function for ``_eq_nodes_setup``&quot;&quot;&quot;</span>
+    <span class="n">inode</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nid_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">renumber_nodes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">nid</span> <span class="o">=</span> <span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">nid_map</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nid</span>
+            <span class="n">inode</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">inode</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">nids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">nnodes</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">nid_map</span><span class="p">[</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nid</span>
+            <span class="n">inode</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nids</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">node</span><span class="o">.</span><span class="n">nid</span> <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">items</span><span class="p">())],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">all_nids</span> <span class="o">=</span> <span class="n">nids</span>
+    <span class="k">return</span> <span class="n">nids</span><span class="p">,</span> <span class="n">all_nids</span><span class="p">,</span> <span class="n">nid_map</span></div>
+
+<div class="viewcode-block" id="_check_for_referenced_nodes"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._check_for_referenced_nodes">[docs]</a><span class="k">def</span> <span class="nf">_check_for_referenced_nodes</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span>
+                                <span class="n">node_set</span><span class="p">:</span> <span class="n">NDArrayNint</span><span class="p">,</span>
+                                <span class="n">nids</span><span class="p">:</span> <span class="n">NDArrayNint</span><span class="p">,</span>
+                                <span class="n">all_nids</span><span class="p">:</span> <span class="n">NDArrayNint</span><span class="p">,</span>
+                                <span class="n">nodes_xyz</span><span class="p">:</span> <span class="n">NDArrayN3float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NDArrayNint</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;helper function for ``_eq_nodes_setup``&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">nodes_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># I forget entirely what this block of code is for, but my general</span>
+        <span class="c1"># recollection was that it checked that all the nodes that were</span>
+        <span class="c1"># referenced were included in the nids list.  I&#39;d rather break that</span>
+        <span class="c1"># check in order to support nodes_set.</span>
+        <span class="c1">#</span>
+        <span class="c1"># It&#39;s also possible that it&#39;s here, so you only consider nodes that</span>
+        <span class="c1"># are associated...</span>
+
+        <span class="c1"># there is some set of points that are used on the elements that</span>
+        <span class="c1"># will be considered.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Presumably this is enough to capture all the node ids and NOT</span>
+        <span class="c1"># spoints, but I doubt it...</span>
+        <span class="n">spoint_epoint_nid_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">spoint_epoint_nid_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">unused_eid</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">spoint_epoint_nid_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">node_ids</span><span class="p">)</span>
+
+        <span class="n">nids_new</span> <span class="o">=</span> <span class="n">spoint_epoint_nid_set</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">spoints</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">epoints</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">nids_new</span><span class="p">:</span>
+            <span class="n">nids_new</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># autosorts the data</span>
+        <span class="n">nids_new</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nids_new</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nids_new</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">integer_types</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">nids_new</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">missing_nids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nids_new</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_nids</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">missing_nids</span><span class="p">:</span>
+            <span class="n">missing_nids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;There are missing nodes...</span><span class="se">\n</span><span class="s1">&#39;</span>  <span class="c1"># TODO: in what???</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;missing nids=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">missing_nids</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># get the node_id mapping for the kdtree</span>
+        <span class="n">inew</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">nids_new</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="c1"># print(&#39;nids_new =&#39;, nids_new)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inew</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#assert np.array_equal(nids[inew], nids_new), &#39;some nodes are not defined&#39;</span>
+    <span class="k">return</span> <span class="n">inew</span></div>
+
+<span class="k">def</span> <span class="nf">_eq_nodes_find_pairs</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">slots</span><span class="p">,</span> <span class="n">ieq</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper function for `bdf_equivalence_nodes`&quot;&quot;&quot;</span>
+    <span class="n">irows</span><span class="p">,</span> <span class="n">icols</span> <span class="o">=</span> <span class="n">slots</span>
+    <span class="c1">#replacer = unique(ieq[slots])  ## TODO: turn this back on?</span>
+
+    <span class="c1">#skip_nodes = []</span>
+    <span class="n">nid_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">irows</span><span class="p">,</span> <span class="n">icols</span><span class="p">):</span>
+        <span class="n">inid2</span> <span class="o">=</span> <span class="n">ieq</span><span class="p">[</span><span class="n">irow</span><span class="p">,</span> <span class="n">icol</span><span class="p">]</span>
+        <span class="n">nid1</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="n">irow</span><span class="p">]</span>
+        <span class="n">nid2</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="n">inid2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nid1</span> <span class="o">==</span> <span class="n">nid2</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nid1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_set</span> <span class="ow">and</span> <span class="n">nid2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="n">nid_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nid1</span><span class="p">,</span> <span class="n">nid2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">nid_pairs</span>
+
+
+<div class="viewcode-block" id="_eq_nodes_final"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._eq_nodes_final">[docs]</a><span class="k">def</span> <span class="nf">_eq_nodes_final</span><span class="p">(</span><span class="n">nid_pairs</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;apply nodal equivalencing to model&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">nid1</span><span class="p">,</span> <span class="n">nid2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">nid_pairs</span><span class="p">:</span>
+        <span class="n">node1</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid1</span><span class="p">]</span>
+        <span class="n">node2</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nid2</span><span class="p">]</span>
+
+        <span class="c1"># TODO: doesn&#39;t use get position...</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">node1</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span> <span class="o">-</span> <span class="n">node2</span><span class="o">.</span><span class="n">get_position</span><span class="p">())</span>
+
+        <span class="c1">#print(&#39;  irow=%s-&gt;n1=%s icol=%s-&gt;n2=%s&#39; % (irow, nid1, icol, nid2))</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
+            <span class="c1">#print(&#39;  *n1=%-4s xyz=%s\n  *n2=%-4s xyz=%s\n  *distance=%s\n&#39; % (</span>
+            <span class="c1">#    nid1, list_print(node1.xyz),</span>
+            <span class="c1">#    nid2, list_print(node2.xyz),</span>
+            <span class="c1">#    distance))</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">nid1</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">,</span> <span class="s1">&#39;nid1=</span><span class="si">%s</span><span class="s1"> node_set=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid1</span><span class="p">,</span> <span class="n">node_set</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">nid2</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">,</span> <span class="s1">&#39;nid2=</span><span class="si">%s</span><span class="s1"> node_set=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid2</span><span class="p">,</span> <span class="n">node_set</span><span class="p">)</span>
+            <span class="c1">#print(&#39;  n1=%-4s xyz=%s\n  n2=%-4s xyz=%s\n  distance=%s\n&#39; % (</span>
+                <span class="c1">#nid1, str(node1.xyz),</span>
+                <span class="c1">#nid2, str(node2.xyz),</span>
+                <span class="c1">#distance))</span>
+
+        <span class="c1"># if hasattr(node2, &#39;new_node_id&#39;):</span>
+
+        <span class="c1"># else:</span>
+        <span class="n">node2</span><span class="o">.</span><span class="n">nid</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">nid</span>
+        <span class="n">node2</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">xyz</span>
+        <span class="n">node2</span><span class="o">.</span><span class="n">cp</span> <span class="o">=</span> <span class="n">node1</span><span class="o">.</span><span class="n">cp</span>
+        <span class="k">assert</span> <span class="n">node2</span><span class="o">.</span><span class="n">cd</span> <span class="o">==</span> <span class="n">node1</span><span class="o">.</span><span class="n">cd</span>
+        <span class="k">assert</span> <span class="n">node2</span><span class="o">.</span><span class="n">ps</span> <span class="o">==</span> <span class="n">node1</span><span class="o">.</span><span class="n">ps</span>
+        <span class="k">assert</span> <span class="n">node2</span><span class="o">.</span><span class="n">seid</span> <span class="o">==</span> <span class="n">node1</span><span class="o">.</span><span class="n">seid</span>
+        <span class="c1"># node2.new_nid = node1.nid</span>
+        <span class="c1">#skip_nodes.append(nid2)</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="_nodes_xyz_nids_to_nid_pairs"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._nodes_xyz_nids_to_nid_pairs">[docs]</a><span class="k">def</span> <span class="nf">_nodes_xyz_nids_to_nid_pairs</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">:</span> <span class="n">NDArrayN3float</span><span class="p">,</span>
+                                 <span class="n">nids</span><span class="p">:</span> <span class="n">NDArrayNint</span><span class="p">,</span>
+                                 <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">log</span><span class="p">,</span>
+                                 <span class="n">inew</span><span class="p">:</span> <span class="n">NDArrayNint</span><span class="p">,</span>
+                                 <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">neq_max</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;new&#39;</span><span class="p">,</span>
+                                 <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;helper for equivalencing&quot;&quot;&quot;</span>
+    <span class="n">unused_kdt</span><span class="p">,</span> <span class="n">nid_pairs</span> <span class="o">=</span> <span class="n">_eq_nodes_build_tree</span><span class="p">(</span>
+        <span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span>
+        <span class="n">inew</span><span class="o">=</span><span class="n">inew</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">,</span>
+        <span class="n">neq_max</span><span class="o">=</span><span class="n">neq_max</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nid_pairs</span></div>
+
+<div class="viewcode-block" id="_nodes_xyz_nids_to_nid_pairs_new"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._nodes_xyz_nids_to_nid_pairs_new">[docs]</a><span class="k">def</span> <span class="nf">_nodes_xyz_nids_to_nid_pairs_new</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    helper function for `bdf_equivalence_nodes`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ieq3</span> <span class="o">=</span> <span class="n">kdt</span><span class="o">.</span><span class="n">query_ball_tree</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
+    <span class="n">nid_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">ieq3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># the combinations should be paired with 2 nodes in each group</span>
+        <span class="k">for</span> <span class="n">inid1</span><span class="p">,</span> <span class="n">inid2</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">nid1</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="n">inid1</span><span class="p">]</span>
+            <span class="n">nid2</span> <span class="o">=</span> <span class="n">nids</span><span class="p">[</span><span class="n">inid2</span><span class="p">]</span>
+            <span class="c1">#if nid1 == nid2:</span>
+                <span class="c1">#continue</span>
+            <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nid1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_set</span> <span class="ow">and</span> <span class="n">nid2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">nid1</span><span class="p">,</span> <span class="n">nid2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">nid_pairs</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">nid_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nid1</span><span class="p">,</span> <span class="n">nid2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">nid_pairs</span></div>
+
+<span class="k">def</span> <span class="nf">_eq_nodes_build_tree</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span>
+                         <span class="n">inew</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">neq_max</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                         <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    helper function for `bdf_equivalence_nodes`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nodes_xyz : (nnodes, 3) float ndarray</span>
+<span class="sd">        the xyzs to equivalence</span>
+<span class="sd">    nids : (nnodes,) int ndarray</span>
+<span class="sd">        the node ids</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        the spherical equivalence tolerance</span>
+<span class="sd">    inew : int ndarray; default=None -&gt; slice(None)</span>
+<span class="sd">        a slice on nodes_xyz to exclude some nodes from the equivalencing</span>
+<span class="sd">    node_set : List[int] / (n, ) ndarray; default=None</span>
+<span class="sd">        the list/array of nodes to consider</span>
+<span class="sd">    neq_max : int; default=4</span>
+<span class="sd">        the number of nodes to consider for equivalencing</span>
+<span class="sd">    msg : str; default=&#39;&#39;</span>
+<span class="sd">        custom message used for errors</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kdt : cKDTree()</span>
+<span class="sd">        the kdtree object</span>
+<span class="sd">    ieq : (nnodes, neq) int ndarray</span>
+<span class="sd">        ???</span>
+<span class="sd">    slots : (nnodes, neq) int ndarray</span>
+<span class="sd">        ???</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inew</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inew</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="s1">&#39;tol=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tol</span>
+    <span class="n">kdt</span> <span class="o">=</span> <span class="n">_get_tree</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">is_not_node_set</span> <span class="o">=</span> <span class="n">inew</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">inew</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># check the closest 10 nodes for equality</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;new&#39;</span> <span class="ow">and</span> <span class="n">is_not_node_set</span><span class="p">:</span>
+        <span class="n">kdt</span><span class="p">,</span> <span class="n">nid_pairs</span> <span class="o">=</span> <span class="n">_eq_nodes_build_tree_new</span><span class="p">(</span>
+            <span class="n">kdt</span><span class="p">,</span> <span class="n">nodes_xyz</span><span class="p">,</span>
+            <span class="n">nids</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">is_not_node_set</span><span class="p">,</span>
+            <span class="n">tol</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span>
+            <span class="n">inew</span><span class="o">=</span><span class="n">inew</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">,</span> <span class="n">neq_max</span><span class="o">=</span><span class="n">neq_max</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;new&#39;</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;setting method to &quot;old&quot; because node_set is specified&#39;</span><span class="p">)</span>
+        <span class="n">deq</span><span class="p">,</span> <span class="n">ieq</span> <span class="o">=</span> <span class="n">kdt</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">[</span><span class="n">inew</span><span class="p">,</span> <span class="p">:],</span> <span class="n">k</span><span class="o">=</span><span class="n">neq_max</span><span class="p">,</span> <span class="n">distance_upper_bound</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">deq</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nids</span><span class="p">)</span>
+
+        <span class="c1"># get the ids of the duplicate nodes</span>
+        <span class="n">slots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ieq</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">nnodes</span><span class="p">)</span>
+        <span class="n">nid_pairs</span> <span class="o">=</span> <span class="n">_eq_nodes_find_pairs</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">slots</span><span class="p">,</span> <span class="n">ieq</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nid_pairs</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="n">nid_pairs</span>
+    <span class="k">return</span> <span class="n">kdt</span><span class="p">,</span> <span class="n">nid_pairs</span>
+
+<div class="viewcode-block" id="_eq_nodes_build_tree_new"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._eq_nodes_build_tree_new">[docs]</a><span class="k">def</span> <span class="nf">_eq_nodes_build_tree_new</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span>
+                             <span class="n">nodes_xyz</span><span class="p">:</span> <span class="n">NDArrayN3float</span><span class="p">,</span>
+                             <span class="n">nids</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">is_not_node_set</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                             <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                             <span class="n">log</span><span class="p">,</span>
+                             <span class="n">inew</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">neq_max</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                             <span class="n">debug</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+    <span class="n">deq</span><span class="p">,</span> <span class="n">ieq</span> <span class="o">=</span> <span class="n">kdt</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">[</span><span class="n">inew</span><span class="p">,</span> <span class="p">:],</span> <span class="n">k</span><span class="o">=</span><span class="n">neq_max</span><span class="p">,</span> <span class="n">distance_upper_bound</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ieq</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">nnodes</span><span class="p">)</span>
+    <span class="n">nid_pairs_expected</span> <span class="o">=</span> <span class="n">_eq_nodes_find_pairs</span><span class="p">(</span><span class="n">nids</span><span class="p">,</span> <span class="n">slots</span><span class="p">,</span> <span class="n">ieq</span><span class="p">,</span> <span class="n">node_set</span><span class="o">=</span><span class="n">node_set</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_not_node_set</span><span class="p">:</span>
+        <span class="n">nid_pairs</span> <span class="o">=</span> <span class="n">_nodes_xyz_nids_to_nid_pairs_new</span><span class="p">(</span><span class="n">kdt</span><span class="p">,</span> <span class="n">nids</span><span class="p">,</span> <span class="n">node_set</span><span class="p">,</span> <span class="n">tol</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;node_set = </span><span class="si">{</span><span class="n">node_set</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">snid_pairs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nid_pairs</span><span class="p">)</span>
+    <span class="n">snid_pairs_expected</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nid_pairs_expected</span><span class="p">)</span>
+    <span class="n">diff_bad</span> <span class="o">=</span> <span class="n">snid_pairs</span> <span class="o">-</span> <span class="n">snid_pairs_expected</span>
+    <span class="n">diff_missed</span> <span class="o">=</span> <span class="n">snid_pairs</span> <span class="o">-</span> <span class="n">snid_pairs_expected</span>
+    <span class="k">if</span> <span class="n">debug</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff_bad</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff_missed</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="c1">#log.warning(f&#39;nid_pairs          = {nid_pairs}&#39;)</span>
+        <span class="c1">#log.warning(f&#39;nid_pairs_expected = {nid_pairs_expected}&#39;)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;diff_bad = </span><span class="si">{</span><span class="n">diff_bad</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;diff_missed = </span><span class="si">{</span><span class="n">diff_missed</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">kdt</span><span class="p">,</span> <span class="n">nid_pairs</span></div>
+
+<div class="viewcode-block" id="_get_tree"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.split_elements.html#pyNastran.bdf.mesh_utils.bdf_equivalence._get_tree">[docs]</a><span class="k">def</span> <span class="nf">_get_tree</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets the kdtree&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">nodes_xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nnodes=0</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span>
+
+    <span class="c1"># build the kdtree</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">kdt</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">cKDTree</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">nodes_xyz</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kdt</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

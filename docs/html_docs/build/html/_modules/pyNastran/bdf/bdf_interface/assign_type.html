@@ -1,0 +1,1389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.bdf_interface.assign_type &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.bdf_interface.assign_type</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.bdf_interface.assign_type</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Parses Nastran fields&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf_interface.bdf_card</span> <span class="kn">import</span> <span class="n">BDFCard</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">integer_types</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">,</span> <span class="n">float_types</span><span class="p">)</span>
+
+
+<span class="c1">#^       - start of string</span>
+<span class="c1">#[-+]?   - an optional (this is what ? means) minus or plus sign</span>
+<span class="c1">#[0-9]+  - one or more digits (the plus means &quot;one or more&quot; and [0-9] is another way to say \d)</span>
+<span class="c1">#$       - end of string</span>
+<span class="n">RE_INT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;^[-+]?[0-9]+$&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="c1">#[-+]?      - an optional (this is what ? means) minus or plus sign</span>
+<span class="c1"># \.        - period</span>
+<span class="c1"># [-|+?]    - required negtive sign or optional plus sign</span>
+<span class="c1"># [-|+]     - required negtive sign or plus sign</span>
+<span class="c1"># [[0-9]+]? - optional N integers</span>
+<span class="c1">#</span>
+<span class="c1">#  1.032</span>
+<span class="c1"># +1.032</span>
+<span class="c1"># -1.032</span>
+<span class="c1">#RE_FLOAT = re.compile(&#39;^[-+]?[0-9]+ \. [[0-9]+]$&#39;, flags=0)</span>
+
+<span class="c1">#  1.032E+02</span>
+<span class="c1"># +1.032E-02</span>
+<span class="c1"># -1.032e+2</span>
+<span class="c1">#RE_FLOAT_E = re.compile(&#39;^[-+]?[0-9]+ .[[0-9]+] [e|E] [-|+?] [0-9]+$&#39;, flags=0)</span>
+
+<span class="c1">#  1.032D+02</span>
+<span class="c1"># +1.032D-02</span>
+<span class="c1"># -1.032d+02</span>
+<span class="c1">#RE_FLOAT_D = re.compile(&#39;^[-+]?[0-9]+ .[[0-9]+] [d|D] [-|+?] [0-9]+$&#39;, flags=0)</span>
+<span class="c1">#%e, %E, %f, %g     [-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?</span>
+
+<span class="c1">#  1.032+2</span>
+<span class="c1"># +1.032-2</span>
+<span class="c1"># -1.032+2</span>
+<span class="c1">#RE_FLOAT_SHORT = re.compile(&#39;^[-+]?[0-9]+ \. [[0-9]+]? [-+] [0-9]+$&#39;, flags=0)</span>
+
+<div class="viewcode-block" id="parse_components"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.parse_components">[docs]</a><span class="k">def</span> <span class="nf">parse_components</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    components : str</span>
+<span class="sd">        a string of the dofs &#39;0&#39; or &#39;123456&#39; (not all are required)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">BDFCard</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifield</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">fieldname</span><span class="p">)</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+               <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+               <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;0&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="n">value2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must contain 0 or </span><span class="si">%s</span><span class="s1"> (not both).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                   <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">value2</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">svalue2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">svalue3</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">svalue2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">component</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">svalue3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;0123456&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card contains an invalid component </span><span class="si">%r</span><span class="s1">.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                   <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">svalue3</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must not contain duplicate entries.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                   <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">svalue3</span></div>
+
+<div class="viewcode-block" id="components_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.components_or_blank">[docs]</a><span class="k">def</span> <span class="nf">components_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span>
+                        <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : str, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    components : str</span>
+<span class="sd">        a string of the dofs &#39;0&#39; or &#39;123456&#39; (not all are required)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#assert isinstance(card, BDFCard), type(card)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifield</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">fieldname</span><span class="p">)</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parse_components</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.blank">[docs]</a><span class="k">def</span> <span class="nf">blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">BDFCard</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifield</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">fieldname</span><span class="p">)</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                      <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+<span class="c1">#def field(card, ifield, fieldname):</span>
+    <span class="c1">## type: (BDFCard, int, str) -&gt; Optional[Union[int, float, str]]</span>
+    <span class="c1">#&quot;&quot;&quot;</span>
+    <span class="c1">#Parameters</span>
+    <span class="c1">#----------</span>
+    <span class="c1">#card : BDFCard()</span>
+        <span class="c1">#BDF card as a list</span>
+    <span class="c1">#ifield : int</span>
+        <span class="c1">#field number</span>
+    <span class="c1">#fieldname : str</span>
+        <span class="c1">#name of field</span>
+
+    <span class="c1">#Returns</span>
+    <span class="c1">#-------</span>
+    <span class="c1">#value : int, float, str, None</span>
+        <span class="c1">#the field value</span>
+    <span class="c1">#&quot;&quot;&quot;</span>
+    <span class="c1">#assert isinstance(card, BDFCard), type(card)</span>
+    <span class="c1">#assert isinstance(ifield, int), type(ifield)</span>
+    <span class="c1">#assert isinstance(fieldname, str), type(fieldname)</span>
+    <span class="c1">#return integer_double_string_or_blank(card, ifield, fieldname, default=None)</span>
+
+<div class="viewcode-block" id="integer_double_string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_double_string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">integer_double_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># type (BDFCard, int, str, Union[int, float, str]) -&gt; Optional[Union[int, float, str]]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : int, float, str, None (default=None)</span>
+<span class="sd">        the default value for the field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : int, float, str, None</span>
+<span class="sd">        the field value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="c1"># integer/float/string</span>
+        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="c1"># float</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">interpret_value</span><span class="p">(</span><span class="n">card</span><span class="p">[</span><span class="n">ifield</span><span class="p">],</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">RE_INT</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">svalue</span><span class="p">):</span> <span class="c1"># svalue[0].isdigit() or svalue[1:].isdigit():</span>
+            <span class="c1"># int</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, &#39;</span>
+                       <span class="s1">&#39;or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                       <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float or string &#39;</span>
+                              <span class="s1">&#39;(without a blank space).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">svalue</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<span class="c1">#def assert_int_bounded_range(card, ifield, fieldname, lower=None, upper=None):</span>
+
+<div class="viewcode-block" id="fields"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.fields">[docs]</a><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. todo:: improve fieldname</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">BDFCard</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">fieldname</span><span class="p">)</span>
+    <span class="n">function_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">j</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="n">function_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="n">fieldname</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">function_values</span></div>
+
+<div class="viewcode-block" id="modal_components"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.modal_components">[docs]</a><span class="k">def</span> <span class="nf">modal_components</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the modal components (allows a -1 value); used by TIC</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">integer</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer &#39;</span>
+                          <span class="s1">&#39;(-1 &lt;= val &lt;= 6).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="modal_components_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.modal_components_or_blank">[docs]</a><span class="k">def</span> <span class="nf">modal_components_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the modal components (allows a -1 value); used by TIC</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer &#39;</span>
+                          <span class="s1">&#39;(-1 &lt;= val &lt;= 6).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="integer"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer">[docs]</a><span class="k">def</span> <span class="nf">integer</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="integer_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_or_blank">[docs]</a><span class="k">def</span> <span class="nf">integer_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># type (BDFCard, int, str, Optional[int]) -&gt; Optional[int]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : int, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">elif</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                      <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="double"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.double">[docs]</a><span class="k">def</span> <span class="nf">double</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into a double</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : float</span>
+<span class="sd">        the value from the desired field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1">## None</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>  <span class="c1"># 1, not +1, or -1</span>
+        <span class="c1"># if only int</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float (not an integer).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># 1.0, 1.0E+3, 1.0E-3</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># 1D+3, 1D-3, 1-3</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;D&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+                <span class="c1"># 1.0D+3, 1.0D-3</span>
+                <span class="n">svalue2</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">svalue2</span><span class="p">)</span>
+
+            <span class="c1"># 1.0+3, 1.0-3</span>
+            <span class="n">sign</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">):</span>
+                <span class="n">sign</span> <span class="o">=</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+                <span class="n">svalue</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">+</span> <span class="n">svalue</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;E+&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+                <span class="n">svalue</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">+</span> <span class="n">svalue</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;E-&#39;</span><span class="p">)</span>
+
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="double_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.double_or_blank">[docs]</a><span class="k">def</span> <span class="nf">double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># type (BDFCard, int, str, Optional[Union[float]]) -&gt; Optional[Union[float]]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets a double/blank value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : double, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">svalue</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="double_or_string"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.double_or_string">[docs]</a><span class="k">def</span> <span class="nf">double_or_string</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into a double or a string</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="c1"># float</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>  <span class="c1"># 1, not +1, or -1</span>
+        <span class="c1"># fail</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="c1"># string</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float or &#39;</span>
+                              <span class="s1">&#39;string (without a blank space; not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float or &#39;</span>
+                              <span class="s1">&#39;string (without a blank space; not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                      <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="double_string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.double_string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">double_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># type (BDFCard, int, str, Optional[Union[float, str]]) -&gt; Optional[Union[float, str]]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : double, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : float / str / None</span>
+<span class="sd">        the typed value</span>
+
+<span class="sd">    :raises SyntaxError: if there is an invalid type</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float, string, or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+               <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float, string &#39;</span>
+                              <span class="s1">&#39;or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>  <span class="c1"># 1, not +1, or -1</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a float, string or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an float, &#39;</span>
+                          <span class="s1">&#39;string (without a blank space) or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">svalue</span></div>
+
+<div class="viewcode-block" id="integer_or_double"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_or_double">[docs]</a><span class="k">def</span> <span class="nf">integer_or_double</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into an integer or double</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : int/float</span>
+<span class="sd">        the value with the proper type</span>
+
+<span class="sd">    :raises SyntaxError: if there&#39;s an invalid type</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="c1"># float/exponent</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a integer or a float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># int</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">interpret_value</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="n">value</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or a &#39;</span>
+                              <span class="s1">&#39;float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="integer_double_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_double_or_blank">[docs]</a><span class="k">def</span> <span class="nf">integer_double_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : int / float / None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="c1"># integer/float</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integer_or_double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, or &#39;</span>
+                              <span class="s1">&#39;blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="integer_or_string"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_or_string">[docs]</a><span class="k">def</span> <span class="nf">integer_or_string</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into an integer or string</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : int / str</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string (not </span><span class="si">%s</span><span class="s1">; &#39;</span>
+                          <span class="s1">&#39;strings must start with a character).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string &#39;</span>
+                          <span class="s1">&#39;(without a blank space).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="c1"># string</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="integer_string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">integer_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into an integer, string or sets the default using a blank value</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : int, str, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">float_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>
+        <span class="c1"># integer/string</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">integer_or_string</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, &#39;</span>
+                              <span class="s1">&#39;string (without a blank space), or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<span class="k">def</span> <span class="nf">_get_dtype</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the type of the input value in a form that is clear.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    value : int/float/str/None</span>
+<span class="sd">        the value to get the type of</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dtype : str</span>
+<span class="sd">        the type of the value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">interpret_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;blank&#39;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;an integer&#39;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;a double value=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;a string&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dtype</span>
+
+
+<div class="viewcode-block" id="integer_double_or_string"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.integer_double_or_string">[docs]</a><span class="k">def</span> <span class="nf">integer_double_or_string</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into an integer, double or a string</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : varies</span>
+<span class="sd">        the value of the field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">svalue</span>
+    <span class="k">elif</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer or float (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="n">svalue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>  <span class="c1"># integer/float/string</span>
+        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="c1"># float</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>  <span class="c1"># 1, not +1, or -1</span>
+            <span class="c1"># int</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, &#39;</span>
+                                  <span class="s1">&#39;or string (not blank).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                  <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, or string &#39;</span>
+                              <span class="s1">&#39;(not a string with a blank).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, or string &#39;</span>
+                              <span class="s1">&#39;(not a string with a leading integer).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">interpret_value</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="n">card</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be an integer, float, or string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                      <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="string"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.string">[docs]</a><span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a field into a string</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : str</span>
+<span class="sd">        the value of the field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string without a space.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">integer_or_double</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">)</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a &#39;</span>
+                          <span class="s1">&#39;string with a character (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>  <span class="c1"># string</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                      <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="check_string"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.check_string">[docs]</a><span class="k">def</span> <span class="nf">check_string</span><span class="p">(</span><span class="n">svalue</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string without a space.</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1">#value = integer_or_double(card, ifield, fieldname)</span>
+        <span class="c1">#dtype = _get_dtype(value)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a &#39;</span>
+                          <span class="s1">&#39;string with a character.</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                              <span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>  <span class="c1"># string</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : str, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : varies</span>
+<span class="sd">        the value of the field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string without a space.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">chars</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.+-&#39;</span> <span class="o">%</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must not have the &#39;</span>
+                              <span class="s1">&#39;following characters </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">chars</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1"># integer or float</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>  <span class="c1"># string</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="loose_string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.loose_string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">loose_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : str, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : varies</span>
+<span class="sd">        the value of the field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svalue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string without a space.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">chars</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">+-&#39;</span> <span class="o">%</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must not have the &#39;</span>
+                              <span class="s1">&#39;following characters </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span>
+                              <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">chars</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">svalue</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">svalue</span> <span class="ow">or</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">svalue</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1"># integer or float</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">_get_dtype</span><span class="p">(</span><span class="n">svalue</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%r</span><span class="s1"> (field #</span><span class="si">%s</span><span class="s1">) on card must be a string or blank (not </span><span class="si">%s</span><span class="s1">).</span><span class="se">\n</span><span class="s1">&#39;</span>
+                          <span class="s1">&#39;card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">svalue</span><span class="p">,</span> <span class="n">ifield</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">svalue</span><span class="p">:</span>  <span class="c1"># string</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">svalue</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="exact_string_or_blank"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.exact_string_or_blank">[docs]</a><span class="k">def</span> <span class="nf">exact_string_or_blank</span><span class="p">(</span><span class="n">card</span><span class="p">:</span> <span class="n">BDFCard</span><span class="p">,</span> <span class="n">ifield</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    card : BDFCard()</span>
+<span class="sd">        BDF card as a list</span>
+<span class="sd">    ifield : int</span>
+<span class="sd">        field number</span>
+<span class="sd">    fieldname : str</span>
+<span class="sd">        name of field</span>
+<span class="sd">    default : str, None</span>
+<span class="sd">        the default value for the field (default=None)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : varies</span>
+<span class="sd">        the value of the field</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ifield</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="n">svalue</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%-8s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">svalue</span>
+    <span class="k">if</span> <span class="n">svalue</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">return</span> <span class="n">svalue</span></div>
+
+<span class="c1"># int                    - done</span>
+<span class="c1"># int/blank              - done</span>
+<span class="c1"># int/float              - done</span>
+<span class="c1"># int/float/blank        - done</span>
+<span class="c1"># int/float/string       - done</span>
+<span class="c1"># int/float/string/blank - done</span>
+<span class="c1"># int/string             - done</span>
+<span class="c1"># int/string/blank       - done</span>
+
+<span class="c1"># float              - done</span>
+<span class="c1"># float/blank        - done</span>
+<span class="c1"># float/string       - done</span>
+<span class="c1"># float/string/blank - done</span>
+
+<span class="c1"># string       - done</span>
+<span class="c1"># string/blank - done</span>
+
+
+<div class="viewcode-block" id="interpret_value"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.assign_type.html#pyNastran.bdf.bdf_interface.assign_type.interpret_value">[docs]</a><span class="k">def</span> <span class="nf">interpret_value</span><span class="p">(</span><span class="n">value_raw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                    <span class="n">card</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BDFCard</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a value from nastran format into python format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    raw_value : str</span>
+<span class="sd">        a string representation of a value</span>
+<span class="sd">    card : str</span>
+<span class="sd">        ???</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : varies</span>
+<span class="sd">        the Nastran reprentation of the value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value_raw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value_in</span> <span class="o">=</span> <span class="n">value_raw</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; *&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># it&#39;s already an int/float</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;value_raw=</span><span class="si">%s</span><span class="s1"> type=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value_raw</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value_raw</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value_raw</span><span class="p">,</span> <span class="n">integer_float_types</span><span class="p">),</span> <span class="n">msg</span>
+        <span class="k">return</span> <span class="n">value_raw</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_in</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># blank / None</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">value_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+        <span class="c1"># string</span>
+        <span class="k">return</span> <span class="n">value_in</span>
+
+    <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">value_in</span> <span class="ow">or</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">value_in</span> <span class="ow">or</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">value_raw</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value_raw</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># int, float, string, exponent</span>
+    <span class="n">value_positive</span> <span class="o">=</span> <span class="n">value_in</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;+-&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value_positive</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="c1"># int</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_in</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_in</span><span class="p">)</span>
+        <span class="c1"># float</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1">#if(&#39;=&#39; in value_in or &#39;(&#39; in value_in or &#39;)&#39; in value_in):</span>
+        <span class="c1">#print(&quot;=()!&quot;)</span>
+        <span class="c1">#return value_in</span>
+
+    <span class="c1"># if there are non-floats/scientific notation -&gt; string</span>
+    <span class="n">no_ed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">value_in</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="s1">&#39;ED 1234567890+-&#39;</span><span class="p">))</span>
+    <span class="n">word</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">no_ed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+        <span class="c1"># word</span>
+        <span class="k">return</span> <span class="n">value_in</span>
+
+    <span class="n">val0</span> <span class="o">=</span> <span class="n">value_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">val0</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">):</span>
+        <span class="c1"># truncate the sign for now</span>
+        <span class="n">value_left</span> <span class="o">=</span> <span class="n">value_in</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># inplied positive value</span>
+        <span class="n">val0</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
+        <span class="n">value_left</span> <span class="o">=</span> <span class="n">value_in</span>
+
+    <span class="k">if</span> <span class="n">val0</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">val0</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span> <span class="ow">or</span> <span class="n">val0</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;the only 2 cases for a float/scientific are +/- for v0...&#39;</span>
+                          <span class="s1">&#39;value_raw=</span><span class="si">%r</span><span class="s1"> val0=</span><span class="si">%r</span><span class="s1"> card=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value_raw</span><span class="p">,</span> <span class="n">val0</span><span class="p">,</span> <span class="n">card</span><span class="p">))</span>
+
+    <span class="c1"># dont include the 1st character, find the exponent</span>
+    <span class="n">val_minus</span> <span class="o">=</span> <span class="n">value_in</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">val_plus</span> <span class="o">=</span> <span class="n">value_in</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">val_minus</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sline</span> <span class="o">=</span> <span class="n">value_left</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+        <span class="n">exp_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">val_plus</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sline</span> <span class="o">=</span> <span class="n">value_left</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+        <span class="n">exp_factor</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">card_msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">card</span><span class="p">:</span>
+            <span class="n">card_msg</span> <span class="o">=</span> <span class="s1">&#39;card = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">card</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;I thought this was in scientific notation, but I can&#39;t find &quot;</span>
+               <span class="s2">&quot;the exponent sign...</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;value_raw=</span><span class="si">%r</span><span class="s2"> value_left=</span><span class="si">%r</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;You also might have mixed tabs/spaces/commas or misaligned fields.&quot;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">value_raw</span><span class="p">,</span> <span class="n">value_left</span><span class="p">,</span> <span class="n">card_msg</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+        <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sci0</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">sci1</span> <span class="o">=</span> <span class="n">exp_factor</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;val_minus=</span><span class="si">%s</span><span class="s2"> val_plus=</span><span class="si">%s</span><span class="s2"> value_raw=</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val_minus</span><span class="p">,</span> <span class="n">val_plus</span><span class="p">,</span> <span class="n">value_raw</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;cannot parse &#39;</span><span class="si">%s</span><span class="s2">&#39; into a float and &#39;</span><span class="si">%s</span><span class="s2">&#39; &quot;</span>
+                          <span class="s1">&#39;into an integer</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s1">You HAVE mixed &#39;</span>
+                          <span class="s1">&#39;tabs/spaces/commas!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sline</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sline</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">msg</span><span class="p">))</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="n">sci0</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">sci1</span>
+    <span class="c1"># scientific</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

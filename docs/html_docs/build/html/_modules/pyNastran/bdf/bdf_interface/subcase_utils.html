@@ -1,0 +1,593 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.bdf_interface.subcase_utils &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.bdf_interface.subcase_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.bdf_interface.subcase_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - expand_thru_case_control(set_value)</span>
+<span class="sd"> - write_set(set_id, values, spaces=&#39;&#39;)</span>
+<span class="sd"> - write_stress_type(key, options, value, spaces=&#39;&#39;)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">pyNastran.utils.numpy_utils</span> <span class="kn">import</span> <span class="n">integer_types</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.cards.collpase_card</span> <span class="kn">import</span> <span class="n">collapse_thru_packs</span>
+
+
+<div class="viewcode-block" id="expand_thru_case_control"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.expand_thru_case_control">[docs]</a><span class="k">def</span> <span class="nf">expand_thru_case_control</span><span class="p">(</span><span class="n">data_in</span><span class="p">):</span>
+    <span class="c1"># type: (List[Union[int, float, str]]) -&gt; List[int]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Expands a case control SET card</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    set_value : str???</span>
+<span class="sd">        ???</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    values : List[int] / List[float]</span>
+<span class="sd">        the values in the SET</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    set_value = [&#39;1 THRU 5&#39;, &#39;20 THRU 30 BY 2&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; values = expand_thru_case_control(set_value)</span>
+<span class="sd">    [1, 2, 3, 4, 5, 20, 22, 24, 26, 28, 30]</span>
+
+<span class="sd">    Odd behavior:</span>
+<span class="sd">     - 1 THRU 10 EXCEPT 4,5,6,11 results in [1,2,3,7,8,9,10,11]</span>
+<span class="sd">       the EXCEPT is active while the value is less than the THRU value of 10</span>
+<span class="sd">       and the values are in ascending order</span>
+
+<span class="sd">    What happens when:</span>
+<span class="sd">     - a value is excluded and later added or</span>
+<span class="sd">     - a value is included and later excluded</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">stype</span> <span class="o">=</span> <span class="n">setup_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1">#print(&#39;***************************&#39;)</span>
+    <span class="c1">#print(&#39;data =&#39;, data)</span>
+    <span class="k">if</span> <span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">datai</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datai</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">datai</span><span class="p">)</span> <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="k">elif</span> <span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">expand_float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1">#-------------------------------------------------------------------</span>
+    <span class="c1">#  has a THRU, BY, or EXCEPT</span>
+
+    <span class="k">assert</span> <span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;int_thru&#39;</span><span class="p">,</span> <span class="n">data</span>
+    <span class="n">ndata</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">removed_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_thru</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(&#39;---&#39;)</span>
+        <span class="c1">#print(&#39;i=%s value=%r is_thru=%s&#39; % (i, value, is_thru))</span>
+
+        <span class="k">if</span> <span class="n">is_thru</span><span class="p">:</span>
+            <span class="c1">#print(&#39;$$$ starting thru&#39;)</span>
+            <span class="n">is_thru</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">continue_after_range</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">out2</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1">#print(&#39;*&#39;, i, value)</span>
+            <span class="n">value0</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">end_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1">#print(&#39;*value0 =&#39;, value0)</span>
+            <span class="c1">#print(&#39;*end_value =&#39;, i, end_value)</span>
+
+            <span class="n">by_value</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">ndata</span><span class="p">:</span>
+                <span class="n">next_svalue</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c1">#print(&#39;found by?&#39;, next_svalue)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_svalue</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">next_svalue</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>  <span class="c1"># catches integers</span>
+                    <span class="n">continue_after_range</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="n">next_svalue</span> <span class="o">==</span> <span class="s1">&#39;BY&#39;</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">next_svalue2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">next_svalue2</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="n">by_value</span> <span class="o">=</span> <span class="n">next_svalue2</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">next_svalue2</span> <span class="o">=</span> <span class="n">next_svalue2</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="c1">#print(&#39;next_svalue2 =&#39;, next_svalue2)</span>
+                        <span class="n">by_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">next_svalue2</span><span class="p">)</span>
+                    <span class="c1">#print(&#39;by_value =&#39;, by_value)</span>
+                <span class="k">elif</span> <span class="n">next_svalue</span> <span class="o">==</span> <span class="s1">&#39;EXCEPT&#39;</span><span class="p">:</span>
+                    <span class="n">i</span><span class="p">,</span> <span class="n">removed_seti</span> <span class="o">=</span> <span class="n">get_except</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ndata</span><span class="p">,</span> <span class="n">end_value</span><span class="p">)</span>
+                    <span class="n">removed_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">removed_seti</span><span class="p">)</span>
+                    <span class="n">continue_after_range</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;next_svalue=</span><span class="si">%s</span><span class="s1"> data=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">next_svalue</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+            <span class="c1">#else:</span>
+                <span class="c1"># out of range</span>
+
+            <span class="n">rangei</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">end_value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">by_value</span><span class="p">)</span>
+            <span class="c1">#print(&#39;range(%r, %r, %r) = %s&#39; % (value0, end_value + 1, by_value, rangei))</span>
+            <span class="n">out2</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rangei</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">end_value</span> <span class="o">!=</span> <span class="n">out2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">out2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_value</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">continue_after_range</span><span class="p">:</span>
+                <span class="c1">#print(&#39;continue_after_range; adding %s&#39; % str(out2))</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">out2</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#print(&#39;looking for except...&#39;)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ndata</span><span class="p">:</span>
+                <span class="n">exclude_svalue</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c1">#print(&#39;found exclude?&#39;, exclude_svalue)</span>
+                <span class="k">if</span> <span class="n">exclude_svalue</span> <span class="o">==</span> <span class="s1">&#39;EXCEPT&#39;</span><span class="p">:</span>
+                    <span class="n">i</span><span class="p">,</span> <span class="n">removed_seti</span> <span class="o">=</span> <span class="n">get_except</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ndata</span><span class="p">,</span> <span class="n">end_value</span><span class="p">)</span>
+                    <span class="n">removed_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">removed_seti</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;need a test problem for EXCEPT&#39;</span><span class="p">)</span>
+                    <span class="c1">#continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;need a test problem for skipping EXCEPT; &#39;</span>
+                                       <span class="s1">&#39;datai=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>  <span class="n">exclude_svalue</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">out2</span><span class="p">)</span>
+            <span class="c1">#print(i, value0, &#39;THRU&#39;, end_value)</span>
+            <span class="c1">#print(&#39;------------&#39;)</span>
+            <span class="k">del</span> <span class="n">by_value</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="c1">#print(&#39;value =&#39;, i, value)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#print(&#39;add&#39;, i, value)</span>
+            <span class="k">assert</span> <span class="n">is_thru</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;THRU&#39;</span><span class="p">:</span>
+                <span class="n">is_thru</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ivalue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ivalue</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">removed_set</span><span class="p">):</span>
+        <span class="c1">#print(&#39;data =&#39;, data)</span>
+        <span class="c1">#print(&#39;out =&#39;, out)</span>
+        <span class="c1">#print(&#39;removed_set =&#39;, removed_set)</span>
+        <span class="n">out_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">-</span> <span class="n">removed_set</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out_set</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="split_comma_space"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.split_comma_space">[docs]</a><span class="k">def</span> <span class="nf">split_comma_space</span><span class="p">(</span><span class="n">datai</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;normalizes the form of a SET into a comma separated list instead of being mixed&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">datai</span><span class="p">:</span>
+        <span class="c1"># do I need a strip?</span>
+        <span class="n">sline</span> <span class="o">=</span> <span class="n">datai</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sline</span> <span class="o">=</span> <span class="n">datai</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sline</span></div>
+
+<div class="viewcode-block" id="setup_data"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.setup_data">[docs]</a><span class="k">def</span> <span class="nf">setup_data</span><span class="p">(</span><span class="n">data_in</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method for ``expand_thru_case_control``&quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span> <span class="n">data_in</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datai</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datai</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">datai</span> <span class="o">=</span> <span class="n">datai</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;INCLUDE&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">sline</span> <span class="o">=</span> <span class="n">split_comma_space</span><span class="p">(</span><span class="n">datai</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sline</span><span class="p">)</span>
+
+    <span class="n">stype</span> <span class="o">=</span> <span class="s1">&#39;int&#39;</span>
+    <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span>  <span class="n">data</span><span class="p">:</span>
+        <span class="c1">#print(datai, any(char.isalpha() for char in datai))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datai</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">isinteger</span><span class="p">(</span><span class="n">datai</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">datai</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;THRU&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPT&#39;</span><span class="p">,</span> <span class="s1">&#39;BY&#39;</span><span class="p">]:</span>
+            <span class="n">stype</span> <span class="o">=</span> <span class="s1">&#39;int_thru&#39;</span>
+            <span class="k">break</span>
+        <span class="c1">#elif datai.isn</span>
+        <span class="k">elif</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">datai</span><span class="p">:</span>
+            <span class="n">stype</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">datai</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">datai</span><span class="p">):</span>
+            <span class="n">stype</span> <span class="o">=</span> <span class="s1">&#39;str&#39;</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;datai=</span><span class="si">%r</span><span class="s1"> data=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">datai</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+    <span class="c1">#if stype in [&#39;float&#39;, &#39;str&#39;]:</span>
+        <span class="c1">#print(data)</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">stype</span></div>
+
+<div class="viewcode-block" id="isinteger"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.isinteger">[docs]</a><span class="k">def</span> <span class="nf">isinteger</span><span class="p">(</span><span class="n">astring</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Is the given string an integer?&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">astring</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="get_except"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.get_except">[docs]</a><span class="k">def</span> <span class="nf">get_except</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">ndata</span><span class="p">,</span> <span class="n">end_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method for expand that gets the values until the end of an</span>
+<span class="sd">    EXCEPT chain&quot;&quot;&quot;</span>
+    <span class="n">removed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ivalue_old</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(&#39;  exclude?&#39;, i, value)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">ivalue</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">ivalue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;THRU&#39;</span><span class="p">:</span>
+            <span class="n">ivalue_old</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ivalue_new</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">rangei</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">ivalue_old</span><span class="p">,</span> <span class="n">ivalue_new</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">removed</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rangei</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;data[</span><span class="si">%i</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">; data=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        <span class="c1">#print(&#39;  ivalue=%s &gt; end_value=%s&#39; %  (ivalue, end_value))</span>
+
+        <span class="k">if</span> <span class="n">ivalue</span> <span class="o">&gt;</span> <span class="n">end_value</span> <span class="ow">and</span> <span class="n">ivalue</span> <span class="o">&gt;</span> <span class="n">ivalue_old</span><span class="p">:</span>
+            <span class="c1">#print(&#39;    break&#39;)</span>
+            <span class="k">break</span>
+        <span class="n">removed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ivalue</span><span class="p">)</span>
+        <span class="n">ivalue_old</span> <span class="o">=</span> <span class="n">ivalue</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">removed_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">removed</span><span class="p">)</span>
+    <span class="c1">#print(&#39;removed...&#39;, removed)</span>
+    <span class="c1">#print(&#39;*datai =&#39;, data[i])</span>
+    <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">removed_set</span></div>
+
+
+<div class="viewcode-block" id="expand_float"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.expand_float">[docs]</a><span class="k">def</span> <span class="nf">expand_float</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;helper method for ``expand_thru_case_control``&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">datai</span> <span class="ow">in</span>  <span class="n">data</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">datai</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="write_stress_type"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.write_stress_type">[docs]</a><span class="k">def</span> <span class="nf">write_stress_type</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">spaces</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="c1"># type: (str, List[str], Optional[str], str) -&gt; str</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    writes:</span>
+<span class="sd">     - STRESS(SORT1) = ALL</span>
+<span class="sd">     - GROUNDCHECK(PRINT,SET=(G,N,N+AUTOSPC,F,A),THRESH=1e-2,DATAREC=NO) = YES</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">str_options</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1">#print(&quot;str_options = %r&quot; % (str_options))</span>
+    <span class="c1">#print(&quot;STRESS-type key=%s value=%s options=%s&quot;</span>
+          <span class="c1">#% (key, value, options))</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39; = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">str_options</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">str_options</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">64</span><span class="p">:</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(&#39;</span> <span class="o">%</span> <span class="n">key</span>
+            <span class="n">msg_done</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+                <span class="n">new_msgi</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_msgi</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="p">:</span>
+                    <span class="n">msgi</span> <span class="o">+=</span> <span class="n">new_msgi</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg_done</span> <span class="o">+=</span> <span class="n">msgi</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">msgi</span> <span class="o">=</span> <span class="n">spaces</span> <span class="o">+</span> <span class="n">new_msgi</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">msg_done</span> <span class="o">+=</span> <span class="n">msgi</span>
+            <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">msg_done</span> <span class="o">=</span> <span class="n">msg_done</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; ,</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">,</span> <span class="s1">&#39;len(msg)=</span><span class="si">%s</span><span class="s1">; msg=</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">),</span> <span class="n">msgi</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="n">msg_done</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">,</span> <span class="s1">&#39;len(msg)=</span><span class="si">%s</span><span class="s1">; msg=</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">),</span> <span class="n">msgi</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="n">msgi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msgi</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">,</span> <span class="s1">&#39;len(msg)=</span><span class="si">%s</span><span class="s1">; msg=</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">msgi</span><span class="p">),</span> <span class="n">msgi</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">msgi</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">spaces</span> <span class="o">+</span> <span class="n">msg</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+
+
+<div class="viewcode-block" id="write_set"><a class="viewcode-back" href="../../../../reference/bdf/bdf_interface/pyNastran.bdf.bdf_interface.subcase_utils.html#pyNastran.bdf.bdf_interface.subcase_utils.write_set">[docs]</a><span class="k">def</span> <span class="nf">write_set</span><span class="p">(</span><span class="n">set_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">spaces</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    writes</span>
+<span class="sd">    SET 80 = 3926, 3927, 3928, 4141, 4142, 4143, 4356, 4357, 4358, 4571,</span>
+<span class="sd">         4572, 4573, 3323 THRU 3462, 3464 THRU 3603, 3605 THRU 3683,</span>
+<span class="sd">         3910 THRU 3921, 4125 THRU 4136, 4340 THRU 4351</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    set_id : int  / str?</span>
+<span class="sd">        the Set ID</span>
+<span class="sd">    values : List[int]</span>
+<span class="sd">        the Set values</span>
+<span class="sd">    spaces : str; default=&#39;&#39;</span>
+<span class="sd">        indentation</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    msg : str</span>
+<span class="sd">       the string of the set</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    **Example 1**</span>
+<span class="sd">    &gt;&gt;&gt; set_id = 80</span>
+<span class="sd">    &gt;&gt;&gt; values = [1, 2, 3, 4, 5, 7]</span>
+<span class="sd">    &gt;&gt;&gt; set = write_set(set_id, values, spaces=&#39;&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; set</span>
+<span class="sd">    SET 80 = 1 THRU 5, 7</span>
+
+<span class="sd">    **Example 2**</span>
+<span class="sd">    &gt;&gt;&gt; set_id = &#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; values = [&#39;ALL&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; set = write_set(set_id, values, spaces=&#39;&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; set</span>
+<span class="sd">    SET = ALL</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">starter</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SET </span><span class="si">{</span><span class="n">set_id</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> = &#39;</span>
+    <span class="n">msg2</span> <span class="o">=</span> <span class="n">spaces</span> <span class="o">+</span> <span class="n">starter</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">nchars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg2</span><span class="p">)</span>
+    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+        <span class="n">singles</span><span class="p">,</span> <span class="n">doubles</span> <span class="o">=</span> <span class="n">collapse_thru_packs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">out_values</span> <span class="o">=</span> <span class="n">singles</span>
+        <span class="k">for</span> <span class="n">double</span> <span class="ow">in</span> <span class="n">doubles</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">double</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="n">double</span>
+            <span class="n">sdouble</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> THRU </span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">double</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">double</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">out_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sdouble</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out_values</span> <span class="o">=</span> <span class="n">values</span>
+
+    <span class="k">for</span> <span class="n">out_value</span> <span class="ow">in</span> <span class="n">out_values</span><span class="p">:</span>
+        <span class="n">new_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="n">out_value</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg2</span> <span class="o">+</span> <span class="n">new_string</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="n">msg2</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg2</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">nchars</span> <span class="o">+</span> <span class="n">new_string</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg2</span> <span class="o">+=</span> <span class="n">new_string</span>
+    <span class="k">return</span> <span class="n">msg</span> <span class="o">+</span> <span class="n">msg2</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n</span><span class="s1">,&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

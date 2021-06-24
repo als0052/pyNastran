@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.bdf.mesh_utils.export_caero_mesh &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.bdf.mesh_utils.export_caero_mesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.bdf.mesh_utils.export_caero_mesh</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines:</span>
+<span class="sd"> - export_caero_mesh(model, caero_bdf_filename=&#39;caero.bdf&#39;, is_subpanel_model=True)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">pyNastran.bdf.bdf</span> <span class="kn">import</span> <span class="n">BDF</span>
+<span class="kn">from</span> <span class="nn">pyNastran.bdf.field_writer_8</span> <span class="kn">import</span> <span class="n">print_card_8</span>
+
+<div class="viewcode-block" id="export_caero_mesh"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.export_caero_mesh.html#pyNastran.bdf.mesh_utils.export_caero_mesh.export_caero_mesh">[docs]</a><span class="k">def</span> <span class="nf">export_caero_mesh</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">caero_bdf_filename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;caero.bdf&#39;</span><span class="p">,</span>
+                      <span class="n">is_subpanel_model</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">pid_method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;aesurf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;write the CAERO cards as CQUAD4s that can be visualized&quot;&quot;&quot;</span>
+    <span class="n">inid</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;---starting export_caero_model of </span><span class="si">%s</span><span class="s1">---&#39;</span> <span class="o">%</span> <span class="n">caero_bdf_filename</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">caero_bdf_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bdf_file</span><span class="p">:</span>
+        <span class="c1">#bdf_file.write(&#39;$ pyNastran: punch=True\n&#39;)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;CEND</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BEGIN BULK</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">_write_properties</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_file</span><span class="p">,</span> <span class="n">pid_method</span><span class="o">=</span><span class="n">pid_method</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">caero</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1">#assert caero_eid != 1, &#39;CAERO eid=1 is reserved for non-flaps&#39;</span>
+            <span class="n">scaero</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">caero</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_subpanel_model</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">$ &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scaero</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="c1">#bdf_file.write(&quot;$   CAEROID       ID       XLE      YLE      ZLE     CHORD      SPAN\n&quot;)</span>
+                <span class="n">points</span><span class="p">,</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">panel_points_elements</span><span class="p">()</span>
+                <span class="n">_write_subpanel_strips</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+
+                <span class="n">npoints</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1">#nelements = elements.shape[0]</span>
+                <span class="k">for</span> <span class="n">ipoint</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">point</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">([</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">inid</span><span class="o">+</span><span class="n">ipoint</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]))</span>
+
+                <span class="c1">#pid = caero_eid</span>
+                <span class="c1">#mid = caero_eid</span>
+                <span class="n">jeid</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span> <span class="o">+</span> <span class="n">inid</span><span class="p">:</span>
+                    <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span> <span class="o">=</span> <span class="n">elem</span>
+                    <span class="n">eid2</span> <span class="o">=</span> <span class="n">jeid</span> <span class="o">+</span> <span class="n">caero_eid</span>
+                    <span class="n">pidi</span> <span class="o">=</span> <span class="n">_get_subpanel_property</span><span class="p">(</span>
+                        <span class="n">model</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">eid2</span><span class="p">,</span> <span class="n">pid_method</span><span class="o">=</span><span class="n">pid_method</span><span class="p">)</span>
+                    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="n">eid2</span><span class="p">,</span> <span class="n">pidi</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">]</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+                    <span class="n">jeid</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># macro model</span>
+                <span class="k">if</span> <span class="n">caero</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">$ &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scaero</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+                <span class="n">npoints</span> <span class="o">=</span> <span class="mi">4</span>
+                <span class="k">for</span> <span class="n">ipoint</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">point</span>
+                    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">([</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="n">inid</span><span class="o">+</span><span class="n">ipoint</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]))</span>
+
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">_get_subpanel_property</span><span class="p">(</span>
+                    <span class="n">model</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">pid_method</span><span class="o">=</span><span class="n">pid_method</span><span class="p">)</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">inid</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">inid</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">p3</span> <span class="o">=</span> <span class="n">inid</span> <span class="o">+</span> <span class="mi">2</span>
+                <span class="n">p4</span> <span class="o">=</span> <span class="n">inid</span> <span class="o">+</span> <span class="mi">3</span>
+                <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_card_8</span><span class="p">([</span><span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">]))</span>
+            <span class="n">inid</span> <span class="o">+=</span> <span class="n">npoints</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;MAT1,</span><span class="si">%s</span><span class="s1">,3.0E7,,0.3</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mid</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ENDDATA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_write_subpanel_strips"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.export_caero_mesh.html#pyNastran.bdf.mesh_utils.export_caero_mesh._write_subpanel_strips">[docs]</a><span class="k">def</span> <span class="nf">_write_subpanel_strips</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;writes the strips for the subpanels&quot;&quot;&quot;</span>
+    <span class="c1">#bdf_file.write(&quot;$   CAEROID       ID       XLE      YLE      ZLE     CHORD      SPAN\n&quot;)</span>
+    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$$ </span><span class="si">%8s</span><span class="s1"> </span><span class="si">%8s</span><span class="s1"> </span><span class="si">%9s</span><span class="s1"> </span><span class="si">%9s</span><span class="s1"> </span><span class="si">%9s</span><span class="s1"> </span><span class="si">%9s</span><span class="s1"> </span><span class="si">%9s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="s1">&#39;CAEROID&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;XLE&#39;</span><span class="p">,</span> <span class="s1">&#39;YLE&#39;</span><span class="p">,</span> <span class="s1">&#39;ZLE&#39;</span><span class="p">,</span> <span class="s1">&#39;CHORD&#39;</span><span class="p">,</span> <span class="s1">&#39;SPAN&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">elements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="c1"># The point numbers here are consistent with the CAERO1</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="n">le</span> <span class="o">=</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p4</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="n">te</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">p4</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">chord</span> <span class="o">=</span> <span class="n">te</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">le</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;$$ </span><span class="si">%8d</span><span class="s2"> </span><span class="si">%8d</span><span class="s2"> </span><span class="si">%9.4f</span><span class="s2"> </span><span class="si">%9.4f</span><span class="s2"> </span><span class="si">%9.4f</span><span class="s2"> </span><span class="si">%9.4f</span><span class="s2"> </span><span class="si">%9.4f</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">caero_eid</span><span class="p">,</span> <span class="n">caero_eid</span><span class="o">+</span><span class="n">i</span><span class="p">,</span> <span class="n">le</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">le</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">le</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">chord</span><span class="p">,</span> <span class="n">span</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="_get_subpanel_property"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.export_caero_mesh.html#pyNastran.bdf.mesh_utils.export_caero_mesh._get_subpanel_property">[docs]</a><span class="k">def</span> <span class="nf">_get_subpanel_property</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">caero_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">eid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">pid_method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;aesurf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;gets the property id for the subpanel&quot;&quot;&quot;</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;aesurf&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">aesurf_id</span><span class="p">,</span> <span class="n">aesurf</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">aelist_id</span> <span class="o">=</span> <span class="n">aesurf</span><span class="o">.</span><span class="n">aelist_id1</span><span class="p">()</span>
+            <span class="n">aelist</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">aelists</span><span class="p">[</span><span class="n">aelist_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">aelist</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="n">aesurf_id</span>
+                <span class="k">break</span>
+    <span class="k">elif</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;caero&#39;</span><span class="p">:</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">caero_id</span>
+    <span class="k">elif</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;paero&#39;</span><span class="p">:</span>
+        <span class="n">caero</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="p">[</span><span class="n">caero_id</span><span class="p">]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">caero</span><span class="o">.</span><span class="n">pid</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;pid_method=</span><span class="si">{pid_method!r}</span><span class="s1"> is not [aesurf, caero, paero]&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">pid</span></div>
+
+<span class="k">def</span> <span class="nf">_write_properties</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">bdf_file</span><span class="p">,</span> <span class="n">pid_method</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;aesurf&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;aesurf&#39;</span><span class="p">:</span>
+        <span class="n">_write_aesurf_properties</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">bdf_file</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;paero&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">paero_id</span><span class="p">,</span> <span class="n">paero</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">paeros</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">spaero</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">paero</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">$ &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spaero</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSHELL,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,0.1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">paero_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">pid_method</span> <span class="o">==</span> <span class="s1">&#39;caero&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">caero_eid</span><span class="p">,</span> <span class="n">caero</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">caeros</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">scaero</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">caero</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">$ &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scaero</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSHELL,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,0.1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">caero_eid</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;pid_method={repr(pid_method)} is not [aesurf, caero, paero]&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="_write_aesurf_properties"><a class="viewcode-back" href="../../../../reference/bdf/mesh_utils/pyNastran.bdf.mesh_utils.export_caero_mesh.html#pyNastran.bdf.mesh_utils.export_caero_mesh._write_aesurf_properties">[docs]</a><span class="k">def</span> <span class="nf">_write_aesurf_properties</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BDF</span><span class="p">,</span> <span class="n">bdf_file</span><span class="p">):</span>
+    <span class="n">aesurf_mid</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">aesurf_id</span><span class="p">,</span> <span class="n">aesurf</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">aesurf</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1">#cid = aesurf.cid1</span>
+
+        <span class="c1">#aesurf_mid = aesurf_id</span>
+        <span class="n">saesurf</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">aesurf</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;$ &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">$ &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">saesurf</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSHELL,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,0.1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">aesurf_id</span><span class="p">,</span> <span class="n">aesurf_mid</span><span class="p">))</span>
+        <span class="c1">#print(cid)</span>
+        <span class="c1">#ax, ay, az = cid.i</span>
+        <span class="c1">#bx, by, bz = cid.j</span>
+        <span class="c1">#cx, cy, cz = cid.k</span>
+        <span class="c1">#bdf_file.write(&#39;CORD2R,%s,,%s,%s,%s,%s,%s,%s\n&#39; % (</span>
+            <span class="c1">#cid, ax, ay, az, bx, by, bz))</span>
+        <span class="c1">#bdf_file.write(&#39;,%s,%s,%s\n&#39; % (cx, cy, cz))</span>
+        <span class="c1">#print(cid)</span>
+        <span class="c1">#aesurf.elements</span>
+    <span class="c1"># dummy property</span>
+    <span class="n">bdf_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;PSHELL,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,0.1</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

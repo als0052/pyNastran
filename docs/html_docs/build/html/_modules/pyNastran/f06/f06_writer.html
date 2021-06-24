@@ -1,0 +1,859 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyNastran.f06.f06_writer &mdash; pyNastran 1.4-dev 1.4-dev documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pyNastran 1.4-dev
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4-dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start/index.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how_to/index.html">How To: pyNastran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/pyNastran.html">pyNastran Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual/index.html">pyNastran Manual</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyNastran 1.4-dev</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyNastran.f06.f06_writer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyNastran.f06.f06_writer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">defines the F06Writer class and:</span>
+<span class="sd"> - write_f06(...)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#pylint: disable=W0201,C0301,C0111</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">print_exc</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">pyNastran</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.op2_f06_common</span> <span class="kn">import</span> <span class="n">OP2_F06_Common</span>
+<span class="kn">from</span> <span class="nn">pyNastran.op2.op2_interface.result_set</span> <span class="kn">import</span> <span class="n">ResultSet</span>
+
+<div class="viewcode-block" id="make_stamp"><a class="viewcode-back" href="../../../reference/f06/pyNastran.f06.html#pyNastran.f06.f06_writer.make_stamp">[docs]</a><span class="k">def</span> <span class="nf">make_stamp</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">today</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1">#lenghts = [7, 8, 5, 5, 3, 4, 4, 6, 9, 7, 8, 8]</span>
+    <span class="n">months</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; January&#39;</span><span class="p">,</span> <span class="s1">&#39;February&#39;</span><span class="p">,</span> <span class="s1">&#39;March&#39;</span><span class="p">,</span> <span class="s1">&#39;April&#39;</span><span class="p">,</span> <span class="s1">&#39;May&#39;</span><span class="p">,</span> <span class="s1">&#39;June&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;July&#39;</span><span class="p">,</span> <span class="s1">&#39;August&#39;</span><span class="p">,</span> <span class="s1">&#39;September&#39;</span><span class="p">,</span> <span class="s1">&#39;October&#39;</span><span class="p">,</span> <span class="s1">&#39;November&#39;</span><span class="p">,</span> <span class="s1">&#39;December&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">today</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">today</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="n">str_month</span> <span class="o">=</span> <span class="n">months</span><span class="p">[</span><span class="n">today</span><span class="o">.</span><span class="n">month</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">str_today</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> </span><span class="si">%2s</span><span class="s1">, </span><span class="si">%4s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">str_month</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">today</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">year</span><span class="p">)</span> <span class="o">=</span> <span class="n">today</span>
+        <span class="n">str_month</span> <span class="o">=</span> <span class="n">months</span><span class="p">[</span><span class="n">month</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">str_today</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%-9s</span><span class="s1"> </span><span class="si">%2s</span><span class="s1">, </span><span class="si">%4s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">str_month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">year</span><span class="p">)</span>
+    <span class="c1">#str_today = str_today  #.strip()</span>
+
+    <span class="c1">#release_date = &#39;02/08/12&#39;  # pyNastran.__releaseDate__</span>
+    <span class="k">if</span> <span class="n">build</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">release_date</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">build</span> <span class="o">=</span> <span class="s1">&#39;pyNastran v</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">release_date</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;1    </span><span class="si">%-67s</span><span class="s1">   </span><span class="si">%-19s</span><span class="s1"> </span><span class="si">%-22s</span><span class="s1"> PAGE </span><span class="si">%%</span><span class="s1">5i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">str_today</span><span class="p">,</span> <span class="n">build</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="make_f06_header"><a class="viewcode-back" href="../../../reference/f06/pyNastran.f06.html#pyNastran.f06.f06_writer.make_f06_header">[docs]</a><span class="k">def</span> <span class="nf">make_f06_header</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">spaces</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">lines1</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/* -------------------------------------------------------------------  */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                              PYNASTRAN                               */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                      - NASTRAN FILE INTERFACE -                      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                                                                      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*              A Python reader/editor/writer for the various           */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                        NASTRAN file formats.                         */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                       Copyright (C) 2011-2020                        */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                             Steven Doyle                             */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                                                                      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    This program is free software; you can redistribute it and/or     */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    modify it under the terms of the GNU Lesser General Public        */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    License as published by the Free Software Foundation;             */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    version 3 of the License.                                         */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                                                                      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    This program is distributed in the hope that it will be useful,   */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    but WITHOUT ANY WARRANTY; without even the implied warranty of    */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    GNU Lesser General Public License for more details.               */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*                                                                      */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    You should have received a copy of the GNU Lesser General Public  */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    License along with this program; if not, write to the             */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    Free Software Foundation, Inc.,                                   */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/*    675 Mass Ave, Cambridge, MA 02139, USA.                           */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;/* -------------------------------------------------------------------  */</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">]</span>
+
+    <span class="n">spaces</span> <span class="o">=</span> <span class="mi">46</span> <span class="o">*</span> <span class="s1">&#39; &#39;</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;Version </span><span class="si">%8s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pyNastran</span><span class="o">.</span><span class="n">__version__</span>
+    <span class="n">lines2</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* * * * * * * * * * * * * * * * * * * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* * * * * * * * * * * * * * * * * * * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *            pyNastran            * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *</span><span class="si">%s</span><span class="s1">* *</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">version</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="mi">33</span><span class="p">),</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *          </span><span class="si">%15s</span><span class="s1">        * *</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pyNastran</span><span class="o">.</span><span class="n">__releaseDate2__</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *            Questions            * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *        mesheb82@gmail.com       * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* *                                 * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* * * * * * * * * * * * * * * * * * * *</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">spaces</span> <span class="o">+</span> <span class="s1">&#39;* * * * * * * * * * * * * * * * * * * *</span><span class="se">\n\n\n</span><span class="s1">&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines1</span> <span class="o">+</span> <span class="n">lines2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sorted_bulk_data_header"><a class="viewcode-back" href="../../../reference/f06/pyNastran.f06.html#pyNastran.f06.f06_writer.sorted_bulk_data_header">[docs]</a><span class="k">def</span> <span class="nf">sorted_bulk_data_header</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;creates the bulk data echo header&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;0                                                 S O R T E D   B U L K   D A T A   E C H O                                         </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;                 ENTRY                                                                                                              </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;                 COUNT        .   1  ..   2  ..   3  ..   4  ..   5  ..   6  ..   7  ..   8  ..   9  ..  10  .                      </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">msg</span></div>
+
+
+<div class="viewcode-block" id="make_end"><a class="viewcode-back" href="../../../reference/f06/pyNastran.f06.html#pyNastran.f06.f06_writer.make_end">[docs]</a><span class="k">def</span> <span class="nf">make_end</span><span class="p">(</span><span class="n">end_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;creates the F06 footer&quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lines2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">end_flag</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;0                                   * * * *  A N A L Y S I S  S U M M A R Y  T A B L E  * * * *&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;0 SEID  PEID PROJ VERS APRCH      SEMG SEMR SEKR SELG SELR MODES DYNRED SOLLIN PVALID SOLNL LOOPID DESIGN CYCLE SENSITIVITY&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; --------------------------------------------------------------------------------------------------------------------------&#39;</span><span class="p">]</span>
+        <span class="c1">#0     0    1    1 &#39;        &#39;    T    T    T    T    T     F      F      T      0     F     -1            0           F</span>
+
+        <span class="n">seid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">peid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">vers</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">approach</span> <span class="o">=</span> <span class="s2">&quot;&#39;        &#39;&quot;</span>
+
+        <span class="n">SELG</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+        <span class="n">SEMG</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+        <span class="n">SEMR</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;SEMR&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">SEMR</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span> <span class="c1"># modal</span>
+        <span class="n">SEKR</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+        <span class="n">SELR</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+        <span class="n">MODES</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="n">DYNRED</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+
+        <span class="n">SOLLIN</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;SEMR&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">SOLLIN</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span> <span class="c1"># p-elements</span>
+        <span class="n">PVALID</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">SOLNL</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="n">LOOPID</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">CYCLE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">SENSITIVITY</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;     </span><span class="si">%s</span><span class="s1">     </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1"> </span><span class="si">%8s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">    </span><span class="si">%s</span><span class="s1">     </span><span class="si">%s</span><span class="s1">      </span><span class="si">%s</span><span class="s1">      </span><span class="si">%s</span><span class="s1">      </span><span class="si">%s</span><span class="s1">     </span><span class="si">%s</span><span class="s1">     </span><span class="si">%s</span><span class="s1">            </span><span class="si">%s</span><span class="s1">           </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">seid</span><span class="p">,</span> <span class="n">peid</span><span class="p">,</span> <span class="n">proj</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">approach</span><span class="p">,</span> <span class="n">SEMG</span><span class="p">,</span> <span class="n">SEMR</span><span class="p">,</span> <span class="n">SEKR</span><span class="p">,</span> <span class="n">SELG</span><span class="p">,</span> <span class="n">SELR</span><span class="p">,</span> <span class="n">MODES</span><span class="p">,</span> <span class="n">DYNRED</span><span class="p">,</span> <span class="n">SOLLIN</span><span class="p">,</span> <span class="n">PVALID</span><span class="p">,</span> <span class="n">SOLNL</span><span class="p">,</span>
+            <span class="n">LOOPID</span><span class="p">,</span> <span class="n">CYCLE</span><span class="p">,</span> <span class="n">SENSITIVITY</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">lines2</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;0SEID = SUPERELEMENT ID.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; PEID = PRIMARY SUPERELEMENT ID OF IMAGE SUPERELEMENT.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; PROJ = PROJECT ID NUMBER.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; VERS = VERSION ID.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; APRCH = BLANK FOR STRUCTURAL ANALYSIS.  HEAT FOR HEAT TRANSFER ANALYSIS.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SEMG = STIFFNESS AND MASS MATRIX GENERATION STEP.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SEMR = MASS MATRIX REDUCTION STEP (INCLUDES EIGENVALUE SOLUTION FOR MODES).&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SEKR = STIFFNESS MATRIX REDUCTION STEP.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SELG = LOAD MATRIX GENERATION STEP.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SELR = LOAD MATRIX REDUCTION STEP. &#39;</span><span class="p">,</span>
+            <span class="s1">&#39; MODES = T (TRUE) IF NORMAL MODES OR BUCKLING MODES CALCULATED.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; DYNRED = T (TRUE) MEANS GENERALIZED DYNAMIC AND/OR COMPONENT MODE REDUCTION PERFORMED.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SOLLIN = T (TRUE) IF LINEAR SOLUTION EXISTS IN DATABASE.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; PVALID = P-DISTRIBUTION ID OF P-VALUE FOR P-ELEMENTS&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; LOOPID = THE LAST LOOPID VALUE USED IN THE NONLINEAR ANALYSIS.  USEFUL FOR RESTARTS.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SOLNL = T (TRUE) IF NONLINEAR SOLUTION EXISTS IN DATABASE.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; DESIGN CYCLE = THE LAST DESIGN CYCLE (ONLY VALID IN OPTIMIZATION).&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; SENSITIVITY = SENSITIVITY MATRIX GENERATION FLAG.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; &#39;</span><span class="p">,</span>
+            <span class="s1">&#39; No PARAM values were set in the Control File.&#39;</span>
+        <span class="p">]</span>
+
+    <span class="n">lines3</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39; &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;1                                        * * * END OF JOB * * *&#39;</span><span class="p">,</span>
+        <span class="s1">&#39; &#39;</span><span class="p">,</span>
+        <span class="s1">&#39; &#39;</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span> <span class="o">+</span> <span class="n">lines2</span> <span class="o">+</span> <span class="n">lines3</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">F06Writer</span><span class="p">(</span><span class="n">OP2_F06_Common</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">OP2_F06_Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subcase_key</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_options</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">ResultSet</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_all_results</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">op2_results</span><span class="o">.</span><span class="n">_get_sum_objects_map</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_all_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">all_results</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;stress&#39;</span><span class="p">,</span> <span class="s1">&#39;strain&#39;</span><span class="p">,</span> <span class="s1">&#39;element_forces&#39;</span><span class="p">,</span> <span class="s1">&#39;constraint_forces&#39;</span><span class="p">,</span> <span class="s1">&#39;thermal_load&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_table_types</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">all_results</span>
+
+    <span class="k">def</span> <span class="nf">clear_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">results</span><span class="p">]</span>
+        <span class="n">all_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_results</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_results</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid result to remove; all_results=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">all_results</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="s1">&#39;stress&#39;</span><span class="p">:</span>
+                <span class="n">stress_results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">all_results</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;stress&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                        <span class="n">stress_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="c1">#stress_results = [result if &#39;stress&#39; in result.lower() for result in all_results]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">stress_results</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">result</span> <span class="o">==</span> <span class="s1">&#39;strain&#39;</span><span class="p">:</span>
+                <span class="n">strain_results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">all_results</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;strain&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                        <span class="n">strain_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="c1">#strain_results = [result if &#39;strain&#39; in result.lower() for result in all_results]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">strain_results</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;stress&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;stress&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;strain&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;strain&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">result</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;spc_forces&#39;</span><span class="p">,</span> <span class="s1">&#39;mpc_forces&#39;</span><span class="p">,</span> <span class="s1">&#39;constraint_forces&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;constraint_forces&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;force&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="c1"># could use more validation...</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;element_forces&#39;</span><span class="p">)</span>
+            <span class="c1"># thermalLoad_VU_3D, thermalLoad_1D, conv_thermal_load, thermalLoad_2D_3D</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_results</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_f06_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If this class is inherited, the F06 Header may be overwritten&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">make_f06_header</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">make_stamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">today</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If this class is inherited, the PAGE stamp may be overwritten&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">make_stamp</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">today</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_grid_point_singularity_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">failed</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates a grid point singularity table</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        failed : List[(nid, component), ...]</span>
+<span class="sd">            defines failed degrees of freedom</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;0                                         G R I D   P O I N T   S I N G U L A R I T Y   T A B L E</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;0                             POINT    TYPE   FAILED      STIFFNESS       OLD USET           NEW USET</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;                               ID            DIRECTION      RATIO     EXCLUSIVE  UNION   EXCLUSIVE  UNION</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failed</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;                         </span><span class="si">%8s</span><span class="s1">        G      </span><span class="si">%s</span><span class="s1">         0.00E+00          B        F         SB       SB   *</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;No constraints have been applied...</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">page_stamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_stamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="n">page_stamp</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">_write_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_file</span><span class="p">,</span> <span class="n">card_count</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes the F06 card summary table&quot;&quot;&quot;</span>
+        <span class="n">summary_header</span> <span class="o">=</span> <span class="s1">&#39;                                        M O D E L   S U M M A R Y</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cards_to_read</span> <span class="o">=</span> <span class="p">{</span>
+
+            <span class="c1"># rigid elements</span>
+            <span class="s1">&#39;RBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;RBAR1&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE1&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">,</span>
+
+            <span class="c1"># spc/mpc constraints</span>
+            <span class="s1">&#39;SPC&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCADD&#39;</span><span class="p">,</span> <span class="s1">&#39;SPC1&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCD&#39;</span><span class="p">,</span> <span class="s1">&#39;SPCAX&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;MPC&#39;</span><span class="p">,</span> <span class="s1">&#39;MPCADD&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SUPORT&#39;</span><span class="p">,</span> <span class="s1">&#39;SUPORT1&#39;</span><span class="p">,</span>
+
+            <span class="c1"># aero cards</span>
+            <span class="s1">&#39;CAERO1&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO2&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO3&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO4&#39;</span><span class="p">,</span> <span class="s1">&#39;CAERO5&#39;</span><span class="p">,</span>
+
+            <span class="c1"># temperature cards</span>
+            <span class="s1">&#39;CHBDYE&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYG&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CONV&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="s1">&#39;POINTS&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;GRID&#39;</span><span class="p">,</span> <span class="s1">&#39;GRDSET&#39;</span><span class="p">,</span> <span class="p">]],</span>
+            <span class="p">[</span><span class="s1">&#39;ENTRIES&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;SPOINT&#39;</span><span class="p">]],</span>
+
+            <span class="p">[</span><span class="s1">&#39;ELEMENTS&#39;</span><span class="p">,</span>
+             <span class="p">[</span>
+                 <span class="c1"># these are sorted</span>
+                 <span class="c1"># elements</span>
+                 <span class="s1">&#39;CONM1&#39;</span><span class="p">,</span> <span class="s1">&#39;CONM2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CMASS4&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># springs</span>
+                 <span class="s1">&#39;CELAS1&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS2&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS3&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS4&#39;</span><span class="p">,</span> <span class="s1">&#39;CELAS5&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># bushings</span>
+                 <span class="s1">&#39;CBUSH&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH1D&#39;</span><span class="p">,</span> <span class="s1">&#39;CBUSH2D&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># dampers</span>
+                 <span class="s1">&#39;CDAMP1&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP2&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP3&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP4&#39;</span><span class="p">,</span> <span class="s1">&#39;CDAMP5&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># bar flags</span>
+                 <span class="s1">&#39;BAROR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBARAO&#39;</span><span class="p">,</span>
+                 <span class="c1"># bars</span>
+                 <span class="s1">&#39;CBAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CTUBE&#39;</span><span class="p">,</span> <span class="s1">&#39;BEAMOR&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEAM3&#39;</span><span class="p">,</span> <span class="s1">&#39;CONROD&#39;</span><span class="p">,</span> <span class="s1">&#39;CBEND&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># shells</span>
+                 <span class="s1">&#39;CTRIA3&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIA6&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX&#39;</span><span class="p">,</span> <span class="s1">&#39;CTRIAX6&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;CQUAD4&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD8&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADR&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUADX&#39;</span><span class="p">,</span> <span class="s1">&#39;CQUAD&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># solids</span>
+                 <span class="s1">&#39;CTETRA&#39;</span><span class="p">,</span> <span class="s1">&#39;CPENTA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHEXA&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># other</span>
+                 <span class="s1">&#39;CSHEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;CVISC&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC2D&#39;</span><span class="p">,</span> <span class="s1">&#39;CRAC3D&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;CGAP&#39;</span><span class="p">,</span> <span class="s1">&#39;CFAST&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE2&#39;</span><span class="p">,</span> <span class="s1">&#39;RBE3&#39;</span><span class="p">,</span>
+
+                 <span class="c1"># thermal</span>
+                 <span class="s1">&#39;CHBDYP&#39;</span><span class="p">,</span> <span class="s1">&#39;CHBDYG&#39;</span><span class="p">,</span> <span class="s1">&#39;CONV&#39;</span><span class="p">,</span>
+             <span class="p">]],</span>
+        <span class="p">]</span>
+        <span class="c1">#print(&quot;self.card_count&quot;, self.card_count)</span>
+        <span class="k">if</span> <span class="n">card_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">card_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">card_count</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+            <span class="n">block_name</span><span class="p">,</span> <span class="n">keys</span> <span class="o">=</span> <span class="n">block</span>
+            <span class="n">key_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">card_count</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="n">summary</span> <span class="o">+=</span> <span class="s1">&#39;                                   NUMBER OF </span><span class="si">%-8s</span><span class="s1"> </span><span class="si">%-8s</span><span class="s1"> = </span><span class="si">%8s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">block_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">key_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">key_count</span><span class="p">:</span>
+                <span class="n">summary</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">summary_header</span><span class="p">)</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+            <span class="n">page_stamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_stamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+            <span class="n">f06_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">page_stamp</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">write_f06</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06_outname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">matrix_filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">is_mag_phase</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">delete_objects</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">repr_check</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">close</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes an F06 file based on the data we have stored in the object</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        f06_outname : str</span>
+<span class="sd">            the name of the F06 file to write</span>
+<span class="sd">        matrix_filename : str; default=None</span>
+<span class="sd">            str : the name of the .mat file to write</span>
+<span class="sd">            None : based on f06_outname</span>
+<span class="sd">        is_mag_phase : bool; default=False</span>
+<span class="sd">            should complex data be written using Magnitude/Phase</span>
+<span class="sd">            instead of Real/Imaginary</span>
+<span class="sd">            Real objects don&#39;t use this parameter</span>
+<span class="sd">        is_sort1 : bool; default=True</span>
+<span class="sd">            writes output in SORT1 format if the output is transient;</span>
+<span class="sd">            ignored for static analyses</span>
+<span class="sd">        delete_objects : bool; default=True</span>
+<span class="sd">            should objects be deleted after they&#39;re written to reduce memory</span>
+<span class="sd">        end_flag : bool; default=False</span>
+<span class="sd">            should a dummy Nastran &quot;END&quot; table be made</span>
+<span class="sd">        quiet : bool; default=False</span>
+<span class="sd">            suppress print messages</span>
+<span class="sd">        repr_check: bool; defualt=False</span>
+<span class="sd">            calls the object repr as a validation test (prints nothing)</span>
+<span class="sd">        close : bool; default=True</span>
+<span class="sd">            close the f06 file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;F06:&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">matrix_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matrix_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.mat&#39;</span>
+            <span class="c1">#print(&quot;matrix_filename =&quot;, matrix_filename)</span>
+            <span class="c1">#mat = open(matrix_filename, &#39;wb&#39;)</span>
+
+            <span class="n">f06</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_summary</span><span class="p">(</span><span class="n">f06</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">,</span> <span class="s1">&#39;write&#39;</span><span class="p">):</span>
+            <span class="c1">#f06 = f06_outname</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#print(&#39;type(f06_outname) =&#39;, type(f06_outname))</span>
+            <span class="c1">#assert isinstance(f06_outname, file), &#39;type(f06_outname)= %s&#39; % f06_outname</span>
+            <span class="n">f06</span> <span class="o">=</span> <span class="n">f06_outname</span>
+            <span class="n">f06_outname</span> <span class="o">=</span> <span class="n">f06</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">matrix_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matrix_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">f06_outname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.mat&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;f06_outname =&#39;</span><span class="p">,</span> <span class="n">f06_outname</span><span class="p">)</span>
+
+        <span class="n">page_stamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_stamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_weight</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; grid_point_weight&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_weight</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">repr_check</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_point_weight</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_weight</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oload_resultant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oload_resultant</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">repr_check</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oload_resultant</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">oload_resultant</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="c1"># writes all results for</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_f06_subcase_based</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">delete_objects</span><span class="o">=</span><span class="n">delete_objects</span><span class="p">,</span>
+                                      <span class="n">is_mag_phase</span><span class="o">=</span><span class="n">is_mag_phase</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="n">is_sort1</span><span class="p">,</span>
+                                      <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">repr_check</span><span class="o">=</span><span class="n">repr_check</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">op2_results</span><span class="o">.</span><span class="n">psds</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f06</span><span class="p">)</span>
+
+        <span class="c1">#self._write_f06_time_based(f06, page_stamp)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_matrices</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">matrix_filename</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+        <span class="n">f06</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">make_end</span><span class="p">(</span><span class="n">end_flag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_options</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">close</span><span class="p">:</span>
+            <span class="n">f06</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">write_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06</span><span class="p">,</span> <span class="n">matrix_filename</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;writes the f06 matrices&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;monitor1&#39;</span><span class="p">):</span>
+                <span class="n">page_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor1</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="o">=</span><span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="n">page_num</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MONPNT1 from [PMRF, PERF, PFRF, AGRF]&#39;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">matrix_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mat</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;MP3F&#39;</span><span class="p">:</span>
+                        <span class="n">page_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor3</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="o">=</span><span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="n">page_num</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MONPNT3 from MP3F&#39;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;PMRF&#39;</span><span class="p">,</span> <span class="s1">&#39;PERF&#39;</span><span class="p">,</span> <span class="s1">&#39;PFRF&#39;</span><span class="p">,</span> <span class="s1">&#39;AGRF&#39;</span><span class="p">]:</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+                        <span class="n">matrix</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_write_f06_subcase_based</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f06</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">delete_objects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">is_mag_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                 <span class="n">repr_check</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function for ``write_f06`` that does the real work</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        f06 : file</span>
+<span class="sd">            the opened file object</span>
+<span class="sd">        page_stamp : str</span>
+<span class="sd">            the format string stamp is the ending to every F06 page that</span>
+<span class="sd">            contains the version, date, and page number</span>
+<span class="sd">            (e.g., &#39;pyNastran 0.8   1/1/2016  PAGE %%i&#39;)</span>
+<span class="sd">        is_mag_phase : bool; default=False</span>
+<span class="sd">            should complex data be written using Magnitude/Phase</span>
+<span class="sd">            instead of Real/Imaginary</span>
+<span class="sd">            Real objects don&#39;t use this parameter</span>
+<span class="sd">        is_sort1 : bool; default=True</span>
+<span class="sd">            writes output in SORT1 format if the output is transient;</span>
+<span class="sd">            ignored for static analyses</span>
+<span class="sd">        delete_objects : bool; default=True</span>
+<span class="sd">            should objects be deleted after they&#39;re written to reduce memory</span>
+<span class="sd">        quiet : bool; default=False</span>
+<span class="sd">            suppress print messages</span>
+<span class="sd">        repr_check: bool; defualt=False</span>
+<span class="sd">            calls the object repr as a validation test (prints nothing)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;     DEFAULT                                                                                                                        </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+        <span class="c1"># eigenvalues are written first</span>
+        <span class="n">f06</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">page_stamp</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ikey</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%-18s</span><span class="s1"> case=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">ikey</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span>
+                                             <span class="n">page_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">repr_check</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;pageNum=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">delete_objects</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># then eigenvectors</span>
+        <span class="c1"># has a special header</span>
+        <span class="c1"># isubcases = sorted(self.isubcase_name_map.keys())</span>
+
+        <span class="c1"># TODO: superelement version...need the nominal...</span>
+        <span class="n">res_keys_subcase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subcase_key</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res_keys_subcase</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no cases to write...self.subcase_key=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">subcase_key</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">res_keys</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res_keys_subcase</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">res_key</span> <span class="ow">in</span> <span class="n">res_keys</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                    <span class="c1">#is_compressed = False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># int</span>
+                    <span class="c1">#is_compressed = True</span>
+                    <span class="n">isubcase</span> <span class="o">=</span> <span class="n">res_key</span>
+
+                <span class="k">if</span> <span class="n">res_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span><span class="p">[</span><span class="n">res_key</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">repr_check</span><span class="p">:</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="n">subtitle</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">subtitle</span>
+                <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;     </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">subtitle</span>
+                <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0                                                                                                            SUBCASE </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">isubcase</span>
+                <span class="c1">#header[2] = complex/nonlinear</span>
+
+                <span class="n">res_length</span> <span class="o">=</span> <span class="mi">18</span>
+                <span class="n">res_format</span> <span class="o">=</span> <span class="s1">&#39;*</span><span class="si">%%</span><span class="s1">-</span><span class="si">%i</span><span class="s1">s SUBCASE=</span><span class="si">%%</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">res_length</span>
+                <span class="n">res_format_vectorized</span> <span class="o">=</span> <span class="s1">&#39; </span><span class="si">%%</span><span class="s1">-</span><span class="si">%i</span><span class="s1">s SUBCASE=</span><span class="si">%%</span><span class="s1">i SUBTITLE=</span><span class="si">%%</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">res_length</span>
+                <span class="n">class_name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">res_format_vectorized</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">subtitle</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">res_format</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span><span class="n">f06</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="n">is_mag_phase</span><span class="o">=</span><span class="n">is_mag_phase</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;pageNum=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">delete_objects</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">result</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># finally, we writte all the other tables</span>
+        <span class="c1"># nastran puts the tables in order of the Case Control deck,</span>
+        <span class="c1"># but we&#39;re lazy so we just hardcode the order</span>
+
+        <span class="c1"># subcase name, subcase ID, transient word &amp; value</span>
+        <span class="n">header_old</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;     DEFAULT                                                                                                                        </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">header_old</span><span class="p">)</span>
+        <span class="n">unallowed_results</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;eigenvectors&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenvalues&#39;</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;gpdt&#39;</span><span class="p">,</span> <span class="s1">&#39;bgpdt&#39;</span><span class="p">,</span> <span class="s1">&#39;eqexin&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;grid_point_weight&#39;</span><span class="p">,</span> <span class="s1">&#39;psds&#39;</span><span class="p">]</span>
+        <span class="n">res_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">table_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">table_type</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_table_types</span><span class="p">())</span>
+                         <span class="k">if</span> <span class="n">table_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unallowed_results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">table_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;responses.&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">res_keys</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res_keys_subcase</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">res_key</span> <span class="ow">in</span> <span class="n">res_keys</span><span class="p">:</span>
+                <span class="c1">#if isinstance(res_key, tuple):</span>
+                    <span class="c1">#is_compressed = False</span>
+                <span class="c1">#else:</span>
+                    <span class="c1">#is_compressed = True</span>
+
+                <span class="n">res_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_result_length</span><span class="p">(</span><span class="n">res_types</span><span class="p">,</span> <span class="n">res_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">res_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># skipped subcase; no saved results</span>
+                    <span class="k">continue</span>
+
+                <span class="n">res_format</span> <span class="o">=</span> <span class="s1">&#39;*</span><span class="si">%%</span><span class="s1">-</span><span class="si">%i</span><span class="s1">s SUBCASE=</span><span class="si">%%</span><span class="s1">i</span><span class="si">%%</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">res_length</span>
+                <span class="n">res_format_vectorized</span> <span class="o">=</span> <span class="s1">&#39; </span><span class="si">%%</span><span class="s1">-</span><span class="si">%i</span><span class="s1">s SUBCASE=</span><span class="si">%%</span><span class="s1">i SUBTITLE=</span><span class="si">%%</span><span class="s1">s </span><span class="si">%%</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">res_length</span>
+
+                <span class="k">for</span> <span class="n">res_type</span> <span class="ow">in</span> <span class="n">res_types</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">res_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">res_type</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">res_type</span><span class="p">[</span><span class="n">res_key</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">repr_check</span><span class="p">:</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                    <span class="n">subtitle</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">subtitle</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">label</span>
+
+                    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+                    <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;      </span><span class="si">%-126s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">subtitle</span>
+                    <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0     </span><span class="si">%-32s</span><span class="s1">                                                                       SUBCASE </span><span class="si">%-15i</span><span class="se">\n</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">nonlinear_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">class_name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+                        <span class="n">element_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;element_name&#39;</span><span class="p">):</span>
+                            <span class="n">element_name</span> <span class="o">=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">element_name</span>
+                            <span class="n">is_ignored</span> <span class="o">=</span> <span class="s1">&#39;StrainEnergy&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">class_name</span> <span class="ow">and</span> <span class="s1">&#39;GridPointForces&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">class_name</span>
+                            <span class="n">has_nnodes</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;nnodes_per_element&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">has_nnodes</span> <span class="ow">and</span> <span class="n">is_ignored</span> <span class="ow">and</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sdoyle&#39;</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> is missing nnodes_per_element&#39;</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">res_format_vectorized</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">class_name</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">subtitle</span><span class="p">,</span> <span class="n">element_name</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">res_format</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">isubcase</span><span class="p">,</span> <span class="n">element_name</span><span class="p">))</span>
+
+                        <span class="n">result</span><span class="o">.</span><span class="n">is_complex</span>
+                        <span class="n">result</span><span class="o">.</span><span class="n">is_real</span>
+
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">write_f06</span><span class="p">(</span>
+                                <span class="n">f06</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">page_stamp</span><span class="p">,</span> <span class="n">page_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span>
+                                <span class="n">is_mag_phase</span><span class="o">=</span><span class="n">is_mag_phase</span><span class="p">,</span> <span class="n">is_sort1</span><span class="o">=</span><span class="n">is_sort1</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                            <span class="n">print_exc</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()))</span>
+                            <span class="k">raise</span>
+
+                        <span class="c1">#assert &#39;table_name=&#39; in &#39;&#39;.join(result.get_stats())</span>
+                        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="s1">&#39;result=</span><span class="si">%s</span><span class="s1"> pageNum=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_num</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="c1">#print(&quot;result name = %r&quot; % result.name())</span>
+                        <span class="k">raise</span>
+                    <span class="k">if</span> <span class="n">delete_objects</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">result</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">page_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Steven Doyle.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
