@@ -52,3 +52,13 @@ make html > make.out 2>&1
 pyNastran
 Sphinx
 sphinx_rtd_theme
+Pandas
+Numpy
+
+scipy >= 1.0
+cpylog >= 1.4.0
+docopt-ng == 0.7.2 (required for command line tools)
+
+?alabaster
+?numpydoc
+
